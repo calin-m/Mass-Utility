@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-19 12:19:16 UTC
+ * Generated: 2026-07-19 12:33:40 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -491,7 +491,7 @@ window.SettingsEngine = (function() {
             proBtn.innerText = isPro ? 'Update License' : 'Unlock Now';
         }
         if (removeBtn) {
-            removeBtn.style.display = isPro ? 'block' : 'none';
+            removeBtn.style.display = isPro ? 'inline-flex' : 'none';
         }
 
         // Engine Tuning

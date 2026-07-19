@@ -51,7 +51,7 @@ window.SettingsEngine = (function() {
             proBtn.innerText = isPro ? 'Update License' : 'Unlock Now';
         }
         if (removeBtn) {
-            removeBtn.style.display = isPro ? 'block' : 'none';
+            removeBtn.style.display = isPro ? 'inline-flex' : 'none';
         }
 
         // Engine Tuning
