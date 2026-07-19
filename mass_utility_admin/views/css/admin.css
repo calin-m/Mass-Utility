@@ -37,8 +37,8 @@ body::before {
 }
 
 .pm-admin-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
     padding: 2rem;
     position: relative;
     z-index: 1;
@@ -75,7 +75,6 @@ body::before {
 }
 
 .pm-card:hover {
-    transform: translateY(-2px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
 }
 
@@ -122,6 +121,15 @@ body::before {
     border-color: var(--pm-accent);
     outline: none;
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+}
+
+select.pm-input {
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
 }
 
 .pm-btn {

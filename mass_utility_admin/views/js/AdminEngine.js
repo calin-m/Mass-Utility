@@ -167,6 +167,17 @@ function renderLicenses(licenses) {
         const tr = document.createElement('tr');
         const emailSafe = escapeHtml(l.user_email || 'Unknown');
         const urlSafe = l.store_url ? escapeHtml(l.store_url) : '<em>Not bound yet</em>';
+        const expiryVal = l.expires_at || '';
+        const domainVal = l.store_url || '';
+        const tierVal = l.package_tier || 'basic';
+        
+        let toggleButton = '';
+        if (l.status === 'active') {
+            toggleButton = `<button class="pm-btn pm-btn-sm pm-btn-danger" style="margin-left: 0.5rem;" onclick="toggleStatus(${l.id}, 'suspended', '${escapeHtml(tierVal)}', '${escapeHtml(expiryVal)}', '${escapeHtml(domainVal)}')">🛑 Suspend</button>`;
+        } else {
+            toggleButton = `<button class="pm-btn pm-btn-sm pm-btn-primary" style="margin-left: 0.5rem;" onclick="toggleStatus(${l.id}, 'active', '${escapeHtml(tierVal)}', '${escapeHtml(expiryVal)}', '${escapeHtml(domainVal)}')">✅ Activate</button>`;
+        }
+
         tr.innerHTML = /* nosec */ `
             <td>${l.id}</td>
             <td>${emailSafe}</td>
@@ -175,11 +186,35 @@ function renderLicenses(licenses) {
             <td><strong>${escapeHtml(l.package_tier.toUpperCase())}</strong></td>
             <td><span class="pm-badge badge-${escapeHtml(l.status)}">${escapeHtml(l.status)}</span></td>
             <td>${escapeHtml(l.expires_at || 'Never')}</td>
-            <td><button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="openEdit(${l.id}, '${escapeHtml(l.package_tier)}', '${escapeHtml(l.status)}', '${escapeHtml(l.expires_at || '')}', '${escapeHtml(l.store_url || '')}')">✏️ Edit</button></td>
+            <td>
+                <button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="openEdit(${l.id}, '${escapeHtml(l.package_tier)}', '${escapeHtml(l.status)}', '${escapeHtml(l.expires_at || '')}', '${escapeHtml(l.store_url || '')}')">✏️ Edit</button>
+                ${toggleButton}
+            </td>
         `;
         list.appendChild(tr);
     });
 }
+
+window.toggleStatus = async function(id, newStatus, currentTier, currentExpiry, currentDomain) {
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('status', newStatus);
+    formData.append('tier', currentTier);
+    formData.append('expiry', currentExpiry);
+    formData.append('store_url', currentDomain);
+
+    try {
+        const response = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) {
+            renderLicenses(result.licenses);
+        } else {
+            alert(result.error || 'Failed to update license status.');
+        }
+    } catch (err) {
+        console.error('Failed to update status', err);
+    }
+};
 
 window.openEdit = function(id, tier, status, expiry, domain) {
     document.getElementById('pm-edit-id').value = id;
