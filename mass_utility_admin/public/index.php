@@ -105,7 +105,7 @@ if (!$hasAdmin) {
 $auth = new \MassUtilityAdmin\Service\AdminSettingsManager();
 
 // Simple Router
-if (!$auth->isAuthenticated() && $action !== 'login' && !str_starts_with($action, 'api_')) {
+if (!$auth->isAuthenticated() && $action !== 'login' && $action !== 'activate_key' && !str_starts_with($action, 'api_')) {
     // Render Login page
     require_once dirname(__DIR__) . '/views/templates/login.tpl';
     exit;
@@ -161,6 +161,11 @@ if ($action === 'activate_key') {
 
         if ($lic['status'] !== 'active') {
             echo json_encode(['success' => false, 'error' => 'This license is ' . $lic['status'] . '.']);
+            exit;
+        }
+
+        if ($lic['expires_at'] && strtotime($lic['expires_at']) < time()) {
+            echo json_encode(['success' => false, 'error' => 'This license key has expired.']);
             exit;
         }
 
