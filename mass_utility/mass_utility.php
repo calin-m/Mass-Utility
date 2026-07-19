@@ -206,7 +206,7 @@ class Mass_Utility extends Module
                             \Configuration::updateValue('PM_SAAS_DASHBOARD_URL', rtrim($licensingServer, '/') . '/../mass_utility_dashboard/');
                         }
                         
-                        $this->syncLocalSQLite($licenseKey, $data['secure_token']);
+                        $this->syncLocalSQLite($licenseKey, $data['secure_token'], $data['tier'], $data['capabilities'] ?? null);
                         
                         $redirectUrl = $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility';
                         \Tools::redirectAdmin($redirectUrl);
@@ -247,10 +247,24 @@ class Mass_Utility extends Module
             
             if ($res !== false) {
                 $data = json_decode((string)$res, true);
-                if ($httpCode === 200 && empty($data['success'])) {
-                    $serverError = $data['error'] ?? '';
-                    if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false) {
-                        $licenseSuspended = true;
+                if ($httpCode === 200) {
+                    if (!empty($data['success'])) {
+                        // If the server tier or capabilities changed, sync locally!
+                        $currentTier = '';
+                        if (class_exists('\Configuration')) {
+                            $currentTier = \Configuration::get('PM_LICENSE_TIER');
+                        }
+                        if ($currentTier !== $data['tier']) {
+                            if (class_exists('\Configuration')) {
+                                \Configuration::updateValue('PM_LICENSE_TIER', $data['tier']);
+                            }
+                            $this->syncLocalSQLite($licenseKey, $secureToken, $data['tier'], $data['capabilities'] ?? null);
+                        }
+                    } else {
+                        $serverError = $data['error'] ?? '';
+                        if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false) {
+                            $licenseSuspended = true;
+                        }
                     }
                 }
             }
@@ -714,7 +728,7 @@ class Mass_Utility extends Module
         </div>';
     }
 
-    private function syncLocalSQLite(string $licenseKey, string $secureToken): void
+    private function syncLocalSQLite(string $licenseKey, string $secureToken, string $tier = 'pro', ?array $capabilities = null): void
     {
         try {
             $dbPath = _PS_ROOT_DIR_ . '/mass_utility_dashboard/data/pm_cloud_backups.db';
@@ -737,18 +751,27 @@ class Mass_Utility extends Module
             $stmt->execute(['PM_LICENSE_KEY', json_encode($licenseKey)]);
             $stmt->execute(['PM_BRIDGE_TOKEN', json_encode($secureToken)]);
             
+            // Setup capabilities fallback if missing (e.g. offline activation fallback)
+            if (empty($capabilities)) {
+                $isDeveloper = ($tier === 'developer');
+                $isPro = ($tier === 'pro' || $isDeveloper);
+                $capabilities = [
+                    'backup_destinations' => $isPro ? ['local', 'gdrive'] : ['local'],
+                    'backup_automation' => $isPro,
+                    'rollback_history_limit' => $isDeveloper ? 999 : ($isPro ? 10 : 0),
+                    'query_visual_execute' => $isPro,
+                    'governor_autopilot' => $isPro,
+                    'sweeper_execution' => $isPro
+                ];
+            }
+
             // Generate token payload for local verification
             $payloadData = [
                 'license_key' => $licenseKey,
                 'store_url' => $_SERVER['HTTP_HOST'] ?? 'localhost',
-                'tier' => 'pro',
+                'tier' => $tier,
                 'features' => [
-                    'PM_ENABLE_FILE_TOOLS' => 1,
-                    'PM_ENABLE_DB_TOOLS' => 1,
-                    'PM_ENABLE_QUERY_WIZARD' => 1,
-                    'PM_ENABLE_GHOST_PURGER' => 1,
-                    'PM_GDRIVE_SYNC' => 1,
-                    'PM_RETENTION_RULE' => 1
+                    'capabilities' => $capabilities
                 ],
                 'expires_at' => null,
                 'generated_at' => time()

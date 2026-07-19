@@ -277,10 +277,17 @@ if ($action === 'activate_key') {
             $stmt->execute([$storeUrl, $lic['id']]);
         }
 
+        // Fetch capabilities of this package tier (Self-healing fallback included)
+        $stmtTier = $pdo->prepare("SELECT capabilities FROM pm_package_tiers WHERE name = ?");
+        $stmtTier->execute([$lic['package_tier']]);
+        $tierCapsJson = $stmtTier->fetchColumn();
+        $capabilities = $tierCapsJson ? json_decode($tierCapsJson, true) : null;
+
         echo json_encode([
             'success' => true,
             'secure_token' => $secureToken,
             'tier' => $lic['package_tier'],
+            'capabilities' => $capabilities,
             'expires_at' => $lic['expires_at']
         ]);
         exit;
