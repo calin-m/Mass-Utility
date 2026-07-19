@@ -476,10 +476,7 @@ if ($isAuthorized) {
                 $stmtCheck->execute([$licenseKey]);
                 $licStatus = $stmtCheck->fetchColumn();
                 if ($licStatus === 'suspended') {
-                    $_SESSION = [];
-                    if (session_status() === PHP_SESSION_ACTIVE) {
-                        session_destroy();
-                    }
+                    unset($_SESSION['employee_id']);
                     $isAuthorized = false;
                     $suspendedMessage = true;
                 }
