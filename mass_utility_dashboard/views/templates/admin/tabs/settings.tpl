@@ -129,9 +129,9 @@
                     <input type="checkbox" id="pm-setting-enable-file-tools" style="width: 1.2rem; height: 1.2rem;">
                     <span style="font-weight: 500; color: var(--pm-text-primary);">Enable File Tools Tab <span style="font-size: 0.75rem; background: var(--pm-warning); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">PRO</span></span>
                 </label>
-                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: not-allowed; opacity: 0.6;">
-                    <input type="checkbox" id="pm-setting-enable-ghost-purger" style="width: 1.2rem; height: 1.2rem;" disabled>
-                    <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Ghost File Purger <span style="font-size: 0.75rem; background: var(--pm-neutral); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold;">COMING SOON</span></span>
+                <label id="pm-lbl-enable-ghost-purger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                    <input type="checkbox" id="pm-setting-enable-ghost-purger" style="width: 1.2rem; height: 1.2rem;">
+                    <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Ghost File Purger <span style="font-size: 0.75rem; background: var(--pm-warning); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">PRO</span></span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 0.75rem; cursor: not-allowed; opacity: 0.6;">
                     <input type="checkbox" id="pm-setting-enable-gdpr-sweeper" style="width: 1.2rem; height: 1.2rem;" disabled>
@@ -204,7 +204,27 @@
                 </div>
             </div>
         </div>
+    <!-- Backup Retention Rules -->
+    <div class="pm-card pm-mb-6">
+        <div class="pm-card-title" style="margin-bottom: 0.5rem; color: var(--pm-warning);">
+            <span class="pm-card-title-icon" style="background-color: var(--pm-warning);"></span>
+            🕒 Backup Retention Policies
+        </div>
+        <p class="pm-text-muted" style="margin-bottom: 1.25rem; font-size: 0.9rem;">
+            Automatically prune local database and file backups to keep server storage clean. Set to 0 to disable.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Backups to Keep</label>
+                <input type="number" id="pm-setting-backup-max-count" class="pm-form-control" min="0" placeholder="5 (0 to disable)" style="width: 100%;">
+            </div>
+            <div>
+                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Age of Backups (Days)</label>
+                <input type="number" id="pm-setting-backup-max-days" class="pm-form-control" min="0" placeholder="30 (0 to disable)" style="width: 100%;">
+            </div>
+        </div>
     </div>
+
 
     <!-- Safety Guards & Server Overrides -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">

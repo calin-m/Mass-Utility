@@ -489,4 +489,78 @@ class FileBackupEngine
             }
         }
     }
+
+    public function deleteBackupFolder(string $baseName): bool
+    {
+        $baseName = basename($baseName);
+        $folderPath = $this->backupDir . $baseName;
+        if (is_dir($folderPath)) {
+            $files = glob($folderPath . '/*');
+            if (is_array($files)) {
+                foreach ($files as $f) {
+                    if (file_exists($f)) {
+                        @unlink($f);
+                    }
+                }
+            }
+            return @rmdir($folderPath);
+        }
+        return false;
+    }
+
+    /**
+     * Purges old file backups chronologically based on settings.
+     */
+    public function purgeOldBackups(): void
+    {
+        try {
+            $maxCount = (int)$this->settingsManager->getSetting(SettingsManager::PM_BACKUP_MAX_COUNT);
+            $maxDays = (int)$this->settingsManager->getSetting(SettingsManager::PM_BACKUP_MAX_DAYS);
+
+            if ($maxCount <= 0 && $maxDays <= 0) {
+                return;
+            }
+
+            $backups = $this->getBackupList();
+            if (empty($backups)) {
+                return;
+            }
+
+            // Sort oldest first
+            usort($backups, function ($a, $b) {
+                return $a['timestamp'] <=> $b['timestamp'];
+            });
+
+            $now = time();
+
+            foreach ($backups as $index => $b) {
+                $basename = preg_replace('/\.tar$/', '', $b['basename']);
+                $shouldDelete = false;
+
+                // 1. Age-based
+                if ($maxDays > 0) {
+                    $ageSeconds = $now - $b['timestamp'];
+                    $maxSeconds = $maxDays * 86400;
+                    if ($ageSeconds > $maxSeconds) {
+                        $shouldDelete = true;
+                    }
+                }
+
+                // 2. Count-based
+                if ($maxCount > 0 && !$shouldDelete) {
+                    $remainingCount = count($backups) - $index;
+                    if ($remainingCount > $maxCount) {
+                        $shouldDelete = true;
+                    }
+                }
+
+                if ($shouldDelete) {
+                    $this->deleteBackupFolder($basename);
+                    unset($backups[$index]);
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->logger->log("File backup retention purge failed: " . $e->getMessage(), 'ERROR');
+        }
+    }
 }

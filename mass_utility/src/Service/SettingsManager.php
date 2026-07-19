@@ -35,6 +35,8 @@ class SettingsManager
     // Safety & Quotas
     const PM_DEFAULT_DRY_RUN = 'PM_DEFAULT_DRY_RUN';
     const PM_CUSTOM_DISK_QUOTA_GB = 'PM_CUSTOM_DISK_QUOTA_GB';
+    const PM_BACKUP_MAX_COUNT = 'PM_BACKUP_MAX_COUNT';
+    const PM_BACKUP_MAX_DAYS = 'PM_BACKUP_MAX_DAYS';
 
     // Defaults
     private static $defaults = [
@@ -53,6 +55,8 @@ class SettingsManager
         self::PM_UI_FONT => "system-ui, -apple-system, sans-serif",
         self::PM_UI_THEME => "classic",
         self::PM_CUSTOM_DISK_QUOTA_GB => "0",
+        self::PM_BACKUP_MAX_COUNT => "0",
+        self::PM_BACKUP_MAX_DAYS => "0",
     ];
 
     /**

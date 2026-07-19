@@ -23,25 +23,111 @@ class MaintenanceSweeperEngine
     }
 
     /**
-     * Ghost File & Image Purger
-     * Cross-references physical /img/p/ files against the ps_image table.
+     * Ghost File & Image Purger - Scans and returns all orphaned image files from /img/p/
      */
-    public function purgeGhostImages(int $chunkSize = 1000): array
+    public function scanOrphanedImages(): array
+    {
+        try {
+            $imageDir = _PS_IMG_DIR_ . 'p/';
+            if (!is_dir($imageDir)) {
+                return ['success' => false, 'error' => 'Image directory img/p/ does not exist.'];
+            }
+
+            // Get all active image IDs in PrestaShop
+            $db = Db::getInstance();
+            $sql = 'SELECT `id_image` FROM `' . _DB_PREFIX_ . 'image`';
+            $rows = $db->executeS($sql);
+            $activeImageIds = [];
+            if (is_array($rows)) {
+                foreach ($rows as $row) {
+                    $activeImageIds[(int)$row['id_image']] = true;
+                }
+            }
+
+            $orphanedFiles = [];
+            $totalScanned = 0;
+            $totalSize = 0;
+
+            $this->scanDirectoryRecursively($imageDir, $activeImageIds, $orphanedFiles, $totalScanned, $totalSize);
+
+            return [
+                'success' => true,
+                'scanned_files' => $totalScanned,
+                'orphaned_files' => $orphanedFiles,
+                'total_orphaned_size' => $totalSize
+            ];
+        } catch (Exception $e) {
+            $this->logger->logError('Ghost Image Scan failed: ' . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    private function scanDirectoryRecursively(string $dir, array &$activeImageIds, array &$orphanedFiles, int &$totalScanned, int &$totalSize): void
+    {
+        $items = scandir($dir);
+        if (!is_array($items)) {
+            return;
+        }
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $path = $dir . $item;
+            if (is_dir($path)) {
+                $this->scanDirectoryRecursively($path . '/', $activeImageIds, $orphanedFiles, $totalScanned, $totalSize);
+            } else {
+                $totalScanned++;
+                // Check if file name matches PrestaShop product image format
+                // Examples: 123.jpg, 123-medium_default.jpg, 123-watermark.png
+                if (preg_match('/^(\d+)(?:-[\w_]+)?\.(jpe?g|png|webp)$/i', $item, $matches)) {
+                    $imageId = (int)$matches[1];
+                    if (!isset($activeImageIds[$imageId])) {
+                        $size = filesize($path);
+                        $totalSize += $size;
+                        $orphanedFiles[] = [
+                            'path' => $path,
+                            'relative_path' => str_replace(_PS_ROOT_DIR_, '', $path),
+                            'size' => $size
+                        ];
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Purges orphaned images.
+     */
+    public function purgeOrphanedImages(array $files): array
     {
         try {
             if ($this->isCpuHot()) {
                 return ['success' => false, 'error' => 'Server load critical. Operation paused.'];
             }
 
-            // Scaffolding logic: Cross-reference logic to be implemented fully in future phases
+            $deletedCount = 0;
+            $reclaimedBytes = 0;
+
+            foreach ($files as $file) {
+                $filePath = _PS_ROOT_DIR_ . '/' . ltrim($file, '/\\');
+                if (file_exists($filePath)) {
+                    $size = filesize($filePath);
+                    if (@unlink($filePath)) {
+                        $deletedCount++;
+                        $reclaimedBytes += $size;
+                    }
+                }
+            }
+
             return [
                 'success' => true,
-                'message' => 'Ghost images scanned successfully.',
-                'processed' => 0,
-                'deleted' => 0
+                'deleted_count' => $deletedCount,
+                'reclaimed_size' => $reclaimedBytes
             ];
         } catch (Exception $e) {
-            $this->logger->logError('Ghost Image Purger failed: ' . $e->getMessage());
+            $this->logger->logError('Ghost Image Purge failed: ' . $e->getMessage());
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }

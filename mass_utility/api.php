@@ -442,7 +442,7 @@ if ($action === 'execute-chunk') {
 }
 
 // 5. Dispatch controller actions
-$dbActions = ['download_backup', 'create_backup', 'compare_backup', 'prepare_restore', 'execute_restore_chunk', 'complete_restore', 'upload_restore_file', 'delete_backup', 'clear_backup_history', 'diff_table_rows', 'export_diff', 'profile_database', 'optimize_table', 'get_categorized_tables', 'get_db_backups'];
+$dbActions = ['download_backup', 'create_backup', 'compare_backup', 'prepare_restore', 'execute_restore_chunk', 'complete_restore', 'upload_restore_file', 'delete_backup', 'clear_backup_history', 'diff_table_rows', 'export_diff', 'profile_database', 'optimize_table', 'get_categorized_tables', 'get_db_backups', 'get_fragmentation_status'];
 if (in_array($action, $dbActions, true)) {
     require_once __DIR__ . '/src/Service/BridgeLogger.php';
     require_once __DIR__ . '/src/Service/TableBackupManager.php';
@@ -480,7 +480,7 @@ if (in_array($action, $fileActions, true)) {
     exit;
 }
 
-$sweeperActions = ['sweepCarts', 'warmIndex', 'purgeGhostImages', 'sweeper_analyze', 'sweeper_sweep_connections', 'sweeper_sweep_guests', 'sweeper_sweep_carts'];
+$sweeperActions = ['sweepCarts', 'warmIndex', 'purgeGhostImages', 'sweeper_analyze', 'sweeper_sweep_connections', 'sweeper_sweep_guests', 'sweeper_sweep_carts', 'sweeper_scan_images', 'sweeper_purge_images'];
 if (in_array($action, $sweeperActions, true)) {
     require_once __DIR__ . '/src/Service/BridgeLogger.php';
     require_once __DIR__ . '/src/Service/ResourceMonitor.php';

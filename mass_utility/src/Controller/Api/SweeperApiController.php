@@ -102,4 +102,25 @@ class SweeperApiController extends AbstractApiController
             $this->sendErrorResponse($result['error']);
         }
     }
+
+    protected function sweeperScanImages(): void
+    {
+        $result = $this->sweeper->scanOrphanedImages();
+        if ($result['success']) {
+            $this->sendJsonResponse($result);
+        } else {
+            $this->sendErrorResponse($result['error']);
+        }
+    }
+
+    protected function sweeperPurgeImages(): void
+    {
+        $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+        $files = isset($payload['files']) ? $payload['files'] : [];
+        if (!is_array($files)) {
+            $this->sendErrorResponse("Invalid file list provided.");
+        }
+        $result = $this->sweeper->purgeOrphanedImages($files);
+        $this->sendJsonResponse($result);
+    }
 }

@@ -70,6 +70,19 @@
                     </div>
                 </div>
 
+                <!-- Ghost Images readout -->
+                <div style="background: rgba(0,0,0,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--pm-border-color);">
+                    <h4 style="margin: 0 0 0.75rem 0; font-family: 'Outfit'; font-size: 0.9rem; color: var(--pm-card-title-color);">🖼️ Ghost Product Images</h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; color: var(--pm-text-secondary);">
+                        <div class="pm-flex-between"><span>Physical Images (`img/p/`):</span><strong id="pm-scan-images-total">-</strong></div>
+                        <div class="pm-flex-between"><span>Orphaned Image Files:</span><strong id="pm-scan-images-orphans">-</strong></div>
+                        <hr style="border: 0; border-top: 1px solid var(--pm-border-color); margin: 0.5rem 0;">
+                        <div class="pm-flex-between" style="font-weight: bold; color: var(--pm-text-primary);">
+                            <span>Total Reclaimable Space:</span><span id="pm-scan-images-size">-</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Execution Panel -->
@@ -92,6 +105,9 @@
                     </label>
                     <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
                         <input type="checkbox" id="pm-sweeper-check-carts" checked> Purge Abandoned Shopping Carts (<span id="pm-check-carts-count">0</span> rows)
+                    </label>
+                    <label id="pm-lbl-sweeper-check-images" style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                        <input type="checkbox" id="pm-sweeper-check-images" checked> Purge Ghost Product Images (<span id="pm-check-images-count">0</span> files)
                     </label>
                 </div>
             </div>

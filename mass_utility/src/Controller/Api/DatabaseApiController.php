@@ -453,4 +453,25 @@ class DatabaseApiController extends AbstractApiController
             $this->sendErrorResponse($e->getMessage());
         }
     }
+
+    protected function getFragmentationStatus(): void
+    {
+        try {
+            $sql = "SELECT TABLE_NAME AS name, 
+                           (DATA_LENGTH + INDEX_LENGTH) AS total_size, 
+                           DATA_FREE AS data_free
+                    FROM INFORMATION_SCHEMA.TABLES 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                      AND ENGINE = 'InnoDB'
+                      AND DATA_FREE > 0";
+            $rows = \Db::getInstance()->executeS($sql);
+            $this->sendJsonResponse([
+                'success' => true,
+                'tables' => is_array($rows) ? $rows : []
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->log("Get fragmentation status failed: " . $e->getMessage(), 'ERROR');
+            $this->sendErrorResponse($e->getMessage());
+        }
+    }
 }

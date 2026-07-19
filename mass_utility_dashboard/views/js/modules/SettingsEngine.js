@@ -157,6 +157,12 @@ window.SettingsEngine = (function() {
         if (document.getElementById('pm-setting-custom-quota')) {
             document.getElementById('pm-setting-custom-quota').value = settings.PM_CUSTOM_DISK_QUOTA_GB || "0";
         }
+        if (document.getElementById('pm-setting-backup-max-count')) {
+            document.getElementById('pm-setting-backup-max-count').value = settings.PM_BACKUP_MAX_COUNT || "0";
+        }
+        if (document.getElementById('pm-setting-backup-max-days')) {
+            document.getElementById('pm-setting-backup-max-days').value = settings.PM_BACKUP_MAX_DAYS || "0";
+        }
 
         applyUIEffects();
     }
@@ -318,7 +324,9 @@ window.SettingsEngine = (function() {
                         PM_GDRIVE_DEFAULT_DOWNLOAD: document.getElementById('pm-setting-gdrive-default-download') ? document.getElementById('pm-setting-gdrive-default-download').value : (settings.PM_GDRIVE_DEFAULT_DOWNLOAD || 'cloud'),
                         PM_UI_FONT: document.getElementById('pm-setting-ui-font').value,
                         PM_UI_THEME: document.getElementById('pm-setting-ui-theme').value,
-                        PM_CUSTOM_DISK_QUOTA_GB: document.getElementById('pm-setting-custom-quota').value || "0"
+                        PM_CUSTOM_DISK_QUOTA_GB: document.getElementById('pm-setting-custom-quota').value || "0",
+                        PM_BACKUP_MAX_COUNT: document.getElementById('pm-setting-backup-max-count').value || "0",
+                        PM_BACKUP_MAX_DAYS: document.getElementById('pm-setting-backup-max-days').value || "0"
                     }
                 };
 

@@ -1317,4 +1317,71 @@ class TableBackupManager
         }
         return $categorized;
     }
+
+    /**
+     * Purge old database backups chronologically based on settings.
+     */
+    public function purgeOldBackups(): void
+    {
+        try {
+            $maxCount = (int)$this->settingsManager->getSetting(SettingsManager::PM_BACKUP_MAX_COUNT);
+            $maxDays = (int)$this->settingsManager->getSetting(SettingsManager::PM_BACKUP_MAX_DAYS);
+
+            if ($maxCount <= 0 && $maxDays <= 0) {
+                return; // Retention policies disabled
+            }
+
+            $backups = $this->getBackupList();
+            // Filter only local backups that actually exist on disk
+            $localBackups = array_filter($backups, function ($b) {
+                return !empty($b['is_local']) && !empty($b['basename']);
+            });
+
+            if (empty($localBackups)) {
+                return;
+            }
+
+            // Sort chronologically (oldest first)
+            usort($localBackups, function ($a, $b) {
+                return $a['date'] <=> $b['date'];
+            });
+
+            $now = time();
+
+            foreach ($localBackups as $index => $b) {
+                $basename = $b['basename'];
+                $folderPath = $this->backupDir . $basename . '/';
+                if (!is_dir($folderPath)) {
+                    continue;
+                }
+
+                $shouldDelete = false;
+
+                // 1. Age-based purge
+                if ($maxDays > 0) {
+                    $ageSeconds = $now - $b['date'];
+                    $maxSeconds = $maxDays * 86400;
+                    if ($ageSeconds > $maxSeconds) {
+                        $shouldDelete = true;
+                    }
+                }
+
+                // 2. Count-based purge
+                if ($maxCount > 0 && !$shouldDelete) {
+                    $remainingCount = count($localBackups) - $index;
+                    if ($remainingCount > $maxCount) {
+                        $shouldDelete = true;
+                    }
+                }
+
+                if ($shouldDelete) {
+                    $this->deleteBackup($basename);
+                    // Remove from local list so count checks are correct
+                    unset($localBackups[$index]);
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->logger->log("Database backup retention purge failed: " . $e->getMessage(), 'ERROR');
+        }
+    }
 }

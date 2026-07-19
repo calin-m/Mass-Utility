@@ -33,8 +33,11 @@ class DataSweeperEngine {
             btnAnalyze.disabled = true;
             btnAnalyze.innerHTML = '⚡ Scanning Database...'; // nosec
 
-            FetchEngine.post('sweeper_analyze', { days_old: daysOld })
-                .then(data => {
+            const scanPromise = FetchEngine.post('sweeper_analyze', { days_old: daysOld });
+            const imagePromise = FetchEngine.post('sweeper_scan_images');
+
+            Promise.all([scanPromise, imagePromise])
+                .then(([data, imageData]) => {
                     btnAnalyze.disabled = false;
                     btnAnalyze.innerHTML = '🔍 Run Pre-Flight Scan'; // nosec
 
@@ -46,6 +49,7 @@ class DataSweeperEngine {
                     // Store row counts
                     this.statsTotal = data.stats.total;
                     this.cartsTotal = data.carts.total;
+                    this.orphanedImages = imageData.success ? imageData.orphaned_files : [];
 
                     // Update UI Readout elements
                     document.getElementById('pm-scan-connections').innerText = data.stats.connections.toLocaleString();
@@ -58,6 +62,106 @@ class DataSweeperEngine {
                     document.getElementById('pm-scan-products').innerText = data.carts.cart_products.toLocaleString();
                     document.getElementById('pm-scan-rules').innerText = data.carts.cart_rules.toLocaleString();
                     document.getElementById('pm-scan-carts-total').innerText = data.carts.total.toLocaleString();
+
+                    if (imageData.success) {
+                        document.getElementById('pm-scan-images-total').innerText = imageData.scanned_files.toLocaleString();
+                        document.getElementById('pm-scan-images-orphans').innerText = imageData.orphaned_files.length.toLocaleString();
+                        document.getElementById('pm-scan-images-size').innerText = (imageData.total_orphaned_size / 1024 / 1024).toFixed(2) + ' MB';
+                        document.getElementById('pm-check-images-count').innerText = imageData.orphaned_files.length.toLocaleString();
+                    } else {
+                        document.getElementById('pm-scan-images-total').innerText = 'Error';
+                        document.getElementById('pm-scan-images-orphans').innerText = '0';
+                        document.getElementById('pm-scan-images-size').innerText = '0.00 MB';
+                        document.getElementById('pm-check-images-count').innerText = '0';
+                    }
+
+                    // Checkbox counts
+                    document.getElementById('pm-check-stats-count').innerText = data.stats.total.toLocaleString();
+                    document.getElementById('pm-check-carts-count').innerText = data.carts.total.toLocaleString();
+
+                    // Reveal Results
+                    const resultsCard = document.getElementById('pm-sweeper-results-card');
+                    if (resultsCard) {
+                        resultsCard.style.display = 'block';
+                        resultsCard.scrollIntoView({ behavior: 'smooth' });
+                    }
+                })
+/**
+ * Project Mass - Data Sweeper Engine (TX-298)
+ * Orchestrates the Pre-flight Scan and chunked database purge loops.
+ */
+class DataSweeperEngine {
+    static statsTotal = 0;
+    static cartsTotal = 0;
+    static isRunning = false;
+    static isAborted = false;
+
+    static initialize() {
+        this.bindAnalyze();
+        this.bindExecute();
+        this.bindAbort();
+    }
+
+    static logConsole(message, type = 'SYSTEM') {
+        const consoleEl = document.getElementById('pm-sweeper-console');
+        if (!consoleEl) return;
+        const timestamp = new Date().toLocaleTimeString();
+        consoleEl.innerHTML += `\n[${timestamp}] [${type}] ${message}`;
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    static bindAnalyze() {
+        const btnAnalyze = document.getElementById('pm-btn-sweeper-analyze');
+        if (!btnAnalyze) return;
+
+        btnAnalyze.addEventListener('click', () => {
+            const daysSelect = document.getElementById('pm-sweeper-days');
+            const daysOld = daysSelect ? daysSelect.value : 30;
+
+            btnAnalyze.disabled = true;
+            btnAnalyze.innerHTML = '⚡ Scanning Database...'; // nosec
+
+            const scanPromise = FetchEngine.post('sweeper_analyze', { days_old: daysOld });
+            const imagePromise = FetchEngine.post('sweeper_scan_images');
+
+            Promise.all([scanPromise, imagePromise])
+                .then(([data, imageData]) => {
+                    btnAnalyze.disabled = false;
+                    btnAnalyze.innerHTML = '🔍 Run Pre-Flight Scan'; // nosec
+
+                    if (!data.success) {
+                        UiEngine.showAlert('Scan Error', data.error || 'Failed to complete pre-flight scan.');
+                        return;
+                    }
+
+                    // Store row counts
+                    this.statsTotal = data.stats.total;
+                    this.cartsTotal = data.carts.total;
+                    this.orphanedImages = imageData.success ? imageData.orphaned_files : [];
+
+                    // Update UI Readout elements
+                    document.getElementById('pm-scan-connections').innerText = data.stats.connections.toLocaleString();
+                    document.getElementById('pm-scan-pages').innerText = data.stats.connections_page.toLocaleString();
+                    document.getElementById('pm-scan-sources').innerText = data.stats.connections_source.toLocaleString();
+                    document.getElementById('pm-scan-guests').innerText = data.stats.guests.toLocaleString();
+                    document.getElementById('pm-scan-stats-total').innerText = data.stats.total.toLocaleString();
+
+                    document.getElementById('pm-scan-carts').innerText = data.carts.carts.toLocaleString();
+                    document.getElementById('pm-scan-products').innerText = data.carts.cart_products.toLocaleString();
+                    document.getElementById('pm-scan-rules').innerText = data.carts.cart_rules.toLocaleString();
+                    document.getElementById('pm-scan-carts-total').innerText = data.carts.total.toLocaleString();
+
+                    if (imageData.success) {
+                        document.getElementById('pm-scan-images-total').innerText = imageData.scanned_files.toLocaleString();
+                        document.getElementById('pm-scan-images-orphans').innerText = imageData.orphaned_files.length.toLocaleString();
+                        document.getElementById('pm-scan-images-size').innerText = (imageData.total_orphaned_size / 1024 / 1024).toFixed(2) + ' MB';
+                        document.getElementById('pm-check-images-count').innerText = imageData.orphaned_files.length.toLocaleString();
+                    } else {
+                        document.getElementById('pm-scan-images-total').innerText = 'Error';
+                        document.getElementById('pm-scan-images-orphans').innerText = '0';
+                        document.getElementById('pm-scan-images-size').innerText = '0.00 MB';
+                        document.getElementById('pm-check-images-count').innerText = '0';
+                    }
 
                     // Checkbox counts
                     document.getElementById('pm-check-stats-count').innerText = data.stats.total.toLocaleString();
@@ -85,24 +189,25 @@ class DataSweeperEngine {
         btnExecute.addEventListener('click', () => {
             const statsEnabled = document.getElementById('pm-sweeper-check-stats').checked;
             const cartsEnabled = document.getElementById('pm-sweeper-check-carts').checked;
+            const imagesEnabled = document.getElementById('pm-sweeper-check-images').checked;
 
-            if (!statsEnabled && !cartsEnabled) {
+            if (!statsEnabled && !cartsEnabled && !imagesEnabled) {
                 UiEngine.showAlert('No Options Selected', 'Please check at least one of the data domains to purge.');
                 return;
             }
 
-            const totalExpected = (statsEnabled ? this.statsTotal : 0) + (cartsEnabled ? this.cartsTotal : 0);
+            const totalExpected = (statsEnabled ? this.statsTotal : 0) + (cartsEnabled ? this.cartsTotal : 0) + (imagesEnabled ? this.orphanedImages.length : 0);
             if (totalExpected === 0) {
-                UiEngine.showAlert('No Records to Purge', 'The selected tables contain 0 expired rows matching the criteria.');
+                UiEngine.showAlert('No Records to Purge', 'The selected options contain 0 expired items matching the criteria.');
                 return;
             }
 
             UiEngine.showConfirmModal(
-                'Confirm Database Purge',
-                `You are about to permanently sweep up to <strong>${totalExpected.toLocaleString()}</strong> rows from your PrestaShop database. This operation runs chunked to respect CloudLinux constraints, but cannot be undone.<br><br>Type <strong style="color: var(--pm-danger);">SWEEP</strong> in the field below to confirm:`,
+                'Confirm Database & Files Purge',
+                `You are about to permanently sweep up to <strong>${totalExpected.toLocaleString()}</strong> items (database records and physical files). This operation runs chunked to respect CloudLinux constraints, but cannot be undone.<br><br>Type <strong style="color: var(--pm-danger);">SWEEP</strong> in the field below to confirm:`,
                 'SWEEP',
                 () => {
-                    this.startPurgeSequence(statsEnabled, cartsEnabled);
+                    this.startPurgeSequence(statsEnabled, cartsEnabled, imagesEnabled);
                 }
             );
         });
@@ -120,7 +225,7 @@ class DataSweeperEngine {
         });
     }
 
-    static startPurgeSequence(statsEnabled, cartsEnabled) {
+    static startPurgeSequence(statsEnabled, cartsEnabled, imagesEnabled) {
         this.isRunning = true;
         this.isAborted = false;
 
@@ -149,7 +254,9 @@ class DataSweeperEngine {
         const daysOld = daysSelect ? parseInt(daysSelect.value) : 30;
         const chunkSize = 5000;
 
-        const totalExpected = (statsEnabled ? this.statsTotal : 0) + (cartsEnabled ? this.cartsTotal : 0);
+        // Make a mutable copy of the scanned image list for splice operation
+        const imagesList = [...(this.orphanedImages || [])];
+        const totalExpected = (statsEnabled ? this.statsTotal : 0) + (cartsEnabled ? this.cartsTotal : 0) + (imagesEnabled ? imagesList.length : 0);
         let totalDeleted = 0;
 
         const consoleEl = document.getElementById('pm-sweeper-console');
@@ -260,8 +367,43 @@ class DataSweeperEngine {
                 return;
             }
 
+            // Step 4: Ghost Product Images
+            if (imagesEnabled) {
+                this.logConsole(`Executing purge on orphaned product images...`, 'IMAGES');
+                document.getElementById('pm-sweeper-progress-text').innerText = 'Sweeping ghost product images...';
+
+                const filesChunk = imagesList.splice(0, 50).map(f => f.relative_path);
+                if (filesChunk.length > 0) {
+                    FetchEngine.post('sweeper_purge_images', { files: filesChunk })
+                        .then(res => {
+                            if (!res.success) throw new Error(res.error || 'Unknown image sweeper endpoint error');
+
+                            if (res.deleted_count > 0) {
+                                totalDeleted += res.deleted_count;
+                                updateProgressBar();
+                                this.logConsole(`Purged ${res.deleted_count.toLocaleString()} ghost image files.`, 'SUCCESS');
+                            }
+
+                            if (imagesList.length > 0) {
+                                setTimeout(executeNext, 200);
+                            } else {
+                                imagesEnabled = false; // Mark images done
+                                executeNext();
+                            }
+                        })
+                        .catch(err => {
+                            this.logConsole(`Fatal image sweeper error: ${err.message}`, 'ERROR');
+                            this.finishSequence(false, err.message);
+                        });
+                } else {
+                    imagesEnabled = false;
+                    executeNext();
+                }
+                return;
+            }
+
             // All steps finished
-            this.finishSequence(true, `Purged a total of ${totalDeleted.toLocaleString()} rows successfully.`);
+            this.finishSequence(true, `Purged a total of ${totalDeleted.toLocaleString()} items successfully.`);
         };
 
         // Boot loader recursion

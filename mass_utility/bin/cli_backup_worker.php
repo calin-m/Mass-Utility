@@ -155,6 +155,7 @@ try {
             'status' => 'completed'
         ]);
         $logger->log("CLI Database Backup completed successfully. Archive: {$baseName}", 'INFO');
+        $backupManager->purgeOldBackups();
         
     } elseif ($type === 'file') {
         $backupDir = _PS_MODULE_DIR_ . 'mass_utility/backups/files/';
@@ -248,6 +249,7 @@ try {
 
         if ($nativeTarSuccess) {
             $logger->log("CLI File Backup completed successfully via fast-path for Job ID: {$jobId}", 'INFO');
+            $fileEngine->purgeOldBackups();
             exit(0);
         }
 
@@ -286,6 +288,7 @@ try {
         }
         
         $logger->log("CLI File Backup completed successfully for Job ID: {$jobId}", 'INFO');
+        $fileEngine->purgeOldBackups();
     } else {
         throw new Exception("Unknown backup type: " . $type);
     }
