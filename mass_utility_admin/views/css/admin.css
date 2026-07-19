@@ -1,0 +1,126 @@
+:root {
+    --pm-bg-main: #05070f;
+    --pm-bg-card: #0f1224;
+    --pm-border-color: #1e2640;
+    --pm-text-primary: #f1f5f9;
+    --pm-text-secondary: #94a3b8;
+    --pm-warning: #f59e0b;
+    --pm-danger: #ef4444;
+    --pm-success: #10b981;
+}
+
+body {
+    background-color: var(--pm-bg-main);
+    color: var(--pm-text-primary);
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.pm-admin-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.pm-admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--pm-border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.pm-card {
+    background-color: var(--pm-bg-card);
+    border: 1px solid var(--pm-border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.pm-mb-6 { margin-bottom: 1.5rem; }
+.pm-mb-4 { margin-bottom: 1rem; }
+
+.pm-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--pm-text-secondary);
+    margin-bottom: 0.4rem;
+}
+
+.pm-input {
+    background-color: var(--pm-bg-main);
+    border: 1px solid var(--pm-border-color);
+    border-radius: 4px;
+    color: var(--pm-text-primary);
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.pm-btn {
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.pm-btn:hover {
+    opacity: 0.9;
+}
+
+.pm-btn-primary { background-color: #6366f1; color: #fff; }
+.pm-btn-neutral { background-color: #334155; color: #fff; }
+.pm-btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+.pm-logout-btn { background-color: var(--pm-danger); color: #fff; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: 600; }
+
+.pm-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.pm-table th, .pm-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--pm-border-color);
+    text-align: left;
+}
+
+.pm-table th {
+    color: var(--pm-text-secondary);
+    font-weight: 600;
+}
+
+.pm-badge {
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    text-transform: capitalize;
+}
+
+.badge-active { background-color: rgba(16, 185, 129, 0.2); color: var(--pm-success); }
+.badge-suspended { background-color: rgba(239, 68, 68, 0.2); color: var(--pm-danger); }
+.badge-expired { background-color: rgba(245, 158, 11, 0.2); color: var(--pm-warning); }
+
+/* Modal container overlay */
+.pm-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 1000;
+}
+
+.pm-modal-content {
+    background-color: var(--pm-bg-card);
+    border: 1px solid var(--pm-border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    width: 400px;
+}

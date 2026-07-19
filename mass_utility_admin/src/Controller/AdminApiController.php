@@ -1,0 +1,98 @@
+<?php
+namespace MassUtilityAdmin\Controller;
+
+use MassUtilityAdmin\Repository\LicenseRepository;
+use MassUtilityAdmin\Service\AdminSettingsManager;
+
+class AdminApiController
+{
+    private AdminSettingsManager $auth;
+    private LicenseRepository $repo;
+
+    public function __construct(AdminSettingsManager $auth)
+    {
+        $this->auth = $auth;
+        $this->repo = new LicenseRepository($auth->getDbConnection());
+    }
+
+    public function execute(string $action): void
+    {
+        $method = str_replace('api_', '', $action);
+        if (method_exists($this, $method)) {
+            $this->$method();
+        } else {
+            echo json_encode(['success' => false, 'error' => 'API endpoint not found.']);
+        }
+    }
+
+    private function list(): void
+    {
+        $licenses = $this->repo->getAllLicenses();
+        $users = $this->repo->getAllUsers();
+        echo json_encode(['success' => true, 'licenses' => $licenses, 'users' => $users]);
+    }
+
+    private function create_user(): void
+    {
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $company = $_POST['company'] ?? null;
+
+        if (empty($email) || empty($password)) {
+            echo json_encode(['success' => false, 'error' => 'Email and password are required.']);
+            return;
+        }
+
+        try {
+            $userId = $this->repo->createUser($email, $password, $company);
+            echo json_encode(['success' => true, 'user_id' => $userId, 'users' => $this->repo->getAllUsers()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function generate(): void
+    {
+        $userId = (int)($_POST['user_id'] ?? 0);
+        $tier = $_POST['tier'] ?? 'basic';
+        $expiry = $_POST['expiry'] ?? null;
+        if (empty($expiry)) {
+            $expiry = null;
+        }
+
+        if ($userId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'A valid client user ID is required.']);
+            return;
+        }
+
+        try {
+            $key = $this->repo->createLicense($userId, $tier, $expiry);
+            echo json_encode(['success' => true, 'key' => $key, 'licenses' => $this->repo->getAllLicenses()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function update(): void
+    {
+        $id = (int)($_POST['id'] ?? 0);
+        $status = $_POST['status'] ?? 'active';
+        $tier = $_POST['tier'] ?? 'basic';
+        $expiry = $_POST['expiry'] ?? null;
+        if (empty($expiry)) {
+            $expiry = null;
+        }
+
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Invalid license ID.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->updateLicense($id, $status, $tier, $expiry);
+            echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+}
