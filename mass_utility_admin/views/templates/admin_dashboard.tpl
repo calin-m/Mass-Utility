@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Mass - Super Admin Panel</title>
-    <link rel="stylesheet" href="views/css/admin.css">
+    <link rel="stylesheet" href="views/css/admin.css?v=1.2">
 </head>
 <body>
     <div class="pm-admin-wrapper">
@@ -128,6 +128,10 @@
             <form id="pm-edit-form">
                 <input type="hidden" id="pm-edit-id">
                 <div class="pm-mb-4">
+                    <label class="pm-label">Bound Domain</label>
+                    <input type="text" id="pm-edit-domain" class="pm-input" style="width: 100%;" placeholder="e.g. store.com">
+                </div>
+                <div class="pm-mb-4">
                     <label class="pm-label">Package Tier</label>
                     <select id="pm-edit-tier" class="pm-input" style="width: 100%;">
                         <option value="basic">Basic</option>
@@ -155,6 +159,6 @@
         </div>
     </div>
 
-    <script src="views/js/AdminEngine.js"></script>
+    <script src="views/js/AdminEngine.js?v=1.2"></script>
 </body>
 </html>

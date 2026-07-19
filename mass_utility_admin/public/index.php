@@ -46,24 +46,26 @@ if (!$hasAdmin) {
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Build Database Schema
-            $pdo->exec("CREATE TABLE IF NOT EXISTS pm_admins ( // nosec
+            $sqlAdmins = "CREATE TABLE IF NOT EXISTS pm_admins (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username VARCHAR(64) UNIQUE NOT NULL,
                 password_hash VARCHAR(255) NOT NULL,
                 role VARCHAR(32) DEFAULT 'admin',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );"); // nosec
+            );";
+            $pdo->exec($sqlAdmins); // nosec
             
-            $pdo->exec("CREATE TABLE IF NOT EXISTS pm_users ( // nosec
+            $sqlUsers = "CREATE TABLE IF NOT EXISTS pm_users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email VARCHAR(128) UNIQUE NOT NULL,
                 password_hash VARCHAR(255) NOT NULL,
                 company_name VARCHAR(128) NULL,
                 status VARCHAR(32) DEFAULT 'active',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );"); // nosec
+            );";
+            $pdo->exec($sqlUsers); // nosec
             
-            $pdo->exec("CREATE TABLE IF NOT EXISTS pm_licenses ( // nosec
+            $sqlLicenses = "CREATE TABLE IF NOT EXISTS pm_licenses (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
                 license_key VARCHAR(64) UNIQUE NOT NULL,
@@ -74,7 +76,8 @@ if (!$hasAdmin) {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY(user_id) REFERENCES pm_users(id) ON DELETE CASCADE
-            );"); // nosec
+            );";
+            $pdo->exec($sqlLicenses); // nosec
             
             $pdo->exec("CREATE INDEX IF NOT EXISTS idx_license_key ON pm_licenses(license_key);"); // nosec
             $pdo->exec("CREATE INDEX IF NOT EXISTS idx_admin_user ON pm_admins(username);"); // nosec

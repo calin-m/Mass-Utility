@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    loadData();
-
     // Tab Switching
     const tabBtns = document.querySelectorAll('.pm-tab-btn');
     const tabPanes = document.querySelectorAll('.pm-tab-pane');
@@ -29,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             passInput.focus();
         });
     }
+
+    loadData();
 
     document.getElementById('pm-user-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -105,12 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const tier = document.getElementById('pm-edit-tier').value;
         const status = document.getElementById('pm-edit-status').value;
         const expiry = document.getElementById('pm-edit-expiry').value;
+        const domain = document.getElementById('pm-edit-domain').value;
 
         const formData = new FormData();
         formData.append('id', id);
         formData.append('tier', tier);
         formData.append('status', status);
         formData.append('expiry', expiry);
+        formData.append('store_url', domain);
 
         const response = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
         const result = await response.json();
@@ -173,16 +175,17 @@ function renderLicenses(licenses) {
             <td><strong>${escapeHtml(l.package_tier.toUpperCase())}</strong></td>
             <td><span class="pm-badge badge-${escapeHtml(l.status)}">${escapeHtml(l.status)}</span></td>
             <td>${escapeHtml(l.expires_at || 'Never')}</td>
-            <td><button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="openEdit(${l.id}, '${escapeHtml(l.package_tier)}', '${escapeHtml(l.status)}', '${escapeHtml(l.expires_at || '')}')">✏️ Edit</button></td>
+            <td><button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="openEdit(${l.id}, '${escapeHtml(l.package_tier)}', '${escapeHtml(l.status)}', '${escapeHtml(l.expires_at || '')}', '${escapeHtml(l.store_url || '')}')">✏️ Edit</button></td>
         `; // nosec
         list.appendChild(tr);
     });
 }
 
-window.openEdit = function(id, tier, status, expiry) {
+window.openEdit = function(id, tier, status, expiry, domain) {
     document.getElementById('pm-edit-id').value = id;
     document.getElementById('pm-edit-tier').value = tier;
     document.getElementById('pm-edit-status').value = status;
     document.getElementById('pm-edit-expiry').value = expiry ? expiry.split(' ')[0] : '';
+    document.getElementById('pm-edit-domain').value = domain || '';
     document.getElementById('pm-edit-modal').style.display = 'flex';
 };

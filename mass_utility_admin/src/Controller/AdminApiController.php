@@ -78,6 +78,10 @@ class AdminApiController
         $id = (int)($_POST['id'] ?? 0);
         $status = $_POST['status'] ?? 'active';
         $tier = $_POST['tier'] ?? 'basic';
+        $storeUrl = $_POST['store_url'] ?? null;
+        if (empty($storeUrl)) {
+            $storeUrl = null;
+        }
         $expiry = $_POST['expiry'] ?? null;
         if (empty($expiry)) {
             $expiry = null;
@@ -89,7 +93,7 @@ class AdminApiController
         }
 
         try {
-            $success = $this->repo->updateLicense($id, $status, $tier, $expiry);
+            $success = $this->repo->updateLicense($id, $status, $tier, $expiry, $storeUrl);
             echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
