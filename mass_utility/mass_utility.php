@@ -217,13 +217,7 @@ class Mass_Utility extends Module
             }
         }
 
-        $secureToken = '';
-        $licenseKey = '';
-        if (class_exists('\Configuration')) {
-            $secureToken = \Configuration::get('PM_SECURE_TOKEN');
-            $licenseKey = \Configuration::get('PM_LICENSE_KEY');
-        }
-
+        $licenseSuspended = false;
         // Live status verification check
         if (!empty($secureToken) && !empty($licenseKey)) {
             $licensingServer = self::LICENSING_SERVER_URL;
@@ -249,19 +243,7 @@ class Mass_Utility extends Module
                 if ($httpCode === 200 && empty($data['success'])) {
                     $serverError = $data['error'] ?? '';
                     if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false) {
-                        // Deactivate locally
-                        \Configuration::deleteByName('PM_SECURE_TOKEN');
-                        \Configuration::deleteByName('PM_LICENSE_TIER');
-                        try {
-                            $dbPath = _PS_ROOT_DIR_ . '/mass_utility_dashboard/data/pm_cloud_backups.db';
-                            if (file_exists($dbPath)) {
-                                $pdo = new \PDO('sqlite:' . $dbPath);
-                                $pdo->exec("DROP TABLE IF EXISTS tenant_settings;"); // nosec
-                            }
-                        } catch (\Throwable $e) {}
-                        
-                        $secureToken = '';
-                        $activationError = 'Your license key has been suspended or expired. Please contact the administrator.';
+                        $licenseSuspended = true;
                     }
                 }
             }
@@ -318,7 +300,7 @@ class Mass_Utility extends Module
             }
         } catch (\Throwable $e) {}
 
-        return $this->renderBridgeStatusPage($launcherUrl, $apiEndpoint, $isGdriveConnected, $authUrl, $gdriveConfigured);
+        return $this->renderBridgeStatusPage($launcherUrl, $apiEndpoint, $isGdriveConnected, $authUrl, $gdriveConfigured, $licenseSuspended);
     }
 
     private function renderOauthCallbackPage(bool $success, string $errorMsg = ''): string
@@ -384,7 +366,7 @@ class Mass_Utility extends Module
         return base64_encode($iv . $ciphertext);
     }
 
-    private function renderBridgeStatusPage(string $launcherUrl, string $apiEndpoint, bool $isGdriveConnected = false, string $authUrl = '#', bool $gdriveConfigured = false): string
+    private function renderBridgeStatusPage(string $launcherUrl, string $apiEndpoint, bool $isGdriveConnected = false, string $authUrl = '#', bool $gdriveConfigured = false, bool $isSuspended = false): string
     {
         return '
         <style>
@@ -528,17 +510,35 @@ class Mass_Utility extends Module
         </style>
         <div class="pm-bridge-card">
             <div class="pm-bridge-status-row">
+                ' . ($isSuspended ? '
+                <span class="pm-bridge-badge" style="background: var(--bridge-danger-bg); color: var(--bridge-danger); border: 1px solid var(--bridge-danger-border);">
+                    <span class="pm-bridge-badge-dot" style="background-color: var(--bridge-danger); box-shadow: 0 0 8px var(--bridge-danger);"></span> License Suspended
+                </span>
+                ' : '
                 <span class="pm-bridge-badge">
                     <span class="pm-bridge-badge-dot"></span> API Bridge Active
                 </span>
+                ') . '
             </div>
-            <h2 class="pm-bridge-title">⚡ Mass Utility Bridge</h2>
+            <h2 class="pm-bridge-title">⚡ Mass Utility Bridge ' . ($isSuspended ? '(Suspended)' : '') . '</h2>
             <p class="pm-bridge-subtitle">Decoupled API gateway and secure telemetry pipeline. The administration UI has been relocated to the Standalone SaaS Dashboard for maximum performance and IP security.</p>
             
+            ' . ($isSuspended ? '
+            <div style="background: var(--bridge-danger-bg); border: 1px solid var(--bridge-danger-border); color: var(--bridge-danger); padding: 1.25rem; border-radius: 8px; font-weight: 600; margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5;">
+                🛑 Your merchant license key is currently suspended or expired. Access to the standalone dashboard and premium modules is restricted. Please contact the administrator.
+            </div>
+            ' : '') . '
+
             <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                ' . ($isSuspended ? '
+                <span class="pm-bridge-btn" style="background: #334155; opacity: 0.6; cursor: not-allowed; box-shadow: none;">
+                    Launch Standalone Dashboard (Locked)
+                </span>
+                ' : '
                 <a href="' . $launcherUrl . '" class="pm-bridge-btn" target="_blank">
                     Launch Standalone Dashboard <i class="icon-external-link"></i>
                 </a>
+                ') . '
                 <a href="' . $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&action=deactivate_license" class="pm-bridge-btn" style="background: linear-gradient(135deg, var(--bridge-danger) 0%, var(--bridge-danger-hover) 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onclick="return confirm(\'Are you sure you want to deactivate and remove your Pro license from this store?\');">
                     Deactivate License
                 </a>
