@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Mass - Super Admin Panel</title>
-    <link rel="stylesheet" href="views/css/admin.css">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
     <div class="pm-admin-wrapper">
@@ -13,24 +13,46 @@
         </header>
 
         <main class="pm-admin-main">
-            <!-- Client Account Creation -->
-            <div class="pm-card pm-mb-6">
-                <h3>👥 Create Standalone Client Account</h3>
-                <form id="pm-user-form" style="display: flex; gap: 1rem; align-items: flex-end; margin-top: 1rem;">
-                    <div style="flex: 1;">
-                        <label class="pm-label">Client Email</label>
-                        <input type="email" id="pm-user-email" class="pm-input" style="width: 100%;" placeholder="merchant@email.com" required>
-                    </div>
-                    <div style="flex: 1;">
-                        <label class="pm-label">Password</label>
-                        <input type="password" id="pm-user-pass" class="pm-input" style="width: 100%;" required>
-                    </div>
-                    <div style="flex: 1;">
-                        <label class="pm-label">Company Name</label>
-                        <input type="text" id="pm-user-company" class="pm-input" style="width: 100%;" placeholder="Store Co.">
-                    </div>
-                    <button type="submit" class="pm-btn pm-btn-primary">Create Client</button>
-                </form>
+            <!-- Client & Security Grid -->
+            <div class="pm-grid-2 pm-mb-6">
+                <!-- Client Account Creation -->
+                <div class="pm-card">
+                    <h3>👥 Create Standalone Client Account</h3>
+                    <form id="pm-user-form" style="margin-top: 1rem;">
+                        <div class="pm-mb-4">
+                            <label class="pm-label">Client Email</label>
+                            <input type="email" id="pm-user-email" class="pm-input" style="width: 100%;" placeholder="merchant@email.com" required>
+                        </div>
+                        <div class="pm-mb-4">
+                            <label class="pm-label">Password</label>
+                            <input type="password" id="pm-user-pass" class="pm-input" style="width: 100%;" required>
+                        </div>
+                        <div class="pm-mb-4">
+                            <label class="pm-label">Company Name</label>
+                            <input type="text" id="pm-user-company" class="pm-input" style="width: 100%;" placeholder="Store Co.">
+                        </div>
+                        <button type="submit" class="pm-btn pm-btn-primary" style="width: 100%;">Create Client</button>
+                    </form>
+                </div>
+
+                <!-- Admin Security Password Update -->
+                <div class="pm-card">
+                    <h3>🔒 Change Admin Password</h3>
+                    <form id="pm-password-form" style="margin-top: 1rem;">
+                        <div class="pm-mb-4">
+                            <label class="pm-label">Current Password</label>
+                            <input type="password" id="pm-admin-old-pass" class="pm-input" style="width: 100%;" required autocomplete="current-password">
+                        </div>
+                        <div class="pm-mb-4">
+                            <label class="pm-label">New Password</label>
+                            <input type="password" id="pm-admin-new-pass" class="pm-input" style="width: 100%;" required autocomplete="new-password">
+                        </div>
+                        <div class="pm-mb-4" style="height: 58px;">
+                            <!-- Spacer for grid alignment -->
+                        </div>
+                        <button type="submit" class="pm-btn pm-btn-danger" style="width: 100%;">Update Admin Password</button>
+                    </form>
+                </div>
             </div>
 
             <!-- Key Generation Panel -->
@@ -119,6 +141,6 @@
         </div>
     </div>
 
-    <script src="views/js/AdminEngine.js"></script>
+    <script src="js/AdminEngine.js"></script>
 </body>
 </html>

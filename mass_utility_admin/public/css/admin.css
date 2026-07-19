@@ -39,6 +39,12 @@ body {
     padding: 1.5rem;
 }
 
+.pm-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
 .pm-mb-6 { margin-bottom: 1.5rem; }
 .pm-mb-4 { margin-bottom: 1rem; }
 
@@ -76,8 +82,13 @@ body {
 
 .pm-btn-primary { background-color: #6366f1; color: #fff; }
 .pm-btn-neutral { background-color: #334155; color: #fff; }
+.pm-btn-danger { background-color: var(--pm-danger); color: #fff; }
 .pm-btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
 .pm-logout-btn { background-color: var(--pm-danger); color: #fff; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: 600; }
+
+.pm-table-container {
+    overflow-x: auto;
+}
 
 .pm-table {
     width: 100%;

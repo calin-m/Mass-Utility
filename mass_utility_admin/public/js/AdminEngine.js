@@ -46,6 +46,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.getElementById('pm-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const oldPass = document.getElementById('pm-admin-old-pass').value;
+        const newPass = document.getElementById('pm-admin-new-pass').value;
+
+        const formData = new FormData();
+        formData.append('old_password', oldPass);
+        formData.append('new_password', newPass);
+
+        const response = await fetch('index.php?action=api_change_password', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) {
+            alert('Admin password updated successfully!');
+            document.getElementById('pm-admin-old-pass').value = '';
+            document.getElementById('pm-admin-new-pass').value = '';
+        } else {
+            alert(result.error || 'Failed to update password.');
+        }
+    });
+
     document.getElementById('pm-edit-cancel').addEventListener('click', () => {
         document.getElementById('pm-edit-modal').style.display = 'none';
     });

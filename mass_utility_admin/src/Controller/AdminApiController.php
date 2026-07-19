@@ -95,4 +95,37 @@ class AdminApiController
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
+
+    private function change_password(): void
+    {
+        $oldPassword = $_POST['old_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+
+        if (empty($oldPassword) || empty($newPassword)) {
+            echo json_encode(['success' => false, 'error' => 'Current password and new password are required.']);
+            return;
+        }
+
+        $username = $_SESSION['pm_admin_user'] ?? 'admin';
+
+        try {
+            $pdo = $this->auth->getDbConnection();
+            $stmt = $pdo->prepare("SELECT * FROM pm_admins WHERE username = ?");
+            $stmt->execute([$username]);
+            $admin = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$admin || !password_verify($oldPassword, $admin['password_hash'])) {
+                echo json_encode(['success' => false, 'error' => 'Invalid current password.']);
+                return;
+            }
+
+            $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("UPDATE pm_admins SET password_hash = ? WHERE username = ?");
+            $stmt->execute([$newHash, $username]);
+
+            echo json_encode(['success' => true]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
 }
