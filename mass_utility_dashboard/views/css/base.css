@@ -192,3 +192,68 @@
                 }
             }
 
+            /* Tabler Design Theme Overrides */
+            .pm-container[data-theme="tabler"],
+            .pm-modal-overlay[data-theme="tabler"] {
+                --pm-bg: #f8fafc;
+                --pm-white: #ffffff;
+                --pm-card-bg: #ffffff;
+                --pm-border-color: #e6e8eb;
+                --pm-border-glow: rgba(32, 107, 196, 0.15);
+                --pm-text-primary: #1d273b;
+                --pm-text-secondary: #626976;
+                --pm-hero-bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+                --pm-shadow: rgba(30, 41, 59, 0.04);
+                --pm-card-title-color: #1d273b;
+                
+                --pm-primary: #206bc4;
+                --pm-primary-rgb: 32, 107, 196;
+                --pm-primary-hover: #185094;
+                --pm-primary-hover-rgb: 24, 80, 148;
+                --pm-primary-light: #4299e1;
+                --pm-primary-dark: #1a4b8c;
+
+                --pm-input-bg: #ffffff;
+                --pm-input-border: #dadcde;
+                --pm-input-text: #1d273b;
+                --pm-terminal-bg: #f8fafc;
+                --pm-terminal-text: #0d1726;
+                --pm-terminal-border: #dadcde;
+                --pm-hover-highlight: rgba(0, 0, 0, 0.03);
+                --pm-code-bg: rgba(32, 107, 196, 0.06);
+                --pm-code-text: #206bc4;
+                --pm-code-border: rgba(32, 107, 196, 0.15);
+            }
+
+            .pm-container[data-theme="tabler"].pm-dark-mode,
+            .pm-modal-overlay[data-theme="tabler"].pm-dark-mode {
+                --pm-bg: #0d1726;
+                --pm-white: #ffffff;
+                --pm-card-bg: #182433;
+                --pm-border-color: #212e3e;
+                --pm-border-glow: rgba(32, 107, 196, 0.2);
+                --pm-text-primary: #f4f6fa;
+                --pm-text-secondary: #90a0b7;
+                --pm-hero-bg: linear-gradient(135deg, #101e30 0%, #0d1726 100%);
+                --pm-shadow: rgba(0, 0, 0, 0.2);
+                --pm-card-title-color: #f4f6fa;
+
+                --pm-primary: #206bc4;
+                --pm-primary-rgb: 32, 107, 196;
+                --pm-primary-hover: #4299e1;
+                --pm-primary-hover-rgb: 66, 153, 225;
+                --pm-primary-light: #63b3ed;
+                --pm-primary-dark: #185094;
+
+                --pm-input-bg: #0d1726;
+                --pm-input-border: #212e3e;
+                --pm-input-text: #f4f6fa;
+                --pm-terminal-bg: #0b0f19;
+                --pm-terminal-text: #4299e1;
+                --pm-terminal-border: rgba(66, 153, 225, 0.25);
+                --pm-hover-highlight: rgba(255, 255, 255, 0.05);
+                --pm-code-bg: rgba(32, 107, 196, 0.12);
+                --pm-code-text: #4299e1;
+                --pm-code-border: rgba(32, 107, 196, 0.2);
+            }
+

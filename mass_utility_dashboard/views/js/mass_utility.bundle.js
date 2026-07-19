@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-19 09:16:49 UTC
+ * Generated: 2026-07-19 09:42:29 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -591,6 +591,9 @@ window.SettingsEngine = (function() {
         if (document.getElementById('pm-setting-ui-font')) {
             document.getElementById('pm-setting-ui-font').value = settings.PM_UI_FONT || "system-ui, -apple-system, sans-serif";
         }
+        if (document.getElementById('pm-setting-ui-theme')) {
+            document.getElementById('pm-setting-ui-theme').value = settings.PM_UI_THEME || "classic";
+        }
         if (document.getElementById('pm-setting-custom-quota')) {
             document.getElementById('pm-setting-custom-quota').value = settings.PM_CUSTOM_DISK_QUOTA_GB || "0";
         }
@@ -599,6 +602,15 @@ window.SettingsEngine = (function() {
     }
 
     function applyUIEffects() {
+        const container = document.querySelector('.pm-container');
+        if (container) {
+            container.setAttribute('data-theme', settings.PM_UI_THEME || "classic");
+        }
+        const premiumModal = document.getElementById('pm-modal-premium');
+        if (premiumModal) {
+            premiumModal.setAttribute('data-theme', settings.PM_UI_THEME || "classic");
+        }
+
         // Toggle tabs visibility based on settings
         const fileTab = document.querySelector('label[for="pm-tab-file-tools"]');
         if (fileTab) {
@@ -711,6 +723,16 @@ window.SettingsEngine = (function() {
             });
         }
 
+        const themeSelect = document.getElementById('pm-setting-ui-theme');
+        if (themeSelect) {
+            themeSelect.addEventListener('change', function() {
+                const container = document.querySelector('.pm-container');
+                if (container) container.setAttribute('data-theme', this.value);
+                const premiumModal = document.getElementById('pm-modal-premium');
+                if (premiumModal) premiumModal.setAttribute('data-theme', this.value);
+            });
+        }
+
         const saveBtn = document.getElementById('pm-btn-save-settings');
         if (saveBtn) {
             saveBtn.addEventListener('click', async function() {
@@ -735,6 +757,7 @@ window.SettingsEngine = (function() {
                         PM_DEFAULT_DRY_RUN: document.getElementById('pm-setting-default-dry-run').checked ? 1 : 0,
                         PM_GDRIVE_DEFAULT_DOWNLOAD: document.getElementById('pm-setting-gdrive-default-download') ? document.getElementById('pm-setting-gdrive-default-download').value : (settings.PM_GDRIVE_DEFAULT_DOWNLOAD || 'cloud'),
                         PM_UI_FONT: document.getElementById('pm-setting-ui-font').value,
+                        PM_UI_THEME: document.getElementById('pm-setting-ui-theme').value,
                         PM_CUSTOM_DISK_QUOTA_GB: document.getElementById('pm-setting-custom-quota').value || "0"
                     }
                 };

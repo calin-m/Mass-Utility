@@ -10,7 +10,7 @@
     }
 </style>
 
-<div class="pm-container">
+<div class="pm-container" data-theme="{$settings.PM_UI_THEME|default:'classic'}">
     <!-- Module Header -->
     <div class="pm-header">
         <div class="pm-header-row" style="display: flex; justify-content: space-between; align-items: center;">

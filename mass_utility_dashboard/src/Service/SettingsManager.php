@@ -28,6 +28,7 @@ class SettingsManager
 
     // UI & Appearance
     const PM_UI_FONT = 'PM_UI_FONT';
+    const PM_UI_THEME = 'PM_UI_THEME';
 
     // Safety & Quotas
     const PM_DEFAULT_DRY_RUN = 'PM_DEFAULT_DRY_RUN';
@@ -48,6 +49,7 @@ class SettingsManager
         self::PM_GDRIVE_DEFAULT_DOWNLOAD => "cloud",
         self::PM_DEFAULT_DRY_RUN => "1",
         self::PM_UI_FONT => "system-ui, -apple-system, sans-serif",
+        self::PM_UI_THEME => "classic",
         self::PM_CUSTOM_DISK_QUOTA_GB => "0",
     ];
 

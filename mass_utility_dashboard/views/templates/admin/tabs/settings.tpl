@@ -90,11 +90,17 @@
             <p class="pm-text-muted" style="margin-bottom: 1rem; font-size: 0.9rem;">Customize the look and feel of your workspace.</p>
             
             <label class="pm-font-semibold pm-mb-2" style="display: block; color: var(--pm-text-primary);">Base Typography</label>
-            <select id="pm-setting-ui-font" class="pm-form-control pm-mb-2" style="width: 100%;">
+            <select id="pm-setting-ui-font" class="pm-form-control pm-mb-4" style="width: 100%;">
                 <option value="system-ui, -apple-system, sans-serif">System Native (Fastest, Default)</option>
                 <option value="Inter, sans-serif">Inter (Apple-like)</option>
                 <option value="Outfit, sans-serif">Outfit (Modern, Geometric)</option>
                 <option value="Roboto, sans-serif">Roboto (Android-like)</option>
+            </select>
+
+            <label class="pm-font-semibold pm-mb-2" style="display: block; color: var(--pm-text-primary);">Dashboard UI Theme</label>
+            <select id="pm-setting-ui-theme" class="pm-form-control pm-mb-2" style="width: 100%;">
+                <option value="classic">Classic Obsidian (Default)</option>
+                <option value="tabler">Modern Tabler</option>
             </select>
         </div>
 
