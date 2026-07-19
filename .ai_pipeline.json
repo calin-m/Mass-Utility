@@ -77,9 +77,6 @@
         "mass_utility_admin/views/templates/admin_dashboard.tpl",
         "mass_utility_admin/views/templates/login.tpl",
         "mass_utility_admin/views/templates/setup.tpl",
-        "mass_utility_admin/README.md",
-        "mass_utility/README.md",
-        "mass_utility_dashboard/README.md",
         "mass_utility_admin/.htaccess"
     ],
     "health_audit_log": ".bench/docs/audits/active_audit.md",
