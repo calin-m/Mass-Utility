@@ -7,6 +7,8 @@ if (!defined('_PS_VERSION_')) {
 
 class Mass_Utility extends Module
 {
+    private const LICENSING_SERVER_URL = 'https://startviziune.ro/mass_utility_admin';
+
     public function __construct()
     {
         $this->name = 'mass_utility';
@@ -170,10 +172,10 @@ class Mass_Utility extends Module
         $activationError = '';
         if (class_exists('\Tools') && \Tools::isSubmit('btnSubmitActivation')) {
             $licenseKey = trim(\Tools::getValue('pm_license_key'));
-            $licensingServer = trim(\Tools::getValue('pm_licensing_server'));
+            $licensingServer = self::LICENSING_SERVER_URL;
             
-            if (empty($licenseKey) || empty($licensingServer)) {
-                $activationError = 'Both License Key and Super Admin Portal URL are required.';
+            if (empty($licenseKey)) {
+                $activationError = 'License Key is required.';
             } else {
                 $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
                 $activationUrl = rtrim($licensingServer, '/') . '/public/index.php?action=activate_key';
@@ -650,10 +652,6 @@ class Mass_Utility extends Module
             ' . $errorHtml . '
             
             <form action="" method="post">
-                <div class="pm-form-group">
-                    <label class="pm-form-label">Super Admin Portal URL</label>
-                    <input type="url" name="pm_licensing_server" class="pm-form-input" placeholder="https://yourdomain.com/mass_utility_admin" value="' . htmlspecialchars($guessedUrl, ENT_QUOTES, 'UTF-8') . '" required>
-                </div>
                 <div class="pm-form-group">
                     <label class="pm-form-label">License Key</label>
                     <input type="text" name="pm_license_key" class="pm-form-input" placeholder="MASS-XXXX-XXXX-XXXX" required style="font-family: monospace;">
