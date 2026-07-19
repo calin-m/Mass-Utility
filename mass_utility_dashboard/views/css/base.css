@@ -86,7 +86,7 @@
                 /* -----------------------------------------
                    DESIGN SYSTEM: Component Heights & Radius
                    ----------------------------------------- */
-                --pm-btn-height: 2.75rem; /* 44px tactile targets */
+                --pm-btn-height: 2.375rem; /* 38px compact tactile targets */
                 --pm-input-height: 2.75rem;
                 --pm-radius-sm: 8px;
                 --pm-radius-md: 12px;

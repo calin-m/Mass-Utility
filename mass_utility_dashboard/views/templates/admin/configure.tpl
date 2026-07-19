@@ -7,6 +7,7 @@
 <style>
     :root {
         --pm-font-family: 'Inter', sans-serif;
+        --pm-font-family-heading: 'Outfit', sans-serif;
     }
 </style>
 
@@ -52,7 +53,7 @@
 
         <div class="pm-tab-nav" style="justify-content: space-between; align-items: center;">
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <label for="pm-tab-governor" class="pm-tab-label">🛡️ Native Safety Governor Staging</label>
+                <label for="pm-tab-governor" class="pm-tab-label">🛡️ Safety Governor</label>
                 <label for="pm-tab-database" class="pm-tab-label">🗄️ Database Tools</label>
                 <label for="pm-tab-file-tools" class="pm-tab-label">📁 File Tools</label>
                 <label for="pm-tab-query-mutate" class="pm-tab-label">⚡ Query & Mutate</label>

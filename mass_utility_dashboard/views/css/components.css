@@ -27,7 +27,7 @@
             }
 
             .pm-title {
-                font-family: var(--pm-font-family, 'Outfit', sans-serif);
+                font-family: var(--pm-font-family-heading, 'Outfit', sans-serif);
                 font-size: 2.25rem;
                 font-weight: 800;
                 background: linear-gradient(135deg, var(--pm-primary-light) 0%, var(--pm-primary) 50%, var(--pm-primary-dark) 100%);
@@ -48,7 +48,7 @@
             }
 
             .pm-h2 {
-                font-family: var(--pm-font-family, 'Outfit', sans-serif);
+                font-family: var(--pm-font-family-heading, 'Outfit', sans-serif);
                 font-size: 1.5rem;
                 font-weight: 700;
                 color: var(--pm-text-primary);
@@ -58,7 +58,7 @@
             }
 
             .pm-h3 {
-                font-family: var(--pm-font-family, 'Outfit', sans-serif);
+                font-family: var(--pm-font-family-heading, 'Outfit', sans-serif);
                 font-size: 1.1rem;
                 font-weight: 600;
                 color: var(--pm-text-primary);
@@ -120,10 +120,11 @@
                  padding: 0.4rem 0.8rem;
                  border-radius: 8px;
                 cursor: pointer;
-                font-weight: 600;
+                font-weight: 500;
                 color: var(--pm-text-secondary);
                 transition: all 0.2s ease;
-                font-family: var(--pm-font-family, 'Outfit', sans-serif);
+                font-family: var(--pm-font-family, sans-serif);
+                font-size: 0.9rem;
                 border: 1px solid transparent;
                 position: relative;
                 z-index: 1;
@@ -491,7 +492,7 @@
             }
 
             .pm-tooltip-title {
-                font-family: var(--pm-font-family, 'Outfit', sans-serif);
+                font-family: var(--pm-font-family-heading, 'Outfit', sans-serif);
                 font-weight: 600;
                 font-size: 0.9rem;
                 color: var(--pm-card-title-color);
@@ -622,7 +623,7 @@
             }
 
             .pm-card-title {
-                font-family: var(--pm-font-family, 'Outfit', sans-serif);
+                font-family: var(--pm-font-family-heading, 'Outfit', sans-serif);
                 font-size: 1.15rem;
                 font-weight: 600;
                 margin-bottom: 1.25rem;
