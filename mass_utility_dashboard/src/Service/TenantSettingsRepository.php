@@ -48,7 +48,14 @@ class TenantSettingsRepository implements TenantSettingsRepositoryInterface
             $stmt = $pdo->prepare('SELECT `value` FROM `tenant_settings` WHERE `name` = :name');
             $stmt->execute([':name' => $key]);
             $val = $stmt->fetchColumn();
-            return $val !== false ? json_decode($val, true) : $default;
+            if ($val === false) {
+                return $default;
+            }
+            $decoded = json_decode($val, true);
+            if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+                return $val;
+            }
+            return $decoded;
         } catch (Exception $e) {
             $this->logger->log("Failed to read setting {$key} from SQLite: " . $e->getMessage(), 'ERROR');
             return $default;

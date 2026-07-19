@@ -674,15 +674,16 @@ class Mass_Utility extends Module
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             
             // Create table if missing
-            $pdo->exec("CREATE TABLE IF NOT EXISTS tenant_settings ( // nosec
+            $sqlSettings = "CREATE TABLE IF NOT EXISTS tenant_settings (
                 name VARCHAR(255) PRIMARY KEY,
                 value TEXT
-            );"); // nosec
+            );";
+            $pdo->exec($sqlSettings); // nosec
 
             // Save settings
             $stmt = $pdo->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
-            $stmt->execute(['PM_LICENSE_KEY', $licenseKey]);
-            $stmt->execute(['PM_BRIDGE_TOKEN', $secureToken]);
+            $stmt->execute(['PM_LICENSE_KEY', json_encode($licenseKey)]);
+            $stmt->execute(['PM_BRIDGE_TOKEN', json_encode($secureToken)]);
             
             // Generate token payload for local verification
             $payloadData = [
@@ -705,8 +706,8 @@ class Mass_Utility extends Module
             $signature = hash_hmac('sha256', $payloadJson, $secret);
             $token = base64_encode($payloadJson);
 
-            $stmt->execute(['PM_LICENSE_TOKEN', $token]);
-            $stmt->execute(['PM_LICENSE_SIGNATURE', $signature]);
+            $stmt->execute(['PM_LICENSE_TOKEN', json_encode($token)]);
+            $stmt->execute(['PM_LICENSE_SIGNATURE', json_encode($signature)]);
         } catch (\Throwable $e) {
             // Ignore error silently
         }
