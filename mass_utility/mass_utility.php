@@ -178,7 +178,7 @@ class Mass_Utility extends Module
                 $activationError = 'License Key is required.';
             } else {
                 $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
-                $activationUrl = rtrim($licensingServer, '/') . '/public/index.php?action=activate_key';
+                $activationUrl = rtrim($licensingServer, '/') . '/?action=activate_key';
                 
                 $ch = curl_init($activationUrl);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -188,6 +188,7 @@ class Mass_Utility extends Module
                     'store_url' => $storeUrl
                 ]));
                 curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                 $res = curl_exec($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
