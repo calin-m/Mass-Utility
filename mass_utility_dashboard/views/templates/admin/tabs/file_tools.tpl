@@ -7,9 +7,14 @@
                 <span class="pm-card-title-icon pm-bg-warning"></span>
                 File Backup System
             </div>
-            <button type="button" id="pm-btn-start-file-backup" class="pm-btn" disabled>
-                📥 Generate Site Backup
-            </button>
+            <div class="pm-flex-center pm-gap-2">
+                <button type="button" id="pm-btn-stop-file-backup" class="pm-btn pm-btn-danger" style="display: none; padding: 0.35rem 0.75rem;">
+                    🛑 Stop Backup
+                </button>
+                <button type="button" id="pm-btn-start-file-backup" class="pm-btn" disabled>
+                    📥 Generate Site Backup
+                </button>
+            </div>
         </div>
 
         <!-- BACKUP PROFILE MATRIX -->
@@ -32,9 +37,6 @@
             <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; position: relative; margin-bottom: 0.75rem;">
                 <div id="pm-file-backup-progress-bar" style="width: 0%; height: 100%; background: var(--pm-primary); border-radius: 4px; transition: width 0.2s linear;"></div>
             </div>
-            <button type="button" id="pm-btn-stop-file-backup" class="pm-btn pm-btn-danger pm-text-xs" style="padding: 0.2rem 0.6rem;">
-                🛑 Stop Backup
-            </button>
         </div>
         <p class="pm-text-sm pm-text-muted pm-m-0" style="margin-top: 1rem; line-height: 1.4;">
             Generates a streaming TAR archive of the PrestaShop filesystem based on the selected segment profile. The engine uses an asynchronous chunking algorithm to respect CloudLinux LVE limits and prevent 503 Gateway Timeouts.

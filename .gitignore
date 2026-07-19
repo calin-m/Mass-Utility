@@ -4,8 +4,6 @@
 # Whitelist allowed directories
 !/mass_utility/
 !/mass_utility_dashboard/
-!/.bench/
-!/.bench/docs/
 
 # Whitelist allowed files
 !/.cpanel.yml

@@ -39,6 +39,12 @@ class FileToolsEngine {
             const text = document.getElementById('pm-file-backup-progress-text');
             const percent = document.getElementById('pm-file-backup-progress-percent');
             
+            const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+            if (stopBtn) {
+                stopBtn.style.display = 'inline-block';
+                stopBtn.disabled = false;
+            }
+            
             container.style.display = 'block';
             bar.style.width = '0%';
             text.innerText = 'Scanning file system...';
@@ -80,6 +86,9 @@ class FileToolsEngine {
                         bar.style.width = '100%';
                         percent.innerText = '100%';
                         
+                        const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+                        if (stopBtn) stopBtn.style.display = 'none';
+                        
                         setTimeout(() => {
                             btnFileBackup.innerHTML = '📥 Generate Site Backup'; // nosec
                             btnFileBackup.disabled = false;
@@ -90,6 +99,10 @@ class FileToolsEngine {
                     } else if (d.status === 'cancelled') {
                         if (source) source.close();
                         btnFileBackup.innerHTML = '🛑 Backup Cancelled'; // nosec
+                        
+                        const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+                        if (stopBtn) stopBtn.style.display = 'none';
+                        
                         if (container) container.style.display = 'none';
                         window.showPremiumToast('Backup cancelled successfully.', 'warning');
                         setTimeout(() => {
@@ -109,17 +122,21 @@ class FileToolsEngine {
                         FetchEngine.post('poll_job_progress', { job_id: jobId })
                         .then(d => {
                             if (d.error) {
-                                throw new Error(d.error);
+                                  throw new Error(d.error);
                             }
                             const isFinished = handleStateUpdate(d);
                             if (!isFinished) {
-                                setTimeout(poll, 1500);
+                                  setTimeout(poll, 1500);
                             }
                         })
                         .catch(err => {
                             UiEngine.showAlert('Archive Engine Error', err.message);
                             btnFileBackup.innerHTML = '❌ Backup Failed'; // nosec
                             btnFileBackup.disabled = false;
+                            
+                            const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+                            if (stopBtn) stopBtn.style.display = 'none';
+                            
                             if (container) container.style.display = 'none';
                         });
                     };
@@ -150,6 +167,10 @@ class FileToolsEngine {
                                 UiEngine.showAlert('Archive Engine Error', err.message);
                                 btnFileBackup.innerHTML = '❌ Backup Failed'; // nosec
                                 btnFileBackup.disabled = false;
+                                
+                                const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+                                if (stopBtn) stopBtn.style.display = 'none';
+                                
                                 if (container) container.style.display = 'none';
                             }
                         };
@@ -244,7 +265,16 @@ class FileToolsEngine {
 
         if (!backups || backups.length === 0) {
             const emptyTbody = document.createElement('tbody');
-            emptyTbody.innerHTML = '<tr class="pm-empty-row"><td colspan="4" style="text-align: center; padding: 2rem; color: var(--pm-text-secondary); font-style: italic;">No file system archives generated yet.</td></tr>'; // nosec
+            emptyTbody.innerHTML = /* nosec */ `
+                <tr class="pm-empty-row">
+                    <td colspan="4" style="padding: 0;">
+                        <div class="pm-empty-state" style="margin: 0; border: none; border-radius: 0; background: transparent;">
+                            <div class="pm-empty-state-icon">&#128193;</div>
+                            <div class="pm-empty-state-text">No File Backups Found</div>
+                            <div class="pm-empty-state-subtext">The historical backups repository is currently empty.</div>
+                        </div>
+                    </td>
+                </tr>`; // nosec
             table.appendChild(emptyTbody);
             return;
         }

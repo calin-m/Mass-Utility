@@ -42,8 +42,7 @@ sequenceDiagram
 ### Monorepo Components
 *   **`mass_utility/` (PrestaShop Module)**: Houses the local Bridge API (`api.php`), the `QueryTranslationEngine` compiler, database backup chunk engines, Google Drive API upload clients, and safety thresholds.
 *   **`mass_utility_dashboard/` (Standalone SaaS App)**: A lightweight PHP router (`public/index.php`) and a single-page administration app powered by modern CSS variables and modular ES6 JavaScript controllers.
-*   **`.bench/`**: Local test suite sandbox, schema verification configs, and auto-generated system documentation maps.
-*   **`.orchestra/`**: Local git pre-commit pipeline hooks, syntax validators, and workspace inspectors.
+
 
 ---
 

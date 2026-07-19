@@ -1071,7 +1071,7 @@
             /* Table actions bar alignment overrides [TX-335] */
             .pm-table .pm-actions-group {
                 max-width: none !important;
-                justify-content: flex-start !important;
+                justify-content: flex-end !important;
             }
 
             /* Premium single-row table row transitions */

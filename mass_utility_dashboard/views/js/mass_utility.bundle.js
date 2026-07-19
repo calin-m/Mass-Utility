@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-19 07:52:53 UTC
+ * Generated: 2026-07-19 09:06:18 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -978,6 +978,12 @@ class FileToolsEngine {
             const text = document.getElementById('pm-file-backup-progress-text');
             const percent = document.getElementById('pm-file-backup-progress-percent');
             
+            const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+            if (stopBtn) {
+                stopBtn.style.display = 'inline-block';
+                stopBtn.disabled = false;
+            }
+            
             container.style.display = 'block';
             bar.style.width = '0%';
             text.innerText = 'Scanning file system...';
@@ -1019,6 +1025,9 @@ class FileToolsEngine {
                         bar.style.width = '100%';
                         percent.innerText = '100%';
                         
+                        const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+                        if (stopBtn) stopBtn.style.display = 'none';
+                        
                         setTimeout(() => {
                             btnFileBackup.innerHTML = '📥 Generate Site Backup'; // nosec
                             btnFileBackup.disabled = false;
@@ -1029,6 +1038,10 @@ class FileToolsEngine {
                     } else if (d.status === 'cancelled') {
                         if (source) source.close();
                         btnFileBackup.innerHTML = '🛑 Backup Cancelled'; // nosec
+                        
+                        const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+                        if (stopBtn) stopBtn.style.display = 'none';
+                        
                         if (container) container.style.display = 'none';
                         window.showPremiumToast('Backup cancelled successfully.', 'warning');
                         setTimeout(() => {
@@ -1048,17 +1061,21 @@ class FileToolsEngine {
                         FetchEngine.post('poll_job_progress', { job_id: jobId })
                         .then(d => {
                             if (d.error) {
-                                throw new Error(d.error);
+                                  throw new Error(d.error);
                             }
                             const isFinished = handleStateUpdate(d);
                             if (!isFinished) {
-                                setTimeout(poll, 1500);
+                                  setTimeout(poll, 1500);
                             }
                         })
                         .catch(err => {
                             UiEngine.showAlert('Archive Engine Error', err.message);
                             btnFileBackup.innerHTML = '❌ Backup Failed'; // nosec
                             btnFileBackup.disabled = false;
+                            
+                            const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+                            if (stopBtn) stopBtn.style.display = 'none';
+                            
                             if (container) container.style.display = 'none';
                         });
                     };
@@ -1089,6 +1106,10 @@ class FileToolsEngine {
                                 UiEngine.showAlert('Archive Engine Error', err.message);
                                 btnFileBackup.innerHTML = '❌ Backup Failed'; // nosec
                                 btnFileBackup.disabled = false;
+                                
+                                const stopBtn = document.getElementById('pm-btn-stop-file-backup');
+                                if (stopBtn) stopBtn.style.display = 'none';
+                                
                                 if (container) container.style.display = 'none';
                             }
                         };
@@ -1183,7 +1204,16 @@ class FileToolsEngine {
 
         if (!backups || backups.length === 0) {
             const emptyTbody = document.createElement('tbody');
-            emptyTbody.innerHTML = '<tr class="pm-empty-row"><td colspan="4" style="text-align: center; padding: 2rem; color: var(--pm-text-secondary); font-style: italic;">No file system archives generated yet.</td></tr>'; // nosec
+            emptyTbody.innerHTML = /* nosec */ `
+                <tr class="pm-empty-row">
+                    <td colspan="4" style="padding: 0;">
+                        <div class="pm-empty-state" style="margin: 0; border: none; border-radius: 0; background: transparent;">
+                            <div class="pm-empty-state-icon">&#128193;</div>
+                            <div class="pm-empty-state-text">No File Backups Found</div>
+                            <div class="pm-empty-state-subtext">The historical backups repository is currently empty.</div>
+                        </div>
+                    </td>
+                </tr>`; // nosec
             table.appendChild(emptyTbody);
             return;
         }
@@ -1884,130 +1914,139 @@ const DatabaseToolsEngine = (function() {
 
 
                 // J. Database Restore / Import Staging & Chunk Execution Loop
-                function pmRenderAllGrids(backups) {
-                    window.PM_CONFIG.backups = backups || [];
-                    
-                    const restoreList = document.getElementById('pm-restore-local-list');
-                    const backupsTable = document.getElementById('pm-backups-table');
-                    
-                    if (restoreList) restoreList.innerHTML = ''; // nosec
-                    if (backupsTable) {
-                        backupsTable.querySelectorAll('tbody').forEach(tb => tb.remove());
-                    }
-                    
-                    let hasBackups = false;
-
-                    if (!backups || backups.length === 0) {
-                        if (restoreList) restoreList.innerHTML = '<div style="text-align: center; color: var(--pm-text-secondary); padding: 1.5rem; border: 1px dashed var(--pm-border-color); border-radius: 8px;">No local backups discovered yet.</div>'; // nosec
-                        if (backupsTable) {
-                            const emptyTbody = document.createElement('tbody');
-                            emptyTbody.innerHTML = /* nosec */ `
-                                <tr class="pm-empty-row">
-                                    <td colspan="5" style="padding: 0;">
-                                        <div class="pm-empty-state" style="margin: 0; border: none; border-radius: 0; background: transparent;">
-                                            <div class="pm-empty-state-icon">&#128193;</div>
-                                            <div class="pm-empty-state-text">No Database Backups Found</div>
-                                            <div class="pm-empty-state-subtext">The historical backups repository is currently empty.</div>
-                                        </div>
-                                    </td>
-                                </tr>`; // nosec
-                            backupsTable.appendChild(emptyTbody);
-                        }
-                        return;
-                    }
-
-                    if (restoreList) {
-                        const legend = document.createElement('div');
-                        legend.style.display = 'flex'; legend.style.gap = '1rem'; legend.style.marginBottom = '1rem'; legend.style.fontSize = '0.75rem';
-                        legend.innerHTML = /* nosec */ `
-                             <div style="display: flex; align-items: center; gap: 0.3rem;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--pm-success);"></span><span style="color: var(--pm-text-secondary);">Local Built</span></div>
-                             <div style="display: flex; align-items: center; gap: 0.3rem;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--pm-purple);"></span><span style="color: var(--pm-text-secondary);">Uploaded</span></div>
-                        `; // nosec
-                        restoreList.appendChild(legend);
-                    }
-
-                    backups.forEach(b => {
-                        let pill = ''; 
-                        let borderColor = ''; 
-                        let bgColor = '';
-                        const isCatalog = true; // All generated backups are now catalog backups since mock data is removed
-                        const isUploaded = b.is_uploaded || b.basename.indexOf('import_tmp') > -1;
-
-                        // Unified date formatting — mirrors HydrationEngine.js rendering path
-                        let dateStr = b.date;
-                        if (typeof dateStr === 'number') {
-                            const d = new Date(dateStr * 1000);
-                            dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
-                        }
-                        dateStr = dateStr || 'Unknown Date';
-
-                        // Unified size formatting — mirrors HydrationEngine.js rendering path
-                        const size = typeof b.sql_size === 'number' ? ((b.sql_size / 1024) / 1024).toFixed(2) + ' MB' : (b.sql_size || 'Unknown Size');
-
-                        if (!b.is_local && b.is_cloud) {
-                            pill = `<span class="pm-status-pill pm-base-status-badge" style="background: rgba(var(--pm-purple-rgb), 0.1); color: var(--pm-purple); font-size: 0.65rem; padding: 0.15rem 0.4rem; letter-spacing: 0; display: inline-block;">☁️ Cloud Only</span>`;
-                            borderColor = 'var(--pm-purple)'; bgColor = 'rgba(var(--pm-purple-rgb), 0.02)';
-                        } else if (isUploaded) {
-                            pill = `<span class="pm-status-pill pm-base-status-badge" style="background: rgba(var(--pm-purple-rgb), 0.1); color: var(--pm-purple); font-size: 0.65rem; padding: 0.15rem 0.4rem; letter-spacing: 0; display: inline-block;">&#128194; Uploaded</span>`;
-                            borderColor = 'var(--pm-purple)'; bgColor = 'rgba(var(--pm-purple-rgb), 0.02)';
-                        } else {
-                            pill = `<span class="pm-status-pill success pm-base-status-badge" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; letter-spacing: 0; display: inline-block;">&#128190; Local</span>`;
-                        }
-                        
-                        const durationBadge = b.duration ? `<span style="font-size: 0.65rem; color: var(--pm-text-secondary); display: inline-flex; align-items: center; gap: 0.2rem;"><span style="font-weight:600; color:var(--pm-text-primary);">Completed In:</span> ${b.duration}</span>` : '';
-
-                        // 1. Restore Sub-tab List Entry (All types)
-                        if (restoreList) {
-                            const card = document.createElement('div');
-                            card.className = 'pm-backup-row'; card.style.gap = '0.5rem';
-                            if (borderColor) { card.style.borderLeft = '4px solid ' + borderColor; card.style.background = bgColor; }
-                            
-                            const restoreButtonHtml = b.is_local ? 
-                                `<button type="button" class="pm-btn pm-btn-sm pm-btn-restore-trigger pm-btn-danger" data-backup="${b.basename}">⚡ Restore</button>` :
-                                `<button type="button" class="pm-btn pm-btn-sm pm-btn-cloud-restore pm-btn-purple" data-backup="${b.basename}" data-type="database">☁️ Restore Local</button>`;
-
-                            card.innerHTML = /* nosec */ `
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem;">
-                                        <strong style="font-family: monospace; font-size: 0.85rem; color: var(--pm-text-primary); display: block;">${b.basename}</strong>
-                                        ${pill}
-                                    </div>
-                                    ${durationBadge ? `<div style="margin-bottom: 0.2rem;">${durationBadge}</div>` : ''}
-                                    <span style="font-size: 0.75rem; color: var(--pm-text-secondary); display: block;">
-                                        📅 ${dateStr} &nbsp;|&nbsp; &#128230; Size: ${size}
-                                    </span>
-                                </div>
-                                <div class="pm-actions-group">
-                                    ${restoreButtonHtml}
-                                    <button type="button" class="pm-btn pm-btn-sm pm-btn-delete-trigger pm-btn-neutral" data-backup="${b.basename}">🗑️ Delete</button>
-                                </div>
-                            `; // nosec
-                            restoreList.appendChild(card);
-                        }
-
-                        const trData = document.createElement('tr');
-                        trData.className = 'pm-data-row';
-                        trData.setAttribute('data-is-local', (b.is_local !== false) ? 'true' : 'false');
-                        trData.setAttribute('data-is-cloud', b.is_cloud ? 'true' : 'false');
-                        if (borderColor) { trData.style.borderLeft = '4px solid ' + borderColor; trData.style.background = bgColor; }
-
-                        const escapeHtml = (str) => {
-                            if (!str) return '';
-                            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                        };
-                        
-                        let actionsHtml = `
-                            <a href="${b.sql_download_url}" class="pm-btn pm-btn-sm" title="Download SQL">⬇️ SQL</a>
-                            ${b.log_filename ? `<a href="${b.log_download_url}" class="pm-btn pm-btn-sm pm-btn-neutral" title="Download Log">📄 Log</a>` : ''}
-                        `;
-                        if (isCatalog) {
-                            actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-compare pm-btn-purple" data-backup="${escapeHtml(b.basename)}" title="Compare Diff">🔍 Diff</button>`;
-                        }
-                        if (b.is_local !== false) {
-                            actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-delete pm-btn-danger" data-backup="${escapeHtml(b.basename)}" title="Delete Local">🗑️ Delete</button>`;
-                        } else {
-                            actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-cloud-restore pm-btn-purple" data-backup="${escapeHtml(b.basename)}" data-type="database" title="Restore Local">☁️ Restore</button>`;
-                        }
+                 function pmRenderAllGrids(backups) {
+                     window.PM_CONFIG.backups = backups || [];
+                     
+                     const escapeHtml = (str) => {
+                         if (!str) return '';
+                         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                     };
+                     
+                     const restoreList = document.getElementById('pm-restore-local-list');
+                     const backupsTable = document.getElementById('pm-backups-table');
+                     
+                     if (restoreList) restoreList.innerHTML = ''; // nosec
+                     if (backupsTable) {
+                         backupsTable.querySelectorAll('tbody').forEach(tb => tb.remove());
+                     }
+                     
+                     let hasBackups = false;
+ 
+                     if (!backups || backups.length === 0) {
+                         if (restoreList) {
+                             restoreList.innerHTML = /* nosec */ `
+                                 <tr class="pm-empty-row">
+                                     <td colspan="4" style="padding: 0;">
+                                         <div class="pm-empty-state" style="margin: 0; border: none; border-radius: 0; background: transparent;">
+                                             <div class="pm-empty-state-icon">&#128193;</div>
+                                             <div class="pm-empty-state-text">No Local Backups Found</div>
+                                             <div class="pm-empty-state-subtext">No local database backups are available to restore.</div>
+                                         </div>
+                                     </td>
+                                 </tr>`; // nosec
+                         }
+                         if (backupsTable) {
+                             const emptyTbody = document.createElement('tbody');
+                             emptyTbody.innerHTML = /* nosec */ `
+                                 <tr class="pm-empty-row">
+                                     <td colspan="5" style="padding: 0;">
+                                         <div class="pm-empty-state" style="margin: 0; border: none; border-radius: 0; background: transparent;">
+                                             <div class="pm-empty-state-icon">&#128193;</div>
+                                             <div class="pm-empty-state-text">No Database Backups Found</div>
+                                             <div class="pm-empty-state-subtext">The historical backups repository is currently empty.</div>
+                                         </div>
+                                     </td>
+                                 </tr>`; // nosec
+                             backupsTable.appendChild(emptyTbody);
+                         }
+                         return;
+                     }
+ 
+                     backups.forEach(b => {
+                         let pill = ''; 
+                         let borderColor = ''; 
+                         let bgColor = '';
+                         const isCatalog = true; // All generated backups are now catalog backups since mock data is removed
+                         const isUploaded = b.is_uploaded || b.basename.indexOf('import_tmp') > -1;
+ 
+                         // Unified date formatting — mirrors HydrationEngine.js rendering path
+                         let dateStr = b.date;
+                         if (typeof dateStr === 'number') {
+                             const d = new Date(dateStr * 1000);
+                             dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+                         }
+                         dateStr = dateStr || 'Unknown Date';
+ 
+                         // Unified size formatting — mirrors HydrationEngine.js rendering path
+                         const size = typeof b.sql_size === 'number' ? ((b.sql_size / 1024) / 1024).toFixed(2) + ' MB' : (b.sql_size || 'Unknown Size');
+ 
+                         if (!b.is_local && b.is_cloud) {
+                             pill = `<span class="pm-status-pill pm-base-status-badge" style="background: rgba(var(--pm-purple-rgb), 0.1); color: var(--pm-purple); font-size: 0.65rem; padding: 0.15rem 0.4rem; letter-spacing: 0; display: inline-block;">☁️ Cloud Only</span>`;
+                             borderColor = 'var(--pm-purple)'; bgColor = 'rgba(var(--pm-purple-rgb), 0.02)';
+                         } else if (isUploaded) {
+                             pill = `<span class="pm-status-pill pm-base-status-badge" style="background: rgba(var(--pm-purple-rgb), 0.1); color: var(--pm-purple); font-size: 0.65rem; padding: 0.15rem 0.4rem; letter-spacing: 0; display: inline-block;">&#128194; Uploaded</span>`;
+                             borderColor = 'var(--pm-purple)'; bgColor = 'rgba(var(--pm-purple-rgb), 0.02)';
+                         } else {
+                             pill = `<span class="pm-status-pill success pm-base-status-badge" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; letter-spacing: 0; display: inline-block;">&#128190; Local</span>`;
+                         }
+                         
+                         const durationBadge = b.duration ? `<span style="font-size: 0.65rem; color: var(--pm-text-secondary); display: inline-flex; align-items: center; gap: 0.2rem;"><span style="font-weight:600; color:var(--pm-text-primary);">Completed In:</span> ${b.duration}</span>` : '';
+ 
+                         // 1. Restore Sub-tab List Entry (All types as table rows)
+                         if (restoreList) {
+                             const trRestore = document.createElement('tr');
+                             trRestore.className = 'pm-data-row pm-backup-entry';
+                             if (borderColor) { trRestore.style.borderLeft = '4px solid ' + borderColor; trRestore.style.background = bgColor; }
+                             
+                             const restoreButtonHtml = b.is_local ? 
+                                 `<button type="button" class="pm-btn pm-btn-sm pm-btn-restore-trigger pm-btn-danger" data-backup="${escapeHtml(b.basename)}">⚡ Restore</button>` :
+                                 `<button type="button" class="pm-btn pm-btn-sm pm-btn-cloud-restore pm-btn-purple" data-backup="${escapeHtml(b.basename)}" data-type="database">☁️ Restore</button>`;
+ 
+                             trRestore.innerHTML = /* nosec */ `
+                                 <td style="vertical-align: middle;">
+                                     <div>
+                                         <div class="pm-flex-center pm-gap-2 pm-flex-wrap" style="justify-content: flex-start; gap: 0.5rem; display: inline-flex; vertical-align: middle;">
+                                             <span class="pm-truncated-filename" style="font-family: monospace; font-weight: 600; color: var(--pm-text-primary);" data-full-name="${escapeHtml(b.basename)}">
+                                                 ${escapeHtml(b.basename)}
+                                             </span>
+                                             <span class="pm-copy-trigger" style="cursor: pointer; font-size: 0.95rem; opacity: 0.6; transition: opacity 0.2s;" data-copy="${escapeHtml(b.basename)}" title="Copy to clipboard">📋</span>
+                                         </div>
+                                         <div class="pm-backup-badges" style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.25rem;">
+                                             ${pill}
+                                             ${durationBadge}
+                                         </div>
+                                     </div>
+                                 </td>
+                                 <td style="color: var(--pm-text-secondary); vertical-align: middle;">${size}</td>
+                                 <td style="color: var(--pm-text-secondary); vertical-align: middle;">${dateStr}</td>
+                                 <td style="vertical-align: middle; text-align: right;">
+                                     <div class="pm-actions-group" style="justify-content: flex-end; display: inline-flex; max-width: none !important;">
+                                         ${restoreButtonHtml}
+                                         <button type="button" class="pm-btn pm-btn-sm pm-btn-delete-trigger pm-btn-neutral" data-backup="${escapeHtml(b.basename)}">🗑️ Delete</button>
+                                     </div>
+                                 </td>
+                             `; // nosec
+                             restoreList.appendChild(trRestore);
+                         }
+ 
+                         const trData = document.createElement('tr');
+                         trData.className = 'pm-data-row';
+                         trData.setAttribute('data-is-local', (b.is_local !== false) ? 'true' : 'false');
+                         trData.setAttribute('data-is-cloud', b.is_cloud ? 'true' : 'false');
+                         if (borderColor) { trData.style.borderLeft = '4px solid ' + borderColor; trData.style.background = bgColor; }
+ 
+                         let actionsHtml = `
+                             <a href="${b.sql_download_url}" class="pm-btn pm-btn-sm" title="Download SQL">⬇️ SQL</a>
+                             ${b.log_filename ? `<a href="${b.log_download_url}" class="pm-btn pm-btn-sm pm-btn-neutral" title="Download Log">📄 Log</a>` : ''}
+                         `;
+                         if (isCatalog) {
+                             actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-compare pm-btn-purple" data-backup="${escapeHtml(b.basename)}" title="Compare Diff">🔍 Diff</button>`;
+                         }
+                         if (b.is_local !== false) {
+                             actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-delete pm-btn-danger" data-backup="${escapeHtml(b.basename)}" title="Delete Local">🗑️ Delete</button>`;
+                         } else {
+                             actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-cloud-restore pm-btn-purple" data-backup="${escapeHtml(b.basename)}" data-type="database" title="Restore Local">☁️ Restore</button>`;
+                         }
 
                         trData.innerHTML = /* nosec */ `
                             <td style="vertical-align: middle;">

@@ -289,33 +289,21 @@
                             </p>
                         </div>
 
-                        <div class="pm-grid pm-mb-6 pm-gap-6" style="grid-template-columns: repeat(2, 1fr);">
-                            <!-- Local Backups List -->
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <!-- External SQL Import Zone (Full Width) -->
                             <div class="pm-card">
                                 <div class="pm-card-title" style="font-size: 1rem; color: var(--pm-text-primary); border-bottom: 1px solid var(--pm-border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                                    📁 Select Local Backup
+                                    📤 Upload External SQL File
                                 </div>
-                                <div style="max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem;" id="pm-restore-local-list">
-                                    <!-- Populated dynamically by JS -->
+                                <p class="pm-text-sm pm-text-muted pm-mb-4" style="line-height: 1.4;">
+                                    Upload a standard raw <code>.sql</code> or compressed <code>.sql.gz</code> database backup file to import it into your catalog tables.
+                                </p>
+                                <div id="pm-restore-dropzone" style="border: 2px dashed var(--pm-border-color); border-radius: 12px; padding: 2rem 1rem; text-align: center; background: rgba(0,0,0,0.01); transition: all 0.3s ease; cursor: pointer; max-width: 500px; margin: 0 auto; width: 100%;">
+                                    <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📁</span>
+                                    <span class="pm-text-sm pm-font-semibold" style="color: var(--pm-text-primary);" id="pm-restore-file-name">Click or Drag SQL/GZ file here</span>
+                                    <input type="file" id="pm-restore-file-input" accept=".sql,.gz" style="display: none;">
                                 </div>
-                            </div>
-
-                            <!-- External SQL Import Zone -->
-                            <div class="pm-card" style="display: flex; flex-direction: column; justify-content: space-between;">
-                                <div>
-                                    <div class="pm-card-title" style="font-size: 1rem; color: var(--pm-text-primary); border-bottom: 1px solid var(--pm-border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                                        📤 Upload External SQL File
-                                    </div>
-                                    <p class="pm-text-sm pm-text-muted pm-mb-4" style="line-height: 1.4;">
-                                        Upload a standard raw <code>.sql</code> or compressed <code>.sql.gz</code> database backup file to import it into your catalog tables.
-                                    </p>
-                                    <div id="pm-restore-dropzone" style="border: 2px dashed var(--pm-border-color); border-radius: 12px; padding: 2rem 1rem; text-align: center; background: rgba(0,0,0,0.01); transition: all 0.3s ease; cursor: pointer;">
-                                        <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📁</span>
-                                        <span class="pm-text-sm pm-font-semibold" style="color: var(--pm-text-primary);" id="pm-restore-file-name">Click or Drag SQL/GZ file here</span>
-                                        <input type="file" id="pm-restore-file-input" accept=".sql,.gz" style="display: none;">
-                                    </div>
-                                </div>
-                                <div id="pm-upload-progress-container" style="display: none; margin-top: 1.5rem;">
+                                <div id="pm-upload-progress-container" style="display: none; margin-top: 1.5rem; max-width: 500px; margin: 1.5rem auto 0 auto; width: 100%;">
                                     <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--pm-text-secondary); margin-bottom: 0.3rem;">
                                         <span>Uploading...</span>
                                         <span id="pm-upload-percent">0%</span>
@@ -331,6 +319,43 @@
                                     <button type="button" id="pm-btn-upload-stage" class="pm-btn pm-btn-purple" disabled>
                                         📤 Upload & Stage SQL File
                                     </button>
+                                </div>
+                            </div>
+
+                            <!-- Local Backups Table List (Full Width) -->
+                            <div class="pm-card">
+                                <div class="pm-card-title pm-flex-between pm-flex-wrap pm-gap-2" style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                                    <div class="pm-flex-center pm-gap-2">
+                                        <span class="pm-card-title-icon pm-bg-primary"></span>
+                                        📁 Select Local Backup
+                                    </div>
+                                    <div style="display: flex; gap: 1rem; font-size: 0.75rem;">
+                                         <div style="display: flex; align-items: center; gap: 0.3rem;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--pm-success);"></span><span style="color: var(--pm-text-secondary);">Local</span></div>
+                                         <div style="display: flex; align-items: center; gap: 0.3rem;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--pm-purple);"></span><span style="color: var(--pm-text-secondary);">Uploaded</span></div>
+                                    </div>
+                                </div>
+                                <div class="pm-table-wrapper pm-rounded-md">
+                                    <table class="pm-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Backup Name</th>
+                                                <th>SQL File Size</th>
+                                                <th>Timestamp Created</th>
+                                                <th style="text-align: right;">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pm-restore-local-list">
+                                            <tr class="pm-empty-row">
+                                                <td colspan="4" style="padding: 0;">
+                                                    <div class="pm-empty-state" style="margin: 0; border: none; border-radius: 0; background: transparent;">
+                                                        <div class="pm-empty-state-icon" style="animation: pm-pulse 2s infinite;">&#128340;</div>
+                                                        <div class="pm-empty-state-text">Loading Local Backups...</div>
+                                                        <div class="pm-empty-state-subtext">Fetching local database backups.</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
