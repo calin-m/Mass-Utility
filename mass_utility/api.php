@@ -118,39 +118,10 @@ if (!empty($secureToken) && !empty($incomingToken)) {
 }
 
 if (!$tokenValid) {
-    // Enforce strict IP validation for security during migration
-    $allowedIps = ['127.0.0.1', '::1'];
-    $serverIp = $_SERVER['SERVER_ADDR'] ?? '';
-    if (!empty($serverIp)) {
-        $allowedIps[] = $serverIp;
-    }
-
-    // Resolve server's public domain IP to allow local loopback requests from SaaS dashboard
-    $serverHost = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
-    if (!empty($serverHost)) {
-        $hostParts = explode(':', $serverHost);
-        $resolvedIp = @gethostbyname($hostParts[0]);
-        if (!empty($resolvedIp) && $resolvedIp !== $hostParts[0]) {
-            $allowedIps[] = $resolvedIp;
-        }
-    }
-
-    // Resolve machine hostname IP
-    $machineHost = @gethostname();
-    if (!empty($machineHost)) {
-        $machineIp = @gethostbyname($machineHost);
-        if (!empty($machineIp) && $machineIp !== $machineHost) {
-            $allowedIps[] = $machineIp;
-        }
-    }
-
-    $clientIp = $_SERVER['REMOTE_ADDR'] ?? '';
-    if (!in_array($clientIp, $allowedIps, true)) {
-        header('HTTP/1.1 403 Forbidden');
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => 'Unauthorized access from ' . $clientIp]);
-        exit;
-    }
+    header('HTTP/1.1 403 Forbidden');
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'Access Denied: Invalid or missing X-Bridge-Token header.']);
+    exit;
 }
 
 // Support JSON request body parsing for forwarded SaaS requests

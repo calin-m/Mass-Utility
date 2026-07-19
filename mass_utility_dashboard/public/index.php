@@ -459,7 +459,7 @@ if (strpos($path, '/views/') === 0) {
 $isAuthorized = !empty($_SESSION['employee_id']);
 
 // If X-Bridge-Token header is provided and matches, allow API requests (from the Bridge)
-if (!$isAuthorized && isset($_SERVER['HTTP_X_BRIDGE_TOKEN']) && $_SERVER['HTTP_X_BRIDGE_TOKEN'] === $bridgeToken) {
+if (!$isAuthorized && !empty($bridgeToken) && isset($_SERVER['HTTP_X_BRIDGE_TOKEN']) && $_SERVER['HTTP_X_BRIDGE_TOKEN'] === $bridgeToken) {
     $isAuthorized = true;
 }
 
