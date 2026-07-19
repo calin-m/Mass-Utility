@@ -12,6 +12,24 @@ if (php_sapi_name() !== 'cli') {
     die("Security Error: This script can only be executed via the Command Line Interface (CLI).\n");
 }
 
+// Bootstrap PrestaShop to read configuration
+$configPath = __DIR__ . '/../../../config/config.inc.php';
+if (!file_exists($configPath)) {
+    $configPath = __DIR__ . '/../../../../config/config.inc.php';
+}
+if (file_exists($configPath)) {
+    try {
+        require_once $configPath;
+    } catch (\Throwable $e) {}
+}
+
+if (class_exists('Configuration')) {
+    $cronAuto = \Configuration::getGlobalValue('PM_BACKUP_CRON_AUTO');
+    if ($cronAuto !== false && (int)$cronAuto === 0) {
+        die("Info: Automated scheduled backups are disabled in settings. Exiting.\n");
+    }
+}
+
 $moduleDir = dirname(__DIR__);
 $psRootDir = dirname($moduleDir, 2);
 $backupDir = $moduleDir . '/backups/files/';

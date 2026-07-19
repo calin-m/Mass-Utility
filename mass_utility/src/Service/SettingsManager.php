@@ -37,6 +37,7 @@ class SettingsManager
     const PM_CUSTOM_DISK_QUOTA_GB = 'PM_CUSTOM_DISK_QUOTA_GB';
     const PM_BACKUP_MAX_COUNT = 'PM_BACKUP_MAX_COUNT';
     const PM_BACKUP_MAX_DAYS = 'PM_BACKUP_MAX_DAYS';
+    const PM_BACKUP_CRON_AUTO = 'PM_BACKUP_CRON_AUTO';
 
     // Defaults
     private static $defaults = [
@@ -57,6 +58,7 @@ class SettingsManager
         self::PM_CUSTOM_DISK_QUOTA_GB => "0",
         self::PM_BACKUP_MAX_COUNT => "0",
         self::PM_BACKUP_MAX_DAYS => "0",
+        self::PM_BACKUP_CRON_AUTO => "1",
     ];
 
     /**

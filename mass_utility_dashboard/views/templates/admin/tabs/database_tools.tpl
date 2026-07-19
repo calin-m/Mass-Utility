@@ -273,31 +273,7 @@
                             </div>
                         </div>
 
-                        <!-- Backup Retention Rules -->
-                        <div class="pm-card pm-mb-6">
-                            <div class="pm-card-title pm-flex-between pm-m-0 pm-flex-wrap" style="gap: 0.75rem;">
-                                <div class="pm-flex-center pm-gap-2">
-                                    <span class="pm-card-title-icon pm-bg-warning"></span>
-                                    🕒 Backup Retention Policies
-                                </div>
-                                <button type="button" id="pm-btn-save-retention" class="pm-btn pm-btn-success pm-text-xs" style="padding: 0.4rem 1rem;">
-                                    💾 Save Retention
-                                </button>
-                            </div>
-                            <p class="pm-text-muted" style="margin-top: 1rem; margin-bottom: 1.25rem; font-size: 0.9rem;">
-                                Automatically prune local database and file backups to keep server storage clean. Set to 0 to disable.
-                            </p>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                                <div>
-                                    <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Backups to Keep</label>
-                                    <input type="number" id="pm-setting-backup-max-count" class="pm-form-control" min="0" placeholder="5 (0 to disable)" style="width: 100%;">
-                                </div>
-                                <div>
-                                    <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Age of Backups (Days)</label>
-                                    <input type="number" id="pm-setting-backup-max-days" class="pm-form-control" min="0" placeholder="30 (0 to disable)" style="width: 100%;">
-                                </div>
-                            </div>
-                        </div>
+
 
                     </div>
 

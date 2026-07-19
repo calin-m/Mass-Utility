@@ -251,6 +251,38 @@
         </div>
     </div>
 
+    <!-- Backup Retention & Automations -->
+    <div class="pm-card pm-mb-6">
+        <div class="pm-card-title" style="margin-bottom: 0.5rem; color: var(--pm-warning);">
+            <span class="pm-card-title-icon" style="background-color: var(--pm-warning);"></span>
+            🕒 Backup Retention & Scheduled Automations
+        </div>
+        <p class="pm-text-muted" style="margin-bottom: 1.25rem; font-size: 0.9rem;">Configure automatic pruning policies and scheduled crons execution limits.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
+            <div>
+                <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Backups to Keep</label>
+                <input type="number" id="pm-setting-backup-max-count" class="pm-form-control" min="0" placeholder="5 (0 to disable)" style="width: 100%;">
+                <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Automatically prunes oldest archives once limit is reached.</p>
+            </div>
+            <div>
+                <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Age of Backups (Days)</label>
+                <input type="number" id="pm-setting-backup-max-days" class="pm-form-control" min="0" placeholder="30 (0 to disable)" style="width: 100%;">
+                <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Backups older than this will be deleted automatically.</p>
+            </div>
+        </div>
+
+        <div style="padding-top: 1.25rem; border-top: 1px solid var(--pm-border-color);">
+            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                <input type="checkbox" id="pm-setting-backup-cron-auto" style="width: 1.2rem; height: 1.2rem;">
+                <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Scheduled Background Backups (via Cron CLI)</span>
+            </label>
+            <p class="pm-text-muted" style="font-size: 0.8rem; margin-top: 0.25rem; padding-left: 2rem; margin-bottom: 0;">
+                If disabled, automated crontab execution calls of cli_backup.php will exit early. Manual backups triggered via Web GUI will remain functional.
+            </p>
+        </div>
+    </div>
+
     <!-- Save Button -->
     <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
         <button type="button" id="pm-btn-save-settings" class="pm-btn pm-btn-success" style="font-size: 1.1rem; padding: 0.75rem 2rem;">
