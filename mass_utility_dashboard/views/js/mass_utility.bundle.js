@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-19 09:06:18 UTC
+ * Generated: 2026-07-19 09:11:31 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -2422,13 +2422,13 @@ const DatabaseToolsEngine = (function() {
                     });
                     
                     dropzone.addEventListener('dragleave', () => {
-                        dropzone.style.background = 'rgba(0,0,0,0.01)';
+                        dropzone.style.background = 'var(--pm-input-bg)';
                         dropzone.style.borderColor = 'var(--pm-border-color)';
                     });
                     
                     dropzone.addEventListener('drop', (e) => {
                         e.preventDefault();
-                        dropzone.style.background = 'rgba(0,0,0,0.01)';
+                        dropzone.style.background = 'var(--pm-input-bg)';
                         dropzone.style.borderColor = 'var(--pm-border-color)';
                         
                         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -2447,7 +2447,7 @@ const DatabaseToolsEngine = (function() {
                         if (ext !== 'sql' && ext !== 'gz') {
                             alert('Invalid file format. Please select a valid .sql or .sql.gz file.');
                             selectedFile = null;
-                            fileNameSpan.textContent = 'Click or Drag SQL/GZ file here';
+                            fileNameSpan.textContent = 'Click or drag SQL/GZ file here...';
                             btnUploadStage.disabled = true;
                             return;
                         }
@@ -2471,14 +2471,14 @@ const DatabaseToolsEngine = (function() {
                             }
                             
                             btnUploadStage.disabled = false;
-                            btnUploadStage.innerHTML = '📤 Upload & Stage SQL File'; // nosec
+                            btnUploadStage.innerHTML = '📤 Upload & Stage'; // nosec
                             btnUploadCancel.style.display = 'none';
                             uploadProgressContainer.style.display = 'none';
                             uploadProgressBar.style.width = '0%';
                             uploadPercent.textContent = '0%';
                             
                             selectedFile = null;
-                            fileNameSpan.textContent = 'Click or Drag SQL/GZ file here';
+                            fileNameSpan.textContent = 'Click or drag SQL/GZ file here...';
                             btnUploadStage.disabled = true;
                             document.getElementById('pm-restore-file-input').value = '';
                         });
@@ -2525,7 +2525,7 @@ const DatabaseToolsEngine = (function() {
                                         pmRenderAllGrids(data.backups || []);
                                         
                                         selectedFile = null;
-                                        fileNameSpan.textContent = 'Click or Drag SQL/GZ file here';
+                                        fileNameSpan.textContent = 'Click or drag SQL/GZ file here...';
                                         btnUploadStage.disabled = true;
                                         document.getElementById('pm-restore-file-input').value = '';
                                     } else {

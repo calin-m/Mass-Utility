@@ -296,14 +296,30 @@
                                     📤 Upload External SQL File
                                 </div>
                                 <p class="pm-text-sm pm-text-muted pm-mb-4" style="line-height: 1.4;">
-                                    Upload a standard raw <code>.sql</code> or compressed <code>.sql.gz</code> database backup file to import it into your catalog tables.
+                                    Select or upload a standard raw <code>.sql</code> or compressed <code>.sql.gz</code> database backup file to import it into your catalog tables.
                                 </p>
-                                <div id="pm-restore-dropzone" style="border: 2px dashed var(--pm-border-color); border-radius: 12px; padding: 2rem 1rem; text-align: center; background: rgba(0,0,0,0.01); transition: all 0.3s ease; cursor: pointer; max-width: 500px; margin: 0 auto; width: 100%;">
-                                    <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📁</span>
-                                    <span class="pm-text-sm pm-font-semibold" style="color: var(--pm-text-primary);" id="pm-restore-file-name">Click or Drag SQL/GZ file here</span>
-                                    <input type="file" id="pm-restore-file-input" accept=".sql,.gz" style="display: none;">
+                                
+                                <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%; flex-wrap: wrap;">
+                                    <!-- Stylized File Selector Bar (acting as the dropzone target) -->
+                                    <div id="pm-restore-dropzone" style="display: flex; align-items: center; flex-grow: 1; min-width: 250px; background: var(--pm-input-bg); border: 1px solid var(--pm-border-color); border-radius: 8px; padding: 0.2rem 0.2rem 0.2rem 0.75rem; transition: all 0.2s ease; cursor: pointer; height: 38px; box-sizing: border-box;">
+                                        <span style="font-size: 1rem; margin-right: 0.5rem; display: flex; align-items: center;">📁</span>
+                                        <span class="pm-text-sm pm-font-medium" style="color: var(--pm-text-secondary); flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none;" id="pm-restore-file-name">Click or drag SQL/GZ file here...</span>
+                                        <button type="button" class="pm-btn pm-btn-neutral" style="padding: 0 1rem; height: 30px; line-height: 30px; font-size: 0.8rem; border-radius: 6px; pointer-events: none;">Browse</button>
+                                        <input type="file" id="pm-restore-file-input" accept=".sql,.gz" style="display: none;">
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <button type="button" id="pm-btn-upload-cancel" class="pm-btn pm-btn-neutral" style="display: none; height: 38px; padding: 0 1.25rem;">
+                                            Cancel
+                                        </button>
+                                        <button type="button" id="pm-btn-upload-stage" class="pm-btn pm-btn-purple" disabled style="height: 38px; padding: 0 1.25rem;">
+                                            📤 Upload & Stage
+                                        </button>
+                                    </div>
                                 </div>
-                                <div id="pm-upload-progress-container" style="display: none; margin-top: 1.5rem; max-width: 500px; margin: 1.5rem auto 0 auto; width: 100%;">
+
+                                <div id="pm-upload-progress-container" style="display: none; margin-top: 1rem; width: 100%;">
                                     <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--pm-text-secondary); margin-bottom: 0.3rem;">
                                         <span>Uploading...</span>
                                         <span id="pm-upload-percent">0%</span>
@@ -311,14 +327,6 @@
                                     <div style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden; border: 1px solid var(--pm-border-color);">
                                         <div id="pm-upload-progress-bar" style="width: 0%; height: 100%; background: var(--pm-purple); transition: width 0.15s ease;"></div>
                                     </div>
-                                </div>
-                                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
-                                    <button type="button" id="pm-btn-upload-cancel" class="pm-btn pm-btn-neutral" style="display: none;">
-                                        Cancel Upload
-                                    </button>
-                                    <button type="button" id="pm-btn-upload-stage" class="pm-btn pm-btn-purple" disabled>
-                                        📤 Upload & Stage SQL File
-                                    </button>
                                 </div>
                             </div>
 
