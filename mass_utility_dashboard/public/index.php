@@ -476,10 +476,49 @@ if ($isAuthorized) {
                 $stmtCheck->execute();
                 $valJson = $stmtCheck->fetchColumn();
                 $licStatus = $valJson ? json_decode($valJson, true) : 'active';
+                
                 if ($licStatus === 'suspended' || $licStatus === 'expired') {
-                    unset($_SESSION['employee_id']);
-                    $isAuthorized = false;
-                    $suspendedMessage = true;
+                    // Try to re-verify status with the central server in case it was reactivated
+                    $licServer = 'https://startviziune.ro/mass_utility_admin';
+                    $stmtServer = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSING_SERVER_URL'");
+                    $stmtServer->execute();
+                    $srvVal = $stmtServer->fetchColumn();
+                    if ($srvVal) {
+                        $licServer = json_decode($srvVal, true) ?? $licServer;
+                    }
+                    
+                    $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                    $isReactivated = false;
+                    
+                    try {
+                        $ch = curl_init(rtrim($licServer, '/') . '/?action=activate_key');
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_POST, true);
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                            'license_key' => $licenseKey,
+                            'store_url' => $storeUrl
+                        ]));
+                        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                        $res = curl_exec($ch);
+                        curl_close($ch);
+                        
+                        if ($res) {
+                            $resData = json_decode($res, true);
+                            if (!empty($resData['success'])) {
+                                $isReactivated = true;
+                                $upStmt = $pdoCheck->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
+                                $upStmt->execute(['PM_LICENSE_STATUS', json_encode('active')]);
+                                $licStatus = 'active';
+                            }
+                        }
+                    } catch (\Throwable $curlEx) {}
+                    
+                    if (!$isReactivated) {
+                        unset($_SESSION['employee_id']);
+                        $isAuthorized = false;
+                        $suspendedMessage = true;
+                    }
                 }
             }
         } catch (\Throwable $e) {}
