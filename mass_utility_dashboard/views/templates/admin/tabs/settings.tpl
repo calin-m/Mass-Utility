@@ -13,7 +13,7 @@
         </div>
 
     <!-- Activation Section -->
-    <div id="pm-pro-card" class="pm-card pm-mb-6" style="border: 2px solid var(--pm-warning);">
+    <div id="pm-pro-card" class="pm-card pm-mb-6" style="border: 1px solid var(--pm-border-color);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <div class="pm-card-title" style="margin-bottom: 0;">
                 <span id="pm-pro-icon" class="pm-card-title-icon" style="background-color: var(--pm-warning);"></span>

@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-19 12:33:40 UTC
+ * Generated: 2026-07-19 12:41:38 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -470,7 +470,7 @@ window.SettingsEngine = (function() {
         const removeBtn = document.getElementById('pm-btn-remove-license');
 
         if (proCard) {
-            proCard.style.border = isPro ? '2px solid var(--pm-success)' : '2px solid var(--pm-warning)';
+            proCard.style.border = isPro ? '1px solid var(--pm-primary)' : '1px solid var(--pm-border-color)';
         }
         if (proIcon) {
             proIcon.style.backgroundColor = isPro ? 'var(--pm-success)' : 'var(--pm-warning)';
