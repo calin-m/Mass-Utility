@@ -217,6 +217,13 @@ class Mass_Utility extends Module
             }
         }
 
+        $secureToken = '';
+        $licenseKey = '';
+        if (class_exists('\Configuration')) {
+            $secureToken = \Configuration::get('PM_SECURE_TOKEN');
+            $licenseKey = \Configuration::get('PM_LICENSE_KEY');
+        }
+
         $licenseSuspended = false;
         // Live status verification check
         if (!empty($secureToken) && !empty($licenseKey)) {
