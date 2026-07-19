@@ -45,6 +45,51 @@ $db->query("CREATE INDEX IF NOT EXISTS idx_license_key ON pm_licenses(license_ke
 $db->query("CREATE INDEX IF NOT EXISTS idx_admin_user ON pm_admins(username);");
 $db->query("CREATE INDEX IF NOT EXISTS idx_client_user ON pm_users(email);");
 
+// 4. Package Tiers Table
+$db->query("CREATE TABLE IF NOT EXISTS pm_package_tiers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(64) UNIQUE NOT NULL,
+    capabilities TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);");
+
+// Seed default tiers
+$stmtTiers = $db->query("SELECT COUNT(*) FROM pm_package_tiers");
+if ($stmtTiers->fetchColumn() == 0) {
+    $defaultTiers = [
+        'basic' => [
+            'backup_destinations' => ['local'],
+            'backup_automation' => false,
+            'rollback_history_limit' => 0,
+            'query_visual_execute' => false,
+            'governor_autopilot' => false,
+            'sweeper_execution' => false
+        ],
+        'pro' => [
+            'backup_destinations' => ['local', 'gdrive'],
+            'backup_automation' => true,
+            'rollback_history_limit' => 10,
+            'query_visual_execute' => true,
+            'governor_autopilot' => true,
+            'sweeper_execution' => true
+        ],
+        'developer' => [
+            'backup_destinations' => ['local', 'gdrive'],
+            'backup_automation' => true,
+            'rollback_history_limit' => 999,
+            'query_visual_execute' => true,
+            'governor_autopilot' => true,
+            'sweeper_execution' => true
+        ]
+    ];
+    
+    $insertTier = $db->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
+    foreach ($defaultTiers as $name => $caps) {
+        $insertTier->execute([$name, json_encode($caps)]);
+    }
+}
+
 // Inject default admin seed (password: admin123) if none exist
 $stmt = $db->query("SELECT COUNT(*) FROM pm_admins");
 if ($stmt->fetchColumn() == 0) {

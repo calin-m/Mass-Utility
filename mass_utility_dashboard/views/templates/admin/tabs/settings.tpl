@@ -14,24 +14,35 @@
 
     <!-- Activation Section -->
     <div id="pm-pro-card" class="pm-card pm-mb-6" style="border: 1px solid var(--pm-border-color);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <div class="pm-card-title" style="margin-bottom: 0;">
-                <span id="pm-pro-icon" class="pm-card-title-icon" style="background-color: var(--pm-warning);"></span>
-                ⭐️ Mass Utility Pro Activation
+                <span id="pm-pro-icon" class="pm-card-title-icon" style="background-color: var(--pm-success);"></span>
+                ⭐️ License Subscription Details
             </div>
-            <div id="pm-pro-badge-active" style="display: none; padding: 0.4rem 0.8rem; background: rgba(16, 185, 129, 0.1); color: var(--pm-success); font-weight: 700; border-radius: 8px; font-size: 0.85rem;">
-                ✅ Active License
-            </div>
-            <div id="pm-pro-badge-free" style="display: block; padding: 0.4rem 0.8rem; background: rgba(245, 158, 11, 0.1); color: var(--pm-warning); font-weight: 700; border-radius: 8px; font-size: 0.85rem;">
-                🔒 Free Version
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <div id="pm-pro-badge-active" style="display: flex; padding: 0.4rem 0.8rem; background: rgba(16, 185, 129, 0.1); color: var(--pm-success); font-weight: 700; border-radius: 8px; font-size: 0.85rem;">
+                    Active License
+                </div>
             </div>
         </div>
-        <p class="pm-text-muted" style="margin-bottom: 1.5rem;">Enter your Pro license key to unlock the Mass Query Engine, File Backup Tools, and Automated Maintenance Sweepers.</p>
         
-        <div style="display: flex; gap: 1rem; align-items: center;">
-            <input type="text" id="pm-pro-license-key" placeholder="Enter license key (e.g. 3010)" style="flex: 1; padding: 0.75rem; border: 1px solid var(--pm-border-color); border-radius: 8px; background: var(--pm-input-bg); color: var(--pm-text-primary); font-family: monospace; font-size: 1.1rem;">
-            <button type="button" class="pm-btn" id="pm-btn-activate-pro" style="background-color: var(--pm-warning); color: var(--pm-white); padding: 0.75rem 2rem; font-weight: bold;">Unlock Now</button>
-            <button type="button" class="pm-btn" id="pm-btn-remove-license" style="display: none; background-color: var(--pm-danger); color: var(--pm-white); padding: 0.75rem 2rem; font-weight: bold;">Remove License</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; border-top: 1px solid var(--pm-border-color); padding-top: 1.25rem;">
+            <!-- Key Info -->
+            <div>
+                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-secondary);">License Subscription Key</label>
+                <div id="pm-license-display-key" style="font-family: monospace; font-size: 1.1rem; font-weight: 700; color: var(--pm-warning); padding: 0.5rem 0;">MASS-••••-••••-••••</div>
+                
+                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-secondary); margin-top: 1rem;">Subscription Package Tier</label>
+                <div id="pm-license-display-tier" style="font-size: 1rem; font-weight: 700; color: var(--pm-primary); padding: 0.25rem 0; text-transform: uppercase;">PRO TIER</div>
+            </div>
+
+            <!-- Features Checklist -->
+            <div style="border-left: 1px solid var(--pm-border-color); padding-left: 1.5rem;">
+                <label class="pm-font-semibold pm-text-xs pm-mb-2" style="display: block; color: var(--pm-text-secondary);">Active Feature Capabilities</label>
+                <ul id="pm-license-features-checklist" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem; color: var(--pm-text-primary);">
+                    <!-- Populated dynamically via JS -->
+                </ul>
+            </div>
         </div>
     </div>
 

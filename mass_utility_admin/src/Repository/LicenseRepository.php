@@ -79,20 +79,75 @@ class LicenseRepository
             return ['valid' => false, 'message' => 'License is registered to a different store domain.'];
         }
 
-        // Tier Feature Bitmaps
-        $features = [
-            'PM_ENABLE_FILE_TOOLS' => ($lic['package_tier'] === 'pro' || $lic['package_tier'] === 'developer') ? 1 : 0,
-            'PM_ENABLE_DB_TOOLS' => 1,
-            'PM_ENABLE_QUERY_WIZARD' => ($lic['package_tier'] === 'developer') ? 1 : 0,
-            'PM_ENABLE_GHOST_PURGER' => ($lic['package_tier'] === 'pro' || $lic['package_tier'] === 'developer') ? 1 : 0,
-            'PM_GDRIVE_SYNC' => ($lic['package_tier'] === 'pro' || $lic['package_tier'] === 'developer') ? 1 : 0,
-            'PM_RETENTION_RULE' => ($lic['package_tier'] === 'pro' || $lic['package_tier'] === 'developer') ? 1 : 0
-        ];
+        // Fetch custom tier capabilities dynamically
+        $features = null;
+        try {
+            $stmtTier = $this->db->prepare("SELECT capabilities FROM pm_package_tiers WHERE name = ?");
+            $stmtTier->execute([$lic['package_tier']]);
+            $capsJson = $stmtTier->fetchColumn();
+            if ($capsJson) {
+                $caps = json_decode($capsJson, true);
+                if (is_array($caps)) {
+                    // Map capabilities to features array
+                    $features = [
+                        'PM_ENABLE_FILE_TOOLS' => 1,
+                        'PM_ENABLE_DB_TOOLS' => 1,
+                        'PM_ENABLE_QUERY_WIZARD' => 1,
+                        'PM_ENABLE_GHOST_PURGER' => 1,
+                        'PM_ENABLE_HISTORY' => 1,
+                        'PM_ENABLE_GDPR_SWEEPER' => 1,
+                        'capabilities' => $caps
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        // Fallback default features if dynamic fetch failed
+        if (!$features) {
+            $isDeveloper = ($lic['package_tier'] === 'developer');
+            $isPro = ($lic['package_tier'] === 'pro' || $isDeveloper);
+            $features = [
+                'PM_ENABLE_FILE_TOOLS' => 1,
+                'PM_ENABLE_DB_TOOLS' => 1,
+                'PM_ENABLE_QUERY_WIZARD' => 1,
+                'PM_ENABLE_GHOST_PURGER' => 1,
+                'PM_ENABLE_HISTORY' => 1,
+                'PM_ENABLE_GDPR_SWEEPER' => 1,
+                'capabilities' => [
+                    'backup_destinations' => $isPro ? ['local', 'gdrive'] : ['local'],
+                    'backup_automation' => $isPro,
+                    'rollback_history_limit' => $isDeveloper ? 999 : ($isPro ? 10 : 0),
+                    'query_visual_execute' => $isPro,
+                    'governor_autopilot' => $isPro,
+                    'sweeper_execution' => $isPro
+                ]
+            ];
+        }
 
         return [
             'valid' => true,
             'tier' => $lic['package_tier'],
             'features' => $features
         ];
+    }
+
+    public function getAllTiers(): array
+    {
+        $stmt = $this->db->query("SELECT * FROM pm_package_tiers ORDER BY name ASC");
+        $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($res) ? $res : [];
+    }
+
+    public function saveTier(string $name, array $capabilities): bool
+    {
+        $stmt = $this->db->prepare("INSERT INTO pm_package_tiers (name, capabilities, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(name) DO UPDATE SET capabilities = excluded.capabilities, updated_at = CURRENT_TIMESTAMP");
+        return $stmt->execute([$name, json_encode($capabilities)]);
+    }
+
+    public function deleteTier(int $id): bool
+    {
+        $stmt = $this->db->prepare("DELETE FROM pm_package_tiers WHERE id = ?");
+        return $stmt->execute([$id]);
     }
 }

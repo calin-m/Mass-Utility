@@ -100,6 +100,14 @@ class DataSweeperEngine {
         if (!btnExecute) return;
 
         btnExecute.addEventListener('click', () => {
+            if (window.PM_CAPABILITIES && window.PM_CAPABILITIES.sweeper_execution === false) {
+                UiEngine.showAlert(
+                    'Pro Feature Locked', 
+                    'Executing bulk database purges and image cleaning sweeps requires a Pro or Developer subscription package.<br><br><strong>Note:</strong> You can still run the Pre-Flight Scan to audit database and image overhead details.'
+                );
+                return;
+            }
+
             const statsEnabled = document.getElementById('pm-sweeper-check-stats').checked;
             const cartsEnabled = document.getElementById('pm-sweeper-check-carts').checked;
             const imagesEnabled = document.getElementById('pm-sweeper-check-images').checked;

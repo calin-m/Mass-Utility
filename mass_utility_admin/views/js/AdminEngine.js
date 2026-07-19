@@ -123,6 +123,41 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(result.error || 'Failed to update license.');
         }
     });
+
+    document.getElementById('pm-tier-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('pm-tier-name').value.trim().toLowerCase();
+        const caps = {
+            query_visual_execute: document.getElementById('pm-cap-visual-execute').checked,
+            backup_destinations: document.getElementById('pm-cap-gdrive').checked ? ['local', 'gdrive'] : ['local'],
+            backup_automation: document.getElementById('pm-cap-automation').checked,
+            rollback_history_limit: parseInt(document.getElementById('pm-cap-rollback-limit').value || '0'),
+            governor_autopilot: document.getElementById('pm-cap-autopilot').checked,
+            sweeper_execution: document.getElementById('pm-cap-sweeper').checked
+        };
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('capabilities', JSON.stringify(caps));
+
+        const response = await fetch('index.php?action=api_save_tier', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) {
+            alert('Package tier saved successfully!');
+            document.getElementById('pm-tier-name').value = '';
+            document.getElementById('pm-cap-visual-execute').checked = false;
+            document.getElementById('pm-cap-gdrive').checked = false;
+            document.getElementById('pm-cap-automation').checked = false;
+            document.getElementById('pm-cap-sweeper').checked = false;
+            document.getElementById('pm-cap-autopilot').checked = false;
+            document.getElementById('pm-cap-rollback-limit').value = '';
+            renderTiers(result.tiers);
+            updateTiersDropdowns(result.tiers);
+            loadData();
+        } else {
+            alert(result.error || 'Failed to save package tier.');
+        }
+    });
 });
 
 async function loadData() {
@@ -132,6 +167,8 @@ async function loadData() {
         if (result.success) {
             renderLicenses(result.licenses);
             updateUsersDropdown(result.users);
+            renderTiers(result.tiers || []);
+            updateTiersDropdowns(result.tiers || []);
         } else {
             if (result.error && result.error.includes('Unauthenticated')) {
                 window.location.href = 'index.php';
@@ -151,6 +188,27 @@ function updateUsersDropdown(users) {
         option.value = u.id;
         option.textContent = `${u.email} (${u.company_name || 'No Company'})`;
         select.appendChild(option);
+    });
+}
+
+function updateTiersDropdowns(tiers) {
+    const newTierSelect = document.getElementById('pm-new-tier');
+    const editTierSelect = document.getElementById('pm-edit-tier');
+    if (!newTierSelect || !editTierSelect) return;
+    
+    newTierSelect.innerHTML = ''; // nosec
+    editTierSelect.innerHTML = ''; // nosec
+    
+    tiers.forEach(t => {
+        const opt1 = document.createElement('option');
+        opt1.value = t.name;
+        opt1.textContent = t.name.toUpperCase();
+        newTierSelect.appendChild(opt1);
+        
+        const opt2 = document.createElement('option');
+        opt2.value = t.name;
+        opt2.textContent = t.name.toUpperCase();
+        editTierSelect.appendChild(opt2);
     });
 }
 
@@ -194,6 +252,77 @@ function renderLicenses(licenses) {
         list.appendChild(tr);
     });
 }
+
+function renderTiers(tiers) {
+    const list = document.getElementById('pm-tiers-list');
+    if (!list) return;
+    list.innerHTML = ''; // nosec
+    
+    tiers.forEach(t => {
+        let caps = {};
+        try {
+            caps = JSON.parse(t.capabilities);
+        } catch(e) {}
+        
+        const tr = document.createElement('tr');
+        const capabilitiesStr = `
+            Visual Execute: <strong>${caps.query_visual_execute ? 'YES' : 'NO'}</strong> | 
+            Destinations: <strong>${(caps.backup_destinations || []).join(', ')}</strong> | 
+            Auto Crons: <strong>${caps.backup_automation ? 'YES' : 'NO'}</strong> | 
+            Safety Auto-Pilot: <strong>${caps.governor_autopilot ? 'YES' : 'NO'}</strong> | 
+            Sweeper Exec: <strong>${caps.sweeper_execution ? 'YES' : 'NO'}</strong> | 
+            Rollbacks: <strong>${caps.rollback_history_limit}</strong>
+        `;
+        
+        tr.innerHTML = /* nosec */ `
+            <td style="font-weight: bold; color: var(--pm-primary);">${escapeHtml(t.name.toUpperCase())}</td>
+            <td style="font-size: 0.85rem; color: var(--pm-text-secondary); line-height: 1.4;">${capabilitiesStr}</td>
+            <td>
+                <button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="loadTierToForm('${escapeHtml(t.name)}', '${escapeHtml(t.capabilities)}')">✏️ Edit</button>
+                <button class="pm-btn pm-btn-sm pm-btn-danger" style="margin-left: 0.5rem;" onclick="deleteTier(${t.id})">🗑️ Delete</button>
+            </td>
+        `;
+        list.appendChild(tr);
+    });
+}
+
+window.loadTierToForm = function(name, capabilitiesStr) {
+    let caps = {};
+    try {
+        caps = JSON.parse(capabilitiesStr);
+    } catch(e) {}
+    
+    document.getElementById('pm-tier-name').value = name;
+    document.getElementById('pm-cap-visual-execute').checked = !!caps.query_visual_execute;
+    document.getElementById('pm-cap-gdrive').checked = !!(caps.backup_destinations && caps.backup_destinations.includes('gdrive'));
+    document.getElementById('pm-cap-automation').checked = !!caps.backup_automation;
+    document.getElementById('pm-cap-sweeper').checked = !!caps.sweeper_execution;
+    document.getElementById('pm-cap-autopilot').checked = !!caps.governor_autopilot;
+    document.getElementById('pm-cap-rollback-limit').value = caps.rollback_history_limit ?? '0';
+    
+    document.getElementById('pm-tier-name').focus();
+};
+
+window.deleteTier = async function(id) {
+    if (!confirm('Are you sure you want to delete this package tier? Licenses using this tier will fallback to default Basic limits.')) {
+        return;
+    }
+    const formData = new FormData();
+    formData.append('id', id);
+    try {
+        const response = await fetch('index.php?action=api_delete_tier', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) {
+            renderTiers(result.tiers);
+            updateTiersDropdowns(result.tiers);
+            loadData();
+        } else {
+            alert(result.error || 'Failed to delete tier.');
+        }
+    } catch (err) {
+        console.error('Failed to delete tier', err);
+    }
+};
 
 window.toggleStatus = async function(id, newStatus, currentTier, currentExpiry, currentDomain) {
     const formData = new FormData();

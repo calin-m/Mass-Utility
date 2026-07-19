@@ -29,7 +29,47 @@ class AdminApiController
     {
         $licenses = $this->repo->getAllLicenses();
         $users = $this->repo->getAllUsers();
-        echo json_encode(['success' => true, 'licenses' => $licenses, 'users' => $users]);
+        $tiers = $this->repo->getAllTiers();
+        echo json_encode(['success' => true, 'licenses' => $licenses, 'users' => $users, 'tiers' => $tiers]);
+    }
+
+    private function save_tier(): void
+    {
+        $name = trim($_POST['name'] ?? '');
+        $capsJson = $_POST['capabilities'] ?? '';
+        if (empty($name)) {
+            echo json_encode(['success' => false, 'error' => 'Package tier name is required.']);
+            return;
+        }
+
+        $caps = json_decode($capsJson, true);
+        if (!is_array($caps)) {
+            echo json_encode(['success' => false, 'error' => 'Invalid capabilities payload.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->saveTier($name, $caps);
+            echo json_encode(['success' => $success, 'tiers' => $this->repo->getAllTiers()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function delete_tier(): void
+    {
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Invalid package tier ID.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->deleteTier($id);
+            echo json_encode(['success' => $success, 'tiers' => $this->repo->getAllTiers()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
     }
 
     private function create_user(): void

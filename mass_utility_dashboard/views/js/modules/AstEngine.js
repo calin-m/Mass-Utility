@@ -686,6 +686,15 @@ const AstEngine = (function() {
 
                 if (btnExecuteMutations) {
                     btnExecuteMutations.addEventListener('click', function() {
+                        if (window.PM_CAPABILITIES && window.PM_CAPABILITIES.query_visual_execute === false) {
+                            showPremiumAlert(
+                                'Pro Feature Locked', 
+                                'Visual execution of query wizard mutations requires a Pro or Developer subscription package.<br><br><strong>Note:</strong> You can still write and run your mutations as raw SQL statements inside the database terminal tab.', 
+                                'warning'
+                            );
+                            return;
+                        }
+
                         if (!window.lastCompiledAst) {
                             showPremiumAlert('Out of Sync', 'Target scope is out of sync. Please preview your query on the Query Builder tab first.', 'warning');
                             return;

@@ -16,60 +16,121 @@ window.SettingsEngine = (function() {
             window.PM_CONFIG.settings = settings;
         }
 
-        // Dynamically compute and cache Pro license state
-        const isPro = !!(settings.PM_LICENSE_KEY && settings.PM_LICENSE_KEY.trim() !== '');
-        window.pmIsPro = isPro;
+        // Dynamically compute capabilities from the signed license token
+        let capabilities = {
+            backup_destinations: ['local'],
+            backup_automation: false,
+            rollback_history_limit: 0,
+            query_visual_execute: false,
+            governor_autopilot: false,
+            sweeper_execution: false
+        };
+        let tierName = 'free';
 
-        // Hydrate license activation visual interface elements
-        const proCard = document.getElementById('pm-pro-card');
-        const proIcon = document.getElementById('pm-pro-icon');
-        const proBadgeActive = document.getElementById('pm-pro-badge-active');
-        const proBadgeFree = document.getElementById('pm-pro-badge-free');
-        const proInput = document.getElementById('pm-pro-license-key');
-        const proBtn = document.getElementById('pm-btn-activate-pro');
-        const removeBtn = document.getElementById('pm-btn-remove-license');
-
-        if (proCard) {
-            proCard.style.border = isPro ? '1px solid var(--pm-primary)' : '1px solid var(--pm-border-color)';
-        }
-        if (proIcon) {
-            proIcon.style.backgroundColor = isPro ? 'var(--pm-success)' : 'var(--pm-warning)';
-        }
-        if (proBadgeActive) {
-            proBadgeActive.style.display = isPro ? 'block' : 'none';
-        }
-        if (proBadgeFree) {
-            proBadgeFree.style.display = isPro ? 'none' : 'block';
-        }
-        if (proInput) {
-            proInput.value = settings.PM_LICENSE_KEY || '';
-            proInput.disabled = isPro;
-            proInput.style.opacity = isPro ? '0.6' : '1';
-            proInput.style.cursor = isPro ? 'not-allowed' : 'text';
-        }
-        if (proBtn) {
-            proBtn.innerText = isPro ? 'Update License' : 'Unlock Now';
-        }
-        if (removeBtn) {
-            removeBtn.style.display = isPro ? 'inline-flex' : 'none';
+        if (settings.PM_LICENSE_TOKEN) {
+            try {
+                const payloadStr = atob(settings.PM_LICENSE_TOKEN);
+                const payload = JSON.parse(payloadStr);
+                tierName = payload.tier || 'basic';
+                if (payload.features && payload.features.capabilities) {
+                    capabilities = payload.features.capabilities;
+                } else {
+                    // Safe fallback mappings based on tier name
+                    const isDeveloper = (tierName === 'developer');
+                    const isPro = (tierName === 'pro' || isDeveloper);
+                    capabilities = {
+                        backup_destinations: isPro ? ['local', 'gdrive'] : ['local'],
+                        backup_automation: isPro,
+                        rollback_history_limit: isDeveloper ? 999 : (isPro ? 10 : 0),
+                        query_visual_execute: isPro,
+                        governor_autopilot: isPro,
+                        sweeper_execution: isPro
+                    };
+                }
+            } catch (e) {
+                console.error('Failed to decode dynamic license token signature.', e);
+            }
         }
 
-        // Engine Tuning
+        // Cache capabilities globally
+        window.PM_CAPABILITIES = capabilities;
+        window.PM_TIER_NAME = tierName;
+        window.pmIsPro = true; // Dashboard is running in active authenticated state
+
+        // Hydrate license subscription visual card
+        const keyDisplay = document.getElementById('pm-license-display-key');
+        const tierDisplay = document.getElementById('pm-license-display-tier');
+        const featuresChecklist = document.getElementById('pm-license-features-checklist');
+
+        if (keyDisplay) {
+            const rawKey = settings.PM_LICENSE_KEY || 'None';
+            if (rawKey !== 'None' && rawKey.length > 10) {
+                keyDisplay.textContent = rawKey.substring(0, 9) + '-••••-••••-••••';
+            } else {
+                keyDisplay.textContent = rawKey;
+            }
+        }
+        if (tierDisplay) {
+            tierDisplay.textContent = `${tierName} TIER`;
+        }
+        if (featuresChecklist) {
+            featuresChecklist.innerHTML = ''; // nosec
+            const items = [
+                { label: 'Raw SQL Execution (Terminal)', active: true },
+                { label: 'Local Backups (Manual)', active: true },
+                { label: 'Visual Query Builder (AST Editor)', active: !!capabilities.query_visual_execute },
+                { label: 'Offsite Cloud Backup (Google Drive)', active: !!(capabilities.backup_destinations && capabilities.backup_destinations.includes('gdrive')) },
+                { label: 'Scheduled Backups (Cron CLI)', active: !!capabilities.backup_automation },
+                { label: 'Safety Auto-Pilot Performance Tuning', active: !!capabilities.governor_autopilot },
+                { label: 'Undo Rollback Mutations', active: !!(capabilities.rollback_history_limit > 0) },
+                { label: 'Data & Image Sweeper Execution', active: !!capabilities.sweeper_execution }
+            ];
+
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.style.display = 'flex';
+                li.style.alignItems = 'center';
+                li.style.gap = '0.5rem';
+                
+                const dot = document.createElement('span');
+                dot.style.display = 'inline-block';
+                dot.style.width = '8px';
+                dot.style.height = '8px';
+                dot.style.borderRadius = '50%';
+                dot.style.backgroundColor = item.active ? 'var(--pm-success)' : '#64748b';
+                
+                li.appendChild(dot);
+                
+                const text = document.createElement('span');
+                text.textContent = item.label;
+                if (!item.active) {
+                    text.style.color = '#64748b';
+                    text.innerHTML += ' <span style="font-size: 0.7rem; background: #334155; color: #cbd5e1; padding: 1px 4px; border-radius: 4px; font-weight: bold; margin-left: 5px;">PRO LOCK</span>';
+                }
+                li.appendChild(text);
+                
+                featuresChecklist.appendChild(li);
+            });
+        }
+
+        // Lock/unlock Auto-Pilot slider based on capabilities
         const autoRadio = document.querySelector('input[name="pm_governor_mode"][value="auto"]');
         const manualRadio = document.querySelector('input[name="pm_governor_mode"][value="manual"]');
         const autoLabel = document.getElementById('pm-lbl-gov-auto');
         
         if (autoLabel) {
-            if (!isPro) {
+            if (!capabilities.governor_autopilot) {
                 autoLabel.classList.add('pm-pro-locked');
+                autoLabel.style.opacity = '0.5';
+                autoLabel.style.cursor = 'not-allowed';
             } else {
                 autoLabel.classList.remove('pm-pro-locked');
+                autoLabel.style.opacity = '1';
+                autoLabel.style.cursor = 'pointer';
             }
         }
 
-        const isFree = !isPro;
-        const govMode = isFree ? 'manual' : (settings.PM_GOVERNOR_MODE || 'auto');
-        
+        const govMode = !capabilities.governor_autopilot ? 'manual' : (settings.PM_GOVERNOR_MODE || 'auto');
         if (autoRadio && manualRadio) {
             if (govMode === 'manual') manualRadio.checked = true;
             else autoRadio.checked = true;
@@ -88,31 +149,78 @@ window.SettingsEngine = (function() {
             document.getElementById('pm-setting-db-chunk').value = settings.PM_DB_CHUNK_ROWS || '5000';
         }
 
-        // Configure Modularity checkbox disabled and styling properties
-        const queryWizardInput = document.getElementById('pm-setting-enable-query-wizard');
-        const queryWizardLabel = document.getElementById('pm-lbl-enable-query-wizard');
-        if (queryWizardInput) {
-            queryWizardInput.disabled = !isPro;
-            if (queryWizardLabel) {
-                queryWizardLabel.style.opacity = isPro ? '1' : '0.6';
+        // Lock / Unlock retention inputs based on history capabilities limit
+        const retentionInputs = [
+            'pm-setting-backup-max-count',
+            'pm-setting-backup-max-days',
+            'pm-setting-backup-cloud-max-count',
+            'pm-setting-backup-cloud-max-days'
+        ];
+        retentionInputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                if (capabilities.rollback_history_limit === 0) {
+                    input.disabled = true;
+                    input.style.opacity = '0.5';
+                    input.style.cursor = 'not-allowed';
+                    input.value = '0';
+                } else {
+                    input.disabled = false;
+                    input.style.opacity = '1';
+                    input.style.cursor = 'text';
+                }
+            }
+        });
+
+        if (document.getElementById('pm-setting-backup-max-count') && !document.getElementById('pm-setting-backup-max-count').disabled) {
+            document.getElementById('pm-setting-backup-max-count').value = settings.PM_BACKUP_MAX_COUNT || "0";
+        }
+        if (document.getElementById('pm-setting-backup-max-days') && !document.getElementById('pm-setting-backup-max-days').disabled) {
+            document.getElementById('pm-setting-backup-max-days').value = settings.PM_BACKUP_MAX_DAYS || "0";
+        }
+        if (document.getElementById('pm-setting-backup-cloud-max-count') && !document.getElementById('pm-setting-backup-cloud-max-count').disabled) {
+            document.getElementById('pm-setting-backup-cloud-max-count').value = settings.PM_BACKUP_CLOUD_MAX_COUNT || "0";
+        }
+        if (document.getElementById('pm-setting-backup-cloud-max-days') && !document.getElementById('pm-setting-backup-cloud-max-days').disabled) {
+            document.getElementById('pm-setting-backup-cloud-max-days').value = settings.PM_BACKUP_CLOUD_MAX_DAYS || "0";
+        }
+
+        if (document.getElementById('pm-setting-backup-frequency')) {
+            document.getElementById('pm-setting-backup-frequency').value = settings.PM_BACKUP_FREQUENCY || "0";
+        }
+
+        // Lock / Unlock Cron check box based on capabilities
+        const cronAutoCheckbox = document.getElementById('pm-setting-backup-cron-auto');
+        if (cronAutoCheckbox) {
+            if (!capabilities.backup_automation) {
+                cronAutoCheckbox.checked = false;
+                cronAutoCheckbox.disabled = true;
+                cronAutoCheckbox.parentElement.style.opacity = '0.5';
+                cronAutoCheckbox.parentElement.style.cursor = 'not-allowed';
+            } else {
+                cronAutoCheckbox.disabled = false;
+                cronAutoCheckbox.parentElement.style.opacity = '1';
+                cronAutoCheckbox.parentElement.style.cursor = 'pointer';
+                cronAutoCheckbox.checked = parseInt(settings.PM_BACKUP_CRON_AUTO ?? 1) === 1;
             }
         }
 
-        const historyInput = document.getElementById('pm-setting-enable-history');
-        const historyLabel = document.getElementById('pm-lbl-enable-history');
-        if (historyInput) {
-            historyInput.disabled = !isPro;
-            if (historyLabel) {
-                historyLabel.style.opacity = isPro ? '1' : '0.6';
-            }
-        }
-
-        const fileToolsInput = document.getElementById('pm-setting-enable-file-tools');
-        const fileToolsLabel = document.getElementById('pm-lbl-enable-file-tools');
-        if (fileToolsInput) {
-            fileToolsInput.disabled = !isPro;
-            if (fileToolsLabel) {
-                fileToolsLabel.style.opacity = isPro ? '1' : '0.6';
+        // Lock / Unlock Google Drive panel based on capabilities
+        const gdriveCard = document.getElementById('pm-gdrive-card');
+        if (gdriveCard) {
+            const cloudEnabled = capabilities.backup_destinations && capabilities.backup_destinations.includes('gdrive');
+            const gdriveBadge = document.getElementById('pm-gdrive-badge');
+            if (!cloudEnabled) {
+                gdriveCard.style.opacity = '0.5';
+                gdriveCard.style.pointerEvents = 'none';
+                if (gdriveBadge) {
+                    gdriveBadge.textContent = '🔒 Locked';
+                    gdriveBadge.style.backgroundColor = '#475569';
+                    gdriveBadge.style.color = '#e2e8f0';
+                }
+            } else {
+                gdriveCard.style.opacity = '1';
+                gdriveCard.style.pointerEvents = 'auto';
             }
         }
 
@@ -157,26 +265,7 @@ window.SettingsEngine = (function() {
         if (document.getElementById('pm-setting-custom-quota')) {
             document.getElementById('pm-setting-custom-quota').value = settings.PM_CUSTOM_DISK_QUOTA_GB || "0";
         }
-        if (document.getElementById('pm-setting-backup-max-count')) {
-            document.getElementById('pm-setting-backup-max-count').value = settings.PM_BACKUP_MAX_COUNT || "0";
-        }
-        if (document.getElementById('pm-setting-backup-max-days')) {
-            document.getElementById('pm-setting-backup-max-days').value = settings.PM_BACKUP_MAX_DAYS || "0";
-        }
-        if (document.getElementById('pm-setting-backup-cloud-max-count')) {
-            document.getElementById('pm-setting-backup-cloud-max-count').value = settings.PM_BACKUP_CLOUD_MAX_COUNT || "0";
-        }
-        if (document.getElementById('pm-setting-backup-cloud-max-days')) {
-            document.getElementById('pm-setting-backup-cloud-max-days').value = settings.PM_BACKUP_CLOUD_MAX_DAYS || "0";
-        }
-        if (document.getElementById('pm-setting-backup-frequency')) {
-            document.getElementById('pm-setting-backup-frequency').value = settings.PM_BACKUP_FREQUENCY || "0";
-        }
-        if (document.getElementById('pm-setting-backup-cron-auto')) {
-            document.getElementById('pm-setting-backup-cron-auto').checked = parseInt(settings.PM_BACKUP_CRON_AUTO ?? 1) === 1;
-        }
 
-        const cronAutoCheckbox = document.getElementById('pm-setting-backup-cron-auto');
         const frequencySelect = document.getElementById('pm-setting-backup-frequency');
         if (cronAutoCheckbox && frequencySelect) {
             frequencySelect.disabled = !cronAutoCheckbox.checked;
@@ -201,7 +290,7 @@ window.SettingsEngine = (function() {
             premiumModal.setAttribute('data-theme', settings.PM_UI_THEME || "classic");
         }
 
-        // Toggle tabs visibility based on settings
+        // Toggle tabs visibility dynamically (keep visible if enabled)
         const fileTab = document.querySelector('label[for="pm-tab-file-tools"]');
         if (fileTab) {
             fileTab.style.display = parseInt(settings.PM_ENABLE_FILE_TOOLS ?? 1) === 1 ? 'flex' : 'none';
@@ -222,13 +311,12 @@ window.SettingsEngine = (function() {
             historyTab.style.display = parseInt(settings.PM_ENABLE_HISTORY ?? 1) === 1 ? 'flex' : 'none';
         }
 
-        // Default Dry Run enforcement (hook into existing UI if it exists)
+        // Default Dry Run enforcement
         const dryRunCheckbox = document.getElementById('pm-simulate');
         if (dryRunCheckbox && parseInt(settings.PM_DEFAULT_DRY_RUN ?? 1) === 1) {
             dryRunCheckbox.checked = true;
         }
 
-        // Governor UI state sync
         syncGovernorUI();
     }
 
@@ -349,12 +437,12 @@ window.SettingsEngine = (function() {
                         PM_UI_FONT: document.getElementById('pm-setting-ui-font').value,
                         PM_UI_THEME: document.getElementById('pm-setting-ui-theme').value,
                         PM_CUSTOM_DISK_QUOTA_GB: document.getElementById('pm-setting-custom-quota').value || "0",
-                        PM_BACKUP_MAX_COUNT: document.getElementById('pm-setting-backup-max-count').value || "0",
-                        PM_BACKUP_MAX_DAYS: document.getElementById('pm-setting-backup-max-days').value || "0",
-                        PM_BACKUP_CLOUD_MAX_COUNT: document.getElementById('pm-setting-backup-cloud-max-count').value || "0",
-                        PM_BACKUP_CLOUD_MAX_DAYS: document.getElementById('pm-setting-backup-cloud-max-days').value || "0",
+                        PM_BACKUP_MAX_COUNT: document.getElementById('pm-setting-backup-max-count') ? document.getElementById('pm-setting-backup-max-count').value : "0",
+                        PM_BACKUP_MAX_DAYS: document.getElementById('pm-setting-backup-max-days') ? document.getElementById('pm-setting-backup-max-days').value : "0",
+                        PM_BACKUP_CLOUD_MAX_COUNT: document.getElementById('pm-setting-backup-cloud-max-count') ? document.getElementById('pm-setting-backup-cloud-max-count').value : "0",
+                        PM_BACKUP_CLOUD_MAX_DAYS: document.getElementById('pm-setting-backup-cloud-max-days') ? document.getElementById('pm-setting-backup-cloud-max-days').value : "0",
                         PM_BACKUP_FREQUENCY: document.getElementById('pm-setting-backup-frequency').value || "0",
-                        PM_BACKUP_CRON_AUTO: document.getElementById('pm-setting-backup-cron-auto').checked ? 1 : 0
+                        PM_BACKUP_CRON_AUTO: document.getElementById('pm-setting-backup-cron-auto') ? (document.getElementById('pm-setting-backup-cron-auto').checked ? 1 : 0) : 0
                     }
                 };
 
@@ -362,7 +450,7 @@ window.SettingsEngine = (function() {
                     const response = await window.FetchEngine.post('save_settings', payload);
                     if (response && response.success) {
                         window.showPremiumToast('Settings saved successfully', 'success');
-                        hydrateSettings(payload.settings); // Re-apply locally
+                        hydrateSettings(payload.settings);
                     } else {
                         window.showPremiumToast(response?.error || 'Failed to save settings.', 'error');
                     }
@@ -375,94 +463,28 @@ window.SettingsEngine = (function() {
             });
         }
 
-        const proBtn = document.getElementById('pm-btn-activate-pro');
-        const proInput = document.getElementById('pm-pro-license-key');
-        if (proBtn && proInput) {
-            proBtn.addEventListener('click', async function() {
-                const key = proInput.value.trim();
-                if (!key) {
-                    window.showPremiumToast('Please enter a license key', 'error');
-                    return;
-                }
-                
-                proBtn.disabled = true;
-                proBtn.innerText = 'Verifying...';
-                
-                try {
-                    const response = await window.FetchEngine.post('activate_license', { key: key });
-                    if (response && response.success) {
-                        window.showPremiumToast(response.message, 'success');
-                        const cleanUrl = window.location.href.split('#')[0];
-                        setTimeout(() => window.location.href = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + 'reload=' + new Date().getTime(), 1500);
-                    } else {
-                        window.showPremiumToast(response.error || 'Activation failed', 'error');
-                        proBtn.disabled = false;
-                        proBtn.innerText = 'Try Again';
-                    }
-                } catch (err) {
-                    window.showPremiumToast(err.message || 'Network error', 'error');
-                    proBtn.disabled = false;
-                    proBtn.innerText = 'Try Again';
-                }
-            });
-        }
-        
-        const removeBtn = document.getElementById('pm-btn-remove-license');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', async function() {
-                window.showPremiumConfirmModal(
-                    'Remove Pro License',
-                    'Are you sure you want to completely remove your active Pro license?<br><br>Doing this will immediately lock you out of the Mass Query Engine, File Backup Tools, and Automated Maintenance Sweepers.<br><br>To confirm, please type <strong style="color: #ef4444;">REMOVE</strong> below:',
-                    'REMOVE',
-                    async () => {
-                        removeBtn.disabled = true;
-                        removeBtn.innerText = 'Removing...';
-                        const proInput = document.getElementById('pm-pro-license-key');
-                        if (proInput) {
-                            proInput.value = '';
-                            proInput.disabled = true;
-                        }
-                        
-                        try {
-                            const response = await window.FetchEngine.post('remove_license', {});
-                            if (response && response.success) {
-                                window.showPremiumToast(response.message, 'success');
-                                const cleanUrl = window.location.href.split('#')[0];
-                                setTimeout(() => window.location.href = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + 'reload=' + new Date().getTime(), 500);
-                            } else {
-                                window.showPremiumToast(response.error || 'Failed to remove license', 'error');
-                                removeBtn.disabled = false;
-                                removeBtn.innerText = 'Try Again';
-                            }
-                        } catch (err) {
-                            window.showPremiumToast(err.message || 'Network error', 'error');
-                            removeBtn.disabled = false;
-                            removeBtn.innerText = 'Try Again';
-                        }
-                    }
-                );
-            });
-        }
-        
-        // Handle Locked Tabs via event delegation
+        // Tab locked redirect checks
         document.addEventListener('click', function(e) {
             const label = e.target.closest('.pm-pro-locked');
-            if (label && window.pmIsPro !== true) {
-                e.preventDefault();
-                e.stopPropagation();
-                const settingsTab = document.getElementById('pm-tab-settings');
-                if (settingsTab) {
-                    settingsTab.checked = true;
-                }
-                if (window.UiEngine && typeof window.UiEngine.showToast === 'function') {
-                    window.UiEngine.showToast('This feature requires Mass Utility Pro. Please activate below.', 'warning');
-                } else if (typeof window.showPremiumToast === 'function') {
-                    window.showPremiumToast('This feature requires Mass Utility Pro. Please activate below.', 'warning');
+            if (label) {
+                const cloudEnabled = window.PM_CAPABILITIES && window.PM_CAPABILITIES.backup_destinations && window.PM_CAPABILITIES.backup_destinations.includes('gdrive');
+                const autopilotEnabled = window.PM_CAPABILITIES && window.PM_CAPABILITIES.governor_autopilot;
+                const cronEnabled = window.PM_CAPABILITIES && window.PM_CAPABILITIES.backup_automation;
+                
+                let isLocked = false;
+                if (label.id === 'pm-lbl-gov-auto' && !autopilotEnabled) isLocked = true;
+                if (label.id === 'pm-lbl-enable-query-wizard' && !(window.PM_CAPABILITIES && window.PM_CAPABILITIES.query_visual_execute)) isLocked = true;
+                if (label.id === 'pm-lbl-enable-history' && !(window.PM_CAPABILITIES && window.PM_CAPABILITIES.rollback_history_limit > 0)) isLocked = true;
+                
+                if (isLocked) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.showPremiumToast('This automation feature requires a Pro or Developer license.', 'warning');
                 }
             }
         }, true);
 
-        // Settings Sub-tabs switching logic
+        // Settings Sub-tabs switching
         const settingsSubTabBtns = document.querySelectorAll('.pm-settings-tab-btn');
         settingsSubTabBtns.forEach(btn => {
             btn.addEventListener('click', function() {

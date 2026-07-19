@@ -285,11 +285,17 @@ const HistoryEngine = (function() {
                                                 <button type="button" class="pm-btn pm-btn-reapply-job" data-job-id="${escapeHtml(job.job_id)}" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; background-color: var(--pm-success); box-shadow: 0 2px 4px rgba(16, 185, 129, 0.15);" title="Re-executes original mutation rules. A fresh safety baseline will be captured before execution.">
                                                     &#128260; Reapply
                                                 </button>
-                                            ` : job.has_revert ? `
+                                            ` : job.has_revert ? (
+                                                (window.PM_CAPABILITIES && window.PM_CAPABILITIES.rollback_history_limit === 0) ? `
+                                                <button type="button" class="pm-btn pm-btn-revert-job" data-job-id="${escapeHtml(job.job_id)}" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; background-color: #475569; color: #94a3b8; opacity: 0.5; cursor: not-allowed; box-shadow: none;" title="Rollbacks require Pro license.">
+                                                    🔒 Revert
+                                                </button>
+                                                ` : `
                                                 <button type="button" class="pm-btn pm-btn-revert-job" data-job-id="${escapeHtml(job.job_id)}" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; background-color: var(--pm-danger); box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);">
                                                     &#9889; Revert
                                                 </button>
-                                            ` : `<span style="font-size: 0.75rem; color: var(--pm-text-secondary); font-style: italic; align-self: center;">N/A</span>`}
+                                                `
+                                            ) : `<span style="font-size: 0.75rem; color: var(--pm-text-secondary); font-style: italic; align-self: center;">N/A</span>`}
                                             <button type="button" class="pm-btn pm-btn-delete-job" data-job-id="${escapeHtml(job.job_id)}" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; background-color: var(--pm-danger); box-shadow: none;" title="Delete Ledger Entry">
                                                 &#128465;&#65039; Delete
                                             </button>
@@ -369,6 +375,10 @@ const HistoryEngine = (function() {
                                 // Bind click handler on Revert buttons
                                 historyBody.querySelectorAll('.pm-btn-revert-job').forEach(btn => {
                                     btn.addEventListener('click', function() {
+                                        if (window.PM_CAPABILITIES && window.PM_CAPABILITIES.rollback_history_limit === 0) {
+                                            showPremiumToast('Automatic rollbacks require a Pro or Developer subscription package.', 'warning');
+                                            return;
+                                        }
                                         const jobId = this.getAttribute('data-job-id');
                                         
                                         showPremiumConfirmModal(
