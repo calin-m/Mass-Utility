@@ -20,47 +20,51 @@ try {
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Ensure pm_package_tiers table exists and is seeded (Self-healing repair)
-        $pdo->exec("CREATE TABLE IF NOT EXISTS pm_package_tiers ( // nosec
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name VARCHAR(64) UNIQUE NOT NULL,
-            capabilities TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );");
+        try {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS pm_package_tiers ( // nosec
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(64) UNIQUE NOT NULL,
+                capabilities TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );");
 
-        $stmtTiersCount = $pdo->query("SELECT COUNT(*) FROM pm_package_tiers");
-        if ($stmtTiersCount->fetchColumn() == 0) {
-            $defaultTiers = [
-                'basic' => [
-                    'backup_destinations' => ['local'],
-                    'backup_automation' => false,
-                    'rollback_history_limit' => 0,
-                    'query_visual_execute' => false,
-                    'governor_autopilot' => false,
-                    'sweeper_execution' => false
-                ],
-                'pro' => [
-                    'backup_destinations' => ['local', 'gdrive'],
-                    'backup_automation' => true,
-                    'rollback_history_limit' => 10,
-                    'query_visual_execute' => true,
-                    'governor_autopilot' => true,
-                    'sweeper_execution' => true
-                ],
-                'developer' => [
-                    'backup_destinations' => ['local', 'gdrive'],
-                    'backup_automation' => true,
-                    'rollback_history_limit' => 999,
-                    'query_visual_execute' => true,
-                    'governor_autopilot' => true,
-                    'sweeper_execution' => true
-                ]
-            ];
-            
-            $insertTier = $pdo->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
-            foreach ($defaultTiers as $name => $caps) {
-                $insertTier->execute([$name, json_encode($caps)]);
+            $stmtTiersCount = $pdo->query("SELECT COUNT(*) FROM pm_package_tiers");
+            if ($stmtTiersCount->fetchColumn() == 0) {
+                $defaultTiers = [
+                    'basic' => [
+                        'backup_destinations' => ['local'],
+                        'backup_automation' => false,
+                        'rollback_history_limit' => 0,
+                        'query_visual_execute' => false,
+                        'governor_autopilot' => false,
+                        'sweeper_execution' => false
+                    ],
+                    'pro' => [
+                        'backup_destinations' => ['local', 'gdrive'],
+                        'backup_automation' => true,
+                        'rollback_history_limit' => 10,
+                        'query_visual_execute' => true,
+                        'governor_autopilot' => true,
+                        'sweeper_execution' => true
+                    ],
+                    'developer' => [
+                        'backup_destinations' => ['local', 'gdrive'],
+                        'backup_automation' => true,
+                        'rollback_history_limit' => 999,
+                        'query_visual_execute' => true,
+                        'governor_autopilot' => true,
+                        'sweeper_execution' => true
+                    ]
+                ];
+                
+                $insertTier = $pdo->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
+                foreach ($defaultTiers as $name => $caps) {
+                    $insertTier->execute([$name, json_encode($caps)]);
+                }
             }
+        } catch (\Exception $writeEx) {
+            // Silence write permission locks so read-only admin checks still succeed
         }
 
         // Simple sanity check on tables
