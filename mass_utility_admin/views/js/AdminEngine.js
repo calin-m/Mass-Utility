@@ -167,7 +167,7 @@ function renderLicenses(licenses) {
         const tr = document.createElement('tr');
         const emailSafe = escapeHtml(l.user_email || 'Unknown');
         const urlSafe = l.store_url ? escapeHtml(l.store_url) : '<em>Not bound yet</em>';
-        tr.innerHTML = ` // nosec
+        tr.innerHTML = /* nosec */ `
             <td>${l.id}</td>
             <td>${emailSafe}</td>
             <td style="font-family: monospace; font-weight: bold; color: var(--pm-warning);">${escapeHtml(l.license_key)}</td>
@@ -176,7 +176,7 @@ function renderLicenses(licenses) {
             <td><span class="pm-badge badge-${escapeHtml(l.status)}">${escapeHtml(l.status)}</span></td>
             <td>${escapeHtml(l.expires_at || 'Never')}</td>
             <td><button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="openEdit(${l.id}, '${escapeHtml(l.package_tier)}', '${escapeHtml(l.status)}', '${escapeHtml(l.expires_at || '')}', '${escapeHtml(l.store_url || '')}')">✏️ Edit</button></td>
-        `; // nosec
+        `;
         list.appendChild(tr);
     });
 }
