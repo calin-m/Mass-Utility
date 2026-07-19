@@ -447,9 +447,48 @@ window.SettingsEngine = (function() {
                 if (paneGeneral && paneInfo) {
                     paneGeneral.style.display = (targetId === 'pm-settings-pane-general') ? 'block' : 'none';
                     paneInfo.style.display = (targetId === 'pm-settings-pane-info') ? 'block' : 'none';
+                    
+                    if (targetId === 'pm-settings-pane-info') {
+                        loadReadme();
+                    }
                 }
             });
         });
+
+        const btnReload = document.getElementById('pm-btn-reload-readme');
+        if (btnReload) {
+            btnReload.addEventListener('click', function() {
+                loadReadme(true);
+            });
+        }
+
+        function loadReadme(force = false) {
+            const renderArea = document.getElementById('pm-readme-render-area');
+            if (!renderArea) return;
+
+            if (!force && renderArea.getAttribute('data-loaded') === 'true') {
+                return;
+            }
+
+            renderArea.innerHTML = '<div class="pm-flex-center pm-gap-2" style="justify-content: center; padding: 3rem 0; color: var(--pm-text-secondary);"><span class="pm-card-title-icon pm-bg-primary" style="animation: pm-pulse 1.5s infinite;"></span><span>Fetching and rendering live manual...</span></div>'; // nosec
+
+            window.FetchEngine.post('get_readme')
+                .then(res => {
+                    if (res.success && res.content) {
+                        if (typeof window.marked !== 'undefined' && typeof window.marked.parse === 'function') {
+                            renderArea.innerHTML = window.marked.parse(res.content); // nosec
+                        } else {
+                            renderArea.innerHTML = `<pre style="white-space: pre-wrap; font-family: monospace; font-size: 0.85rem; color: var(--pm-text-secondary);">${res.content}</pre>`; // nosec
+                        }
+                        renderArea.setAttribute('data-loaded', 'true');
+                    } else {
+                        renderArea.innerHTML = `<div style="color: var(--pm-danger); padding: 1.5rem; text-align: center;">⚠️ Failed to load manual: ${res.error || 'Unknown error'}</div>`; // nosec
+                    }
+                })
+                .catch(err => {
+                    renderArea.innerHTML = `<div style="color: var(--pm-danger); padding: 1.5rem; text-align: center;">⚠️ Connection failure: ${err.message}</div>`; // nosec
+                });
+        }
     }
 
     return {

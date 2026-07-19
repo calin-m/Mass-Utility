@@ -1016,10 +1016,20 @@ if (strpos($path, '/api/v1/') === 0) {
         if ($action === 'delete_preset') {
             $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
             $idPreset = (int)($payload['id_preset'] ?? 0);
-            
             $stmt = $pdo->prepare('DELETE FROM `mass_update_presets` WHERE `id_preset` = :id');
             $stmt->execute([':id' => $idPreset]);
             echo json_encode(['success' => true]);
+            exit;
+        }
+
+        if ($action === 'get_readme') {
+            $readmePath = dirname(dirname(__DIR__)) . '/README.md';
+            if (file_exists($readmePath)) {
+                $content = file_get_contents($readmePath);
+                echo json_encode(['success' => true, 'content' => $content]);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'README.md not found.']);
+            }
             exit;
         }
 

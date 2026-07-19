@@ -115,5 +115,8 @@
     };
 </script>
 
+<!-- Markdown Parser CDN -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <!-- Theme, AJAX and UX Dynamic Core scripts -->
 <script src="../../js/mass_utility.bundle.js" defer></script>
