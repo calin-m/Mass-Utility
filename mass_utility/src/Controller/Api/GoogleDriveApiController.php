@@ -667,14 +667,34 @@ class GoogleDriveApiController extends AbstractApiController
                 if ($maxDays > 0 && isset($folder['createdTime'])) {
                     $createdTimestamp = strtotime($folder['createdTime']);
                     if ($createdTimestamp > 0 && ($now - $createdTimestamp) > ($maxDays * 86400)) {
-                        $shouldDelete = true;
+                        // Absolute Min-Keep Safeguard: Never delete the last unpinned cloud backup
+                        $unpinnedCloudCount = 0;
+                        foreach ($cloudFolders as $tmp) {
+                            $tmpBase = preg_replace('/\.tar$/', '', $tmp['name']);
+                            $tmpDbPin = _PS_MODULE_DIR_ . 'mass_utility/backups/' . $tmpBase . '/.pinned';
+                            $tmpFilePin = _PS_MODULE_DIR_ . 'mass_utility/backups/files/' . $tmpBase . '/.pinned';
+                            if (!file_exists($tmpDbPin) && !file_exists($tmpFilePin)) {
+                                $unpinnedCloudCount++;
+                            }
+                        }
+                        if ($unpinnedCloudCount > 1) {
+                            $shouldDelete = true;
+                        }
                     }
                 }
 
                 // 2. Cloud Count-based purge
                 if ($maxCount > 0 && !$shouldDelete) {
-                    $remainingCount = count($cloudFolders) - $index;
-                    if ($remainingCount > $maxCount) {
+                    $unpinnedCloudCount = 0;
+                    foreach ($cloudFolders as $tmp) {
+                        $tmpBase = preg_replace('/\.tar$/', '', $tmp['name']);
+                        $tmpDbPin = _PS_MODULE_DIR_ . 'mass_utility/backups/' . $tmpBase . '/.pinned';
+                        $tmpFilePin = _PS_MODULE_DIR_ . 'mass_utility/backups/files/' . $tmpBase . '/.pinned';
+                        if (!file_exists($tmpDbPin) && !file_exists($tmpFilePin)) {
+                            $unpinnedCloudCount++;
+                        }
+                    }
+                    if ($unpinnedCloudCount > $maxCount) {
                         $shouldDelete = true;
                     }
                 }

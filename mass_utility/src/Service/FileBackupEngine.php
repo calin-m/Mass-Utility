@@ -549,20 +549,39 @@ class FileBackupEngine
                     $ageSeconds = $now - $b['timestamp'];
                     $maxSeconds = $maxDays * 86400;
                     if ($ageSeconds > $maxSeconds) {
-                        $shouldDelete = true;
+                        // Absolute Min-Keep Safeguard: Never delete the last unpinned backup
+                        $unpinnedCount = 0;
+                        foreach ($backups as $tmp) {
+                            $tmpBase = preg_replace('/\.tar$/', '', $tmp['basename']);
+                            $tmpPath = $this->backupDir . $tmpBase . '/';
+                            if (is_dir($tmpPath) && !file_exists($tmpPath . '.pinned')) {
+                                $unpinnedCount++;
+                            }
+                        }
+                        if ($unpinnedCount > 1) {
+                            $shouldDelete = true;
+                        }
                     }
                 }
 
                 // 2. Count-based
                 if ($maxCount > 0 && !$shouldDelete) {
-                    $remainingCount = count($backups) - $index;
-                    if ($remainingCount > $maxCount) {
+                    $unpinnedCount = 0;
+                    foreach ($backups as $tmp) {
+                        $tmpBase = preg_replace('/\.tar$/', '', $tmp['basename']);
+                        $tmpPath = $this->backupDir . $tmpBase . '/';
+                        if (is_dir($tmpPath) && !file_exists($tmpPath . '.pinned')) {
+                            $unpinnedCount++;
+                        }
+                    }
+                    if ($unpinnedCount > $maxCount) {
                         $shouldDelete = true;
                     }
                 }
 
                 if ($shouldDelete) {
                     $this->deleteBackupFolder($basename);
+                    $this->logger->log("Retention Policy: Automatically deleted local file backup '{$basename}' to satisfy retention limits.", 'INFO');
                     unset($backups[$index]);
                 }
             }

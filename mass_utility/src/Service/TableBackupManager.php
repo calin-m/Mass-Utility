@@ -1367,20 +1367,37 @@ class TableBackupManager
                     $ageSeconds = $now - $b['date'];
                     $maxSeconds = $maxDays * 86400;
                     if ($ageSeconds > $maxSeconds) {
-                        $shouldDelete = true;
+                        // Absolute Min-Keep Safeguard: Never delete the last unpinned backup
+                        $unpinnedCount = 0;
+                        foreach ($localBackups as $tmp) {
+                            $tmpPath = $this->backupDir . $tmp['basename'] . '/';
+                            if (is_dir($tmpPath) && !file_exists($tmpPath . '.pinned')) {
+                                $unpinnedCount++;
+                            }
+                        }
+                        if ($unpinnedCount > 1) {
+                            $shouldDelete = true;
+                        }
                     }
                 }
 
                 // 2. Count-based purge
                 if ($maxCount > 0 && !$shouldDelete) {
-                    $remainingCount = count($localBackups) - $index;
-                    if ($remainingCount > $maxCount) {
+                    $unpinnedCount = 0;
+                    foreach ($localBackups as $tmp) {
+                        $tmpPath = $this->backupDir . $tmp['basename'] . '/';
+                        if (is_dir($tmpPath) && !file_exists($tmpPath . '.pinned')) {
+                            $unpinnedCount++;
+                        }
+                    }
+                    if ($unpinnedCount > $maxCount) {
                         $shouldDelete = true;
                     }
                 }
 
                 if ($shouldDelete) {
                     $this->deleteBackup($basename);
+                    $this->logger->log("Retention Policy: Automatically deleted local database backup '{$basename}' to satisfy retention limits.", 'INFO');
                     // Remove from local list so count checks are correct
                     unset($localBackups[$index]);
                 }

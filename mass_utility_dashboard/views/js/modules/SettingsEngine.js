@@ -176,6 +176,18 @@ window.SettingsEngine = (function() {
             document.getElementById('pm-setting-backup-cron-auto').checked = parseInt(settings.PM_BACKUP_CRON_AUTO ?? 1) === 1;
         }
 
+        const cronAutoCheckbox = document.getElementById('pm-setting-backup-cron-auto');
+        const frequencySelect = document.getElementById('pm-setting-backup-frequency');
+        if (cronAutoCheckbox && frequencySelect) {
+            frequencySelect.disabled = !cronAutoCheckbox.checked;
+            if (!cronAutoCheckbox.dataset.listenerBound) {
+                cronAutoCheckbox.dataset.listenerBound = "true";
+                cronAutoCheckbox.addEventListener('change', () => {
+                    frequencySelect.disabled = !cronAutoCheckbox.checked;
+                });
+            }
+        }
+
         applyUIEffects();
     }
 

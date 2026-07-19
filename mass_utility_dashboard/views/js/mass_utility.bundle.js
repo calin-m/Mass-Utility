@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-19 14:25:00 UTC
+ * Generated: 2026-07-19 14:40:10 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -614,6 +614,18 @@ window.SettingsEngine = (function() {
         }
         if (document.getElementById('pm-setting-backup-cron-auto')) {
             document.getElementById('pm-setting-backup-cron-auto').checked = parseInt(settings.PM_BACKUP_CRON_AUTO ?? 1) === 1;
+        }
+
+        const cronAutoCheckbox = document.getElementById('pm-setting-backup-cron-auto');
+        const frequencySelect = document.getElementById('pm-setting-backup-frequency');
+        if (cronAutoCheckbox && frequencySelect) {
+            frequencySelect.disabled = !cronAutoCheckbox.checked;
+            if (!cronAutoCheckbox.dataset.listenerBound) {
+                cronAutoCheckbox.dataset.listenerBound = "true";
+                cronAutoCheckbox.addEventListener('change', () => {
+                    frequencySelect.disabled = !cronAutoCheckbox.checked;
+                });
+            }
         }
 
         applyUIEffects();
