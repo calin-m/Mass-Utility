@@ -27,10 +27,14 @@ class AdminApiController
 
     private function list(): void
     {
-        $licenses = $this->repo->getAllLicenses();
-        $users = $this->repo->getAllUsers();
-        $tiers = $this->repo->getAllTiers();
-        echo json_encode(['success' => true, 'licenses' => $licenses, 'users' => $users, 'tiers' => $tiers]);
+        try {
+            $licenses = $this->repo->getAllLicenses();
+            $users = $this->repo->getAllUsers();
+            $tiers = $this->repo->getAllTiers();
+            echo json_encode(['success' => true, 'licenses' => $licenses, 'users' => $users, 'tiers' => $tiers]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
     }
 
     private function save_tier(): void
