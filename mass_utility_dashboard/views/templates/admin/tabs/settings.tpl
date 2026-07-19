@@ -202,6 +202,7 @@
                     </select>
                     <div id="pm-warning-db-chunk" style="color: var(--pm-danger); font-size: 0.75rem; margin-bottom: 1rem; display: none; padding-left: 4px;"></div>
                 </div>
+            </div>
         </div>
     </div>
 
@@ -351,4 +352,5 @@
             </div>
         </div>
     </div>
+</div>
 </div>

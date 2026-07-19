@@ -1023,12 +1023,22 @@ if (strpos($path, '/api/v1/') === 0) {
         }
 
         if ($action === 'get_readme') {
-            $readmePath = dirname(dirname(__DIR__)) . '/README.md';
-            if (file_exists($readmePath)) {
-                $content = file_get_contents($readmePath);
+            $paths = [
+                dirname(dirname(__DIR__)) . '/README.md',
+                dirname(dirname(dirname(__DIR__))) . '/README.md',
+                dirname(__DIR__) . '/README.md',
+            ];
+            $content = '';
+            foreach ($paths as $p) {
+                if (file_exists($p)) {
+                    $content = file_get_contents($p);
+                    break;
+                }
+            }
+            if ($content !== '') {
                 echo json_encode(['success' => true, 'content' => $content]);
             } else {
-                echo json_encode(['success' => false, 'error' => 'README.md not found.']);
+                echo json_encode(['success' => false, 'error' => 'README.md not found in search paths.']);
             }
             exit;
         }
