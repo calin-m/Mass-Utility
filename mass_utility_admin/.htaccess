@@ -1,6 +1,3 @@
-# Disable Directory Indexes for maximum security
-Options -Indexes -MultiViews
-
 # Secure Files: Block access to db, tpl, log, yml, json, ini files globally
 <FilesMatch "\.(db|tpl|json|yml|yaml|xml|log|ini|lock)$">
     <IfModule mod_authz_core.c>
