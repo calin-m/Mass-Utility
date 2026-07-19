@@ -1,0 +1,5 @@
+# Disable Directory Indexes for maximum security
+Options -Indexes
+
+# Redirect default root requests to the public router gateway
+DirectoryIndex public/index.php
