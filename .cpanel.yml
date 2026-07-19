@@ -7,4 +7,7 @@ deployment:
     - export DASHBOARDPATH=/home/mpscelkr/public_html/mass_utility_dashboard
     - mkdir -p $DASHBOARDPATH
     - cp -R mass_utility_dashboard/. $DASHBOARDPATH/
+    - export ADMINPATH=/home/mpscelkr/public_html/mass_utility_admin
+    - mkdir -p $ADMINPATH
+    - cp -R mass_utility_admin/. $ADMINPATH/
 
