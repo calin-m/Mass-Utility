@@ -1,12 +1,8 @@
-# Rewrite rule to forward all traffic to public/index.php
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ public/index.php [QSA,L]
-</IfModule>
+# Disable Directory Indexes for maximum security
+Options -Indexes -MultiViews
 
-# Security Enforcement: Explicitly block access to .env credentials
-<FilesMatch "^\.env$">
+# Secure Files: Block access to .env, db, tpl, log, yml, json, ini files globally
+<FilesMatch "^\.env$|\.(db|tpl|json|yml|yaml|xml|log|ini|lock)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -15,3 +11,20 @@
         Deny from all
     </IfModule>
 </FilesMatch>
+
+# Routing and Directory Hiding
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Prevent direct access to public/ folder in URL (Redirect to root clean URL folder-agnostically)
+    RewriteCond %{THE_REQUEST} \s.*/public/([^\s?]*) [NC]
+    RewriteRule ^public/(.*)$ %1 [R=301,L]
+
+    # Block direct browser access to source and templates folders (403 Forbidden)
+    RewriteRule ^(src|tests|views/templates)($|/) - [F,L]
+
+    # Internal rewrite: forward clean URLs to public/index.php if not a physical file
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/index.php [QSA,L]
+</IfModule>
