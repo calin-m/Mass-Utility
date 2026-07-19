@@ -1,0 +1,25 @@
+# Ignore everything by default
+/*
+
+# Whitelist allowed directories
+!/mass_utility/
+!/mass_utility_dashboard/
+!/.bench/
+!/.bench/docs/
+
+# Whitelist allowed files
+!/.cpanel.yml
+!/README.md
+!/.gitignore
+
+# Ignore build and runtime junk inside whitelisted folders
+**/__pycache__/
+**/*.pyc
+**/.sandbox/*.sqlite
+**/backups/
+**/logs/*.log
+
+# Ignore JIT cache databases and tools inside .bench
+.bench/sandbox/
+.bench/db/
+.bench/tools_registry.json

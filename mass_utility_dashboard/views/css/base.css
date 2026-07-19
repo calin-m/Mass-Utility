@@ -1,0 +1,194 @@
+/**
+ * Project Mass - Base Design System (CSS Variables & Global Resets)
+ * Defines the core color palettes, typography, root transitions,
+ * light/dark mode variables, and common scrollbar overrides.
+ */
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .pm-container,
+            .pm-modal-overlay {
+                --pm-bg: #f0f4f9;
+                --pm-white: #ffffff;
+                --pm-card-bg: rgba(255, 255, 255, 0.75);
+                --pm-border-glow: rgba(var(--pm-primary-rgb), 0.2);
+                --pm-text-primary: #1f1f1f;
+                --pm-text-secondary: #444746;
+                --pm-hero-bg: linear-gradient(135deg, rgba(241, 245, 249, 0.7) 0%, rgba(203, 213, 225, 0.7) 100%);
+                --pm-shadow: rgba(0, 0, 0, 0.04);
+                /* Semantic Color Tokens */
+                --pm-primary: #3b82f6;
+                --pm-primary-rgb: 59, 130, 246;
+                --pm-primary-hover: #2563eb;
+                --pm-primary-hover-rgb: 37, 99, 235;
+                --pm-primary-light: #60a5fa;
+                --pm-primary-dark: #1d4ed8;
+                
+                --pm-info: #0ea5e9;
+                --pm-info-rgb: 14, 165, 233;
+                
+                --pm-success: #10b981;
+                --pm-success-rgb: 16, 185, 129;
+                
+                --pm-warning: #f59e0b;
+                --pm-warning-rgb: 245, 158, 11;
+                
+                --pm-danger: #ef4444;
+                --pm-danger-rgb: 239, 68, 68;
+                
+                --pm-purple: #a855f7;
+                --pm-purple-rgb: 168, 85, 247;
+                
+                --pm-pink: #ec4899;
+                --pm-pink-rgb: 236, 72, 153;
+                
+                --pm-neutral: #64748b;
+                --pm-neutral-rgb: 100, 116, 139;
+                --pm-card-title-color: #1f1f1f;
+                --pm-border-color: rgba(0, 0, 0, 0.06);
+                --pm-input-bg: rgba(255, 255, 255, 0.8);
+                --pm-input-text: #1f1f1f;
+                --pm-input-border: rgba(0, 0, 0, 0.1);
+                --pm-terminal-bg: #f1f5f9;
+                --pm-terminal-text: #1e293b;
+                --pm-terminal-border: rgba(0, 0, 0, 0.12);
+                --pm-hover-highlight: rgba(255, 255, 255, 0.4);
+                --pm-code-bg: rgba(59, 130, 246, 0.06);
+                --pm-code-text: #2563eb;
+                --pm-code-border: rgba(59, 130, 246, 0.15);
+
+                /* -----------------------------------------
+                   DESIGN SYSTEM: Layout Spacing Tokens
+                   ----------------------------------------- */
+                --pm-space-xs: 0.25rem;  /* 4px */
+                --pm-space-sm: 0.5rem;   /* 8px */
+                --pm-space-md: 1rem;     /* 16px */
+                --pm-space-lg: 1.5rem;   /* 24px */
+                --pm-space-xl: 2rem;     /* 32px */
+                --pm-space-xxl: 3rem;    /* 48px */
+
+                /* -----------------------------------------
+                   DESIGN SYSTEM: Fluid Typography Scale
+                   ----------------------------------------- */
+                --pm-font-size-xs: clamp(0.7rem, 0.2vw + 0.6rem, 0.75rem);
+                --pm-font-size-sm: clamp(0.8rem, 0.2vw + 0.75rem, 0.85rem);
+                --pm-font-size-base: clamp(0.9rem, 0.2vw + 0.85rem, 0.95rem);
+                --pm-font-size-md: clamp(1rem, 0.3vw + 0.95rem, 1.1rem);
+                --pm-font-size-lg: clamp(1.2rem, 0.4vw + 1.1rem, 1.35rem);
+                --pm-font-size-xl: clamp(1.5rem, 0.6vw + 1.3rem, 1.75rem);
+                --pm-font-size-xxl: clamp(2rem, 0.8vw + 1.8rem, 2.25rem);
+
+                /* -----------------------------------------
+                   DESIGN SYSTEM: Component Heights & Radius
+                   ----------------------------------------- */
+                --pm-btn-height: 2.75rem; /* 44px tactile targets */
+                --pm-input-height: 2.75rem;
+                --pm-radius-sm: 8px;
+                --pm-radius-md: 12px;
+                --pm-radius-lg: 16px;
+            }
+
+            .pm-container.pm-dark-mode,
+            .pm-modal-overlay.pm-dark-mode {
+                --pm-bg: #131314;
+                --pm-white: #ffffff;
+                --pm-card-bg: rgba(30, 30, 32, 0.6);
+                --pm-border-glow: rgba(var(--pm-primary-rgb), 0.15);
+                --pm-text-primary: #e3e3e3;
+                --pm-text-secondary: #c4c7c5;
+                --pm-hero-bg: linear-gradient(135deg, rgba(43, 43, 43, 0.6) 0%, rgba(32, 32, 32, 0.9) 100%);
+                --pm-shadow: rgba(0, 0, 0, 0.15);
+                --pm-card-title-color: #e3e3e3;
+                --pm-border-color: rgba(255, 255, 255, 0.06);
+                --pm-input-bg: rgba(0, 0, 0, 0.2);
+                --pm-input-text: #e3e3e3;
+                --pm-input-border: rgba(255, 255, 255, 0.1);
+                --pm-terminal-bg: #1e1e1e;
+                --pm-terminal-text: var(--pm-success);
+                --pm-terminal-border: rgba(var(--pm-success-rgb), 0.25);
+                --pm-hover-highlight: rgba(255, 255, 255, 0.15);
+                --pm-code-bg: rgba(255, 255, 255, 0.07);
+                --pm-code-text: #93c5fd;
+                --pm-code-border: rgba(255, 255, 255, 0.08);
+            }
+
+            /* Sleek rounded scrollbar rules (zero arrows/square corners overflow) */
+            .pm-container *,
+            .pm-modal-overlay * {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+            }
+
+            .pm-container.pm-dark-mode *,
+            .pm-modal-overlay.pm-dark-mode * {
+                scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+            }
+
+            /* Chrome, Safari, Edge, and Opera */
+            .pm-container *::-webkit-scrollbar,
+            .pm-modal-overlay *::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+
+            .pm-container *::-webkit-scrollbar-track,
+            .pm-modal-overlay *::-webkit-scrollbar-track {
+                background: transparent;
+                border-radius: 9999px;
+            }
+
+            .pm-container *::-webkit-scrollbar-thumb,
+            .pm-modal-overlay *::-webkit-scrollbar-thumb {
+                background: rgba(148, 163, 184, 0.3);
+                border-radius: 9999px;
+                border: 1px solid transparent;
+                -webkit-background-clip: padding-box;
+                background-clip: padding-box;
+            }
+
+            .pm-container *::-webkit-scrollbar-thumb:hover,
+            .pm-modal-overlay *::-webkit-scrollbar-thumb:hover {
+                background: rgba(148, 163, 184, 0.5);
+            }
+
+            .pm-container.pm-dark-mode *::-webkit-scrollbar-thumb,
+            .pm-modal-overlay.pm-dark-mode *::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+            .pm-container.pm-dark-mode *::-webkit-scrollbar-thumb:hover,
+            .pm-modal-overlay.pm-dark-mode *::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            .pm-container *::-webkit-scrollbar-button,
+            .pm-modal-overlay *::-webkit-scrollbar-button {
+                display: none;
+            }
+
+            /* Code snippets custom styling overrides to prevent high-contrast default browser styles */
+            .pm-container code {
+                background: var(--pm-code-bg) !important;
+                color: var(--pm-code-text) !important;
+                border: 1px solid var(--pm-code-border) !important;
+                padding: 0.15rem 0.35rem !important;
+                border-radius: 6px !important;
+                font-family: var(--pm-font-family, monospace) !important;
+                font-size: 0.85em !important;
+                white-space: nowrap !important;
+            }
+
+            @media (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+                .pm-container {
+                    padding: var(--pm-space-lg) var(--pm-space-md) !important;
+                }
+                .pm-card {
+                    padding: var(--pm-space-md) !important;
+                }
+            }
+

@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    - export MODULEPATH=/home/mpscelkr/public_html/modules/mass_utility
+    - mkdir -p $MODULEPATH
+    - cp -R mass_utility/. $MODULEPATH/
+    - export DASHBOARDPATH=/home/mpscelkr/public_html/mass_utility_dashboard
+    - mkdir -p $DASHBOARDPATH
+    - cp -R mass_utility_dashboard/. $DASHBOARDPATH/
+

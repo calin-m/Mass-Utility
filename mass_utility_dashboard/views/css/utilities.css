@@ -1,0 +1,122 @@
+/**
+ * Project Mass - Atomic Utility Classes
+ * Provides clean helper classes for spacing (padding, margins, gaps),
+ * layouts (flex, grid), typography, and button background overrides.
+ */
+               
+            /* Layout & Flexbox */
+            .pm-flex { display: flex; }
+            .pm-flex-center { display: flex; align-items: center; justify-content: center; }
+            .pm-flex-between { display: flex; align-items: center; justify-content: space-between; }
+            .pm-flex-wrap { flex-wrap: wrap; }
+            .pm-gap-2 { gap: 0.5rem; }
+            .pm-gap-3 { gap: 0.75rem; }
+            .pm-gap-4 { gap: 1rem; }
+            .pm-gap-6 { gap: 1.5rem; }
+            
+            /* Spacing */
+            .pm-p-2 { padding: 0.5rem; }
+            .pm-p-4 { padding: 1rem; }
+            .pm-p-6 { padding: 1.5rem; }
+            .pm-m-0 { margin: 0; }
+            .pm-mb-2 { margin-bottom: 0.5rem; }
+            .pm-mb-4 { margin-bottom: 1rem; }
+            .pm-mb-6 { margin-bottom: 1.5rem; }
+            
+            /* Typography */
+            .pm-text-xs { font-size: 0.75rem; }
+            .pm-text-sm { font-size: 0.85rem; }
+            .pm-font-semibold { font-weight: 600; }
+            .pm-font-bold { font-weight: 700; }
+            .pm-text-center { text-align: center; }
+            
+            /* Borders & Highlights */
+            .pm-border-l-4-primary { border-left: 4px solid var(--pm-primary); }
+            .pm-border-l-4-info { border-left: 4px solid var(--pm-info); }
+            .pm-border-l-4-success { border-left: 4px solid var(--pm-success); }
+            .pm-border-l-4-warning { border-left: 4px solid var(--pm-warning); }
+            .pm-border-l-4-danger { border-left: 4px solid var(--pm-danger); }
+            .pm-rounded-md { border-radius: 8px; }
+            .pm-rounded-lg { border-radius: 12px; }
+            .pm-rounded-full { border-radius: 99px; }
+            
+            /* Glassmorphic Alert Backgrounds */
+            .pm-bg-primary-light { background: rgba(var(--pm-primary-rgb), 0.08); border: 1px solid rgba(var(--pm-primary-rgb), 0.2); }
+            .pm-bg-info-light { background: rgba(var(--pm-info-rgb), 0.08); border: 1px solid rgba(var(--pm-info-rgb), 0.2); }
+            .pm-bg-success-light { background: rgba(var(--pm-success-rgb), 0.08); border: 1px solid rgba(var(--pm-success-rgb), 0.2); }
+            .pm-bg-warning-light { background: rgba(var(--pm-warning-rgb), 0.08); border: 1px solid rgba(var(--pm-warning-rgb), 0.2); }
+            .pm-bg-danger-light { background: rgba(var(--pm-danger-rgb), 0.08); border: 1px solid rgba(var(--pm-danger-rgb), 0.2); }
+            
+            /* Button Variants */
+            .pm-btn-success { background: var(--pm-success) !important; box-shadow: 0 1px 3px rgba(var(--pm-success-rgb), 0.15) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; }
+            .pm-btn-success:hover { background: #059669 !important; box-shadow: 0 2px 5px rgba(var(--pm-success-rgb), 0.25) !important; }
+            
+            .pm-btn-danger { background: var(--pm-danger) !important; box-shadow: 0 1px 3px rgba(var(--pm-danger-rgb), 0.15) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; }
+            .pm-btn-danger:hover { background: #dc2626 !important; box-shadow: 0 2px 5px rgba(var(--pm-danger-rgb), 0.25) !important; }
+            
+            .pm-btn-neutral { background: var(--pm-neutral) !important; box-shadow: none !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
+            .pm-btn-neutral:hover { background: #475569 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important; }
+            
+            .pm-btn-purple { background: var(--pm-purple) !important; box-shadow: 0 1px 3px rgba(var(--pm-purple-rgb), 0.15) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; }
+            .pm-btn-purple:hover { background: #9333ea !important; box-shadow: 0 2px 5px rgba(var(--pm-purple-rgb), 0.25) !important; }
+            
+            /* Universal Button Cursor-Tracking Effects */
+            .pm-theme-btn {
+                position: relative;
+                z-index: 1;
+                background-clip: padding-box;
+            }
+
+            .pm-theme-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                padding: 1px;
+                background: radial-gradient(
+                    circle 60px at var(--mouse-x, -100px) var(--mouse-y, -100px),
+                    var(--pm-primary), 
+                    var(--pm-purple), 
+                    transparent 100%
+                );
+                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                -webkit-mask-composite: xor;
+                mask-composite: exclude;
+                z-index: 2;
+                pointer-events: none;
+            }
+
+            .pm-theme-btn::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                background: radial-gradient(
+                    circle 80px at var(--mouse-x, -100px) var(--mouse-y, -100px),
+                    var(--pm-hover-highlight), 
+                    transparent 100%
+                );
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: 2; /* Layer on top of colored background */
+                pointer-events: none;
+            }
+
+            .pm-theme-btn:hover::after {
+                opacity: 1;
+            }
+            
+            /* Missing Colors */
+            .pm-border-l-4-primary { border-left: 4px solid var(--pm-primary); }
+            .pm-border-l-4-purple { border-left: 4px solid var(--pm-purple); }
+            .pm-border-l-4-danger { border-left: 4px solid var(--pm-danger); }
+            .pm-bg-purple { background-color: var(--pm-purple); }
+            .pm-bg-primary { background-color: var(--pm-primary); }
+            .pm-bg-info { background-color: var(--pm-info); }
+            .pm-bg-success { background-color: var(--pm-success); }
+            .pm-bg-warning { background-color: var(--pm-warning); }
+            .pm-bg-danger { background-color: var(--pm-danger); }
+            .pm-text-muted { color: var(--pm-text-secondary); }
+            /* ========================================================= */
+
