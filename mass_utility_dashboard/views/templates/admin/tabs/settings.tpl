@@ -202,26 +202,6 @@
                     </select>
                     <div id="pm-warning-db-chunk" style="color: var(--pm-danger); font-size: 0.75rem; margin-bottom: 1rem; display: none; padding-left: 4px;"></div>
                 </div>
-            </div>
-        </div>
-    <!-- Backup Retention Rules -->
-    <div class="pm-card pm-mb-6">
-        <div class="pm-card-title" style="margin-bottom: 0.5rem; color: var(--pm-warning);">
-            <span class="pm-card-title-icon" style="background-color: var(--pm-warning);"></span>
-            🕒 Backup Retention Policies
-        </div>
-        <p class="pm-text-muted" style="margin-bottom: 1.25rem; font-size: 0.9rem;">
-            Automatically prune local database and file backups to keep server storage clean. Set to 0 to disable.
-        </p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div>
-                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Backups to Keep</label>
-                <input type="number" id="pm-setting-backup-max-count" class="pm-form-control" min="0" placeholder="5 (0 to disable)" style="width: 100%;">
-            </div>
-            <div>
-                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Age of Backups (Days)</label>
-                <input type="number" id="pm-setting-backup-max-days" class="pm-form-control" min="0" placeholder="30 (0 to disable)" style="width: 100%;">
-            </div>
         </div>
     </div>
 

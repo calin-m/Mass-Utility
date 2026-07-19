@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-19 13:17:12 UTC
+ * Generated: 2026-07-19 13:27:57 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -3014,6 +3014,43 @@ const DatabaseToolsEngine = (function() {
             // Initial render call
             if (typeof pmRenderAllGrids === 'function' && window.PM_CONFIG.backups) {
                 pmRenderAllGrids(window.PM_CONFIG.backups);
+            }
+
+            const btnSaveRetention = document.getElementById('pm-btn-save-retention');
+            if (btnSaveRetention) {
+                btnSaveRetention.addEventListener('click', async () => {
+                    btnSaveRetention.disabled = true;
+                    const originalText = btnSaveRetention.textContent;
+                    btnSaveRetention.textContent = '💾 Saving...';
+
+                    const currentSettings = (window.PM_CONFIG && window.PM_CONFIG.settings) ? window.PM_CONFIG.settings : {};
+                    const maxCount = document.getElementById('pm-setting-backup-max-count').value || "0";
+                    const maxDays = document.getElementById('pm-setting-backup-max-days').value || "0";
+
+                    const payload = {
+                        settings: Object.assign({}, currentSettings, {
+                            PM_BACKUP_MAX_COUNT: maxCount,
+                            PM_BACKUP_MAX_DAYS: maxDays
+                        })
+                    };
+
+                    try {
+                        const response = await window.FetchEngine.post('save_settings', payload);
+                        if (response && response.success) {
+                            window.showPremiumToast('Backup retention policies saved successfully', 'success');
+                            if (window.SettingsEngine && typeof window.SettingsEngine.hydrateSettings === 'function') {
+                                window.SettingsEngine.hydrateSettings(payload.settings);
+                            }
+                        } else {
+                            window.showPremiumToast(response?.error || 'Failed to save retention settings.', 'error');
+                        }
+                    } catch (error) {
+                        window.showPremiumToast('Network error while saving retention settings.', 'error');
+                    } finally {
+                        btnSaveRetention.disabled = false;
+                        btnSaveRetention.textContent = originalText;
+                    }
+                });
             }
         },
         renderGrid: function(backups) {
