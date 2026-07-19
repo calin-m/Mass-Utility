@@ -90,64 +90,30 @@
         </div>
     </div>
 
-    <!-- Modularity & Appearance -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-        <!-- UI & Fonts -->
-        <div class="pm-card pm-h-full">
-            <div class="pm-card-title" style="margin-bottom: 0.5rem; color: var(--pm-primary);">
-                <span class="pm-card-title-icon" style="background-color: var(--pm-primary);"></span>
-                🎨 UI & Appearance
-            </div>
-            <p class="pm-text-muted" style="margin-bottom: 1rem; font-size: 0.9rem;">Customize the look and feel of your workspace.</p>
-            
-            <label class="pm-font-semibold pm-mb-2" style="display: block; color: var(--pm-text-primary);">Base Typography</label>
-            <select id="pm-setting-ui-font" class="pm-form-control pm-mb-4" style="width: 100%;">
-                <option value="system-ui, -apple-system, sans-serif">System Native (Fastest, Default)</option>
-                <option value="Inter, sans-serif">Inter (Apple-like)</option>
-                <option value="Outfit, sans-serif">Outfit (Modern, Geometric)</option>
-                <option value="Roboto, sans-serif">Roboto (Android-like)</option>
-            </select>
-
-            <label class="pm-font-semibold pm-mb-2" style="display: block; color: var(--pm-text-primary);">Dashboard UI Theme</label>
-            <select id="pm-setting-ui-theme" class="pm-form-control pm-mb-2" style="width: 100%;">
-                <option value="classic">Classic Obsidian (Default)</option>
-                <option value="tabler">Modern Tabler</option>
-            </select>
+    <!-- UI & Appearance -->
+    <div class="pm-card pm-mb-6">
+        <div class="pm-card-title" style="margin-bottom: 0.5rem; color: var(--pm-primary);">
+            <span class="pm-card-title-icon" style="background-color: var(--pm-primary);"></span>
+            🎨 UI & Appearance
         </div>
-
-        <!-- Modularity Toggles -->
-        <div class="pm-card pm-h-full">
-            <div class="pm-card-title" style="margin-bottom: 0.5rem; color: var(--pm-info);">
-                <span class="pm-card-title-icon" style="background-color: var(--pm-info);"></span>
-                🧩 Modularity & UI Toggles
+        <p class="pm-text-muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">Customize the look and feel of your workspace.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <label class="pm-font-semibold pm-mb-2" style="display: block; color: var(--pm-text-primary);">Base Typography</label>
+                <select id="pm-setting-ui-font" class="pm-form-control" style="width: 100%;">
+                    <option value="system-ui, -apple-system, sans-serif">System Native (Fastest, Default)</option>
+                    <option value="Inter, sans-serif">Inter (Apple-like)</option>
+                    <option value="Outfit, sans-serif">Outfit (Modern, Geometric)</option>
+                    <option value="Roboto, sans-serif">Roboto (Android-like)</option>
+                </select>
             </div>
-            <p class="pm-text-muted" style="margin-bottom: 1rem; font-size: 0.9rem;">Turn off modules you don't use.</p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" id="pm-setting-enable-db-tools" style="width: 1.2rem; height: 1.2rem;">
-                    <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Database Tools Tab <span style="font-size: 0.75rem; background: var(--pm-success); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">FREE</span></span>
-                </label>
-                <label id="pm-lbl-enable-query-wizard" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" id="pm-setting-enable-query-wizard" style="width: 1.2rem; height: 1.2rem;">
-                    <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Query & Mutate Tab <span style="font-size: 0.75rem; background: var(--pm-warning); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">PRO</span></span>
-                </label>
-                <label id="pm-lbl-enable-history" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" id="pm-setting-enable-history" style="width: 1.2rem; height: 1.2rem;">
-                    <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Mutation History Tab <span style="font-size: 0.75rem; background: var(--pm-warning); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">PRO</span></span>
-                </label>
-                <label id="pm-lbl-enable-file-tools" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" id="pm-setting-enable-file-tools" style="width: 1.2rem; height: 1.2rem;">
-                    <span style="font-weight: 500; color: var(--pm-text-primary);">Enable File Tools Tab <span style="font-size: 0.75rem; background: var(--pm-warning); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">PRO</span></span>
-                </label>
-                <label id="pm-lbl-enable-ghost-purger" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" id="pm-setting-enable-ghost-purger" style="width: 1.2rem; height: 1.2rem;">
-                    <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Ghost File Purger <span style="font-size: 0.75rem; background: var(--pm-warning); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">PRO</span></span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: not-allowed; opacity: 0.6;">
-                    <input type="checkbox" id="pm-setting-enable-gdpr-sweeper" style="width: 1.2rem; height: 1.2rem;" disabled>
-                    <span style="font-weight: 500; color: var(--pm-text-primary);">Enable GDPR Sweeper <span style="font-size: 0.75rem; background: var(--pm-neutral); color: var(--pm-white); padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold;">COMING SOON</span></span>
-                </label>
+            <div>
+                <label class="pm-font-semibold pm-mb-2" style="display: block; color: var(--pm-text-primary);">Dashboard UI Theme</label>
+                <select id="pm-setting-ui-theme" class="pm-form-control" style="width: 100%;">
+                    <option value="classic">Classic Obsidian (Default)</option>
+                    <option value="tabler">Modern Tabler</option>
+                </select>
             </div>
         </div>
     </div>

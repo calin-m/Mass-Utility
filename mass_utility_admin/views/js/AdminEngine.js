@@ -196,20 +196,22 @@ function updateTiersDropdowns(tiers) {
     const editTierSelect = document.getElementById('pm-edit-tier');
     if (!newTierSelect || !editTierSelect) return;
     
-    newTierSelect.innerHTML = ''; // nosec
-    editTierSelect.innerHTML = ''; // nosec
-    
-    tiers.forEach(t => {
-        const opt1 = document.createElement('option');
-        opt1.value = t.name;
-        opt1.textContent = t.name.toUpperCase();
-        newTierSelect.appendChild(opt1);
+    if (tiers && tiers.length > 0) {
+        newTierSelect.innerHTML = ''; // nosec
+        editTierSelect.innerHTML = ''; // nosec
         
-        const opt2 = document.createElement('option');
-        opt2.value = t.name;
-        opt2.textContent = t.name.toUpperCase();
-        editTierSelect.appendChild(opt2);
-    });
+        tiers.forEach(t => {
+            const opt1 = document.createElement('option');
+            opt1.value = t.name;
+            opt1.textContent = t.name.toUpperCase();
+            newTierSelect.appendChild(opt1);
+            
+            const opt2 = document.createElement('option');
+            opt2.value = t.name;
+            opt2.textContent = t.name.toUpperCase();
+            editTierSelect.appendChild(opt2);
+        });
+    }
 }
 
 function escapeHtml(str) {
@@ -241,11 +243,11 @@ function renderLicenses(licenses) {
             <td>${emailSafe}</td>
             <td style="font-family: monospace; font-weight: bold; color: var(--pm-warning);">${escapeHtml(l.license_key)}</td>
             <td>${urlSafe}</td>
-            <td><strong>${escapeHtml(l.package_tier.toUpperCase())}</strong></td>
+            <td><strong>${escapeHtml(tierVal.toUpperCase())}</strong></td>
             <td><span class="pm-badge badge-${escapeHtml(l.status)}">${escapeHtml(l.status)}</span></td>
             <td>${escapeHtml(l.expires_at || 'Never')}</td>
             <td>
-                <button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="openEdit(${l.id}, '${escapeHtml(l.package_tier)}', '${escapeHtml(l.status)}', '${escapeHtml(l.expires_at || '')}', '${escapeHtml(l.store_url || '')}')">✏️ Edit</button>
+                <button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="openEdit(${l.id}, '${escapeHtml(tierVal)}', '${escapeHtml(l.status)}', '${escapeHtml(l.expires_at || '')}', '${escapeHtml(l.store_url || '')}')">✏️ Edit</button>
                 ${toggleButton}
             </td>
         `;

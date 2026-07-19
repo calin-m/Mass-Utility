@@ -18,6 +18,51 @@ try {
     if (file_exists($dbPath) && filesize($dbPath) > 0) {
         $pdo = new PDO('sqlite:' . $dbPath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Ensure pm_package_tiers table exists and is seeded (Self-healing repair)
+        $pdo->exec("CREATE TABLE IF NOT EXISTS pm_package_tiers ( // nosec
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(64) UNIQUE NOT NULL,
+            capabilities TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );");
+
+        $stmtTiersCount = $pdo->query("SELECT COUNT(*) FROM pm_package_tiers");
+        if ($stmtTiersCount->fetchColumn() == 0) {
+            $defaultTiers = [
+                'basic' => [
+                    'backup_destinations' => ['local'],
+                    'backup_automation' => false,
+                    'rollback_history_limit' => 0,
+                    'query_visual_execute' => false,
+                    'governor_autopilot' => false,
+                    'sweeper_execution' => false
+                ],
+                'pro' => [
+                    'backup_destinations' => ['local', 'gdrive'],
+                    'backup_automation' => true,
+                    'rollback_history_limit' => 10,
+                    'query_visual_execute' => true,
+                    'governor_autopilot' => true,
+                    'sweeper_execution' => true
+                ],
+                'developer' => [
+                    'backup_destinations' => ['local', 'gdrive'],
+                    'backup_automation' => true,
+                    'rollback_history_limit' => 999,
+                    'query_visual_execute' => true,
+                    'governor_autopilot' => true,
+                    'sweeper_execution' => true
+                ]
+            ];
+            
+            $insertTier = $pdo->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
+            foreach ($defaultTiers as $name => $caps) {
+                $insertTier->execute([$name, json_encode($caps)]);
+            }
+        }
+
         // Simple sanity check on tables
         $stmt = $pdo->query("SELECT COUNT(*) FROM pm_admins");
         $hasAdmin = ((int)$stmt->fetchColumn() > 0);
@@ -82,6 +127,47 @@ if (!$hasAdmin) {
             $pdo->exec("CREATE INDEX IF NOT EXISTS idx_license_key ON pm_licenses(license_key);"); // nosec
             $pdo->exec("CREATE INDEX IF NOT EXISTS idx_admin_user ON pm_admins(username);"); // nosec
             $pdo->exec("CREATE INDEX IF NOT EXISTS idx_client_user ON pm_users(email);"); // nosec
+
+            // Create and seed Tiers table
+            $pdo->exec("CREATE TABLE IF NOT EXISTS pm_package_tiers ( // nosec
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(64) UNIQUE NOT NULL,
+                capabilities TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );");
+
+            $defaultTiers = [
+                'basic' => [
+                    'backup_destinations' => ['local'],
+                    'backup_automation' => false,
+                    'rollback_history_limit' => 0,
+                    'query_visual_execute' => false,
+                    'governor_autopilot' => false,
+                    'sweeper_execution' => false
+                ],
+                'pro' => [
+                    'backup_destinations' => ['local', 'gdrive'],
+                    'backup_automation' => true,
+                    'rollback_history_limit' => 10,
+                    'query_visual_execute' => true,
+                    'governor_autopilot' => true,
+                    'sweeper_execution' => true
+                ],
+                'developer' => [
+                    'backup_destinations' => ['local', 'gdrive'],
+                    'backup_automation' => true,
+                    'rollback_history_limit' => 999,
+                    'query_visual_execute' => true,
+                    'governor_autopilot' => true,
+                    'sweeper_execution' => true
+                ]
+            ];
+            
+            $insertTier = $pdo->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
+            foreach ($defaultTiers as $name => $caps) {
+                $insertTier->execute([$name, json_encode($caps)]);
+            }
 
             // Seed Super Admin
             $hash = password_hash($password, PASSWORD_DEFAULT);
