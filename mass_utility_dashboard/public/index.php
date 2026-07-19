@@ -463,6 +463,31 @@ if (!$isAuthorized && !empty($bridgeToken) && isset($_SERVER['HTTP_X_BRIDGE_TOKE
     $isAuthorized = true;
 }
 
+$suspendedMessage = false;
+if ($isAuthorized) {
+    $licenseKey = $settingsRepo->get('PM_LICENSE_KEY');
+    if (!empty($licenseKey)) {
+        try {
+            $dbCheckPath = dirname(__DIR__) . '/data/pm_cloud_backups.db';
+            if (file_exists($dbCheckPath)) {
+                $pdoCheck = new \PDO('sqlite:' . $dbCheckPath);
+                $pdoCheck->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $stmtCheck = $pdoCheck->prepare("SELECT status FROM pm_licenses WHERE license_key = ?");
+                $stmtCheck->execute([$licenseKey]);
+                $licStatus = $stmtCheck->fetchColumn();
+                if ($licStatus === 'suspended') {
+                    $_SESSION = [];
+                    if (session_status() === PHP_SESSION_ACTIVE) {
+                        session_destroy();
+                    }
+                    $isAuthorized = false;
+                    $suspendedMessage = true;
+                }
+            }
+        } catch (\Throwable $e) {}
+    }
+}
+
 // Webhook endpoints do not require session auth
 $isWebhook = ($path === '/webhook/product-updated');
 
@@ -604,8 +629,11 @@ if (!$isAuthorized && !$isWebhook) {
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                     </svg>
                 </div>
-                <h1>Access Restricted</h1>
-                <p>This Standalone SaaS Dashboard is securely locked. To access this dashboard, please open the PrestaShop back office and click the <strong>Launch Standalone Dashboard</strong> button.</p>
+                <h1><?= $suspendedMessage ? 'License Suspended' : 'Access Restricted' ?></h1>
+                <p><?= $suspendedMessage 
+                    ? 'Your merchant license key has been suspended. Please contact your administrator to reactivate your license.' 
+                    : 'This Standalone SaaS Dashboard is securely locked. To access this dashboard, please open the PrestaShop back office and click the <strong>Launch Standalone Dashboard</strong> button.' 
+                ?></p>
                 <button class="btn" onclick="window.close()">Close Window</button>
             </div>
         </body>

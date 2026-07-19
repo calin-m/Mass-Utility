@@ -218,8 +218,53 @@ class Mass_Utility extends Module
         }
 
         $secureToken = '';
+        $licenseKey = '';
         if (class_exists('\Configuration')) {
             $secureToken = \Configuration::get('PM_SECURE_TOKEN');
+            $licenseKey = \Configuration::get('PM_LICENSE_KEY');
+        }
+
+        // Live status verification check
+        if (!empty($secureToken) && !empty($licenseKey)) {
+            $licensingServer = self::LICENSING_SERVER_URL;
+            $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $checkUrl = rtrim($licensingServer, '/') . '/?action=activate_key';
+            
+            $ch = curl_init($checkUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                'license_key' => $licenseKey,
+                'store_url' => $storeUrl
+            ]));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $res = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            if ($res !== false) {
+                $data = json_decode((string)$res, true);
+                if ($httpCode === 200 && empty($data['success'])) {
+                    $serverError = $data['error'] ?? '';
+                    if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false) {
+                        // Deactivate locally
+                        \Configuration::deleteByName('PM_SECURE_TOKEN');
+                        \Configuration::deleteByName('PM_LICENSE_TIER');
+                        try {
+                            $dbPath = _PS_ROOT_DIR_ . '/mass_utility_dashboard/data/pm_cloud_backups.db';
+                            if (file_exists($dbPath)) {
+                                $pdo = new \PDO('sqlite:' . $dbPath);
+                                $pdo->exec("DROP TABLE IF EXISTS tenant_settings;"); // nosec
+                            }
+                        } catch (\Throwable $e) {}
+                        
+                        $secureToken = '';
+                        $activationError = 'Your license key has been suspended or expired. Please contact the administrator.';
+                    }
+                }
+            }
         }
 
         if (empty($secureToken)) {
