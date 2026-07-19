@@ -983,13 +983,116 @@ if (strpos($path, '/api/v1/') === 0) {
         
         if ($action === 'activate_license') {
             $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
-            $settingsRepo->set('PM_LICENSE_KEY', $payload['key'] ?? '');
-            echo json_encode(['success' => true, 'message' => 'Pro license activated successfully']);
+            $email = $payload['email'] ?? '';
+            $password = $payload['password'] ?? '';
+            $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            
+            if (empty($email) || empty($password)) {
+                echo json_encode(['success' => false, 'error' => 'Email and password are required.']);
+                exit;
+            }
+
+            try {
+                // Query local DB
+                $stmt = $pdo->prepare("SELECT * FROM pm_users WHERE email = ?");
+                $stmt->execute([$email]);
+                $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                if (!$user || !password_verify($password, $user['password_hash'])) {
+                    echo json_encode(['success' => false, 'error' => 'Invalid email or password.']);
+                    exit;
+                }
+
+                // Get or create license
+                $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE user_id = ? AND (store_url = ? OR store_url IS NULL)");
+                $stmt->execute([$user['id'], $storeUrl]);
+                $lic = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                if (!$lic) {
+                    $key = 'MASS-' . strtoupper(bin2hex(random_bytes(8))) . '-' . strtoupper(bin2hex(random_bytes(8)));
+                    $stmt = $pdo->prepare("INSERT INTO pm_licenses (user_id, license_key, store_url, package_tier) VALUES (?, ?, ?, 'basic')");
+                    $stmt->execute([$user['id'], $key, $storeUrl]);
+                    
+                    $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE license_key = ?");
+                    $stmt->execute([$key]);
+                    $lic = $stmt->fetch(\PDO::FETCH_ASSOC);
+                } elseif (empty($lic['store_url'])) {
+                    $stmt = $pdo->prepare("UPDATE pm_licenses SET store_url = ? WHERE id = ?");
+                    $stmt->execute([$storeUrl, $lic['id']]);
+                    $lic['store_url'] = $storeUrl;
+                }
+
+                $tier = $lic['package_tier'];
+                $features = [
+                    'PM_ENABLE_FILE_TOOLS' => ($tier === 'pro' || $tier === 'developer') ? 1 : 0,
+                    'PM_ENABLE_DB_TOOLS' => 1,
+                    'PM_ENABLE_QUERY_WIZARD' => ($tier === 'developer') ? 1 : 0,
+                    'PM_ENABLE_GHOST_PURGER' => ($tier === 'pro' || $tier === 'developer') ? 1 : 0,
+                    'PM_GDRIVE_SYNC' => ($tier === 'pro' || $tier === 'developer') ? 1 : 0,
+                    'PM_RETENTION_RULE' => ($tier === 'pro' || $tier === 'developer') ? 1 : 0
+                ];
+
+                $payloadData = [
+                    'license_key' => $lic['license_key'],
+                    'store_url' => $storeUrl,
+                    'tier' => $tier,
+                    'features' => $features,
+                    'expires_at' => $lic['expires_at'],
+                    'generated_at' => time()
+                ];
+
+                $payloadJson = json_encode($payloadData);
+                $secret = getenv('PM_LICENSE_SIGN_SECRET') ?: 'default_master_sign_secret_key_123';
+                $signature = hash_hmac('sha256', $payloadJson, $secret);
+                $token = base64_encode($payloadJson);
+
+                // Save locally in SQLite
+                $settingsRepo->set('PM_LICENSE_KEY', $lic['license_key']);
+                $settingsRepo->set('PM_LICENSE_TOKEN', $token);
+                $settingsRepo->set('PM_LICENSE_SIGNATURE', $signature);
+
+                // Sync to PrestaShop Bridge
+                try {
+                    $client->request('save_settings', 'POST', [
+                        'settings' => [
+                            'PM_LICENSE_KEY' => $lic['license_key'],
+                            'PM_LICENSE_TOKEN' => $token,
+                            'PM_LICENSE_SIGNATURE' => $signature
+                        ]
+                    ]);
+                } catch (\Throwable $e) {
+                    $logger->log("Failed to sync license token to PrestaShop: " . $e->getMessage(), 'ERROR');
+                }
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'License activated and signed successfully',
+                    'tier' => $tier
+                ]);
+            } catch (\Exception $e) {
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            }
             exit;
         }
         
         if ($action === 'remove_license') {
             $settingsRepo->delete('PM_LICENSE_KEY');
+            $settingsRepo->delete('PM_LICENSE_TOKEN');
+            $settingsRepo->delete('PM_LICENSE_SIGNATURE');
+            
+            // Sync removal to PrestaShop Bridge
+            try {
+                $client->request('save_settings', 'POST', [
+                    'settings' => [
+                        'PM_LICENSE_KEY' => '',
+                        'PM_LICENSE_TOKEN' => '',
+                        'PM_LICENSE_SIGNATURE' => ''
+                    ]
+                ]);
+            } catch (\Throwable $e) {
+                $logger->log("Failed to sync license removal to PrestaShop: " . $e->getMessage(), 'ERROR');
+            }
+            
             echo json_encode(['success' => true]);
             exit;
         }
