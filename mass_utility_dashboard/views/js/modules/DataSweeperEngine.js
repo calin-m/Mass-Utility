@@ -5,94 +5,7 @@
 class DataSweeperEngine {
     static statsTotal = 0;
     static cartsTotal = 0;
-    static isRunning = false;
-    static isAborted = false;
-
-    static initialize() {
-        this.bindAnalyze();
-        this.bindExecute();
-        this.bindAbort();
-    }
-
-    static logConsole(message, type = 'SYSTEM') {
-        const consoleEl = document.getElementById('pm-sweeper-console');
-        if (!consoleEl) return;
-        const timestamp = new Date().toLocaleTimeString();
-        consoleEl.innerHTML += `\n[${timestamp}] [${type}] ${message}`;
-        consoleEl.scrollTop = consoleEl.scrollHeight;
-    }
-
-    static bindAnalyze() {
-        const btnAnalyze = document.getElementById('pm-btn-sweeper-analyze');
-        if (!btnAnalyze) return;
-
-        btnAnalyze.addEventListener('click', () => {
-            const daysSelect = document.getElementById('pm-sweeper-days');
-            const daysOld = daysSelect ? daysSelect.value : 30;
-
-            btnAnalyze.disabled = true;
-            btnAnalyze.innerHTML = '⚡ Scanning Database...'; // nosec
-
-            const scanPromise = FetchEngine.post('sweeper_analyze', { days_old: daysOld });
-            const imagePromise = FetchEngine.post('sweeper_scan_images');
-
-            Promise.all([scanPromise, imagePromise])
-                .then(([data, imageData]) => {
-                    btnAnalyze.disabled = false;
-                    btnAnalyze.innerHTML = '🔍 Run Pre-Flight Scan'; // nosec
-
-                    if (!data.success) {
-                        UiEngine.showAlert('Scan Error', data.error || 'Failed to complete pre-flight scan.');
-                        return;
-                    }
-
-                    // Store row counts
-                    this.statsTotal = data.stats.total;
-                    this.cartsTotal = data.carts.total;
-                    this.orphanedImages = imageData.success ? imageData.orphaned_files : [];
-
-                    // Update UI Readout elements
-                    document.getElementById('pm-scan-connections').innerText = data.stats.connections.toLocaleString();
-                    document.getElementById('pm-scan-pages').innerText = data.stats.connections_page.toLocaleString();
-                    document.getElementById('pm-scan-sources').innerText = data.stats.connections_source.toLocaleString();
-                    document.getElementById('pm-scan-guests').innerText = data.stats.guests.toLocaleString();
-                    document.getElementById('pm-scan-stats-total').innerText = data.stats.total.toLocaleString();
-
-                    document.getElementById('pm-scan-carts').innerText = data.carts.carts.toLocaleString();
-                    document.getElementById('pm-scan-products').innerText = data.carts.cart_products.toLocaleString();
-                    document.getElementById('pm-scan-rules').innerText = data.carts.cart_rules.toLocaleString();
-                    document.getElementById('pm-scan-carts-total').innerText = data.carts.total.toLocaleString();
-
-                    if (imageData.success) {
-                        document.getElementById('pm-scan-images-total').innerText = imageData.scanned_files.toLocaleString();
-                        document.getElementById('pm-scan-images-orphans').innerText = imageData.orphaned_files.length.toLocaleString();
-                        document.getElementById('pm-scan-images-size').innerText = (imageData.total_orphaned_size / 1024 / 1024).toFixed(2) + ' MB';
-                        document.getElementById('pm-check-images-count').innerText = imageData.orphaned_files.length.toLocaleString();
-                    } else {
-                        document.getElementById('pm-scan-images-total').innerText = 'Error';
-                        document.getElementById('pm-scan-images-orphans').innerText = '0';
-                        document.getElementById('pm-scan-images-size').innerText = '0.00 MB';
-                        document.getElementById('pm-check-images-count').innerText = '0';
-                    }
-
-                    // Checkbox counts
-                    document.getElementById('pm-check-stats-count').innerText = data.stats.total.toLocaleString();
-                    document.getElementById('pm-check-carts-count').innerText = data.carts.total.toLocaleString();
-
-                    // Reveal Results
-                    const resultsCard = document.getElementById('pm-sweeper-results-card');
-                    if (resultsCard) {
-                        resultsCard.style.display = 'block';
-                        resultsCard.scrollIntoView({ behavior: 'smooth' });
-                    }
-                })
-/**
- * Project Mass - Data Sweeper Engine (TX-298)
- * Orchestrates the Pre-flight Scan and chunked database purge loops.
- */
-class DataSweeperEngine {
-    static statsTotal = 0;
-    static cartsTotal = 0;
+    static orphanedImages = [];
     static isRunning = false;
     static isAborted = false;
 
@@ -254,7 +167,6 @@ class DataSweeperEngine {
         const daysOld = daysSelect ? parseInt(daysSelect.value) : 30;
         const chunkSize = 5000;
 
-        // Make a mutable copy of the scanned image list for splice operation
         const imagesList = [...(this.orphanedImages || [])];
         const totalExpected = (statsEnabled ? this.statsTotal : 0) + (cartsEnabled ? this.cartsTotal : 0) + (imagesEnabled ? imagesList.length : 0);
         let totalDeleted = 0;
@@ -271,7 +183,6 @@ class DataSweeperEngine {
             if (percentText) percentText.innerText = pct + '%';
         };
 
-        // Recursive execution pipeline
         const executeNext = () => {
             if (this.isAborted) {
                 this.logConsole('Purge loop aborted by user action.', 'ABORTED');
@@ -297,8 +208,7 @@ class DataSweeperEngine {
                         if (!res.done) {
                             setTimeout(executeNext, 200);
                         } else {
-                            // Connections are completely purged, now delete guests
-                            statsEnabled = false; // Move past connection loop
+                            statsEnabled = false;
                             executeNext();
                         }
                     })
@@ -309,7 +219,7 @@ class DataSweeperEngine {
                 return;
             }
 
-            // Step 2: Guest sessions (only run if stats deletion was enabled)
+            // Step 2: Guest sessions
             if (this.statsTotal > 0 && !statsEnabled && this.statsTotal !== -1) {
                 this.logConsole(`Scanning for unreferenced guests in ps_guest...`, 'STATS');
                 document.getElementById('pm-sweeper-progress-text').innerText = 'Sweeping orphaned visitor guest accounts...';
@@ -327,7 +237,7 @@ class DataSweeperEngine {
                         if (!res.done) {
                             setTimeout(executeNext, 200);
                         } else {
-                            this.statsTotal = -1; // Mark guests done
+                            this.statsTotal = -1;
                             executeNext();
                         }
                     })
@@ -356,7 +266,7 @@ class DataSweeperEngine {
                         if (!res.done) {
                             setTimeout(executeNext, 200);
                         } else {
-                            cartsEnabled = false; // Mark carts done
+                            cartsEnabled = false;
                             executeNext();
                         }
                     })
@@ -387,7 +297,7 @@ class DataSweeperEngine {
                             if (imagesList.length > 0) {
                                 setTimeout(executeNext, 200);
                             } else {
-                                imagesEnabled = false; // Mark images done
+                                imagesEnabled = false;
                                 executeNext();
                             }
                         })
@@ -406,7 +316,6 @@ class DataSweeperEngine {
             this.finishSequence(true, `Purged a total of ${totalDeleted.toLocaleString()} items successfully.`);
         };
 
-        // Boot loader recursion
         setTimeout(executeNext, 500);
     }
 
