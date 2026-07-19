@@ -18,14 +18,8 @@ class SQLiteConnectionManager
     public function __construct(Logger $logger)
     {
         $this->logger = $logger;
-        // Resolve database path to the ignored sandbox directory inside SaaS folder
-        $oldDbPath = dirname(dirname(__DIR__)) . '/.sandbox/mass_utility.sqlite';
-        $newDbPath = dirname(dirname(__DIR__)) . '/.sandbox/mass_utility.sqlite';
-        // Check legacy path and migrate dynamically
-        $legacyDbPath = dirname(dirname(__DIR__)) . '/.sandbox/project_mass.sqlite';
-        if (file_exists($legacyDbPath) && !file_exists($newDbPath)) {
-            @rename($legacyDbPath, $newDbPath);
-        }
+        // Resolve database path to the centralized backups registry inside the SaaS data folder
+        $newDbPath = dirname(dirname(__DIR__)) . '/data/pm_cloud_backups.db';
         $this->dbPath = $newDbPath;
     }
 
