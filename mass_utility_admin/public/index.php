@@ -132,6 +132,62 @@ if ($action === 'logout') {
     exit;
 }
 
+if ($action === 'activate_key') {
+    header('Content-Type: application/json');
+    $licenseKey = trim($_POST['license_key'] ?? $_GET['license_key'] ?? '');
+    $storeUrl = trim($_POST['store_url'] ?? $_GET['store_url'] ?? '');
+
+    if (empty($licenseKey) || empty($storeUrl)) {
+        echo json_encode(['success' => false, 'error' => 'License key and store URL are required.']);
+        exit;
+    }
+
+    try {
+        $pdo = new PDO('sqlite:' . $dbPath);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Find the license
+        $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE license_key = ?");
+        $stmt->execute([$licenseKey]);
+        $lic = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$lic) {
+            echo json_encode(['success' => false, 'error' => 'Invalid license key.']);
+            exit;
+        }
+
+        if ($lic['status'] !== 'active') {
+            echo json_encode(['success' => false, 'error' => 'This license is ' . $lic['status'] . '.']);
+            exit;
+        }
+
+        if (!empty($lic['store_url']) && $lic['store_url'] !== $storeUrl) {
+            echo json_encode(['success' => false, 'error' => 'This license key is already bound to another store: ' . $lic['store_url']]);
+            exit;
+        }
+
+        // Generate dynamic secure bridge token
+        $secureToken = bin2hex(random_bytes(32));
+
+        // Bind the store URL in the admin DB if not already set
+        if (empty($lic['store_url'])) {
+            $stmt = $pdo->prepare("UPDATE pm_licenses SET store_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            $stmt->execute([$storeUrl, $lic['id']]);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'secure_token' => $secureToken,
+            'tier' => $lic['package_tier'],
+            'expires_at' => $lic['expires_at']
+        ]);
+        exit;
+    } catch (\Exception $e) {
+        echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
 // API Dispatcher
 if (str_starts_with($action, 'api_')) {
     header('Content-Type: application/json');
