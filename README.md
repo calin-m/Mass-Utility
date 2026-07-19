@@ -54,7 +54,7 @@ To guarantee that no external actors can execute arbitrary database edits or acc
 ### 2.1 Header Authentication
 Every request transmitted to `mass_utility/api.php` must carry the following headers:
 *   `X-Bridge-Token`: Contains the secure authorization hash. This must match the `PM_SECURE_TOKEN` configuration key stored in the PrestaShop database.
-*   `X-Bridge-Version`: Tells the Bridge what API schema version is being requested (default: `1.0.1`).
+*   `X-Bridge-Version`: Tells the Bridge what API schema version is being requested. The gateway strictly validates that this value matches `1.0.0` (as asserted on line 11 in `api.php`).
 
 ### 2.2 One-Time Token (OTT) Redirect Flow
 When the administrator clicks the **Manage Suite** button inside the PrestaShop Admin Panel, the module generates a secure redirect URL:
@@ -90,18 +90,37 @@ By default, the Bridge API restricts incoming traffic to:
 
 ## 🔌 4. API Gateway Reference (api.php & index.php)
 
-The Bridge API routes all operations through the core controller endpoints. The table below outlines the core API actions:
+The system routes operations through a two-tier decoupled API structure: Dashboard AJAX endpoints (local browser-to-dashboard communication) and Bridge Gateway actions (dashboard-to-PrestaShop MySQL communication).
 
-| HTTP Method | Action | Input Parameters | Success Response (JSON) | Description |
+### 4.1 Tier 1: Standalone SaaS Dashboard AJAX Actions (`index.php`)
+These endpoints are sent by the admin browser UI to the Dashboard Backend (`index.php` router).
+
+| Action Key | HTTP Method | Input payload (JSON) | Expected Success Response | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `POST` | `get_server_status` | None | `{"success":true,"load":[0.1,0.05,0.01],"memory":"45%"}` | Returns CPU averages, memory allocations, and disk space usage. |
-| `POST` | `execute_query_ast` | `{"ast": {...}}` | `{"success":true,"rows_affected":12,"execution_time_ms":42}` | Compiles JSON AST, executes database write, and registers rollback state. |
-| `POST` | `get_mutation_history` | `{"page":1,"limit":20}` | `{"success":true,"items":[{"id":1,"query":"...","timestamp":123}]}` | Fetches transactional log records from the local SQLite engine. |
-| `POST` | `clear_mutation_history`| None | `{"success":true,"message":"Log cleared"}` | Wipes database transaction mutation tables. |
-| `POST` | `profile_database` | None | `{"success":true,"fragmented_tables":[]}` | Profiles table optimization and index stats. |
-| `POST` | `backup_table_chunk` | `{"table":"ps_product","offset":0}` | `{"success":true,"offset":5000,"done":false,"file":"..."}` | Dumps table offset block to compressed local Gzip file. |
-| `POST` | `upload_to_gdrive` | `{"filename":"..."}` | `{"success":true,"file_id":"gdrive_abc123"}` | Triggers cloud sync of a local backup file to Google Drive. |
-| `POST` | `disconnect_gdrive` | None | `{"success":true,"message":"Drive unlinked"}` | Destroys local Google Drive OAuth credentials. |
+| `hydrate_dashboard` | `POST` | None | `{"success":true,"presets":[],"logs":[]}` | Initializes the UI state, returning preset ASTs and historical logs. |
+| `execute_mutations` | `POST` | `{"payload":AST_JSON,"actions":[]}` | `{"success":true,"affected_count":12,"done":true}` | Parses the Query Wizard criteria, chunk-paginates matching IDs, and applies updates. |
+| `rollback_mutation` | `POST` | `{"job_id":"job_123"}` | `{"success":true,"message":"Rollback executed"}` | Performs a state rollback using serialized SQLite snapshots. |
+| `get_mutation_history`| `POST` | `{"page":1,"limit":20}` | `{"success":true,"items":[]}` | Retrieves local SQLite transaction records. |
+| `get_auth_status` | `POST` | None | `{"success":true,"licensed":true}` | Asserts handshake status and checks active licenses. |
+| `clear_saas_log` | `POST` | None | `{"success":true}` | Clears the local dashboard debug logging queue. |
+
+### 4.2 Tier 2: Headless Bridge API Actions (`api.php`)
+These endpoints are executed by the Dashboard client to read and write PrestaShop MySQL tables.
+
+| Action Key | HTTP Method | Input Parameters | Success Response (JSON) | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `ping` | `GET` | None | `{"status":"alive","client_cpu":0.05}` | Telemetry check returning CPU cores, memory limits, and PHP settings. |
+| `get_catalog_stats` | `GET` | None | `{"success":true,"products":42}` | Fast count profiles for active products and categories. |
+| `get_categories` | `GET` | `{"id_lang":1}` | `{"success":true,"categories":[]}` | Returns a lookup tree of active categories. |
+| `query_products` | `POST` | `{"ast":AST_JSON}` | `{"success":true,"product_ids":[]}` | Translates AST criteria and returns all matching target product IDs. |
+| `db_query` | `POST` | `{"sql":"...","method":"executeS"}`| `{"success":true,"result":[]}` | Safe execution gateway for reading schemas. |
+| `execute-chunk` | `POST` | `{"queries":[]}` | `{"success":true,"client_cpu":0.1}` | Executes an array of SQL updates wrapped in a single database transaction. |
+
+#### Sub-Controller Action Routing (Bridge Core)
+*   **Database Management (`DatabaseApiController.php`)**: Mapped to actions `create_backup`, `prepare_restore`, `execute_restore_chunk`, `diff_table_rows`, `profile_database`, and `optimize_table`.
+*   **File Backups (`FileToolsApiController.php`)**: Mapped to actions `start_file_backup`, `get_file_backups`, `clear_file_backups`, and `delete_file_backup`.
+*   **Google Drive Cloud Sync (`GoogleDriveApiController.php`)**: Mapped to actions `save_google_tokens`, `init_sync_to_drive`, `upload_sync_chunk`, and `finalize_sync`.
+*   **Maintenance Sweepers (`SweeperApiController.php`)**: Mapped to actions `sweeper_analyze`, `sweeper_sweep_connections`, `sweeper_sweep_guests`, and `sweeper_sweep_carts`.
 
 ---
 
