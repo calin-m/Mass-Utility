@@ -2,12 +2,12 @@
 declare(strict_types=1);
 session_start();
 
-require_once __DIR__ . '/src/Service/AdminSettingsManager.php';
-require_once __DIR__ . '/src/Repository/LicenseRepository.php';
-require_once __DIR__ . '/src/Controller/AdminApiController.php';
+require_once dirname(__DIR__) . '/src/Service/AdminSettingsManager.php';
+require_once dirname(__DIR__) . '/src/Repository/LicenseRepository.php';
+require_once dirname(__DIR__) . '/src/Controller/AdminApiController.php';
 
 // Auto-Migration Bootstrapper for Zero-Config hosting setups
-$dbPath = __DIR__ . '/../mass_utility_dashboard/data/pm_cloud_backups.db';
+$dbPath = dirname(dirname(__DIR__)) . '/mass_utility_dashboard/data/pm_cloud_backups.db';
 $dbDir = dirname($dbPath);
 if (!is_dir($dbDir)) {
     @mkdir($dbDir, 0755, true);
@@ -67,7 +67,7 @@ $auth = new \MassUtilityAdmin\Service\AdminSettingsManager();
 // Simple Router
 if (!$auth->isAuthenticated() && $action !== 'login' && !str_starts_with($action, 'api_')) {
     // Render Login page
-    require_once __DIR__ . '/views/templates/login.tpl';
+    require_once dirname(__DIR__) . '/views/templates/login.tpl';
     exit;
 }
 
@@ -80,7 +80,7 @@ if ($action === 'login') {
             exit;
         } else {
             $error = "Invalid credentials";
-            require_once __DIR__ . '/views/templates/login.tpl';
+            require_once dirname(__DIR__) . '/views/templates/login.tpl';
             exit;
         }
     } else {
@@ -108,4 +108,4 @@ if (str_starts_with($action, 'api_')) {
 }
 
 // Render Dashboard UI
-require_once __DIR__ . '/views/templates/admin_dashboard.tpl';
+require_once dirname(__DIR__) . '/views/templates/admin_dashboard.tpl';

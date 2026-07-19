@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Mass - Super Admin Panel</title>
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="views/css/admin.css">
 </head>
 <body>
     <div class="pm-admin-wrapper">
@@ -141,6 +141,6 @@
         </div>
     </div>
 
-    <script src="js/AdminEngine.js"></script>
+    <script src="views/js/AdminEngine.js"></script>
 </body>
 </html>

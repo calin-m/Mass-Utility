@@ -1,5 +1,9 @@
+# Rewrite rule to forward all traffic to public/index.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ public/index.php [QSA,L]
+</IfModule>
+
 # Disable Directory Indexes for maximum security
 Options -Indexes
-
-# Redirect default root requests to the public router gateway
-DirectoryIndex public/index.php
