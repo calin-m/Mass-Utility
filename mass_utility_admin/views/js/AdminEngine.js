@@ -1,6 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
 
+    // Tab Switching
+    const tabBtns = document.querySelectorAll('.pm-tab-btn');
+    const tabPanes = document.querySelectorAll('.pm-tab-pane');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const targetId = btn.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+        });
+    });
+
+    // Generate Strong Password Button
+    const genPassBtn = document.getElementById('pm-btn-gen-pass');
+    if (genPassBtn) {
+        genPassBtn.addEventListener('click', () => {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+=-';
+            let pass = '';
+            for (let i = 0; i < 16; i++) {
+                pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const passInput = document.getElementById('pm-user-pass');
+            passInput.value = pass;
+            passInput.type = 'text'; // Show temporarily
+            passInput.focus();
+        });
+    }
+
     document.getElementById('pm-user-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('pm-user-email').value;
