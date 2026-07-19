@@ -21,13 +21,15 @@ try {
 
         // Ensure pm_package_tiers table exists and is seeded (Self-healing repair)
         try {
-            $pdo->exec("CREATE TABLE IF NOT EXISTS pm_package_tiers (" . // nosec
+            $pdo->exec( // nosec
+                "CREATE TABLE IF NOT EXISTS pm_package_tiers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(64) UNIQUE NOT NULL,
                 capabilities TEXT NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );");
+            );"
+            );
 
             $stmtTiersCount = $pdo->query("SELECT COUNT(*) FROM pm_package_tiers");
             if ($stmtTiersCount->fetchColumn() == 0) {
@@ -133,13 +135,15 @@ if (!$hasAdmin) {
             $pdo->exec("CREATE INDEX IF NOT EXISTS idx_client_user ON pm_users(email);"); // nosec
 
             // Create and seed Tiers table
-            $pdo->exec("CREATE TABLE IF NOT EXISTS pm_package_tiers (" . // nosec
+            $pdo->exec( // nosec
+                "CREATE TABLE IF NOT EXISTS pm_package_tiers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(64) UNIQUE NOT NULL,
                 capabilities TEXT NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );");
+            );"
+            );
 
             $defaultTiers = [
                 'basic' => [
