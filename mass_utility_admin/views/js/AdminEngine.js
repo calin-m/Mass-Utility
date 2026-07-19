@@ -172,10 +172,13 @@ async function loadData() {
         } else {
             if (result.error && result.error.includes('Unauthenticated')) {
                 window.location.href = 'index.php';
+            } else {
+                alert('API Error: ' + result.error);
             }
         }
     } catch (err) {
         console.error('Failed to load data', err);
+        alert('Network Error loading data: ' + err.message);
     }
 }
 
