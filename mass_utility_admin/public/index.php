@@ -65,22 +65,28 @@ $action = $_GET['action'] ?? '';
 $auth = new \MassUtilityAdmin\Service\AdminSettingsManager();
 
 // Simple Router
-if (!$auth->isAuthenticated() && $action !== 'login') {
+if (!$auth->isAuthenticated() && $action !== 'login' && !str_starts_with($action, 'api_')) {
     // Render Login page
     require_once dirname(__DIR__) . '/views/templates/login.tpl';
     exit;
 }
 
 if ($action === 'login') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    if ($auth->login($username, $password)) {
-        header("Location: index.php");
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $username = $_POST['username'] ?? '';
+        $password = $_POST['password'] ?? '';
+        if (!empty($username) && !empty($password) && $auth->login($username, $password)) {
+            header("Location: index.php");
+            exit;
+        } else {
+            $error = "Invalid credentials";
+            require_once dirname(__DIR__) . '/views/templates/login.tpl';
+            exit;
+        }
     } else {
-        $error = "Invalid credentials";
-        require_once dirname(__DIR__) . '/views/templates/login.tpl';
+        header("Location: index.php");
+        exit;
     }
-    exit;
 }
 
 if ($action === 'logout') {
@@ -92,6 +98,10 @@ if ($action === 'logout') {
 // API Dispatcher
 if (str_starts_with($action, 'api_')) {
     header('Content-Type: application/json');
+    if (!$auth->isAuthenticated()) {
+        echo json_encode(['success' => false, 'error' => 'Unauthenticated session. Please log in again.']);
+        exit;
+    }
     $controller = new \MassUtilityAdmin\Controller\AdminApiController($auth);
     $controller->execute($action);
     exit;

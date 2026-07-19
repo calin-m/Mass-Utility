@@ -101,6 +101,10 @@ async function loadData() {
         if (result.success) {
             renderLicenses(result.licenses);
             updateUsersDropdown(result.users);
+        } else {
+            if (result.error && result.error.includes('Unauthenticated')) {
+                window.location.href = 'index.php';
+            }
         }
     } catch (err) {
         console.error('Failed to load data', err);
