@@ -11,7 +11,7 @@ window.SettingsEngine = (function() {
     }
 
     function hydrateSettings(data) {
-        settings = data || {};
+        settings = Object.assign({}, settings, data || {});
         if (window.PM_CONFIG) {
             window.PM_CONFIG.settings = settings;
         }

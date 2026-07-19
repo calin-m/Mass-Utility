@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-19 09:42:29 UTC
+ * Generated: 2026-07-19 09:47:57 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -451,7 +451,7 @@ window.SettingsEngine = (function() {
     }
 
     function hydrateSettings(data) {
-        settings = data || {};
+        settings = Object.assign({}, settings, data || {});
         if (window.PM_CONFIG) {
             window.PM_CONFIG.settings = settings;
         }

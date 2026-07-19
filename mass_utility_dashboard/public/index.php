@@ -984,7 +984,7 @@ if (strpos($path, '/api/v1/') === 0) {
         if ($action === 'activate_license') {
             $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
             $settingsRepo->set('PM_LICENSE_KEY', $payload['key'] ?? '');
-            echo json_encode(['success' => true]);
+            echo json_encode(['success' => true, 'message' => 'Pro license activated successfully']);
             exit;
         }
         
