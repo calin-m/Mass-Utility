@@ -82,9 +82,7 @@ d:/Project Mass/
 │   │   │   └── QueryTranslationEngine.php  # AST compiler, query whitelist, rollback compiler
 │   │   └── Governor/
 │   │       └── SafetyGovernor.php          # Monitors system averages & maintenance thresholds
-│   └── upgrade/
-│       └── upgrade-2.0.0.php       # Upgrade migration routine hooks
-│
+│   │
 ├── mass_utility_dashboard/         # MERCHANTS CLIENT PORTAL (Standalone Dashboard)
 │   ├── public/
 │   │   └── index.php               # Front Router gateway, OTT decryptor, OAuth broker callback

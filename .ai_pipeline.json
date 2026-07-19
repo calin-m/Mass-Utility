@@ -59,7 +59,6 @@
         "mass_utility_dashboard/tests/phpstan-bootstrap.php",
         "mass_utility/api.php",
         "mass_utility/mass_utility.php",
-        "mass_utility/upgrade/upgrade-2.0.0.php",
         "mass_utility_dashboard/views/js/mass_utility.bundle.js",
         "mass_utility_dashboard/views/js/mass_utility.js",
         "README.md",
