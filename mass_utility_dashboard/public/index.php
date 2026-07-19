@@ -472,10 +472,11 @@ if ($isAuthorized) {
             if (file_exists($dbCheckPath)) {
                 $pdoCheck = new \PDO('sqlite:' . $dbCheckPath);
                 $pdoCheck->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-                $stmtCheck = $pdoCheck->prepare("SELECT status FROM pm_licenses WHERE license_key = ?");
-                $stmtCheck->execute([$licenseKey]);
-                $licStatus = $stmtCheck->fetchColumn();
-                if ($licStatus === 'suspended') {
+                $stmtCheck = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSE_STATUS'");
+                $stmtCheck->execute();
+                $valJson = $stmtCheck->fetchColumn();
+                $licStatus = $valJson ? json_decode($valJson, true) : 'active';
+                if ($licStatus === 'suspended' || $licStatus === 'expired') {
                     unset($_SESSION['employee_id']);
                     $isAuthorized = false;
                     $suspendedMessage = true;
@@ -964,6 +965,97 @@ if (strpos($path, '/api/v1/') === 0) {
             $stmt = $pdo->query('SELECT * FROM `tenant_settings`');
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $settings[$row['name']] = json_decode($row['value'], true) ?? $row['value'];
+            }
+
+            // Check & Sync License changes dynamically from central admin server on load
+            $licKey = $settings['PM_LICENSE_KEY'] ?? '';
+            if (!empty($licKey)) {
+                $licServer = $settings['PM_LICENSING_SERVER_URL'] ?? 'https://startviziune.ro/mass_utility_admin';
+                $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                
+                try {
+                    $ch = curl_init(rtrim($licServer, '/') . '/?action=activate_key');
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                        'license_key' => $licKey,
+                        'store_url' => $storeUrl
+                    ]));
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    $res = curl_exec($ch);
+                    curl_close($ch);
+                    
+                    if ($res) {
+                        $resData = json_decode($res, true);
+                        if (!empty($resData['success'])) {
+                            // Sync status as active
+                            $upStmt = $pdo->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
+                            $upStmt->execute(['PM_LICENSE_STATUS', json_encode('active')]);
+
+                            // Decode active token
+                            $currentToken = $settings['PM_LICENSE_TOKEN'] ?? '';
+                            
+                            // Re-generate local token with new tier/capabilities if they changed
+                            $newTier = $resData['tier'];
+                            $newCaps = $resData['capabilities'] ?? null;
+                            
+                            // Check if current token payload matches
+                            $currentTier = 'free';
+                            if (!empty($currentToken)) {
+                                try {
+                                    $currPayload = json_decode(base64_decode($currentToken), true);
+                                    $currentTier = $currPayload['tier'] ?? 'free';
+                                } catch (\Throwable $tokEx) {}
+                            }
+                            
+                            if ($currentTier !== $newTier) {
+                                // Re-sign token
+                                $payloadData = [
+                                    'license_key' => $licKey,
+                                    'store_url' => $storeUrl,
+                                    'tier' => $newTier,
+                                    'features' => [
+                                        'capabilities' => $newCaps
+                                    ],
+                                    'expires_at' => $resData['expires_at'] ?? null,
+                                    'generated_at' => time()
+                                ];
+                                $payloadJson = json_encode($payloadData);
+                                $secret = getenv('PM_LICENSE_SIGN_SECRET') ?: 'default_master_sign_secret_key_123';
+                                $signature = hash_hmac('sha256', $payloadJson, $secret);
+                                $token = base64_encode($payloadJson);
+                                
+                                $upStmt->execute(['PM_LICENSE_TOKEN', json_encode($token)]);
+                                $upStmt->execute(['PM_LICENSE_SIGNATURE', json_encode($signature)]);
+                                
+                                // Reload settings locally for response
+                                $settings['PM_LICENSE_TOKEN'] = $token;
+                                $settings['PM_LICENSE_SIGNATURE'] = $signature;
+                            }
+                        } else {
+                            // If key check returned suspended or expired, store the status locally and lock out
+                            $serverError = $resData['error'] ?? '';
+                            $statusVal = 'active';
+                            if (strpos(strtolower($serverError), 'suspended') !== false) {
+                                $statusVal = 'suspended';
+                            } elseif (strpos(strtolower($serverError), 'expired') !== false) {
+                                $statusVal = 'expired';
+                            }
+                            
+                            if ($statusVal === 'suspended' || $statusVal === 'expired') {
+                                $upStmt = $pdo->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
+                                $upStmt->execute(['PM_LICENSE_STATUS', json_encode($statusVal)]);
+                                
+                                // Return the exact license error to the browser
+                                echo json_encode(['success' => false, 'error' => $serverError]);
+                                exit;
+                            }
+                        }
+                    }
+                } catch (\Throwable $syncEx) {
+                    // Ignore licensing check exceptions to prevent dashboard boot lockups
+                }
             }
             
             echo json_encode([

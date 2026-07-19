@@ -750,6 +750,7 @@ class Mass_Utility extends Module
             $stmt = $pdo->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
             $stmt->execute(['PM_LICENSE_KEY', json_encode($licenseKey)]);
             $stmt->execute(['PM_BRIDGE_TOKEN', json_encode($secureToken)]);
+            $stmt->execute(['PM_LICENSING_SERVER_URL', json_encode(self::LICENSING_SERVER_URL)]);
             
             // Setup capabilities fallback if missing (e.g. offline activation fallback)
             if (empty($capabilities)) {
