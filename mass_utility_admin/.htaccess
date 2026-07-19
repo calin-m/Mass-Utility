@@ -20,6 +20,10 @@ Options -Indexes -MultiViews
     RewriteCond %{THE_REQUEST} \s.*/public/([^\s?]*) [NC]
     RewriteRule ^public/(.*)$ %1 [R=301,L]
 
+    # Redirect direct requests for index.php to the clean root folder URL
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ .*/index\.php\ HTTP/ [NC]
+    RewriteRule ^index\.php$ ./ [R=301,L]
+
     # Block direct browser access to source and templates folders (403 Forbidden)
     RewriteRule ^(src|tests|views/templates)($|/) - [F,L]
 
