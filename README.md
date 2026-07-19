@@ -16,8 +16,8 @@ sequenceDiagram
     actor Admin as Store Administrator
     participant Dashboard as Standalone SaaS Dashboard
     participant Bridge as PrestaShop Module Bridge (api.php)
-    database MySQL as Shop Database (MariaDB)
-    database SQLite as Local Sandbox DB (mass_utility.sqlite)
+    participant MySQL as Shop Database (MariaDB)
+    participant SQLite as Local Sandbox DB (mass_utility.sqlite)
 
     Admin->>Dashboard: Input SQL Mutation in Query Wizard
     Note over Dashboard: FetchEngine compiles query to JSON AST
