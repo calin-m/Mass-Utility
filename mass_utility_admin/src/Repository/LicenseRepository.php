@@ -32,6 +32,12 @@ class LicenseRepository
 
     public function createUser(string $email, string $password, ?string $company): int
     {
+        $checkStmt = $this->db->prepare("SELECT id FROM pm_users WHERE email = ?");
+        $checkStmt->execute([$email]);
+        if ($checkStmt->fetch()) {
+            throw new \Exception("A client account with this email address already exists.");
+        }
+
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $this->db->prepare("INSERT INTO pm_users (email, password_hash, company_name) VALUES (?, ?, ?)");
         $stmt->execute([$email, $hash, $company]);
