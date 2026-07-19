@@ -1,0 +1,3 @@
+# Protect SQLite database from direct HTTP downloads
+Order deny,allow
+Deny from all
