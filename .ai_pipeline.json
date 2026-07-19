@@ -1,0 +1,164 @@
+{
+    "framework_version": "1.0.0",
+    "directories": {
+        "docs": ".bench/docs/",
+        "source": "./"
+    },
+    "scripts": {
+        "auto_document": "python .orchestra/.conductor/tools/cli_auto_documenter.py",
+        "build": "php .bench/scripts/build_js.php",
+        "map_frontend": "php .bench/scripts/generate_frontend_map.php",
+        "map_architecture": "python .bench/scripts/generate_architecture_graph.py",
+        "map_interconnectivity": "php .bench/scripts/generate_interconnectivity_map.php",
+        "security_audit": "python .orchestra/.conductor/tools/cli_security_audit.py"
+    },
+    "pre_commit_hooks": [
+        "auto_document",
+        "build",
+        "map_frontend",
+        "map_architecture",
+        "map_interconnectivity",
+        "security_audit"
+    ],
+    "phpstan_targets": [
+        "mass_utility_dashboard/src",
+        "mass_utility_admin/src"
+    ],
+    "ignore_doc_lint_paths": [
+        "mass_utility.php",
+        "bin/cli_backup.php",
+        "bin/cli_restore.php",
+        "bin/cli_backup_worker.php",
+        "bin/generate_architecture_graph.php"
+    ],
+    "monitored_extensions": [
+        ".php",
+        ".js",
+        ".css",
+        ".tpl",
+        ".md"
+    ],
+    "monitored_directories": [
+        "src",
+        "views",
+        "bin",
+        ".bench/docs",
+        ".orchestra"
+    ],
+    "ignore_ghost_files": [
+        "mass_utility/build/generate_interconnectivity_map.php",
+        "mass_utility_dashboard/bin/build_js.php",
+        "mass_utility_dashboard/.htaccess",
+        "mass_utility_dashboard/data/.htaccess",
+        "mass_utility_admin/src/.htaccess",
+        "mass_utility_admin/views/templates/.htaccess",
+        "mass_utility_dashboard/autoload.php",
+        "mass_utility_dashboard/phpstan.neon",
+        "mass_utility_dashboard/public/index.php",
+        "mass_utility_dashboard/public/dev_bootstrap.php",
+        "mass_utility_dashboard/tests/phpstan-bootstrap.php",
+        "mass_utility/api.php",
+        "mass_utility/mass_utility.php",
+        "mass_utility/upgrade/upgrade-2.0.0.php",
+        "mass_utility_dashboard/views/js/mass_utility.bundle.js",
+        "mass_utility_dashboard/views/js/mass_utility.js",
+        "README.md",
+        "WORKSPACE.md",
+        ".ai_plan.md",
+        "mass_utility/bin/test_license_encryption.php",
+        "mass_utility_dashboard/bin/migration.php",
+        "mass_utility_dashboard/src/Controller/Api/LicenseVerifyController.php",
+        "mass_utility_admin/public/index.php",
+        "mass_utility_admin/src/Controller/AdminApiController.php",
+        "mass_utility_admin/src/Repository/LicenseRepository.php",
+        "mass_utility_admin/src/Service/AdminSettingsManager.php",
+        "mass_utility_admin/views/css/admin.css",
+        "mass_utility_admin/views/js/AdminEngine.js",
+        "mass_utility_admin/views/templates/admin_dashboard.tpl",
+        "mass_utility_admin/views/templates/login.tpl",
+        "mass_utility_admin/views/templates/setup.tpl",
+        "mass_utility_admin/README.md",
+        "mass_utility/README.md",
+        "mass_utility_dashboard/README.md",
+        "mass_utility_admin/.htaccess"
+    ],
+    "health_audit_log": ".bench/docs/audits/active_audit.md",
+    "legacy_coupling_targets": [
+        "mass_utility_dashboard/src",
+        "mass_utility_dashboard/views"
+    ],
+    "legacy_coupling_patterns": {
+        "Db::getInstance": "Legacy MariaDB connection",
+        "ObjectModel": "Legacy ActiveRecord model class",
+        "Context::getContext": "Legacy Global Context dependency",
+        "Configuration::get": "Legacy PrestaShop Config usage"
+    },
+    "oop_namespaces": {
+        "MassUtility\\SaaS\\": "mass_utility_dashboard/src/",
+        "MassUtility\\": "mass_utility/src/"
+    },
+    "architecture_graphs": [
+        {
+            "namespace": "MassUtility\\Dashboard",
+            "source": "mass_utility_dashboard/src/",
+            "output": ".bench/docs/dashboard/architecture/00_auto_generated_oop_map.md"
+        },
+        {
+            "namespace": "MassUtility",
+            "source": "mass_utility/src/",
+            "output": ".bench/docs/bridge/architecture/00_auto_generated_oop_map.md"
+        }
+    ],
+    "language_syntax": {
+        ".js": {
+            "comment": "//"
+        },
+        ".php": {
+            "comment": "//"
+        },
+        ".py": {
+            "comment": "#"
+        },
+        ".css": {
+            "comment": "/*"
+        },
+        ".tpl": {
+            "comment": "{*"
+        }
+    },
+    "dictionary_mappings": {
+        "Bridge_OOP_Map": ".bench/docs/bridge/architecture/00_auto_generated_oop_map.md",
+        "Bridge_Pipeline": ".bench/docs/bridge/architecture/01_backend_pipeline.md",
+        "Bridge_Integration": ".bench/docs/bridge/architecture/02_integration_matrix.md",
+        "Bridge_Settings": ".bench/docs/bridge/architecture/08_settings_contract_map.md",
+        "Dashboard_OOP_Map": ".bench/docs/dashboard/architecture/00_auto_generated_oop_map.md",
+        "Dashboard_Pipeline": ".bench/docs/dashboard/architecture/01_backend_pipeline.md",
+        "Dashboard_Interconnectivity": ".bench/docs/dashboard/architecture/02_interconnectivity_map.md",
+        "Dashboard_Engine_Capabilities": ".bench/docs/dashboard/architecture/07_engine_capabilities_map.md",
+        "Frontend_Map": ".bench/docs/dashboard/frontend/00_auto_generated_frontend_map.md",
+        "UI_Components": ".bench/docs/dashboard/frontend/01_ui_component_map.md",
+        "DOM_Modals": ".bench/docs/dashboard/frontend/02_dom_and_modals_map.md",
+        "JS_Engine": ".bench/docs/dashboard/frontend/03_javascript_engine_map.md",
+        "CSS_Tokens": ".bench/docs/dashboard/frontend/04_css_tokens_map.md"
+    },
+    "doc_lint_targets": {
+        "Bridge Module": {
+            "docs_dir": ".bench/docs/bridge",
+            "module_dir": "mass_utility"
+        },
+        "SaaS Dashboard": {
+            "docs_dir": ".bench/docs/dashboard",
+            "module_dir": "mass_utility_dashboard"
+        }
+    },
+    "trace_patterns": [
+        {
+            "language": "js",
+            "regex": "FetchEngine\\.(?:post|get)\\('(?P<action>[a-zA-Z0-9_]+)'\\)"
+        },
+        {
+            "language": "php",
+            "regex": "\\$action\\s*===\\s*'(?P<action>[a-zA-Z0-9_]+)'"
+        }
+    ]
+}
