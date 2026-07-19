@@ -163,6 +163,15 @@ window.SettingsEngine = (function() {
         if (document.getElementById('pm-setting-backup-max-days')) {
             document.getElementById('pm-setting-backup-max-days').value = settings.PM_BACKUP_MAX_DAYS || "0";
         }
+        if (document.getElementById('pm-setting-backup-cloud-max-count')) {
+            document.getElementById('pm-setting-backup-cloud-max-count').value = settings.PM_BACKUP_CLOUD_MAX_COUNT || "0";
+        }
+        if (document.getElementById('pm-setting-backup-cloud-max-days')) {
+            document.getElementById('pm-setting-backup-cloud-max-days').value = settings.PM_BACKUP_CLOUD_MAX_DAYS || "0";
+        }
+        if (document.getElementById('pm-setting-backup-frequency')) {
+            document.getElementById('pm-setting-backup-frequency').value = settings.PM_BACKUP_FREQUENCY || "0";
+        }
         if (document.getElementById('pm-setting-backup-cron-auto')) {
             document.getElementById('pm-setting-backup-cron-auto').checked = parseInt(settings.PM_BACKUP_CRON_AUTO ?? 1) === 1;
         }
@@ -330,6 +339,9 @@ window.SettingsEngine = (function() {
                         PM_CUSTOM_DISK_QUOTA_GB: document.getElementById('pm-setting-custom-quota').value || "0",
                         PM_BACKUP_MAX_COUNT: document.getElementById('pm-setting-backup-max-count').value || "0",
                         PM_BACKUP_MAX_DAYS: document.getElementById('pm-setting-backup-max-days').value || "0",
+                        PM_BACKUP_CLOUD_MAX_COUNT: document.getElementById('pm-setting-backup-cloud-max-count').value || "0",
+                        PM_BACKUP_CLOUD_MAX_DAYS: document.getElementById('pm-setting-backup-cloud-max-days').value || "0",
+                        PM_BACKUP_FREQUENCY: document.getElementById('pm-setting-backup-frequency').value || "0",
                         PM_BACKUP_CRON_AUTO: document.getElementById('pm-setting-backup-cron-auto').checked ? 1 : 0
                     }
                 };

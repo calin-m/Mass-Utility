@@ -28,6 +28,33 @@ if (class_exists('Configuration')) {
     if ($cronAuto !== false && (int)$cronAuto === 0) {
         die("Info: Automated scheduled backups are disabled in settings. Exiting.\n");
     }
+
+    $frequency = (int)\Configuration::getGlobalValue('PM_BACKUP_FREQUENCY');
+    if ($frequency > 0) {
+        $moduleDir = dirname(__DIR__);
+        $backupDir = $moduleDir . '/backups/files/';
+        $latestTime = 0;
+        if (is_dir($backupDir)) {
+            $files = glob($backupDir . 'site_backup_*', GLOB_ONLYDIR);
+            if (is_array($files)) {
+                foreach ($files as $fileDir) {
+                    $base = basename($fileDir);
+                    $tarPath = $fileDir . '/' . $base . '.tar';
+                    if (file_exists($tarPath)) {
+                        $mtime = filemtime($tarPath);
+                        if ($mtime > $latestTime) {
+                            $latestTime = $mtime;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($latestTime > 0 && (time() - $latestTime) < $frequency) {
+            $timeLeft = $frequency - (time() - $latestTime);
+            die("Info: Backup frequency throttle active. Last backup was " . (time() - $latestTime) . " seconds ago. Needs to wait " . $timeLeft . " more seconds. Exiting.\n");
+        }
+    }
 }
 
 $moduleDir = dirname(__DIR__);

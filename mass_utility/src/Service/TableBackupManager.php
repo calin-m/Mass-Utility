@@ -898,7 +898,8 @@ class TableBackupManager
                             'date' => filemtime($sqlFile),
                             'is_uploaded' => false,
                             'is_local' => true,
-                            'is_cloud' => false
+                            'is_cloud' => false,
+                            'is_pinned' => file_exists($dir . '/.pinned')
                         ];
                         $backups[] = $bData;
                         $localMap[$baseName] = true;
@@ -1353,6 +1354,10 @@ class TableBackupManager
                 $folderPath = $this->backupDir . $basename . '/';
                 if (!is_dir($folderPath)) {
                     continue;
+                }
+
+                if (file_exists($folderPath . '.pinned')) {
+                    continue; // Skip pinned backups from retention sweep
                 }
 
                 $shouldDelete = false;

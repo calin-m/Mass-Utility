@@ -474,4 +474,36 @@ class DatabaseApiController extends AbstractApiController
             $this->sendErrorResponse($e->getMessage());
         }
     }
+
+    protected function togglePinBackup(): void
+    {
+        try {
+            $file = Tools::getValue('file');
+            if (empty($file)) {
+                throw new Exception('Missing backup file name.');
+            }
+            $dir = _PS_MODULE_DIR_ . 'mass_utility/backups/' . preg_replace('/(\.sql\.gz|\.log)$/', '', $file) . '/';
+            $pinFile = $dir . '.pinned';
+            
+            if (file_exists($pinFile)) {
+                @unlink($pinFile);
+                $pinned = false;
+            } else {
+                if (!is_dir($dir)) {
+                    @mkdir($dir, 0755, true);
+                }
+                @file_put_contents($pinFile, (string)time());
+                $pinned = true;
+            }
+            
+            $backups = $this->backupManager->getBackupList();
+            $this->sendJsonResponse([
+                'success' => true,
+                'pinned' => $pinned,
+                'backups' => $this->formatBackupResponse($backups)
+            ]);
+        } catch (Exception $e) {
+            $this->sendErrorResponse($e->getMessage());
+        }
+    }
 }

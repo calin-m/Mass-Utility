@@ -234,6 +234,27 @@ class FileToolsEngine {
                 return;
             }
 
+            const btnPin = e.target.closest('.pm-btn-pin-file, .pm-btn-unpin-file');
+            if (btnPin) {
+                const backupName = btnPin.getAttribute('data-backup');
+                btnPin.disabled = true;
+                FetchEngine.post('toggle_pin_file_backup', { file: backupName })
+                .then(data => {
+                    if (data.success) {
+                        window.showPremiumToast(data.pinned ? '📌 Backup pinned successfully' : '📌 Backup unpinned');
+                        FileToolsEngine.renderGrid(data.backups || []);
+                    } else {
+                        window.showPremiumToast(data.error || 'Failed to toggle pin', 'error');
+                        btnPin.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    window.showPremiumToast('Network error while toggling pin', 'error');
+                    btnPin.disabled = false;
+                });
+                return;
+            }
+
             const btnVerify = e.target.closest('.pm-btn-verify-backup');
             if (btnVerify) {
                 const backupName = btnVerify.getAttribute('data-backup');
@@ -345,9 +366,14 @@ class FileToolsEngine {
                 ` + actionsHtml;
             }
             if (b.is_local) {
+                const pinText = b.is_pinned ? '📌 Unpin' : '📌 Pin';
+                const pinClass = b.is_pinned ? 'pm-btn-unpin-file pm-btn-success' : 'pm-btn-pin-file pm-btn-neutral';
                 actionsHtml += `
                 <button type="button" class="pm-btn pm-btn-sm pm-btn-delete-file-backup pm-btn-danger" data-backup="${safeName}" title="Delete Local">
                     🗑️ Delete
+                </button>
+                <button type="button" class="pm-btn pm-btn-sm ${pinClass}" data-backup="${safeName}" title="Toggle Pin">
+                    ${pinText}
                 </button>
                 `;
             } else {

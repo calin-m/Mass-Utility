@@ -342,6 +342,28 @@ const DatabaseToolsEngine = (function() {
                         }
                     );
                 });
+ 
+                document.addEventListener('click', function(e) {
+                    const btn = e.target.closest('.pm-btn-pin, .pm-btn-unpin');
+                    if (!btn) return;
+                    
+                    const backupFile = btn.getAttribute('data-backup');
+                    btn.disabled = true;
+                    FetchEngine.post('toggle_pin_backup', { file: backupFile })
+                        .then(data => {
+                            if (data.success) {
+                                showPremiumToast(data.pinned ? '📌 Backup pinned successfully' : '📌 Backup unpinned');
+                                pmRenderAllGrids(data.backups || []);
+                            } else {
+                                showPremiumToast(data.error || 'Failed to toggle pin', 'error');
+                                btn.disabled = false;
+                            }
+                        })
+                        .catch(err => {
+                            showPremiumToast('Network error while toggling pin', 'error');
+                            btn.disabled = false;
+                        });
+                });
 
 
 
@@ -475,10 +497,13 @@ const DatabaseToolsEngine = (function() {
                              actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-compare pm-btn-purple" data-backup="${escapeHtml(b.basename)}" title="Compare Diff">🔍 Diff</button>`;
                          }
                          if (b.is_local !== false) {
-                             actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-delete pm-btn-danger" data-backup="${escapeHtml(b.basename)}" title="Delete Local">🗑️ Delete</button>`;
-                         } else {
-                             actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-cloud-restore pm-btn-purple" data-backup="${escapeHtml(b.basename)}" data-type="database" title="Restore Local">☁️ Restore</button>`;
-                         }
+                              const pinText = b.is_pinned ? '📌 Unpin' : '📌 Pin';
+                              const pinClass = b.is_pinned ? 'pm-btn-unpin pm-btn-success' : 'pm-btn-pin pm-btn-neutral';
+                              actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-delete pm-btn-danger" data-backup="${escapeHtml(b.basename)}" title="Delete Local">🗑️ Delete</button>`;
+                              actionsHtml += `<button type="button" class="pm-btn pm-btn-sm ${pinClass}" data-backup="${escapeHtml(b.basename)}" title="Toggle Pin">${pinText}</button>`;
+                          } else {
+                              actionsHtml += `<button type="button" class="pm-btn pm-btn-sm pm-btn-cloud-restore pm-btn-purple" data-backup="${escapeHtml(b.basename)}" data-type="database" title="Restore Local">☁️ Restore</button>`;
+                          }
 
                         trData.innerHTML = /* nosec */ `
                             <td style="vertical-align: middle;">

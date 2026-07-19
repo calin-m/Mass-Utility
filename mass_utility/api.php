@@ -442,7 +442,7 @@ if ($action === 'execute-chunk') {
 }
 
 // 5. Dispatch controller actions
-$dbActions = ['download_backup', 'create_backup', 'compare_backup', 'prepare_restore', 'execute_restore_chunk', 'complete_restore', 'upload_restore_file', 'delete_backup', 'clear_backup_history', 'diff_table_rows', 'export_diff', 'profile_database', 'optimize_table', 'get_categorized_tables', 'get_db_backups', 'get_fragmentation_status'];
+$dbActions = ['download_backup', 'create_backup', 'compare_backup', 'prepare_restore', 'execute_restore_chunk', 'complete_restore', 'upload_restore_file', 'delete_backup', 'toggle_pin_backup', 'clear_backup_history', 'diff_table_rows', 'export_diff', 'profile_database', 'optimize_table', 'get_categorized_tables', 'get_db_backups', 'get_fragmentation_status'];
 if (in_array($action, $dbActions, true)) {
     require_once __DIR__ . '/src/Service/BridgeLogger.php';
     require_once __DIR__ . '/src/Service/TableBackupManager.php';
@@ -462,7 +462,7 @@ if (in_array($action, $dbActions, true)) {
     exit;
 }
 
-$fileActions = ['download_file_backup', 'download_file_backup_log', 'start_file_backup', 'clear_file_backups', 'delete_file_backup', 'verify_backup_integrity', 'get_directory_tree', 'save_exclusions', 'get_file_backups'];
+$fileActions = ['download_file_backup', 'download_file_backup_log', 'start_file_backup', 'clear_file_backups', 'delete_file_backup', 'toggle_pin_file_backup', 'verify_backup_integrity', 'get_directory_tree', 'save_exclusions', 'get_file_backups'];
 if (in_array($action, $fileActions, true)) {
     require_once __DIR__ . '/src/Service/BridgeLogger.php';
     require_once __DIR__ . '/src/Service/FileBackupEngine.php';

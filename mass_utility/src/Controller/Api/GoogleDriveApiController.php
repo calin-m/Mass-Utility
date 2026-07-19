@@ -219,13 +219,14 @@ class GoogleDriveApiController extends AbstractApiController
                 throw new Exception("Missing parameters: file, folder_id, and type are required.");
             }
 
-
+            // Trigger Cloud Retention sweep logic on successful upload
+            $this->sweepCloudBackups($type);
 
             $backups = $this->getHydratedBackups($type);
 
             $this->sendJsonResponse([
                 'success' => true,
-                'message' => 'Sync finalized successfully.',
+                'message' => 'Sync finalized successfully and cloud retention applied.',
                 'backups' => $backups
             ]);
         } catch (Exception $e) {
@@ -622,4 +623,73 @@ class GoogleDriveApiController extends AbstractApiController
         }
         return $backups;
     }
+
+    private function sweepCloudBackups(string $type): void
+    {
+        try {
+            $maxCount = (int)Configuration::getGlobalValue('PM_BACKUP_CLOUD_MAX_COUNT');
+            $maxDays = (int)Configuration::getGlobalValue('PM_BACKUP_CLOUD_MAX_DAYS');
+
+            if ($maxCount <= 0 && $maxDays <= 0) {
+                return;
+            }
+
+            $subFolderName = ($type === 'database') ? 'Database Backups' : 'File Backups';
+            $masterFolderId = $this->client->getOrCreateFolder('Mass Utility');
+            $subFolderId = $this->client->getOrCreateFolder($subFolderName, $masterFolderId);
+
+            // List folders inside backups (each folder maps to a backup instance)
+            $cloudFolders = $this->client->listFilesInFolder($subFolderId, 'files(id,name,createdTime)');
+            if (empty($cloudFolders)) {
+                return;
+            }
+
+            // Sort folders oldest first (chronological createdTime sorting)
+            usort($cloudFolders, function ($a, $b) {
+                return strcmp($a['createdTime'] ?? '', $b['createdTime'] ?? '');
+            });
+
+            $now = time();
+
+            foreach ($cloudFolders as $index => $folder) {
+                // Check if pinned locally to avoid sweeping
+                $localBaseName = preg_replace('/\.tar$/', '', $folder['name']);
+                $localDbDir = _PS_MODULE_DIR_ . 'mass_utility/backups/' . $localBaseName . '/';
+                $localFileDir = _PS_MODULE_DIR_ . 'mass_utility/backups/files/' . $localBaseName . '/';
+                
+                if (file_exists($localDbDir . '.pinned') || file_exists($localFileDir . '.pinned')) {
+                    continue; // Skip pinned backups from cloud purge
+                }
+
+                $shouldDelete = false;
+
+                // 1. Cloud Age-based purge
+                if ($maxDays > 0 && isset($folder['createdTime'])) {
+                    $createdTimestamp = strtotime($folder['createdTime']);
+                    if ($createdTimestamp > 0 && ($now - $createdTimestamp) > ($maxDays * 86400)) {
+                        $shouldDelete = true;
+                    }
+                }
+
+                // 2. Cloud Count-based purge
+                if ($maxCount > 0 && !$shouldDelete) {
+                    $remainingCount = count($cloudFolders) - $index;
+                    if ($remainingCount > $maxCount) {
+                        $shouldDelete = true;
+                    }
+                }
+
+                if ($shouldDelete) {
+                    // Delete Google Drive folder recursively
+                    $this->client->deleteFile($folder['id']);
+                    unset($cloudFolders[$index]);
+                }
+            }
+        } catch (\Throwable $e) {
+            if (isset($this->logger) && method_exists($this->logger, 'logError')) {
+                $this->logger->logError("Cloud retention purge failed: " . $e->getMessage());
+            }
+        }
+    }
 }
+

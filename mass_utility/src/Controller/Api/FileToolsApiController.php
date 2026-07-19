@@ -423,4 +423,36 @@ class FileToolsApiController extends AbstractApiController
             $this->sendErrorResponse($e->getMessage());
         }
     }
+
+    protected function togglePinFileBackup(): void
+    {
+        try {
+            $file = Tools::getValue('file');
+            if (empty($file)) {
+                throw new Exception('Missing backup file name.');
+            }
+            $baseName = preg_replace('/\.tar$/', '', $file);
+            $dir = _PS_MODULE_DIR_ . 'mass_utility/backups/files/' . $baseName . '/';
+            $pinFile = $dir . '.pinned';
+            
+            if (file_exists($pinFile)) {
+                @unlink($pinFile);
+                $pinned = false;
+            } else {
+                if (!is_dir($dir)) {
+                    @mkdir($dir, 0755, true);
+                }
+                @file_put_contents($pinFile, (string)time());
+                $pinned = true;
+            }
+            
+            $this->sendJsonResponse([
+                'success' => true,
+                'pinned' => $pinned,
+                'backups' => $this->formatBackups($this->fileBackupEngine->getBackupList())
+            ]);
+        } catch (Exception $e) {
+            $this->sendErrorResponse($e->getMessage());
+        }
+    }
 }

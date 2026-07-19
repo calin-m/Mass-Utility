@@ -444,7 +444,8 @@ class FileBackupEngine
                         'duration' => $duration,
                         'has_log' => $hasLog,
                         'is_local' => true,
-                        'is_cloud' => false
+                        'is_cloud' => false,
+                        'is_pinned' => file_exists($dir . '/.pinned')
                     ];
                     $localMap[$baseName . '.tar'] = true;
                 }
@@ -535,6 +536,12 @@ class FileBackupEngine
 
             foreach ($backups as $index => $b) {
                 $basename = preg_replace('/\.tar$/', '', $b['basename']);
+                $folderPath = $this->backupDir . $basename . '/';
+                
+                if (file_exists($folderPath . '.pinned')) {
+                    continue; // Skip pinned backups from retention sweep
+                }
+
                 $shouldDelete = false;
 
                 // 1. Age-based

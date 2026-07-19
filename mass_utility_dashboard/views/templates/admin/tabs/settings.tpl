@@ -259,17 +259,51 @@
         </div>
         <p class="pm-text-muted" style="margin-bottom: 1.25rem; font-size: 0.9rem;">Configure automatic pruning policies and scheduled crons execution limits.</p>
 
+        <!-- Dual-Tier Retention Configuration Grid -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
-            <div>
-                <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Backups to Keep</label>
-                <input type="number" id="pm-setting-backup-max-count" class="pm-form-control" min="0" placeholder="5 (0 to disable)" style="width: 100%;">
-                <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Automatically prunes oldest archives once limit is reached.</p>
+            <!-- Local Storage Limits -->
+            <div style="padding: 1rem; border: 1px dashed var(--pm-border-color); border-radius: 6px;">
+                <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--pm-text-primary); margin-bottom: 0.75rem;">💾 Local Retention (Host Server)</h4>
+                <div style="margin-bottom: 0.75rem;">
+                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Local Backups to Keep</label>
+                    <input type="number" id="pm-setting-backup-max-count" class="pm-form-control" min="0" placeholder="0 for Infinite backups" style="width: 100%;">
+                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 for infinite local retention (never prune).</p>
+                </div>
+                <div>
+                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Local Age (Days)</label>
+                    <input type="number" id="pm-setting-backup-max-days" class="pm-form-control" min="0" placeholder="0 for Infinite retention" style="width: 100%;">
+                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 to keep backups regardless of age.</p>
+                </div>
             </div>
-            <div>
-                <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-primary);">Maximum Age of Backups (Days)</label>
-                <input type="number" id="pm-setting-backup-max-days" class="pm-form-control" min="0" placeholder="30 (0 to disable)" style="width: 100%;">
-                <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Backups older than this will be deleted automatically.</p>
+            <!-- Cloud Storage Limits -->
+            <div style="padding: 1rem; border: 1px dashed var(--pm-border-color); border-radius: 6px;">
+                <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--pm-warning); margin-bottom: 0.75rem;">☁️ Cloud Retention (Google Drive)</h4>
+                <div style="margin-bottom: 0.75rem;">
+                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Cloud Backups to Keep</label>
+                    <input type="number" id="pm-setting-backup-cloud-max-count" class="pm-form-control" min="0" placeholder="0 for Infinite backups" style="width: 100%;">
+                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 for infinite cloud retention.</p>
+                </div>
+                <div>
+                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Cloud Age (Days)</label>
+                    <input type="number" id="pm-setting-backup-cloud-max-days" class="pm-form-control" min="0" placeholder="0 for Infinite retention" style="width: 100%;">
+                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 to ignore cloud backup age limits.</p>
+                </div>
             </div>
+        </div>
+
+        <!-- Backup Frequency Selection -->
+        <div style="padding-top: 1.25rem; border-top: 1px solid var(--pm-border-color); margin-bottom: 1.25rem;">
+            <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-primary);">Backup Frequency Throttle</label>
+            <select id="pm-setting-backup-frequency" class="pm-form-control" style="width: 100%;">
+                <option value="0">No Throttling (Always execute backup when triggered)</option>
+                <option value="3600">Hourly (Minimum 1 hour between backups)</option>
+                <option value="86400">Daily (Minimum 24 hours between backups)</option>
+                <option value="604800">Weekly (Minimum 7 days between backups)</option>
+                <option value="2592000">Monthly (Minimum 30 days between backups)</option>
+            </select>
+            <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">
+                Avoids resource spikes on shared hosting. Scheduled runs of <code>cli_backup.php</code> will exit early if the time since the last successful backup is less than the minimum interval.
+            </p>
         </div>
 
         <div style="padding-top: 1.25rem; border-top: 1px solid var(--pm-border-color);">
