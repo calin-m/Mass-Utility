@@ -261,96 +261,131 @@
 
 <!-- Inner Sub-panel 2: Documentation & Info -->
 <div class="pm-settings-tab-content" id="pm-settings-pane-info" style="display: none;">
-    <style>
-        .pm-markdown-body h1, .pm-markdown-body h2, .pm-markdown-body h3, .pm-markdown-body h4 {
-            font-family: var(--pm-font-family-heading);
-            color: var(--pm-card-title-color);
-            margin-top: 1.75rem;
-            margin-bottom: 0.85rem;
-            font-weight: 600;
-        }
-        .pm-markdown-body h1 { font-size: 1.6rem; border-bottom: 2px solid var(--pm-border-color); padding-bottom: 0.5rem; }
-        .pm-markdown-body h2 { font-size: 1.3rem; border-bottom: 1px solid var(--pm-border-color); padding-bottom: 0.35rem; }
-        .pm-markdown-body h3 { font-size: 1.1rem; }
-        .pm-markdown-body p { margin-bottom: 1rem; color: var(--pm-text-secondary); line-height: 1.6; }
-        .pm-markdown-body code {
-            font-family: monospace;
-            background: rgba(var(--pm-primary-rgb, 59, 130, 246), 0.1);
-            color: var(--pm-primary);
-            padding: 0.15rem 0.35rem;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-        .pm-markdown-body pre {
-            background: rgba(0,0,0,0.03);
-            border: 1px solid var(--pm-border-color);
-            padding: 1.25rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-bottom: 1.25rem;
-        }
-        .pm-markdown-body pre code {
-            background: transparent;
-            color: var(--pm-text-primary);
-            padding: 0;
-            font-size: 0.85rem;
-        }
-        .pm-markdown-body ul, .pm-markdown-body ol {
-            margin-bottom: 1.25rem;
-            padding-left: 1.5rem;
-            color: var(--pm-text-secondary);
-            line-height: 1.6;
-        }
-        .pm-markdown-body li { margin-bottom: 0.4rem; }
-        .pm-markdown-body table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1.5rem;
-            font-size: 0.85rem;
-        }
-        .pm-markdown-body th, .pm-markdown-body td {
-            border: 1px solid var(--pm-border-color);
-            padding: 0.65rem 0.85rem;
-            text-align: left;
-        }
-        .pm-markdown-body th {
-            background: rgba(0,0,0,0.02);
-            color: var(--pm-card-title-color);
-            font-weight: 600;
-        }
-        .pm-markdown-body hr {
-            border: 0;
-            border-top: 1px solid var(--pm-border-color);
-            margin: 1.75rem 0;
-        }
-        .pm-markdown-body blockquote {
-            border-left: 4px solid var(--pm-primary);
-            padding-left: 1rem;
-            margin-left: 0;
-            margin-bottom: 1.25rem;
-            font-style: italic;
-            color: var(--pm-text-secondary);
-        }
-    </style>
-
-    <div class="pm-section-header pm-flex-between pm-flex-wrap pm-gap-2">
-        <div>
-            <h2 class="pm-h2">Module Documentation & Manual</h2>
-            <p class="pm-text-muted">In-depth guide on the Mass Utility module's architecture and procedural operations.</p>
-        </div>
-        <button type="button" id="pm-btn-reload-readme" class="pm-btn pm-btn-primary pm-text-xs" style="padding: 0.45rem 1rem;">
-            🔄 Refresh Manual
-        </button>
+    <div class="pm-section-header">
+        <h2 class="pm-h2">Module Documentation & Manual</h2>
+        <p class="pm-text-muted">In-depth guide on the Mass Utility module's architecture and procedural operations.</p>
     </div>
 
-    <!-- Live Markdown Render Area -->
-    <div class="pm-card pm-mb-6" style="padding: 2rem; background: var(--pm-card-bg); border: 1px solid var(--pm-border-color); border-radius: 12px; overflow-x: auto;">
-        <div id="pm-readme-render-area" class="pm-markdown-body">
-            <div class="pm-flex-center pm-gap-2" style="justify-content: center; padding: 3rem 0; color: var(--pm-text-secondary);">
-                <span class="pm-card-title-icon pm-bg-primary" style="animation: pm-pulse 1.5s infinite;"></span>
-                <span>Fetching and rendering live manual...</span>
+    <div class="pm-card pm-mb-6">
+        <div class="pm-card-title" style="margin-bottom: 1.5rem; color: var(--pm-primary);">
+            <span class="pm-card-title-icon" style="background-color: var(--pm-primary);"></span>
+            1. Core Architectural Pipeline Guide
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Simulation Mode -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">⚙️ Simulation Mode (Dry Run) Process</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>AST Compilation:</strong> Translates visual rules builder JSON payload into an Abstract Syntax Tree structure.</li>
+                    <li><strong>Query Isolation:</strong> Compiles AST rule groups into a read-only MySQL <code>SELECT</code> query instead of a destructive write statement.</li>
+                    <li><strong>Pre-flight Audit:</strong> Returns affected target row counts and metadata, rendering changes visually without committing real mutations.</li>
+                </ol>
+            </div>
+
+            <!-- Database Backups -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">🗄️ Database Backups & Table Drift Detection</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Schema Mapping:</strong> Groups MySQL tables into Core, Catalog, and Sales categories dynamically.</li>
+                    <li><strong>Chunked Dump:</strong> Iterates target tables using <code>SELECT * LIMIT [size] OFFSET [x]</code> streaming straight into a <code>gzwrite</code> file buffer, keeping memory below 2MB.</li>
+                    <li><strong>Drift Analysis:</strong> The frontend computes a diff between the loaded preset's table configurations and the database's actual schema, throwing a visual warning if newly created tables are detected.</li>
+                </ol>
+            </div>
+
+            <!-- InnoDB Defragmenter -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">📈 InnoDB Optimizer & Defragmentation</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Fragmentation Profiling:</strong> Queries target tables dynamically using <code>INFORMATION_SCHEMA</code> space metrics to detect fragmentation levels and data overhead.</li>
+                    <li><strong>Index Rebuilding:</strong> Runs safe, non-destructive table optimization commands (e.g. <code>OPTIMIZE TABLE</code>) table-by-table.</li>
+                    <li><strong>SSD Reclamation:</strong> Reclaims unused disk pages and fragmented indexes, releasing unused storage space back to host OS SSD boundaries.</li>
+                </ol>
+            </div>
+
+            <!-- File Tools -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">📁 File Tools: Streaming TAR/GZIP Archival</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Exclusions Scan:</strong> Parses folder tree selections and stores unchecked paths as exclusions inside settings.</li>
+                    <li><strong>CLI Streaming:</strong> Spawns an external native shell process (<code>tar</code> CLI via <code>proc_open</code>) to stream file compression.</li>
+                    <li><strong>Checksum Validation:</strong> Automatically calculates and writes a SHA256 checksum in a parallel sidecar file on completion.</li>
+                </ol>
+            </div>
+
+            <!-- Google Drive Cloud Sync -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">☁️ Google Drive Cloud Sync & Streaming Restore</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Resumable Session:</strong> Initiates a Google Drive resumable upload session endpoint.</li>
+                    <li><strong>Chunked Streaming:</strong> Uploads binary backup packets in 5MB chunks directly to cloud servers, bypassing local memory limits.</li>
+                    <li><strong>SSE Cloud Restore:</strong> Streams bytes from Google Cloud via curl callbacks directly into local storage files, monitoring download progress via Server-Sent Events.</li>
+                </ol>
+            </div>
+
+            <!-- Query & Mutate -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">⚡ Query & Mutate Deadlock Shield</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Query Fetching:</strong> Compiles and queries index-only primary key IDs of targeted products.</li>
+                    <li><strong>Numeric Sorting:</strong> Sorts target IDs in ascending numerical order (e.g. <code>[5, 10, 15]</code>) to enforce deterministic InnoDB row locking.</li>
+                    <li><strong>Lock Shield:</strong> Acquires row locks and applies mutations sequentially, preventing cross-thread database deadlocks.</li>
+                </ol>
+            </div>
+
+            <!-- History and Rollback -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">🕒 Mutation History & Reversion Rollbacks</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Pre-Update Snapshot:</strong> Queries and caches all columns of targeted rows in a serialized JSON snapshot.</li>
+                    <li><strong>Sandbox Archival:</strong> Records the JSON snapshot to the local SQLite database.</li>
+                    <li><strong>Reversion:</strong> When rolling back, parses the JSON state and builds precise targeted <code>UPDATE</code> queries restoring historical values.</li>
+                </ol>
+            </div>
+
+            <!-- Data Sweeper -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">🧹 Data Sweeper Cleanup Pipeline</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Bloat Assessment:</strong> Scans tables and reports count metrics of connections, guests, logs, and expired carts.</li>
+                    <li><strong>Chunked Deletion:</strong> Runs iterative limits-capped queries (e.g., <code>DELETE LIMIT 500</code>).</li>
+                    <li><strong>InnoDB Lock Breathing:</strong> Pauses deletion for 50ms between chunks, allowing other customer transaction threads to execute.</li>
+                </ol>
+            </div>
+
+            <!-- Ghost Product Image Sweeper -->
+            <div style="border-bottom: 1px solid var(--pm-border-color); padding-bottom: 1rem;">
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">🖼️ Ghost Product Image Sweeper</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Catalog Sync Scan:</strong> Cross-references physical product image subdirectories in PrestaShop <code>/img/p/</code> with DB image references.</li>
+                    <li><strong>Orphan Identification:</strong> Identifies unreferenced legacy image files and orphan database connections.</li>
+                    <li><strong>Safe Disk Sweeping:</strong> Safely purges physical files and purifies database images records without breaking catalog integrity.</li>
+                </ol>
+            </div>
+
+            <!-- Backup Retention Rules -->
+            <div>
+                <h4 style="color: var(--pm-text-primary); margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">🕒 Automatic Backup Retention & Storage Cleaners</h4>
+                <ol style="color: var(--pm-text-secondary); line-height: 1.5; padding-left: 1.2rem; margin: 0;">
+                    <li><strong>Policy Verification:</strong> Checks count limits and age policies (maximum age in days) defined in your backup policies.</li>
+                    <li><strong>Old File Pruning:</strong> Checks directory archives during database/file backups or CLI cron runs.</li>
+                    <li><strong>Automatic Pruning:</strong> Prunes the oldest SQL and TAR archives to automatically keep host storage clean.</li>
+                </ol>
             </div>
         </div>
+    </div>
+
+    <!-- Troubleshooting Card -->
+    <div class="pm-card pm-mb-6">
+        <div class="pm-card-title" style="margin-bottom: 1rem; color: var(--pm-danger);">
+            <span class="pm-card-title-icon" style="background-color: var(--pm-danger);"></span>
+            2. Administrator Troubleshooting
+        </div>
+        <ul style="color: var(--pm-text-secondary); line-height: 1.6; margin: 0; padding-left: 1.2rem; font-size: 0.95rem;">
+            <li><strong>File backup fails:</strong> Lower the <em>TAR Streaming Append Threshold</em> to 10MB or 20MB.</li>
+            <li><strong>Database export timeouts:</strong> Reduce the <em>Database Row Chunk</em> to 1000 or 500 rows.</li>
+            <li><strong>Cloud Sync setup:</strong> Input Google developer client credentials and ensure the Redirect URI is properly registered in Google Cloud Console.</li>
+        </ul>
     </div>
 </div>
 </div>
