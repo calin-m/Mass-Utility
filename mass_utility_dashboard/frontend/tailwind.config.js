@@ -1,3 +1,5 @@
+// @Arch[FrontendConfig]
+// @Description: Tailwind CSS configuration file mapping Obsidian design tokens.
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [

@@ -1,3 +1,5 @@
+/* @Arch[FrontendStyles] */
+/* @Description: Core stylesheet loading Tailwind directives. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

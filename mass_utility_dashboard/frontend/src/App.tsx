@@ -1,3 +1,5 @@
+// @Arch[FrontendApp]
+// @Description: Root React component managing dashboard state and layout tabs.
 import React, { useState } from 'react';
 
 export default function App() {
