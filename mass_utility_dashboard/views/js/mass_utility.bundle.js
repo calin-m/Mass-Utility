@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-20 06:16:31 UTC
+ * Generated: 2026-07-20 06:25:30 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -1095,9 +1095,49 @@ window.SettingsEngine = (function() {
         }
     }
 
+    function updateCloudSettingsVisibility(isConnected) {
+        const defaultDownloadSelect = document.getElementById('pm-setting-gdrive-default-download');
+        const cloudMaxCountInput = document.getElementById('pm-setting-backup-cloud-max-count');
+        const cloudMaxDaysInput = document.getElementById('pm-setting-backup-cloud-max-days');
+        const downloadGroup = document.getElementById('pm-group-gdrive-default-download');
+        const cloudRetentionGroup = document.getElementById('pm-group-gdrive-retention');
+
+        if (isConnected) {
+            if (defaultDownloadSelect) defaultDownloadSelect.disabled = false;
+            if (cloudMaxCountInput) cloudMaxCountInput.disabled = false;
+            if (cloudMaxDaysInput) cloudMaxDaysInput.disabled = false;
+
+            if (downloadGroup) {
+                downloadGroup.style.opacity = '1';
+                downloadGroup.style.pointerEvents = 'auto';
+            }
+            if (cloudRetentionGroup) {
+                cloudRetentionGroup.style.opacity = '1';
+                cloudRetentionGroup.style.pointerEvents = 'auto';
+            }
+        } else {
+            if (defaultDownloadSelect) {
+                defaultDownloadSelect.value = 'local';
+                defaultDownloadSelect.disabled = true;
+            }
+            if (cloudMaxCountInput) cloudMaxCountInput.disabled = true;
+            if (cloudMaxDaysInput) cloudMaxDaysInput.disabled = true;
+
+            if (downloadGroup) {
+                downloadGroup.style.opacity = '0.4';
+                downloadGroup.style.pointerEvents = 'none';
+            }
+            if (cloudRetentionGroup) {
+                cloudRetentionGroup.style.opacity = '0.4';
+                cloudRetentionGroup.style.pointerEvents = 'none';
+            }
+        }
+    }
+
     return {
         init: init,
-        hydrateSettings: hydrateSettings
+        hydrateSettings: hydrateSettings,
+        updateCloudSettingsVisibility: updateCloudSettingsVisibility
     };
 })();
 
@@ -3749,21 +3789,8 @@ class GoogleDriveEngine {
                 btnConnect.style.display = 'none';
                 btnDisconnect.style.display = 'inline-block';
             }
-            const downloadSourceDropdown = document.getElementById('pm-setting-gdrive-default-download');
-            if (!data.configured || !data.authenticated) {
-                if (downloadSourceDropdown) {
-                    if (downloadSourceDropdown.value === 'cloud') {
-                        downloadSourceDropdown.value = 'local';
-                        FetchEngine.post('save_settings', {
-                            settings: { PM_GDRIVE_DEFAULT_DOWNLOAD: 'local' }
-                        }).catch(() => {});
-                    }
-                    downloadSourceDropdown.disabled = true;
-                }
-            } else {
-                if (downloadSourceDropdown) {
-                    downloadSourceDropdown.disabled = false;
-                }
+            if (window.SettingsEngine && window.SettingsEngine.updateCloudSettingsVisibility) {
+                window.SettingsEngine.updateCloudSettingsVisibility(data.authenticated && data.configured);
             }
 
             this.updateGridsUI();

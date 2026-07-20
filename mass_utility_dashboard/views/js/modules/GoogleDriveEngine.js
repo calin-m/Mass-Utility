@@ -145,21 +145,8 @@ class GoogleDriveEngine {
                 btnConnect.style.display = 'none';
                 btnDisconnect.style.display = 'inline-block';
             }
-            const downloadSourceDropdown = document.getElementById('pm-setting-gdrive-default-download');
-            if (!data.configured || !data.authenticated) {
-                if (downloadSourceDropdown) {
-                    if (downloadSourceDropdown.value === 'cloud') {
-                        downloadSourceDropdown.value = 'local';
-                        FetchEngine.post('save_settings', {
-                            settings: { PM_GDRIVE_DEFAULT_DOWNLOAD: 'local' }
-                        }).catch(() => {});
-                    }
-                    downloadSourceDropdown.disabled = true;
-                }
-            } else {
-                if (downloadSourceDropdown) {
-                    downloadSourceDropdown.disabled = false;
-                }
+            if (window.SettingsEngine && window.SettingsEngine.updateCloudSettingsVisibility) {
+                window.SettingsEngine.updateCloudSettingsVisibility(data.authenticated && data.configured);
             }
 
             this.updateGridsUI();

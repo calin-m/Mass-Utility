@@ -43,47 +43,23 @@
                 <ul id="pm-license-features-checklist" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem; color: var(--pm-text-primary);">
                     <!-- Populated dynamically via JS -->
                 </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- GOOGLE DRIVE OFFSITE REDUNDANCY CARD -->
+              <!-- GOOGLE DRIVE OFFSITE REDUNDANCY & BACKUP RETENTION CARD -->
     <div class="pm-card pm-mb-6" id="pm-gdrive-card">
         <div class="pm-card-title pm-flex-between pm-flex-wrap pm-gap-2">
             <div class="pm-flex-center pm-gap-2">
                 <span class="pm-card-title-icon" style="background-color: var(--pm-purple);"></span>
-                ☁️ Google Drive Offsite Redundancy
+                ☁️ Backup, Cloud Sync & Retention Control
             </div>
             <span id="pm-gdrive-badge" class="pm-status-pill" style="font-size: 0.65rem; padding: 0.2rem 0.6rem; font-weight: 700;">
                 Checking...
             </span>
         </div>
         <p class="pm-text-sm pm-text-muted pm-mb-4" style="line-height: 1.45;">
-            Configure Google Drive integration to sync site and database backups directly to the cloud. High-performance, chunk-streamed uploads avoid shared hosting memory limits.
+            Configure Google Drive offsite storage integration, manage local and cloud retention policies, and schedule background backup crons.
         </p>
 
-        <!-- Default Download Source -->
-        <div style="margin-bottom: 1rem; border-top: 1px solid var(--pm-border-color); padding-top: 1rem;">
-            <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Default Download Source</label>
-            <select id="pm-setting-gdrive-default-download" class="pm-form-control" style="width: 100%; font-size: 0.8rem; padding: 0.4rem 0.6rem; max-width: 300px;">
-                <option value="cloud">Cloud (Google Drive)</option>
-                <option value="local">Local Filesystem</option>
-            </select>
-            <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">If a backup exists in both places, which one should be downloaded when you click "Download"? (It will automatically fallback if one is deleted).</p>
-        </div>
-
-        <!-- Automated Backups Staging Cleanup -->
-        <div style="margin-bottom: 1rem; border-top: 1px solid var(--pm-border-color); padding-top: 1rem;">
-            <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Automated Backup Staging Cleanup</label>
-            <select id="pm-setting-cleanup-backups" class="pm-form-control" style="width: 100%; font-size: 0.8rem; padding: 0.4rem 0.6rem; max-width: 300px;">
-                <option value="1">Enabled (Delete local staging files > 24 hours)</option>
-                <option value="0">Disabled (Retain all local files indefinitely)</option>
-            </select>
-            <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Cleans up local temporary backup files (.tar, .sql.gz, and .log) created during the offsite cloud backup staging process to prevent shared hosting quota exhaustion.</p>
-        </div>
-
         <!-- Connection Control Panel -->
-        <div id="pm-gdrive-control-panel" style="display: none; background: rgba(var(--pm-purple-rgb), 0.03); border: 1px dashed rgba(var(--pm-purple-rgb), 0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <div id="pm-gdrive-control-panel" style="display: none; background: rgba(var(--pm-purple-rgb), 0.03); border: 1px dashed rgba(var(--pm-purple-rgb), 0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <strong style="color: var(--pm-text-primary); font-size: 0.85rem; display: block;" id="pm-gdrive-conn-status">Checking connection status...</strong>
@@ -98,6 +74,87 @@
                     </button>
                 </div>
             </div>
+        </div>
+
+        <!-- Settings Grid for General Backup & Downloader Options -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; border-top: 1px solid var(--pm-border-color); padding-top: 1rem;">
+            <!-- Default Download Source -->
+            <div id="pm-group-gdrive-default-download">
+                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Default Download Source</label>
+                <select id="pm-setting-gdrive-default-download" class="pm-form-control" style="width: 100%; font-size: 0.8rem; padding: 0.4rem 0.6rem;">
+                    <option value="cloud">Cloud (Google Drive)</option>
+                    <option value="local">Local Filesystem</option>
+                </select>
+                <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Default download source fallback when backups exist in both locations.</p>
+            </div>
+
+            <!-- Automated Backups Staging Cleanup -->
+            <div>
+                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Automated Backup Staging Cleanup</label>
+                <select id="pm-setting-cleanup-backups" class="pm-form-control" style="width: 100%; font-size: 0.8rem; padding: 0.4rem 0.6rem;">
+                    <option value="1">Enabled (Delete local staging files &gt; 24 hours)</option>
+                    <option value="0">Disabled (Retain all local files indefinitely)</option>
+                </select>
+                <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Automatically purges staging `.tar` / `.sql.gz` / `.log` files after cloud sync is complete.</p>
+            </div>
+        </div>
+
+        <!-- Dual-Tier Retention Configuration Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; border-top: 1px solid var(--pm-border-color); padding-top: 1rem;">
+            <!-- Local Storage Limits -->
+            <div style="padding: 1rem; border: 1px dashed var(--pm-border-color); border-radius: 6px;">
+                <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--pm-text-primary); margin-bottom: 0.75rem;">💾 Local Retention (Host Server)</h4>
+                <div style="margin-bottom: 0.75rem;">
+                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Local Backups to Keep</label>
+                    <input type="number" id="pm-setting-backup-max-count" class="pm-form-control" min="0" placeholder="0 for Infinite backups" style="width: 100%;">
+                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 for infinite local retention (never prune).</p>
+                </div>
+                <div>
+                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Local Age (Days)</label>
+                    <input type="number" id="pm-setting-backup-max-days" class="pm-form-control" min="0" placeholder="0 for Infinite retention" style="width: 100%;">
+                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 to keep backups regardless of age.</p>
+                </div>
+            </div>
+
+            <!-- Cloud Storage Limits -->
+            <div id="pm-group-gdrive-retention" style="padding: 1rem; border: 1px dashed var(--pm-border-color); border-radius: 6px;">
+                <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--pm-warning); margin-bottom: 0.75rem;">☁️ Cloud Retention (Google Drive)</h4>
+                <div style="margin-bottom: 0.75rem;">
+                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Cloud Backups to Keep</label>
+                    <input type="number" id="pm-setting-backup-cloud-max-count" class="pm-form-control" min="0" placeholder="0 for Infinite backups" style="width: 100%;">
+                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 for infinite cloud retention.</p>
+                </div>
+                <div>
+                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Cloud Age (Days)</label>
+                    <input type="number" id="pm-setting-backup-cloud-max-days" class="pm-form-control" min="0" placeholder="0 for Infinite retention" style="width: 100%;">
+                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 to ignore cloud backup age limits.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup Frequency Selection -->
+        <div style="padding-top: 1.25rem; border-top: 1px solid var(--pm-border-color); margin-bottom: 1.25rem;">
+            <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-primary);">Backup Frequency Throttle</label>
+            <select id="pm-setting-backup-frequency" class="pm-form-control" style="width: 100%;">
+                <option value="0">No Throttling (Always execute backup when triggered)</option>
+                <option value="3600">Hourly (Minimum 1 hour between backups)</option>
+                <option value="86400">Daily (Minimum 24 hours between backups)</option>
+                <option value="604800">Weekly (Minimum 7 days between backups)</option>
+                <option value="2592000">Monthly (Minimum 30 days between backups)</option>
+            </select>
+            <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">
+                Avoids resource spikes on shared hosting. Scheduled runs of cli_backup.php will exit early if the minimum interval threshold is not reached.
+            </p>
+        </div>
+
+        <div style="padding-top: 1.25rem; border-top: 1px solid var(--pm-border-color);">
+            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                <input type="checkbox" id="pm-setting-backup-cron-auto" style="width: 1.2rem; height: 1.2rem;">
+                <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Scheduled Background Backups (via Cron CLI)</span>
+            </label>
+            <p class="pm-text-muted" style="font-size: 0.8rem; margin-top: 0.25rem; padding-left: 2rem; margin-bottom: 0;">
+                If disabled, automated crontab execution calls of cli_backup.php will exit early. Manual backups triggered via Web GUI will remain functional.
+            </p>
         </div>
     </div>
 
@@ -238,71 +295,7 @@
         </div>
     </div>
 
-    <!-- Backup Retention & Automations -->
-    <div class="pm-card pm-mb-6">
-        <div class="pm-card-title" style="margin-bottom: 0.5rem; color: var(--pm-warning);">
-            <span class="pm-card-title-icon" style="background-color: var(--pm-warning);"></span>
-            🕒 Backup Retention & Scheduled Automations
-        </div>
-        <p class="pm-text-muted" style="margin-bottom: 1.25rem; font-size: 0.9rem;">Configure automatic pruning policies and scheduled crons execution limits.</p>
 
-        <!-- Dual-Tier Retention Configuration Grid -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
-            <!-- Local Storage Limits -->
-            <div style="padding: 1rem; border: 1px dashed var(--pm-border-color); border-radius: 6px;">
-                <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--pm-text-primary); margin-bottom: 0.75rem;">💾 Local Retention (Host Server)</h4>
-                <div style="margin-bottom: 0.75rem;">
-                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Local Backups to Keep</label>
-                    <input type="number" id="pm-setting-backup-max-count" class="pm-form-control" min="0" placeholder="0 for Infinite backups" style="width: 100%;">
-                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 for infinite local retention (never prune).</p>
-                </div>
-                <div>
-                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Local Age (Days)</label>
-                    <input type="number" id="pm-setting-backup-max-days" class="pm-form-control" min="0" placeholder="0 for Infinite retention" style="width: 100%;">
-                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 to keep backups regardless of age.</p>
-                </div>
-            </div>
-            <!-- Cloud Storage Limits -->
-            <div style="padding: 1rem; border: 1px dashed var(--pm-border-color); border-radius: 6px;">
-                <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--pm-warning); margin-bottom: 0.75rem;">☁️ Cloud Retention (Google Drive)</h4>
-                <div style="margin-bottom: 0.75rem;">
-                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Cloud Backups to Keep</label>
-                    <input type="number" id="pm-setting-backup-cloud-max-count" class="pm-form-control" min="0" placeholder="0 for Infinite backups" style="width: 100%;">
-                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 for infinite cloud retention.</p>
-                </div>
-                <div>
-                    <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-secondary); font-size: 0.8rem;">Max Cloud Age (Days)</label>
-                    <input type="number" id="pm-setting-backup-cloud-max-days" class="pm-form-control" min="0" placeholder="0 for Infinite retention" style="width: 100%;">
-                    <p class="pm-text-muted" style="font-size: 0.7rem; margin-top: 0.25rem;">Set to 0 to ignore cloud backup age limits.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Backup Frequency Selection -->
-        <div style="padding-top: 1.25rem; border-top: 1px solid var(--pm-border-color); margin-bottom: 1.25rem;">
-            <label class="pm-font-semibold pm-mb-1" style="display: block; color: var(--pm-text-primary);">Backup Frequency Throttle</label>
-            <select id="pm-setting-backup-frequency" class="pm-form-control" style="width: 100%;">
-                <option value="0">No Throttling (Always execute backup when triggered)</option>
-                <option value="3600">Hourly (Minimum 1 hour between backups)</option>
-                <option value="86400">Daily (Minimum 24 hours between backups)</option>
-                <option value="604800">Weekly (Minimum 7 days between backups)</option>
-                <option value="2592000">Monthly (Minimum 30 days between backups)</option>
-            </select>
-            <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">
-                Avoids resource spikes on shared hosting. Scheduled runs of <code>cli_backup.php</code> will exit early if the time since the last successful backup is less than the minimum interval.
-            </p>
-        </div>
-
-        <div style="padding-top: 1.25rem; border-top: 1px solid var(--pm-border-color);">
-            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                <input type="checkbox" id="pm-setting-backup-cron-auto" style="width: 1.2rem; height: 1.2rem;">
-                <span style="font-weight: 500; color: var(--pm-text-primary);">Enable Scheduled Background Backups (via Cron CLI)</span>
-            </label>
-            <p class="pm-text-muted" style="font-size: 0.8rem; margin-top: 0.25rem; padding-left: 2rem; margin-bottom: 0;">
-                If disabled, automated crontab execution calls of cli_backup.php will exit early. Manual backups triggered via Web GUI will remain functional.
-            </p>
-        </div>
-    </div>
 
     <!-- Save Button -->
     <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">

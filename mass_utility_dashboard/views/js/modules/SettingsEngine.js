@@ -650,8 +650,48 @@ window.SettingsEngine = (function() {
         }
     }
 
+    function updateCloudSettingsVisibility(isConnected) {
+        const defaultDownloadSelect = document.getElementById('pm-setting-gdrive-default-download');
+        const cloudMaxCountInput = document.getElementById('pm-setting-backup-cloud-max-count');
+        const cloudMaxDaysInput = document.getElementById('pm-setting-backup-cloud-max-days');
+        const downloadGroup = document.getElementById('pm-group-gdrive-default-download');
+        const cloudRetentionGroup = document.getElementById('pm-group-gdrive-retention');
+
+        if (isConnected) {
+            if (defaultDownloadSelect) defaultDownloadSelect.disabled = false;
+            if (cloudMaxCountInput) cloudMaxCountInput.disabled = false;
+            if (cloudMaxDaysInput) cloudMaxDaysInput.disabled = false;
+
+            if (downloadGroup) {
+                downloadGroup.style.opacity = '1';
+                downloadGroup.style.pointerEvents = 'auto';
+            }
+            if (cloudRetentionGroup) {
+                cloudRetentionGroup.style.opacity = '1';
+                cloudRetentionGroup.style.pointerEvents = 'auto';
+            }
+        } else {
+            if (defaultDownloadSelect) {
+                defaultDownloadSelect.value = 'local';
+                defaultDownloadSelect.disabled = true;
+            }
+            if (cloudMaxCountInput) cloudMaxCountInput.disabled = true;
+            if (cloudMaxDaysInput) cloudMaxDaysInput.disabled = true;
+
+            if (downloadGroup) {
+                downloadGroup.style.opacity = '0.4';
+                downloadGroup.style.pointerEvents = 'none';
+            }
+            if (cloudRetentionGroup) {
+                cloudRetentionGroup.style.opacity = '0.4';
+                cloudRetentionGroup.style.pointerEvents = 'none';
+            }
+        }
+    }
+
     return {
         init: init,
-        hydrateSettings: hydrateSettings
+        hydrateSettings: hydrateSettings,
+        updateCloudSettingsVisibility: updateCloudSettingsVisibility
     };
 })();
