@@ -436,6 +436,7 @@
             <li><strong>Cloud Sync setup:</strong> Input Google developer client credentials and ensure the Redirect URI is properly registered in Google Cloud Console.</li>
         </ul>
     </div>
+</div>
 
     <!-- Inner Sub-panel 3: Security & Health -->
     <div class="pm-settings-tab-content" id="pm-settings-pane-security" style="display: none;">
