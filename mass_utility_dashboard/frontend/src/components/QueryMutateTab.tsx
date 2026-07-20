@@ -564,7 +564,7 @@ export const QueryMutateTab: React.FC = () => {
         <select
           value={rule.field}
           onChange={(e) => handleUpdateRule(rule.id, { field: e.target.value, forceManualMode: false, value: '' }, queryTree)}
-          className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#8b5cf6]/50"
+          className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-pm-purple/50"
         >
           <option value="product.active">Product: Active Status</option>
           <option value="product.reference">Product: Reference / SKU</option>
@@ -583,7 +583,7 @@ export const QueryMutateTab: React.FC = () => {
         <select
           value={rule.operator}
           onChange={(e) => handleUpdateRule(rule.id, { operator: e.target.value }, queryTree)}
-          className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none"
+          className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none"
         >
           <option value="EQUAL">Equals</option>
           <option value="NOT_EQUAL">Not Equals</option>
@@ -600,7 +600,7 @@ export const QueryMutateTab: React.FC = () => {
               <select
                 value={rule.value}
                 onChange={(e) => handleUpdateRule(rule.id, { value: e.target.value }, queryTree)}
-                className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none w-full"
+                className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none w-full"
               >
                 <option value="">- Select Target Value -</option>
                 {selectOptions.map(opt => (
@@ -611,7 +611,7 @@ export const QueryMutateTab: React.FC = () => {
                 type="button"
                 title="Switch to manual text input"
                 onClick={() => handleUpdateRule(rule.id, { forceManualMode: true }, queryTree)}
-                className="text-xs hover:bg-white/[0.05] p-1.5 rounded-lg text-gray-400"
+                className="text-xs hover:bg-white/[0.05] p-1.5 rounded-lg text-pm-text-secondary"
               >
                 📝
               </button>
@@ -623,14 +623,14 @@ export const QueryMutateTab: React.FC = () => {
                 value={rule.value}
                 onChange={(e) => handleUpdateRule(rule.id, { value: e.target.value }, queryTree)}
                 placeholder={isListOp ? "e.g. 101, 102, 103" : "Enter filter constraint..."}
-                className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#8b5cf6]/50 flex-grow"
+                className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-purple/50 flex-grow"
               />
               {showOptionsDropdown && !isListOp && (
                 <button
                   type="button"
                   title="Switch to selection dropdown list"
                   onClick={() => handleUpdateRule(rule.id, { forceManualMode: false }, queryTree)}
-                  className="text-xs hover:bg-white/[0.05] p-1.5 rounded-lg text-gray-400"
+                  className="text-xs hover:bg-white/[0.05] p-1.5 rounded-lg text-pm-text-secondary"
                 >
                   📋
                 </button>
@@ -667,7 +667,7 @@ export const QueryMutateTab: React.FC = () => {
                 const updated = handleUpdateGroupOperator(group.id, e.target.value as any, queryTree);
                 setQueryTree(updated);
               }}
-              className="bg-pm-input border border-pm-border text-xs font-bold text-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none"
+              className="bg-pm-input border border-pm-border text-xs font-bold text-pm-text-secondary rounded-lg px-2.5 py-1.5 focus:outline-none"
             >
               <option value="AND">AND (All match)</option>
               <option value="OR">OR (Any match)</option>
@@ -694,7 +694,7 @@ export const QueryMutateTab: React.FC = () => {
                 const updated = handleAddGroup(group.id, queryTree);
                 setQueryTree(updated);
               }}
-              className="bg-gray-700 hover:bg-gray-600 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
+              className="bg-pm-input hover:bg-pm-border text-pm-text text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
             >
               + Add Group
             </button>
@@ -705,7 +705,7 @@ export const QueryMutateTab: React.FC = () => {
                   const updated = handleDeleteGroup(group.id, queryTree);
                   setQueryTree(updated);
                 }}
-                className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
+                className="bg-pm-danger hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
               >
                 Delete Group
               </button>
@@ -757,7 +757,7 @@ export const QueryMutateTab: React.FC = () => {
         <select
           value={rule.field}
           onChange={(e) => handleFieldChange(e.target.value)}
-          className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none"
+          className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none"
         >
           <option value="price">Product: Base Price</option>
           <option value="active">Product: Active Status</option>
@@ -771,14 +771,14 @@ export const QueryMutateTab: React.FC = () => {
           <select
             value={rule.type}
             onChange={(e) => handleUpdate({ type: e.target.value as any })}
-            className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none"
+            className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none"
           >
             <option value="SET">SET to</option>
             <option value="ADD">ADD (+)</option>
             <option value="MULTIPLY">MULTIPLY (*)</option>
           </select>
         ) : (
-          <span className="text-xs text-gray-400 bg-white/5 border border-pm-border rounded-lg px-2 py-1.5">SET TO</span>
+          <span className="text-xs text-pm-text-secondary bg-white/5 border border-pm-border rounded-lg px-2 py-1.5">SET TO</span>
         )}
 
         <span className="flex items-center gap-1.5 min-w-[200px] flex-grow">
@@ -787,7 +787,7 @@ export const QueryMutateTab: React.FC = () => {
               <select
                 value={rule.value}
                 onChange={(e) => handleUpdate({ value: e.target.value })}
-                className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none w-full"
+                className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none w-full"
               >
                 <option value="">- Select value -</option>
                 {selectOptions.map(opt => (
@@ -797,7 +797,7 @@ export const QueryMutateTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleUpdate({ forceManualMode: true })}
-                className="text-xs text-gray-400 hover:bg-white/[0.05] p-1 rounded-lg"
+                className="text-xs text-pm-text-secondary hover:bg-white/[0.05] p-1 rounded-lg"
               >
                 ✏️
               </button>
@@ -810,13 +810,13 @@ export const QueryMutateTab: React.FC = () => {
                 value={rule.value}
                 onChange={(e) => handleUpdate({ value: e.target.value })}
                 placeholder="Enter value..."
-                className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#8b5cf6]/50 flex-grow"
+                className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-purple/50 flex-grow"
               />
               {showOptions && (
                 <button
                   type="button"
                   onClick={() => handleUpdate({ forceManualMode: false })}
-                  className="text-xs text-gray-400 hover:bg-white/[0.05] p-1 rounded-lg"
+                  className="text-xs text-pm-text-secondary hover:bg-white/[0.05] p-1 rounded-lg"
                 >
                   📜
                 </button>
@@ -843,18 +843,18 @@ export const QueryMutateTab: React.FC = () => {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg">⚡</div>
           <div>
-            <h2 className="text-md font-bold tracking-wide text-white uppercase">Query &amp; Mutate Wizard</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Define target AST filters recursively and execute atomic bulk updates</p>
+            <h2 className="text-md font-bold tracking-wide text-pm-text uppercase">Query &amp; Mutate Wizard</h2>
+            <p className="text-xs text-pm-text-secondary mt-0.5">Define target AST filters recursively and execute atomic bulk updates</p>
           </div>
         </div>
 
         {/* Master Preset selector */}
         <div className="flex items-center gap-2 bg-pm-input border border-pm-border p-2 rounded-xl text-xs">
-          <span className="font-bold text-gray-300">Combo Presets:</span>
+          <span className="font-bold text-pm-text-secondary">Combo Presets:</span>
           <select
             value={selectedMasterPreset}
             onChange={(e) => handleLoadMasterPreset(e.target.value)}
-            className="bg-black/20 border border-pm-border rounded px-2 py-1 text-xs text-white focus:outline-none"
+            className="bg-black/20 border border-pm-border rounded px-2 py-1 text-xs text-pm-text focus:outline-none"
           >
             <option value="">- Custom Template -</option>
             {presets.master?.map((p: any) => (
@@ -863,14 +863,14 @@ export const QueryMutateTab: React.FC = () => {
           </select>
           <button
             onClick={() => handleSavePreset('master')}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded transition"
+            className="bg-emerald-600 hover:bg-emerald-500 text-pm-text font-bold px-2.5 py-1 rounded transition"
           >
             Save
           </button>
           <button
             onClick={() => handleDeletePreset('master', selectedMasterPreset)}
             disabled={!selectedMasterPreset}
-            className="bg-red-600 hover:bg-red-500 disabled:opacity-30 text-white font-bold px-2.5 py-1 rounded transition"
+            className="bg-red-600 hover:bg-red-500 disabled:opacity-30 text-pm-text font-bold px-2.5 py-1 rounded transition"
           >
             Delete
           </button>
@@ -882,34 +882,34 @@ export const QueryMutateTab: React.FC = () => {
         <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-3">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#8b5cf6] rounded-full"></span>
-            <h3 className="text-sm font-bold text-white uppercase">Step 1: Define Target Products (Visual AST Filter)</h3>
+            <h3 className="text-sm font-bold text-pm-text uppercase">Step 1: Define Target Products (Visual AST Filter)</h3>
           </div>
           
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-400">Filter Preset:</span>
+            <span className="text-pm-text-secondary">Filter Preset:</span>
             <select
               value={selectedQueryPreset}
               onChange={(e) => handleLoadQueryPreset(e.target.value)}
-              className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded px-2 py-1"
+              className="bg-pm-input border border-pm-border text-xs text-pm-text rounded px-2 py-1"
             >
               <option value="">- Custom Filter -</option>
               {presets.query?.map((p: any) => (
                 <option key={p.id_preset} value={p.id_preset}>{p.name}</option>
               ))}
             </select>
-            <button onClick={() => handleSavePreset('query')} className="bg-gray-800 text-white px-2 py-1 rounded text-xs hover:bg-gray-700">Save</button>
+            <button onClick={() => handleSavePreset('query')} className="bg-gray-800 text-pm-text px-2 py-1 rounded text-xs hover:bg-gray-700">Save</button>
             <button onClick={() => handleDeletePreset('query', selectedQueryPreset)} disabled={!selectedQueryPreset} className="bg-red-950 text-red-400 px-2 py-1 rounded text-xs hover:bg-red-900 disabled:opacity-20">Delete</button>
           </div>
         </div>
 
-        <p className="text-xs text-gray-400 leading-relaxed">
+        <p className="text-xs text-pm-text-secondary leading-relaxed">
           Formulate filter criteria recursively. The translation engine will securely parse the AST structure, resolve indexed database tables, and preview the affected database scopes.
         </p>
 
         {/* Live Translation Sentences Panel */}
-        <div className="bg-blue-500/5 border border-blue-500/10 p-3.5 rounded-xl text-xs text-gray-300">
+        <div className="bg-blue-500/5 border border-blue-500/10 p-3.5 rounded-xl text-xs text-pm-text-secondary">
           🗣️ <strong>Query Live Translation:</strong>{' '}
-          <span className="italic text-gray-400" dangerouslySetInnerHTML={{ __html: liveExplanation }} />
+          <span className="italic text-pm-text-secondary" dangerouslySetInnerHTML={{ __html: liveExplanation }} />
         </div>
 
         {/* Visual Builder Root */}
@@ -923,7 +923,7 @@ export const QueryMutateTab: React.FC = () => {
             type="button"
             disabled={isCompiling}
             onClick={handleCompilePreview}
-            className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase tracking-wide disabled:opacity-40"
+            className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-pm-text text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase tracking-wide disabled:opacity-40"
           >
             {isCompiling ? '⚡ Compiling AST & Resolving Joins...' : '⚡ Compile & Preview Affected Products'}
           </button>
@@ -940,23 +940,23 @@ export const QueryMutateTab: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-black/10 border border-pm-border p-4 rounded-xl">
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Affected Products Count</span>
-              <div className="text-xl font-bold text-white mt-1">{previewCount}</div>
+              <span className="text-[10px] text-pm-text-secondary uppercase tracking-wider block">Affected Products Count</span>
+              <div className="text-xl font-bold text-pm-text mt-1">{previewCount}</div>
             </div>
             <div className="bg-black/10 border border-pm-border p-4 rounded-xl">
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Target Scope Security Status</span>
+              <span className="text-[10px] text-pm-text-secondary uppercase tracking-wider block">Target Scope Security Status</span>
               <div className="text-sm font-bold text-emerald-400 mt-1.5 uppercase">SAFE &amp; PARAMETERIZED</div>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <span className="text-xs font-bold text-gray-300 block">Compiled MariaDB SQL Query</span>
-            <pre className="pm-log-terminal text-xs text-blue-400 border border-blue-500/10 bg-[#05070f] p-3 rounded-lg overflow-x-auto select-all">{previewSql}</pre>
+            <span className="text-xs font-bold text-pm-text-secondary block">Compiled MariaDB SQL Query</span>
+            <pre className="pm-log-terminal text-xs text-blue-400 border border-blue-500/10 bg-[var(--pm-terminal-bg,#05070f)] p-3 rounded-lg overflow-x-auto select-all">{previewSql}</pre>
           </div>
 
           <div className="space-y-1.5">
-            <span className="text-xs font-bold text-gray-300 block">Sample Target Product IDs</span>
-            <div className="text-xs border border-pm-border bg-black/10 p-3 rounded-lg text-gray-300 max-h-24 overflow-y-auto select-all">
+            <span className="text-xs font-bold text-pm-text-secondary block">Sample Target Product IDs</span>
+            <div className="text-xs border border-pm-border bg-black/10 p-3 rounded-lg text-pm-text-secondary max-h-24 overflow-y-auto select-all">
               {previewSamples}
             </div>
           </div>
@@ -973,23 +973,23 @@ export const QueryMutateTab: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-gray-400">Rules Preset:</span>
+              <span className="text-pm-text-secondary">Rules Preset:</span>
               <select
                 value={selectedMutatePreset}
                 onChange={(e) => handleLoadMutatePreset(e.target.value)}
-                className="bg-black/20 border border-pm-border text-xs text-gray-300 rounded px-2 py-1"
+                className="bg-pm-input border border-pm-border text-xs text-pm-text rounded px-2 py-1"
               >
                 <option value="">- Custom Rules -</option>
                 {presets.mutate?.map((p: any) => (
                   <option key={p.id_preset} value={p.id_preset}>{p.name}</option>
                 ))}
               </select>
-              <button onClick={() => handleSavePreset('mutate')} className="bg-gray-800 text-white px-2 py-1 rounded text-xs hover:bg-gray-700">Save</button>
+              <button onClick={() => handleSavePreset('mutate')} className="bg-gray-800 text-pm-text px-2 py-1 rounded text-xs hover:bg-gray-700">Save</button>
               <button onClick={() => handleDeletePreset('mutate', selectedMutatePreset)} disabled={!selectedMutatePreset} className="bg-red-950 text-red-400 px-2 py-1 rounded text-xs hover:bg-red-900 disabled:opacity-20">Delete</button>
             </div>
           </div>
 
-          <p className="text-xs text-gray-400 leading-relaxed">
+          <p className="text-xs text-pm-text-secondary leading-relaxed">
             Configure mutations to apply onto the target scope of <strong>{previewCount} products</strong>.
             Mutations are executed inside transactions. Concurrent rows lock constraints apply, and the Buffer Packet Shield manages chunk throttling automatically.
           </p>
@@ -1004,7 +1004,7 @@ export const QueryMutateTab: React.FC = () => {
               type="button"
               disabled={isExecuting}
               onClick={() => setMutationRules(prev => [...prev, { id: `m-${Math.random()}`, field: 'price', type: 'SET', value: '' }])}
-              className="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+              className="bg-pm-input hover:bg-pm-border text-pm-text text-xs font-bold px-4 py-2 rounded-lg transition"
             >
               ➕ Add Mutation Action
             </button>
@@ -1012,7 +1012,7 @@ export const QueryMutateTab: React.FC = () => {
               type="button"
               disabled={isExecuting || mutationRules.length === 0}
               onClick={handleExecuteMutations}
-              className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase tracking-wide disabled:opacity-40 flex items-center gap-2"
+              className="bg-red-600 hover:bg-red-500 text-pm-text text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase tracking-wide disabled:opacity-40 flex items-center gap-2"
             >
               {isExecuting ? (
                 <>
@@ -1048,7 +1048,7 @@ export const QueryMutateTab: React.FC = () => {
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                 }}
-                className="bg-gray-800 hover:bg-gray-700 text-[10px] text-gray-300 font-bold px-2 py-1 rounded transition"
+                className="bg-gray-800 hover:bg-gray-700 text-[10px] text-pm-text-secondary font-bold px-2 py-1 rounded transition"
               >
                 📥 Save Log
               </button>
@@ -1065,7 +1065,7 @@ export const QueryMutateTab: React.FC = () => {
               </button>
             </div>
           </div>
-          <pre className="pm-log-terminal text-xs text-emerald-400 bg-[#05070f] p-4 rounded-xl border border-pm-border overflow-y-auto max-h-[300px] font-mono leading-relaxed select-all">
+          <pre className="pm-log-terminal text-xs text-emerald-400 bg-[var(--pm-terminal-bg,#05070f)] p-4 rounded-xl border border-pm-border overflow-y-auto max-h-[300px] font-mono leading-relaxed select-all">
             {mutationLogs || 'No logs compiled yet.'}
           </pre>
         </div>

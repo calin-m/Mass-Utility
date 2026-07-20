@@ -114,7 +114,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <span className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-lg shadow-[#8b5cf6]/50"></span>
-          <h3 className="text-md font-bold tracking-wide text-white uppercase">Historical Backups Repository</h3>
+          <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">Historical Backups Repository</h3>
         </div>
         {backups.length > 0 && (
           <button
@@ -130,7 +130,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       <div className="border border-pm-border rounded-xl overflow-hidden bg-black/10 overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-pm-border bg-white/[0.02] text-gray-400 font-bold uppercase tracking-wider text-[0.7rem]">
+            <tr className="border-b border-pm-border bg-white/[0.02] text-pm-text-secondary font-bold uppercase tracking-wider text-[0.7rem]">
               <th className="px-5 py-4">Archive Name</th>
               <th className="px-5 py-4">Archive Size</th>
               <th className="px-5 py-4">Timestamp Created</th>
@@ -142,13 +142,13 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
               <tr>
                 <td colSpan={4} className="px-5 py-12 text-center text-gray-500">
                   <div className="text-2xl animate-pulse mb-2">⏳</div>
-                  <strong className="text-sm text-gray-300 block mb-1">No File Backups Found</strong>
+                  <strong className="text-sm text-pm-text-secondary block mb-1">No File Backups Found</strong>
                   <span>Historical file system backups repository is currently empty.</span>
                 </td>
               </tr>
             </tbody>
           ) : (
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-pm-border">
               {backups.map((b, idx) => {
                 const isCloudOnly = !b.is_local && b.is_cloud;
                 const isUploaded = b.is_uploaded;
@@ -194,7 +194,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                         {badge}
                         {b.duration && (
                           <span className="text-[0.65rem] text-gray-500">
-                            Completed In: <strong className="text-gray-300">{b.duration}</strong>
+                            Completed In: <strong className="text-pm-text-secondary">{b.duration}</strong>
                           </span>
                         )}
                       </div>
@@ -204,7 +204,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                         {b.size}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-gray-400 font-mono">{formatDate(b.timestamp)}</td>
+                    <td className="px-5 py-4 text-pm-text-secondary font-mono">{formatDate(b.timestamp)}</td>
                     <td className="px-5 py-4 text-right">
                       <div className="inline-flex gap-2 flex-wrap justify-end">
                         {b.hash && (
@@ -221,7 +221,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                         {b.archive_download_url && (
                           <a
                             href={b.archive_download_url}
-                            className="bg-pm-input hover:bg-[#202030] text-gray-300 border border-pm-border px-2.5 py-1.5 rounded-lg transition inline-flex items-center"
+                            className="bg-pm-input hover:bg-[#202030] text-pm-text-secondary border border-pm-border px-2.5 py-1.5 rounded-lg transition inline-flex items-center"
                           >
                             ⬇️ Download
                           </a>
@@ -230,7 +230,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                         {b.has_log && b.log_download_url && (
                           <a
                             href={b.log_download_url}
-                            className="bg-pm-input hover:bg-[#202030] text-gray-300 border border-pm-border px-2.5 py-1.5 rounded-lg transition inline-flex items-center"
+                            className="bg-pm-input hover:bg-[#202030] text-pm-text-secondary border border-pm-border px-2.5 py-1.5 rounded-lg transition inline-flex items-center"
                           >
                             📄 Log
                           </a>
@@ -252,7 +252,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                               className={`px-2.5 py-1.5 rounded-lg border transition ${
                                 b.is_pinned
                                   ? 'bg-[#10b981]/15 hover:bg-[#10b981]/25 text-[#10b981] border-[#10b981]/25'
-                                  : 'bg-pm-input hover:bg-[#202030] text-gray-300 border-pm-border'
+                                  : 'bg-pm-input hover:bg-[#202030] text-pm-text-secondary border-pm-border'
                               }`}
                             >
                               {pinningFile === b.basename ? '⏳' : b.is_pinned ? '📌 Unpin' : '📌 Pin'}

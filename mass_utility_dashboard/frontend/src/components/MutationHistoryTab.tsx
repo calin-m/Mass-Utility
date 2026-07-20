@@ -184,8 +184,8 @@ export const MutationHistoryTab: React.FC = () => {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg">⏳</div>
           <div>
-            <h2 className="text-md font-bold tracking-wide text-white uppercase">Mutation History Ledger</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Track, audit, roll back, or reapply visual AST mutations dynamically</p>
+            <h2 className="text-md font-bold tracking-wide text-pm-text uppercase">Mutation History Ledger</h2>
+            <p className="text-xs text-pm-text-secondary mt-0.5">Track, audit, roll back, or reapply visual AST mutations dynamically</p>
           </div>
         </div>
 
@@ -201,25 +201,25 @@ export const MutationHistoryTab: React.FC = () => {
       {/* Filter and Search Bar */}
       <div className="flex flex-wrap gap-4 bg-pm-card border border-pm-border p-4 rounded-xl items-center justify-between shadow-md">
         <div className="flex items-center gap-3 flex-grow max-w-md">
-          <span className="text-xs text-gray-400 font-bold uppercase">Search:</span>
+          <span className="text-xs text-pm-text-secondary font-bold uppercase">Search:</span>
           <input
             type="text"
             placeholder="Search by Job ID or Actions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-black/20 border border-pm-border text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#8b5cf6]/50"
+            className="w-full bg-black/20 border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-[#8b5cf6]/50"
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-400 font-bold uppercase">Status Filter:</span>
+          <span className="text-xs text-pm-text-secondary font-bold uppercase">Status Filter:</span>
           <div className="flex bg-black/20 border border-pm-border p-1 rounded-lg">
             {['ALL', 'SUCCESS', 'ROLLED_BACK', 'FAILED'].map(st => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 className={`text-[10px] font-bold px-3 py-1.5 rounded-md uppercase transition ${
-                  statusFilter === st ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-gray-200'
+                  statusFilter === st ? 'bg-white/10 text-pm-text' : 'text-pm-text-secondary hover:text-gray-200'
                 }`}
               >
                 {st.replace('_', ' ')}
@@ -234,7 +234,7 @@ export const MutationHistoryTab: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-pm-border bg-black/10 text-[10px] text-gray-400 uppercase tracking-wider">
+              <tr className="border-b border-pm-border bg-black/10 text-[10px] text-pm-text-secondary uppercase tracking-wider">
                 <th className="px-6 py-4 font-bold">Execution Date</th>
                 <th className="px-6 py-4 font-bold">Job ID</th>
                 <th className="px-6 py-4 font-bold">Targeted Mutation Actions</th>
@@ -243,10 +243,10 @@ export const MutationHistoryTab: React.FC = () => {
                 <th className="px-6 py-4 font-bold text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04] text-xs text-gray-300">
+            <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
+                  <td colSpan={6} className="px-6 py-12 text-center text-pm-text-secondary">
                     <div className="flex justify-center items-center gap-2">
                       <span className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></span>
                       Fetching ledger records from SQLite database...
@@ -255,23 +255,23 @@ export const MutationHistoryTab: React.FC = () => {
                 </tr>
               ) : filteredHistory.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400 italic">
+                  <td colSpan={6} className="px-6 py-12 text-center text-pm-text-secondary italic">
                     No matching ledger entries found.
                   </td>
                 </tr>
               ) : (
                 filteredHistory.map(job => (
                   <tr key={job.job_id} className="hover:bg-white/[0.01] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-400 font-mono text-[11px]">
+                    <td className="px-6 py-4 whitespace-nowrap text-pm-text-secondary font-mono text-[11px]">
                       {job.date}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-mono text-white text-[11px] font-bold">
+                    <td className="px-6 py-4 whitespace-nowrap font-mono text-pm-text text-[11px] font-bold">
                       {job.job_id}
                     </td>
-                    <td className="px-6 py-4 max-w-xs truncate font-medium text-gray-300">
+                    <td className="px-6 py-4 max-w-xs truncate font-medium text-pm-text-secondary">
                       {job.actions}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center font-bold text-white font-mono">
+                    <td className="px-6 py-4 whitespace-nowrap text-center font-bold text-pm-text font-mono">
                       {job.affected_count}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -281,7 +281,7 @@ export const MutationHistoryTab: React.FC = () => {
                       <div className="inline-flex gap-1">
                         <button
                           onClick={() => setSelectedJob(job)}
-                          className="pm-btn pm-btn-sm bg-gray-800 hover:bg-gray-700 text-white font-bold px-2 py-1 rounded text-[10px] uppercase"
+                          className="pm-btn pm-btn-sm bg-pm-input hover:bg-pm-border text-pm-text font-bold px-2 py-1 rounded text-[10px] uppercase"
                           title="View Payload details"
                         >
                           👁️ View
@@ -290,7 +290,7 @@ export const MutationHistoryTab: React.FC = () => {
                         {job.has_revert && job.state !== 'ROLLED_BACK' && (
                           <button
                             onClick={() => handleRollback(job)}
-                            className="pm-btn pm-btn-sm bg-red-600 hover:bg-red-500 text-white font-bold px-2 py-1 rounded text-[10px] uppercase animate-pulse"
+                            className="pm-btn pm-btn-sm bg-red-600 hover:bg-red-500 text-pm-text font-bold px-2 py-1 rounded text-[10px] uppercase animate-pulse"
                             title="Rollback Changes"
                           >
                             🔄 Revert
@@ -300,7 +300,7 @@ export const MutationHistoryTab: React.FC = () => {
                         {job.state === 'ROLLED_BACK' && (
                           <button
                             onClick={() => handleReapply(job)}
-                            className="pm-btn pm-btn-sm bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2 py-1 rounded text-[10px] uppercase"
+                            className="pm-btn pm-btn-sm bg-emerald-600 hover:bg-emerald-500 text-pm-text font-bold px-2 py-1 rounded text-[10px] uppercase"
                             title="Re-apply changes"
                           >
                             🔄 Reapply
@@ -309,7 +309,7 @@ export const MutationHistoryTab: React.FC = () => {
 
                         <button
                           onClick={() => handleDownloadGzip(job.job_id)}
-                          className="pm-btn pm-btn-sm bg-blue-600 hover:bg-blue-500 text-white font-bold px-2 py-1 rounded text-[10px] uppercase"
+                          className="pm-btn pm-btn-sm bg-blue-600 hover:bg-blue-500 text-pm-text font-bold px-2 py-1 rounded text-[10px] uppercase"
                           title="Download Backup Gzip"
                         >
                           📥 Download
@@ -335,14 +335,14 @@ export const MutationHistoryTab: React.FC = () => {
       {/* View Job Overlay Modal Drawer */}
       {selectedJob && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-[99999]">
-          <div className="bg-pm-card text-white border border-pm-border rounded-2xl p-6 shadow-2xl w-full max-w-3xl mx-4 relative max-h-[85vh] flex flex-col">
+          <div className="bg-pm-card text-pm-text border border-pm-border rounded-2xl p-6 shadow-2xl w-full max-w-3xl mx-4 relative max-h-[85vh] flex flex-col">
             <div className="flex justify-between items-center border-b border-pm-border pb-3 mb-4 flex-shrink-0">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-white">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-pm-text">
                 Ledger Payload Audit Details: {selectedJob.job_id}
               </h2>
               <button
                 onClick={() => setSelectedJob(null)}
-                className="text-gray-400 hover:text-white text-lg font-bold"
+                className="text-pm-text-secondary hover:text-pm-text text-lg font-bold"
               >
                 &times;
               </button>
@@ -351,33 +351,33 @@ export const MutationHistoryTab: React.FC = () => {
             <div className="space-y-4 overflow-y-auto pr-2 flex-grow">
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="text-gray-400 font-bold block uppercase">Date Created:</span>
+                  <span className="text-pm-text-secondary font-bold block uppercase">Date Created:</span>
                   <span className="font-mono text-gray-200">{selectedJob.date}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400 font-bold block uppercase">State:</span>
+                  <span className="text-pm-text-secondary font-bold block uppercase">State:</span>
                   <span>{getStatusBadge(selectedJob.state)}</span>
                 </div>
               </div>
 
               <div>
-                <span className="text-xs font-bold text-gray-400 block uppercase mb-1">Actions String</span>
+                <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">Actions String</span>
                 <div className="bg-black/20 border border-pm-border p-3 rounded-lg text-xs font-mono text-gray-200">
                   {selectedJob.actions}
                 </div>
               </div>
 
               <div>
-                <span className="text-xs font-bold text-gray-400 block uppercase mb-1">AST Query Parameters (JSON)</span>
-                <pre className="bg-[#05070f] border border-pm-border p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-40">
+                <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">AST Query Parameters (JSON)</span>
+                <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-40">
                   {JSON.stringify(JSON.parse(selectedJob.raw_payload), null, 2)}
                 </pre>
               </div>
 
               {selectedJob.revert_payload && (
                 <div>
-                  <span className="text-xs font-bold text-gray-400 block uppercase mb-1">Reversion Backups Map (JSON)</span>
-                  <pre className="bg-[#05070f] border border-pm-border p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-40">
+                  <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">Reversion Backups Map (JSON)</span>
+                  <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-40">
                     {JSON.stringify(JSON.parse(selectedJob.revert_payload), null, 2)}
                   </pre>
                 </div>
@@ -396,7 +396,7 @@ export const MutationHistoryTab: React.FC = () => {
             <div className="border-t border-pm-border pt-4 mt-4 flex justify-end flex-shrink-0">
               <button
                 onClick={() => setSelectedJob(null)}
-                className="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                className="bg-pm-input hover:bg-pm-border text-pm-text text-xs font-bold px-4 py-2 rounded-lg transition"
               >
                 Close Audit View
               </button>
