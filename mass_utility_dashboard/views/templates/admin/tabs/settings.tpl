@@ -113,7 +113,6 @@
                 <label class="pm-font-semibold pm-mb-2" style="display: block; color: var(--pm-text-primary);">Dashboard UI Theme</label>
                 <select id="pm-setting-ui-theme" class="pm-form-control" style="width: 100%;">
                     <option value="classic">Classic Obsidian (Default)</option>
-                    <option value="tabler">Modern Tabler</option>
                 </select>
             </div>
         </div>
