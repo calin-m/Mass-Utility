@@ -43,6 +43,9 @@
                 <ul id="pm-license-features-checklist" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem; color: var(--pm-text-primary);">
                     <!-- Populated dynamically via JS -->
                 </ul>
+            </div>
+        </div>
+    </div>
               <!-- GOOGLE DRIVE OFFSITE REDUNDANCY & BACKUP RETENTION CARD -->
     <div class="pm-card pm-mb-6" id="pm-gdrive-card">
         <div class="pm-card-title pm-flex-between pm-flex-wrap pm-gap-2">
