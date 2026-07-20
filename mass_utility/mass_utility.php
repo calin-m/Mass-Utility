@@ -174,6 +174,17 @@ class Mass_Utility extends Module
             $apiFile = $moduleDir . '/api.php';
             $htaccessFile = $moduleDir . '/.htaccess';
 
+            // Auto-create backups directory if missing
+            if (!is_dir($backupsDir)) {
+                @mkdir($backupsDir, 0755, true);
+            }
+
+            // Generate secure .htaccess if missing
+            if (!file_exists($htaccessFile)) {
+                $htaccessContent = "<Files *>\n    Order Deny,Allow\n    Deny from all\n</Files>\n<Files \"api.php\">\n    Order Allow,Deny\n    Allow from all\n</Files>\n";
+                @file_put_contents($htaccessFile, $htaccessContent);
+            }
+
             $targets = [
                 $moduleDir => 0755,
                 $backupsDir => 0755,
@@ -747,13 +758,13 @@ class Mass_Utility extends Module
                                     <span style="font-size: 0.75rem; color: var(--bridge-muted); font-weight: normal; margin-top: 0.2rem;">Click to expand file permission checks and auto-heal loose settings.</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    ' . ($showFixButton ? '<a href="javascript:void(0);" onclick="event.stopPropagation(); window.location.href=\'' . $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&action=fix_bridge_permissions\';" style="background: var(--bridge-accent); border: none; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.7rem; color: #fff; font-weight: bold; text-decoration: none;">⚡ Auto-Fix</a>' : '') . '
                                     <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ' . ($showFixButton ? 'background: rgba(245, 158, 11, 0.15); color: var(--bridge-warning);' : 'background: rgba(16, 185, 129, 0.15); color: var(--bridge-success);') . '">
                                         ' . ($showFixButton ? '⚠️ HARMONIZE' : '🟢 SECURE') . '
                                     </span>
                                 </div>
                             </summary>
                             ' . $pathsHtml . '
+                            ' . ($showFixButton ? '<div style="text-align: right; margin-top: 0.75rem;"><a href="javascript:void(0);" onclick="event.stopPropagation(); window.location.href=\'' . $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&action=fix_bridge_permissions\';" style="background: var(--bridge-accent); border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; color: #fff; font-weight: bold; text-decoration: none; display: inline-block;">⚡ Auto-Fix & Harden Permissions</a></div>' : '') . '
                         </details>
 
                     </div>

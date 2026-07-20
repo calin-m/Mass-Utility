@@ -262,12 +262,6 @@ class AdminApiController
                         'recommended' => '0755',
                         'is_dir' => true
                     ],
-                    'admin_data_dir' => [
-                        'path' => 'mass_utility_admin/data',
-                        'current' => $getOctalPerms($adminDir . '/data'),
-                        'recommended' => '0755',
-                        'is_dir' => true
-                    ],
                     'dashboard_data_dir' => [
                         'path' => 'mass_utility_dashboard/data',
                         'current' => $getOctalPerms($dashboardDir . '/data'),
@@ -302,13 +296,23 @@ class AdminApiController
         $adminDir = dirname(dirname(__DIR__));
         $dashboardDir = dirname($adminDir) . '/mass_utility_dashboard';
 
+        // Auto-create missing backups directory
+        $backupsDir = $dashboardDir . '/backups';
+        if (!is_dir($backupsDir)) {
+            @mkdir($backupsDir, 0755, true);
+        }
+
+        $htaccessFile = $dashboardDir . '/data/.htaccess';
+        if (!file_exists($htaccessFile) && is_dir($dashboardDir . '/data')) {
+            @file_put_contents($htaccessFile, "Deny from all\n");
+        }
+
         $targets = [
             'admin_dir' => [$adminDir, 0755],
-            'admin_data_dir' => [$adminDir . '/data', 0755],
             'dashboard_data_dir' => [$dashboardDir . '/data', 0755],
-            'dashboard_backups_dir' => [$dashboardDir . '/backups', 0755],
+            'dashboard_backups_dir' => [$backupsDir, 0755],
             'dashboard_db_file' => [$dashboardDir . '/data/pm_cloud_backups.db', 0644],
-            'dashboard_htaccess_file' => [$dashboardDir . '/data/.htaccess', 0644]
+            'dashboard_htaccess_file' => [$htaccessFile, 0644]
         ];
 
         $results = [];

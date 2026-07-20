@@ -1356,6 +1356,16 @@ if (strpos($path, '/api/v1/') === 0) {
             $dbFile = $dataDir . '/pm_cloud_backups.db';
             $htaccessFile = $dataDir . '/.htaccess';
 
+            // Auto-create backups directory if missing
+            if (!is_dir($backupsDir)) {
+                @mkdir($backupsDir, 0755, true);
+            }
+
+            // Generate secure data/.htaccess if missing
+            if (!file_exists($htaccessFile)) {
+                @file_put_contents($htaccessFile, "Deny from all\n");
+            }
+
             $targets = [
                 'data_dir' => [$dataDir, 0755],
                 'backups_dir' => [$backupsDir, 0755],

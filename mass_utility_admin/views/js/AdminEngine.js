@@ -477,13 +477,13 @@ window.openEdit = function(id, tier, status, expiry, domain) {
                                     <span style="font-size: 0.75rem; color: var(--pm-text-secondary); font-weight: normal; margin-top: 0.2rem;">Click to expand file permission checks and auto-heal loose settings.</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    ${showFixButton ? '<button type="button" id="pm-btn-fix-admin-perms" style="background: var(--pm-primary); border: none; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.7rem; color: #fff; font-weight: bold; cursor: pointer;">⚡ Auto-Fix</button>' : ''}
                                     <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${showFixButton ? 'background: rgba(245, 158, 11, 0.1); color: var(--pm-warning);' : 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);'}">
                                         ${showFixButton ? '⚠️ HARMONIZE' : '🟢 SECURE'}
                                     </span>
                                 </div>
                             </summary>
                             ${pathsHtml}
+                            ${showFixButton ? '<div style="display: flex; justify-content: flex-end; margin-top: 0.75rem;"><button type="button" id="pm-btn-fix-admin-perms" style="background: var(--pm-primary); border: none; border-radius: 4px; padding: 0.4rem 0.8rem; font-size: 0.8rem; color: #fff; font-weight: bold; cursor: pointer;">⚡ Auto-Fix & Harden Permissions</button></div>' : ''}
                         </details>
                     `;
 
@@ -511,9 +511,6 @@ window.openEdit = function(id, tier, status, expiry, domain) {
                             }
                         });
                     }
-
-                    html += '</div>';
-                    resultsContainer.innerHTML = html; // nosec
                 } else {
                     resultsContainer.innerHTML = '<p class="pm-label" style="color: var(--pm-danger); text-align: center; padding: 2rem 0;">Failed to retrieve security diagnostics metrics.</p>'; // nosec
                 }
