@@ -358,3 +358,130 @@ window.openEdit = function(id, tier, status, expiry, domain) {
     document.getElementById('pm-edit-domain').value = domain || '';
     document.getElementById('pm-edit-modal').style.display = 'flex';
 };
+
+    // Run Security Diagnostics Scan
+    const runDiagBtn = document.getElementById('pm-btn-run-diagnostics');
+    if (runDiagBtn) {
+        runDiagBtn.addEventListener('click', async () => {
+            runDiagBtn.disabled = true;
+            runDiagBtn.textContent = '⚡ Auditing...';
+
+            const resultsContainer = document.getElementById('pm-diagnostics-results');
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '<p class="pm-label" style="color: var(--pm-primary); text-align: center; padding: 2rem 0;">Scanning multi-server architecture safety indicators...</p>'; // nosec
+            }
+
+            try {
+                const response = await fetch('index.php?action=api_get_diagnostics', { method: 'POST' });
+                const result = await response.json();
+                if (result.success && result.diagnostics) {
+                    const d = result.diagnostics;
+                    let html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+
+                    // 1. Super-Admin Portal Group
+                    html += '<h4 style="margin: 0.5rem 0 0.25rem 0; color: var(--pm-text-primary); font-size: 1.1rem;">🛠️ Super-Admin Portal Environment</h4>';
+                    
+                    html += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">Admin Git Repository (.git Exposure)</strong>
+                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin: 0.2rem 0 0 0;">Checks if Git directory is accessible from public HTTP traffic.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.admin_git_exposed ? 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);' : 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);'}">
+                                ${d.admin_git_exposed ? '⚠️ EXPOSED' : '🟢 SECURE'}
+                            </span>
+                        </div>
+                    `;
+
+                    html += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">Admin Directory Write Access</strong>
+                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin: 0.2rem 0 0 0;">Verifies write permissions for Super-Admin portal source folders.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.admin_writeable ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);'}">
+                                ${d.admin_writeable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY'}
+                            </span>
+                        </div>
+                    `;
+
+                    html += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">Admin Transport Encryption (SSL/TLS)</strong>
+                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin: 0.2rem 0 0 0;">Checks if your Super-Admin active session is running over HTTPS.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.admin_ssl_active ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(245, 158, 11, 0.1); color: var(--pm-warning);'}">
+                                ${d.admin_ssl_active ? '🟢 ON' : '⚠️ OFF'}
+                            </span>
+                        </div>
+                    `;
+
+                    // 2. SaaS Dashboard Group
+                    html += '<h4 style="margin: 1.5rem 0 0.25rem 0; color: var(--pm-text-primary); font-size: 1.1rem;">💻 Standalone SaaS Dashboard Environment</h4>';
+
+                    html += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Git Repository (.git Exposure)</strong>
+                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin: 0.2rem 0 0 0;">Checks if SaaS repository config is accessible from public HTTP traffic.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.dashboard_git_exposed ? 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);' : 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);'}">
+                                ${d.dashboard_git_exposed ? '⚠️ EXPOSED' : '🟢 SECURE'}
+                            </span>
+                        </div>
+                    `;
+
+                    html += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS SQLite Vault Security (.db Exposure)</strong>
+                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin: 0.2rem 0 0 0;">Verifies if the shared SQLite database file is blocked from direct downloads.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.dashboard_db_exposed ? 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);' : 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);'}">
+                                ${d.dashboard_db_exposed ? '⚠️ EXPOSED' : '🟢 SECURE'}
+                            </span>
+                        </div>
+                    `;
+
+                    html += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Local Settings Write Access (data/ folder)</strong>
+                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin: 0.2rem 0 0 0;">Verifies write permissions for local settings storage and registries.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.dashboard_data_writeable ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);'}">
+                                ${d.dashboard_data_writeable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY'}
+                            </span>
+                        </div>
+                    `;
+
+                    html += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Archive Write Access (backups/ folder)</strong>
+                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin: 0.2rem 0 0 0;">Verifies write permissions for staging ZIP/TAR archives.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.dashboard_backups_writeable ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);'}">
+                                ${d.dashboard_backups_writeable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY'}
+                            </span>
+                        </div>
+                    `;
+
+                    html += '</div>';
+                    resultsContainer.innerHTML = html; // nosec
+                } else {
+                    resultsContainer.innerHTML = '<p class="pm-label" style="color: var(--pm-danger); text-align: center; padding: 2rem 0;">Failed to retrieve security diagnostics metrics.</p>'; // nosec
+                }
+            } catch (err) {
+                const resultsContainer = document.getElementById('pm-diagnostics-results');
+                if (resultsContainer) {
+                    resultsContainer.innerHTML = '<p class="pm-label" style="color: var(--pm-danger); text-align: center; padding: 2rem 0;">Network error occurred while fetching diagnostics.</p>'; // nosec
+                }
+            } finally {
+                runDiagBtn.disabled = false;
+                runDiagBtn.textContent = '⚡ Run System Security Audit';
+            }
+        });
+    }
+};

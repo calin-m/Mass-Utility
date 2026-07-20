@@ -13,11 +13,11 @@
         </header>
 
         <main class="pm-admin-main">
-            <!-- Tabs Navigation -->
             <div class="pm-tabs">
                 <button type="button" class="pm-tab-btn active" data-target="pm-tab-licenses">🔑 Licenses & Clients</button>
                 <button type="button" class="pm-tab-btn" data-target="pm-tab-tiers">📦 Package Tiers</button>
                 <button type="button" class="pm-tab-btn" data-target="pm-tab-settings">⚙️ Settings</button>
+                <button type="button" class="pm-tab-btn" data-target="pm-tab-security">🛡️ Security & Health</button>
             </div>
 
             <!-- Tab Pane 1: Licenses -->
@@ -183,6 +183,27 @@
                             <button type="submit" class="pm-btn pm-btn-danger" style="width: 100%; margin-top: 1rem;">Update Admin Password</button>
                         </form>
                     </div>
+                </div>
+            </div>
+
+            <!-- Tab Pane 4: Security & Health -->
+            <div id="pm-tab-security" class="pm-tab-pane">
+                <div class="pm-card" style="margin-bottom: 1.5rem;">
+                    <div class="pm-flex-between">
+                        <div>
+                            <h3>🛡️ Multi-Server Security & Health Diagnostics</h3>
+                            <p class="pm-label" style="font-weight: normal; margin-top: 0.25rem; color: var(--pm-text-secondary);">
+                                Audits the security configurations, file system access, and SSL safety of both the Admin Portal and SaaS Dashboard servers.
+                            </p>
+                        </div>
+                        <button type="button" class="pm-btn pm-btn-primary" id="pm-btn-run-diagnostics" style="white-space: nowrap;">⚡ Run System Security Audit</button>
+                    </div>
+                </div>
+
+                <div id="pm-diagnostics-results" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <p class="pm-label" style="color: var(--pm-text-secondary); text-align: center; padding: 2rem 0;">
+                        Click "Run System Security Audit" above to scan the decoupled server environment.
+                    </p>
                 </div>
             </div>
         </main>

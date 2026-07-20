@@ -606,6 +606,74 @@ class Mass_Utility extends Module
                 <div class="pm-bridge-label">API Gateway Endpoint URL</div>
                 <span class="pm-bridge-code">' . htmlspecialchars($apiEndpoint) . '</span>
             </div>
+
+            <!-- Client Server Security Panel -->
+            ' . (function() {
+                $moduleDir = _PS_MODULE_DIR_ . 'mass_utility';
+                $gitDir = $moduleDir . '/.git';
+                $hasGit = is_dir($gitDir);
+                
+                $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $selfUrl = $scheme . '://' . $host . $this->_path;
+                
+                $gitExposed = false;
+                if ($hasGit) {
+                    $ch = curl_init($selfUrl . '.git/config');
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_NOBODY, true);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_exec($ch);
+                    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+                    if ($code === 200) {
+                        $gitExposed = true;
+                    }
+                }
+                
+                $sslActive = ($scheme === 'https');
+                $backupsDir = $moduleDir . '/backups';
+                $backupsWriteable = is_writable($backupsDir) || (!is_dir($backupsDir) && is_writable($moduleDir));
+
+                return '
+                <div class="pm-bridge-info-section" style="margin-top: 1.5rem; padding-top: 1.5rem;">
+                    <div class="pm-bridge-label">🛡️ Bridge Security & Environment Safety</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem;">
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--bridge-border); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem;">Transport Encryption (SSL/TLS Connection)</strong>
+                                <p style="font-size: 0.75rem; color: var(--bridge-muted); margin: 0.2rem 0 0 0;">Verifies if the bridge connection endpoint is running securely over HTTPS.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ' . ($sslActive ? 'background: rgba(16, 185, 129, 0.15); color: var(--bridge-success);' : 'background: rgba(245, 158, 11, 0.15); color: var(--bridge-warning);') . '">
+                                ' . ($sslActive ? '🟢 HTTPS SECURE' : '⚠️ HTTP UNENCRYPTED') . '
+                            </span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--bridge-border); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem;">Module Git Repository Exposure (.git Config)</strong>
+                                <p style="font-size: 0.75rem; color: var(--bridge-muted); margin: 0.2rem 0 0 0;">Checks if Git configuration files are publicly accessible from the web.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ' . ($gitExposed ? 'background: rgba(239, 68, 68, 0.15); color: var(--bridge-danger);' : 'background: rgba(16, 185, 129, 0.15); color: var(--bridge-success);') . '">
+                                ' . ($gitExposed ? '⚠️ EXPOSED' : '🟢 SECURE') . '
+                            </span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--bridge-border); border-radius: 8px;">
+                            <div>
+                                <strong style="font-size: 0.9rem;">Local Write Permissions (backups/ folder)</strong>
+                                <p style="font-size: 0.75rem; color: var(--bridge-muted); margin: 0.2rem 0 0 0;">Verifies write permissions for local database dumps and file staging packages.</p>
+                            </div>
+                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ' . ($backupsWriteable ? 'background: rgba(16, 185, 129, 0.15); color: var(--bridge-success);' : 'background: rgba(239, 68, 68, 0.15); color: var(--bridge-danger);') . '">
+                                ' . ($backupsWriteable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY') . '
+                            </span>
+                        </div>
+
+                    </div>
+                </div>';
+            })() . '
         </div>
         
         <script>

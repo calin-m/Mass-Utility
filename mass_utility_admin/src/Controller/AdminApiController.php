@@ -176,4 +176,81 @@ class AdminApiController
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
+
+    private function get_diagnostics(): void
+    {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        
+        // 1. Admin Base URLs
+        $adminBaseUrl = $scheme . '://' . $host . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+        $dashboardBaseUrl = $scheme . '://' . $host . rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/mass_utility_dashboard';
+
+        // 2. Audit Admin .git config exposure
+        $adminGitExposed = false;
+        $ch = curl_init($adminBaseUrl . '/../.git/config');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($code === 200) {
+            $adminGitExposed = true;
+        }
+
+        // 3. Audit Dashboard .git config exposure
+        $dashboardGitExposed = false;
+        $ch = curl_init($dashboardBaseUrl . '/../.git/config');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($code === 200) {
+            $dashboardGitExposed = true;
+        }
+
+        // 4. Audit Dashboard SQLite DB exposure
+        $dashboardDbExposed = false;
+        $ch = curl_init($dashboardBaseUrl . '/data/pm_cloud_backups.db');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($code === 200) {
+            $dashboardDbExposed = true;
+        }
+
+        // 5. File System checks
+        $adminDir = dirname(dirname(__DIR__));
+        $dashboardDir = dirname($adminDir) . '/mass_utility_dashboard';
+        
+        $adminWriteable = is_writable($adminDir);
+        $dashboardDataWriteable = is_writable($dashboardDir . '/data');
+        $dashboardBackupsWriteable = is_writable($dashboardDir . '/backups') || (!is_dir($dashboardDir . '/backups') && is_writable($dashboardDir));
+
+        $adminSslActive = ($scheme === 'https');
+        $dashboardSslActive = ($scheme === 'https');
+
+        echo json_encode([
+            'success' => true,
+            'diagnostics' => [
+                'admin_git_exposed' => $adminGitExposed,
+                'admin_writeable' => $adminWriteable,
+                'admin_ssl_active' => $adminSslActive,
+                'dashboard_git_exposed' => $dashboardGitExposed,
+                'dashboard_db_exposed' => $dashboardDbExposed,
+                'dashboard_data_writeable' => $dashboardDataWriteable,
+                'dashboard_backups_writeable' => $dashboardBackupsWriteable,
+                'dashboard_ssl_active' => $dashboardSslActive
+            ]
+        ]);
+    }
 }
