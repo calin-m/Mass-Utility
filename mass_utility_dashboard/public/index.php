@@ -1296,10 +1296,19 @@ if (strpos($path, '/api/v1/') === 0) {
             // 4. Check folder permissions and PHP execution modes
             $dataDir = dirname(__DIR__) . '/data';
             $backupsDir = dirname(__DIR__) . '/backups';
+            $dbFile = $dataDir . '/pm_cloud_backups.db';
+            $htaccessFile = $dataDir . '/.htaccess';
+
             $dataDirWriteable = is_writable($dataDir);
             $backupsDirWriteable = is_writable($backupsDir) || (!is_dir($backupsDir) && is_writable(dirname(__DIR__)));
             
             $sslEnforced = ($scheme === 'https');
+
+            // Octal perms helper
+            $getOctalPerms = function(string $path): string {
+                if (!file_exists($path)) return 'N/A';
+                return substr(sprintf('%o', fileperms($path)), -4);
+            };
 
             echo json_encode([
                 'success' => true,
@@ -1309,9 +1318,62 @@ if (strpos($path, '/api/v1/') === 0) {
                     'bridge_encrypted' => $bridgeEncrypted,
                     'data_dir_writeable' => $dataDirWriteable,
                     'backups_dir_writeable' => $backupsDirWriteable,
-                    'ssl_enforced' => $sslEnforced
+                    'ssl_enforced' => $sslEnforced,
+                    'paths' => [
+                        'data_dir' => [
+                            'path' => 'data',
+                            'current' => $getOctalPerms($dataDir),
+                            'recommended' => '0755',
+                            'is_dir' => true
+                        ],
+                        'backups_dir' => [
+                            'path' => 'backups',
+                            'current' => $getOctalPerms($backupsDir),
+                            'recommended' => '0755',
+                            'is_dir' => true
+                        ],
+                        'db_file' => [
+                            'path' => 'data/pm_cloud_backups.db',
+                            'current' => $getOctalPerms($dbFile),
+                            'recommended' => '0644',
+                            'is_dir' => false
+                        ],
+                        'htaccess_file' => [
+                            'path' => 'data/.htaccess',
+                            'current' => $getOctalPerms($htaccessFile),
+                            'recommended' => '0644',
+                            'is_dir' => false
+                        ]
+                    ]
                 ]
             ]);
+            exit;
+        }
+
+        if ($action === 'fix_diagnostics_permissions') {
+            $dataDir = dirname(__DIR__) . '/data';
+            $backupsDir = dirname(__DIR__) . '/backups';
+            $dbFile = $dataDir . '/pm_cloud_backups.db';
+            $htaccessFile = $dataDir . '/.htaccess';
+
+            $targets = [
+                'data_dir' => [$dataDir, 0755],
+                'backups_dir' => [$backupsDir, 0755],
+                'db_file' => [$dbFile, 0644],
+                'htaccess_file' => [$htaccessFile, 0644]
+            ];
+
+            $results = [];
+            foreach ($targets as $key => $info) {
+                list($path, $mode) = $info;
+                if (file_exists($path)) {
+                    $results[$key] = @chmod($path, $mode);
+                } else {
+                    $results[$key] = true;
+                }
+            }
+
+            echo json_encode(['success' => true, 'results' => $results]);
             exit;
         }
 

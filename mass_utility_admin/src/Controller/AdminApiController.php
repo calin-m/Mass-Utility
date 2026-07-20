@@ -239,6 +239,11 @@ class AdminApiController
         $adminSslActive = ($scheme === 'https');
         $dashboardSslActive = ($scheme === 'https');
 
+        $getOctalPerms = function(string $path): string {
+            if (!file_exists($path)) return 'N/A';
+            return substr(sprintf('%o', fileperms($path)), -4);
+        };
+
         echo json_encode([
             'success' => true,
             'diagnostics' => [
@@ -249,8 +254,73 @@ class AdminApiController
                 'dashboard_db_exposed' => $dashboardDbExposed,
                 'dashboard_data_writeable' => $dashboardDataWriteable,
                 'dashboard_backups_writeable' => $dashboardBackupsWriteable,
-                'dashboard_ssl_active' => $dashboardSslActive
+                'dashboard_ssl_active' => $dashboardSslActive,
+                'paths' => [
+                    'admin_dir' => [
+                        'path' => 'mass_utility_admin',
+                        'current' => $getOctalPerms($adminDir),
+                        'recommended' => '0755',
+                        'is_dir' => true
+                    ],
+                    'admin_data_dir' => [
+                        'path' => 'mass_utility_admin/data',
+                        'current' => $getOctalPerms($adminDir . '/data'),
+                        'recommended' => '0755',
+                        'is_dir' => true
+                    ],
+                    'dashboard_data_dir' => [
+                        'path' => 'mass_utility_dashboard/data',
+                        'current' => $getOctalPerms($dashboardDir . '/data'),
+                        'recommended' => '0755',
+                        'is_dir' => true
+                    ],
+                    'dashboard_backups_dir' => [
+                        'path' => 'mass_utility_dashboard/backups',
+                        'current' => $getOctalPerms($dashboardDir . '/backups'),
+                        'recommended' => '0755',
+                        'is_dir' => true
+                    ],
+                    'dashboard_db_file' => [
+                        'path' => 'mass_utility_dashboard/data/pm_cloud_backups.db',
+                        'current' => $getOctalPerms($dashboardDir . '/data/pm_cloud_backups.db'),
+                        'recommended' => '0644',
+                        'is_dir' => false
+                    ],
+                    'dashboard_htaccess_file' => [
+                        'path' => 'mass_utility_dashboard/data/.htaccess',
+                        'current' => $getOctalPerms($dashboardDir . '/data/.htaccess'),
+                        'recommended' => '0644',
+                        'is_dir' => false
+                    ]
+                ]
             ]
         ]);
+    }
+
+    private function fix_permissions(): void
+    {
+        $adminDir = dirname(dirname(__DIR__));
+        $dashboardDir = dirname($adminDir) . '/mass_utility_dashboard';
+
+        $targets = [
+            'admin_dir' => [$adminDir, 0755],
+            'admin_data_dir' => [$adminDir . '/data', 0755],
+            'dashboard_data_dir' => [$dashboardDir . '/data', 0755],
+            'dashboard_backups_dir' => [$dashboardDir . '/backups', 0755],
+            'dashboard_db_file' => [$dashboardDir . '/data/pm_cloud_backups.db', 0644],
+            'dashboard_htaccess_file' => [$dashboardDir . '/data/.htaccess', 0644]
+        ];
+
+        $results = [];
+        foreach ($targets as $key => $info) {
+            list($path, $mode) = $info;
+            if (file_exists($path)) {
+                $results[$key] = @chmod($path, $mode);
+            } else {
+                $results[$key] = true;
+            }
+        }
+
+        echo json_encode(['success' => true, 'results' => $results]);
     }
 }

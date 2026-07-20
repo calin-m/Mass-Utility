@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-20 05:25:53 UTC
+ * Generated: 2026-07-20 05:34:43 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -1012,32 +1012,67 @@ window.SettingsEngine = (function() {
                             </div>
                         `;
 
-                        html += `
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
-                                <div>
-                                    <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Local Write Access (data/ Folder)</strong>
-                                    <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.2rem;">Verifies write permissions for local settings storage and presets registries.</p>
-                                </div>
-                                <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.data_dir_writeable ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);'}">
-                                    ${d.data_dir_writeable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY'}
-                                </span>
-                            </div>
-                        `;
+                        let showFixButton = false;
+                        let pathsHtml = '<div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; padding: 0.5rem; background: rgba(0,0,0,0.1); border-radius: 6px;">';
+                        if (d.paths) {
+                            for (const key in d.paths) {
+                                const p = d.paths[key];
+                                const isMismatched = (p.current !== p.recommended);
+                                if (isMismatched) showFixButton = true;
+                                pathsHtml += `
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding: 0.25rem 0;">
+                                        <span style="font-family: monospace; color: var(--pm-text-secondary);">${p.path}</span>
+                                        <span>
+                                            Current: <strong style="${isMismatched ? 'color: var(--pm-warning);' : 'color: var(--pm-success);'}">${p.current}</strong> 
+                                            (Recommended: <strong>${p.recommended}</strong>)
+                                        </span>
+                                    </div>
+                                `;
+                            }
+                        }
+                        pathsHtml += '</div>';
 
                         html += `
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
-                                <div>
-                                    <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Archive Write Access (backups/ Folder)</strong>
-                                    <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.2rem;">Verifies write permissions for staging ZIP/TAR archives.</p>
-                                </div>
-                                <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.backups_dir_writeable ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);'}">
-                                    ${d.backups_dir_writeable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY'}
-                                </span>
-                            </div>
+                            <details style="padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px; cursor: pointer;">
+                                <summary style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: var(--pm-text-primary); outline: none; list-style: none;">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <strong style="font-size: 0.9rem;">SaaS Files & Folders Hardening Status</strong>
+                                        <span style="font-size: 0.75rem; color: var(--pm-text-secondary); font-weight: normal; margin-top: 0.2rem;">Click to expand file permission checks and auto-heal loose settings.</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        ${showFixButton ? '<button type="button" id="pm-btn-fix-dashboard-perms" style="background: var(--pm-primary); border: none; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.7rem; color: #fff; font-weight: bold; cursor: pointer;">⚡ Auto-Fix</button>' : ''}
+                                        <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${showFixButton ? 'background: rgba(245, 158, 11, 0.1); color: var(--pm-warning);' : 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);'}">
+                                            ${showFixButton ? '⚠️ HARMONIZE' : '🟢 SECURE'}
+                                        </span>
+                                    </div>
+                                </summary>
+                                ${pathsHtml}
+                            </details>
                         `;
 
                         html += '</div>';
                         resultsContainer.innerHTML = html; // nosec
+
+                        // Bind dashboard fix permissions button
+                        const fixDashboardPermsBtn = document.getElementById('pm-btn-fix-dashboard-perms');
+                        if (fixDashboardPermsBtn) {
+                            fixDashboardPermsBtn.addEventListener('click', async function(e) {
+                                e.stopPropagation();
+                                fixDashboardPermsBtn.disabled = true;
+                                fixDashboardPermsBtn.textContent = '⚡ Fixing...';
+                                try {
+                                    const fixRes = await window.FetchEngine.post('fix_diagnostics_permissions', {});
+                                    if (fixRes && fixRes.success) {
+                                        window.showPremiumToast('Permissions successfully secured to standard 0755/0644 values.', 'success');
+                                        runDiagBtn.click();
+                                    } else {
+                                        window.showPremiumToast('Failed to write permissions changes.', 'error');
+                                    }
+                                } catch (err) {
+                                    window.showPremiumToast('Network error during permissions correction.', 'error');
+                                }
+                            });
+                        }
                     } else {
                         resultsContainer.innerHTML = '<p class="pm-text-sm" style="color: var(--pm-danger);">Security diagnostics audit failed to run.</p>'; // nosec
                     }

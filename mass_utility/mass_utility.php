@@ -165,6 +165,29 @@ class Mass_Utility extends Module
             } catch (\Throwable $e) {}
             
             $redirectUrl = $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility';
+        }
+
+        // Handle Fix Bridge Permissions
+        if (class_exists('\Tools') && \Tools::getValue('action') === 'fix_bridge_permissions') {
+            $moduleDir = _PS_MODULE_DIR_ . 'mass_utility';
+            $backupsDir = $moduleDir . '/backups';
+            $apiFile = $moduleDir . '/api.php';
+            $htaccessFile = $moduleDir . '/.htaccess';
+
+            $targets = [
+                $moduleDir => 0755,
+                $backupsDir => 0755,
+                $apiFile => 0644,
+                $htaccessFile => 0644
+            ];
+
+            foreach ($targets as $path => $mode) {
+                if (file_exists($path)) {
+                    @chmod($path, $mode);
+                }
+            }
+
+            $redirectUrl = $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&perms_fixed=1';
             \Tools::redirectAdmin($redirectUrl);
         }
 
@@ -389,6 +412,15 @@ class Mass_Utility extends Module
 
     private function renderBridgeStatusPage(string $launcherUrl, string $apiEndpoint, bool $isGdriveConnected = false, string $authUrl = '#', bool $gdriveConfigured = false, bool $isSuspended = false): string
     {
+        $permsFixed = (class_exists('\Tools') && \Tools::getValue('perms_fixed') == '1');
+        $successBanner = '';
+        if ($permsFixed) {
+            $successBanner = '
+            <div style="background: var(--bridge-success-bg); border: 1px solid var(--bridge-success-border); color: var(--bridge-success); padding: 1rem; border-radius: 8px; font-weight: 600; margin-bottom: 1.5rem; font-size: 0.9rem; border-left: 4px solid var(--bridge-success);">
+                🟢 All whitelisted bridge directories and configurations have been safely hardened (0755/0644).
+            </div>';
+        }
+
         return '
         <style>
             .pm-bridge-card {
@@ -530,6 +562,7 @@ class Mass_Utility extends Module
             }
         </style>
         <div class="pm-bridge-card">
+            ' . $successBanner . '
             <div class="pm-bridge-status-row">
                 ' . ($isSuspended ? '
                 <span class="pm-bridge-badge" style="background: var(--bridge-danger-bg); color: var(--bridge-danger); border: 1px solid var(--bridge-danger-border);">
@@ -634,7 +667,53 @@ class Mass_Utility extends Module
                 
                 $sslActive = ($scheme === 'https');
                 $backupsDir = $moduleDir . '/backups';
-                $backupsWriteable = is_writable($backupsDir) || (!is_dir($backupsDir) && is_writable($moduleDir));
+
+                $getOctalPerms = function(string $path): string {
+                    if (!file_exists($path)) return 'N/A';
+                    return substr(sprintf('%o', fileperms($path)), -4);
+                };
+
+                $paths = [
+                    'module_dir' => [
+                        'name' => 'mass_utility',
+                        'current' => $getOctalPerms($moduleDir),
+                        'recommended' => '0755'
+                    ],
+                    'backups_dir' => [
+                        'name' => 'backups',
+                        'current' => $getOctalPerms($backupsDir),
+                        'recommended' => '0755'
+                    ],
+                    'api_file' => [
+                        'name' => 'api.php',
+                        'current' => $getOctalPerms($moduleDir . '/api.php'),
+                        'recommended' => '0644'
+                    ],
+                    'htaccess_file' => [
+                        'name' => '.htaccess',
+                        'current' => $getOctalPerms($moduleDir . '/.htaccess'),
+                        'recommended' => '0644'
+                    ]
+                ];
+
+                $showFixButton = false;
+                $pathsHtml = '<div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; padding: 0.5rem; background: rgba(0,0,0,0.3); border-radius: 6px;">';
+                foreach ($paths as $p) {
+                    $isMismatched = ($p['current'] !== $p['recommended']);
+                    if ($isMismatched) {
+                        $showFixButton = true;
+                    }
+                    $pathsHtml .= '
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding: 0.25rem 0;">
+                            <span style="font-family: monospace; color: var(--bridge-muted);">' . htmlspecialchars($p['name']) . '</span>
+                            <span>
+                                Current: <strong style="' . ($isMismatched ? 'color: var(--bridge-warning);' : 'color: var(--bridge-success);') . '">' . htmlspecialchars($p['current']) . '</strong> 
+                                (Recommended: <strong>' . htmlspecialchars($p['recommended']) . '</strong>)
+                            </span>
+                        </div>
+                    ';
+                }
+                $pathsHtml .= '</div>';
 
                 return '
                 <div class="pm-bridge-info-section" style="margin-top: 1.5rem; padding-top: 1.5rem;">
@@ -661,15 +740,21 @@ class Mass_Utility extends Module
                             </span>
                         </div>
 
-                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--bridge-border); border-radius: 8px;">
-                            <div>
-                                <strong style="font-size: 0.9rem;">Local Write Permissions (backups/ folder)</strong>
-                                <p style="font-size: 0.75rem; color: var(--bridge-muted); margin: 0.2rem 0 0 0;">Verifies write permissions for local database dumps and file staging packages.</p>
-                            </div>
-                            <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ' . ($backupsWriteable ? 'background: rgba(16, 185, 129, 0.15); color: var(--bridge-success);' : 'background: rgba(239, 68, 68, 0.15); color: var(--bridge-danger);') . '">
-                                ' . ($backupsWriteable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY') . '
-                            </span>
-                        </div>
+                        <details style="padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--bridge-border); border-radius: 8px; cursor: pointer;">
+                            <summary style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; outline: none; list-style: none;">
+                                <div style="display: flex; flex-direction: column; cursor: pointer;">
+                                    <strong style="font-size: 0.9rem;">Module Files & Folders Hardening Status</strong>
+                                    <span style="font-size: 0.75rem; color: var(--bridge-muted); font-weight: normal; margin-top: 0.2rem;">Click to expand file permission checks and auto-heal loose settings.</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    ' . ($showFixButton ? '<a href="' . $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&action=fix_bridge_permissions" style="background: var(--bridge-accent); border: none; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.7rem; color: #fff; font-weight: bold; text-decoration: none;">⚡ Auto-Fix</a>' : '') . '
+                                    <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ' . ($showFixButton ? 'background: rgba(245, 158, 11, 0.15); color: var(--bridge-warning);' : 'background: rgba(16, 185, 129, 0.15); color: var(--bridge-success);') . '">
+                                        ' . ($showFixButton ? '⚠️ HARMONIZE' : '🟢 SECURE') . '
+                                    </span>
+                                </div>
+                            </summary>
+                            ' . $pathsHtml . '
+                        </details>
 
                     </div>
                 </div>';
