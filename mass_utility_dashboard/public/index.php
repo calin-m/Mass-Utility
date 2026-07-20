@@ -750,6 +750,12 @@ if ($path === '/' || $path === '/index.html') {
                 $html
             );
             
+            $html = str_replace(
+                './assets/',
+                $basePath . '/v2/assets/',
+                $html
+            );
+            
             header('Content-Type: text/html');
             echo $html;
             exit;
