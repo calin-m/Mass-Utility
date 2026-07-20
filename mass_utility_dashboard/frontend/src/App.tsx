@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { SettingsTab } from './components/SettingsTab';
 import { FileToolsTab } from './components/FileToolsTab';
 import { GovernorTab } from './components/GovernorTab';
+import { DatabaseToolsTab } from './components/DatabaseToolsTab';
 
 type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'logs' | 'settings';
 
@@ -259,22 +260,7 @@ export default function App() {
         
         {activeTab === 'governor' && <GovernorTab />}
 
-        {activeTab === 'database' && (
-          <div className="text-center py-12 space-y-4">
-            <span className="text-4xl">🗄️</span>
-            <h3 className="text-lg font-bold">Database Tools (Migration Pending)</h3>
-            <p className={`text-sm max-w-md mx-auto ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-              InnoDB optimizer grids, table sizing meters, and defragmentation metrics are currently operating under the legacy layout.
-            </p>
-            <button
-              type="button"
-              onClick={() => handleLegacyFallback('pm-tab-database')}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition"
-            >
-              🔄 Launch Legacy Database Tools
-            </button>
-          </div>
-        )}
+        {activeTab === 'database' && <DatabaseToolsTab />}
 
         {activeTab === 'query' && (
           <div className="text-center py-12 space-y-4">
