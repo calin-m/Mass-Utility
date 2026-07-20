@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 type ModalType = 'alert' | 'confirm' | 'prompt';
 
@@ -38,6 +38,12 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [inputValue, setInputValue] = useState('');
   const [isConfirmDisabled, setIsConfirmDisabled] = useState(false);
+
+  // Keep a ref of state to prevent listener re-registrations
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     if (state.isOpen) {
@@ -86,7 +92,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const closeModal = () => {
     setState(prev => ({ ...prev, isOpen: false }));
-    if (state.onCancel) state.onCancel();
+    if (stateRef.current.onCancel) stateRef.current.onCancel();
   };
 
   // Register on window for legacy standalone interoperability
@@ -102,7 +108,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && stateRef.current.isOpen) {
         closeModal();
       }
     };
@@ -110,7 +116,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [state]);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -133,14 +139,14 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       {state.isOpen && (
         <div className="pm-modal-overlay fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-[99999] transition-opacity duration-300">
-          <div className="pm-modal-card bg-[#12121a] dark:bg-[#12121a] text-[var(--pm-text-primary)] border border-white/[0.08] dark:border-white/[0.08] rounded-2xl p-6 shadow-2xl w-full max-w-lg mx-4 relative animate-fade-in">
-            <div className="pm-modal-header flex justify-between items-center border-b border-white/[0.06] pb-3 mb-4">
-              <h2 className="pm-modal-title text-sm font-bold uppercase tracking-wider text-white">{state.title}</h2>
-              <button onClick={closeModal} className="pm-modal-close-icon text-gray-400 hover:text-white text-lg font-bold">&times;</button>
+          <div className="pm-modal-card rounded-2xl p-6 shadow-2xl w-full max-w-lg mx-4 relative animate-fade-in">
+            <div className="pm-modal-header flex justify-between items-center pb-3 mb-4">
+              <h2 className="pm-modal-title text-sm font-bold uppercase tracking-wider">{state.title}</h2>
+              <button onClick={closeModal} className="pm-modal-close-icon text-lg font-bold">&times;</button>
             </div>
             
             <div 
-              className="pm-modal-body text-xs text-gray-300 leading-relaxed mb-5"
+              className="pm-modal-body text-xs leading-relaxed mb-5"
               dangerouslySetInnerHTML={{ __html: state.message }}
             />
 
@@ -151,7 +157,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   value={inputValue}
                   onChange={handleInputChange}
                   placeholder={state.expectedPhrase ? `Type '${state.expectedPhrase.toUpperCase()}' to confirm` : state.placeholder}
-                  className="w-full px-3 py-2 text-xs border border-white/[0.1] rounded-lg bg-black/20 text-white font-mono text-center focus:outline-none focus:border-[#8b5cf6]/50 uppercase"
+                  className="w-full px-3 py-2 text-xs border border-pm-border bg-pm-input text-[var(--pm-text-primary)] rounded-lg font-mono text-center focus:outline-none focus:border-pm-purple/50 uppercase"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !isConfirmDisabled) {
@@ -168,7 +174,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 {state.type !== 'alert' && (
                   <button
                     onClick={closeModal}
-                    className="pm-btn px-4 py-2 text-xs font-bold bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition"
+                    className="pm-btn px-4 py-2 text-xs font-bold bg-pm-input hover:bg-pm-border text-[var(--pm-text-primary)] rounded-lg transition"
                   >
                     Cancel
                   </button>
@@ -177,7 +183,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   disabled={isConfirmDisabled}
                   onClick={handleConfirm}
                   className={`pm-btn px-4 py-2 text-xs font-bold rounded-lg text-white transition ${
-                    state.alertType === 'error' || state.type === 'confirm' ? 'bg-red-500 hover:bg-red-600 disabled:bg-red-500/30' : 'bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/30'
+                    state.alertType === 'error' || state.type === 'confirm' ? 'bg-pm-danger' : 'bg-pm-success'
                   }`}
                 >
                   {state.type === 'alert' ? 'OK' : 'Confirm'}
