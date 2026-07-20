@@ -152,10 +152,17 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   // Environment-aware confirmation and alert wrappers
-  const showConfirm = (title: string, message: string, expectedPhrase: string | null, callback: () => void) => {
+  const getGlobalWin = () => {
     const win = window as any;
-    if (win.showPremiumConfirmModal) {
-      win.showPremiumConfirmModal(title, message, expectedPhrase, callback);
+    if (win.showPremiumConfirmModal) return win;
+    if (win.parent && win.parent.showPremiumConfirmModal) return win.parent;
+    return win;
+  };
+
+  const showConfirm = (title: string, message: string, expectedPhrase: string | null, callback: () => void) => {
+    const targetWin = getGlobalWin();
+    if (targetWin.showPremiumConfirmModal) {
+      targetWin.showPremiumConfirmModal(title, message, expectedPhrase, callback);
     } else {
       // Local dev fallback
       if (expectedPhrase) {
@@ -172,9 +179,9 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   const showAlert = (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    const win = window as any;
-    if (win.showPremiumAlert) {
-      win.showPremiumAlert(title, message, type);
+    const targetWin = getGlobalWin();
+    if (targetWin.showPremiumAlert) {
+      targetWin.showPremiumAlert(title, message, type);
     } else {
       window.alert(`${title}\n\n${message}`);
     }
@@ -230,7 +237,7 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   const handleSavePreset = () => {
-    const win = window as any;
+    const targetWin = getGlobalWin();
     const promptCallback = async (name: string) => {
       if (!name) return;
       try {
@@ -243,8 +250,8 @@ export const DatabaseToolsTab: React.FC = () => {
       } catch (e) {}
     };
 
-    if (win.showPremiumPromptModal) {
-      win.showPremiumPromptModal('Save Preset', 'Enter new preset name:', 'Preset Name', promptCallback);
+    if (targetWin.showPremiumPromptModal) {
+      targetWin.showPremiumPromptModal('Save Preset', 'Enter new preset name:', 'Preset Name', promptCallback);
     } else {
       const name = window.prompt('Enter new preset name:');
       if (name) promptCallback(name);
@@ -1096,7 +1103,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             {b.sql_download_url && (
                               <a
                                 href={b.sql_download_url}
-                                className="pm-btn pm-btn-sm text-[0.7rem] inline-flex items-center justify-center gap-1"
+                                className="pm-btn pm-btn-sm text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
                                 title="Download SQL Dump"
                               >
                                 <span>⬇️</span> SQL
@@ -1106,7 +1113,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             {b.log_filename && b.log_download_url && (
                               <a
                                 href={b.log_download_url}
-                                className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] inline-flex items-center justify-center gap-1"
+                                className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
                                 title="Download Telemetry Log"
                               >
                                 <span>📄</span> Log
@@ -1115,7 +1122,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleCheckCompareDrift(b.basename)}
-                              className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] inline-flex items-center justify-center gap-1"
+                              className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
                             >
                               <span>🔍</span> Diff
                             </button>
@@ -1124,14 +1131,14 @@ export const DatabaseToolsTab: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteBackup(b.basename)}
-                                  className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] inline-flex items-center justify-center gap-1"
+                                  className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
                                 >
                                   <span>🗑️</span> Delete
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleTogglePinBackup(b.basename)}
-                                  className={`pm-btn pm-btn-sm text-[0.7rem] inline-flex items-center justify-center gap-1 ${
+                                  className={`pm-btn pm-btn-sm text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90 ${
                                     isPinned ? 'pm-btn-success' : 'pm-btn-neutral'
                                   }`}
                                 >
@@ -1267,7 +1274,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleStartRestore(b.basename)}
-                                className="pm-btn pm-btn-danger text-[0.7rem] inline-flex items-center justify-center gap-1 hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-danger text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
                               >
                                 <span>⚡</span> Restore
                               </button>
@@ -1275,7 +1282,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleStartRestore(b.basename)}
-                                className="pm-btn pm-btn-purple text-[0.7rem] inline-flex items-center justify-center gap-1 hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-purple text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
                               >
                                 <span>☁️</span> Restore
                               </button>
@@ -1284,7 +1291,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleDeleteBackup(b.basename)}
-                                className="pm-btn pm-btn-neutral text-[0.7rem] inline-flex items-center justify-center gap-1 hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-neutral text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
                               >
                                 <span>🗑️</span> Delete
                               </button>
@@ -1621,7 +1628,7 @@ export const DatabaseToolsTab: React.FC = () => {
       {/* COMPARISON DRIFT OVERLAY MODAL (Key Sync Audit Modal matching legacy layout) */}
       {driftModalData && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#12121a] border border-white/[0.08] rounded-xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] rounded-xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[var(--pm-text-primary)]">
             {/* Header */}
             <div className="p-4 border-b border-white/[0.06] flex justify-between items-center bg-black/10">
               <h3 className="text-sm font-bold text-white uppercase flex items-center gap-2">
@@ -1750,9 +1757,9 @@ export const DatabaseToolsTab: React.FC = () => {
 
               {/* Collapsible Drawer (Details Drawer) */}
               {activeDrawer && (
-                <div className="bg-black/20 border border-white/[0.06] p-4 rounded-xl space-y-4">
-                  <div className="flex justify-between items-center border-b border-white/[0.06] pb-2">
-                    <h4 className="font-bold text-white uppercase tracking-wider text-[0.7rem]">
+                <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] p-4 rounded-xl space-y-4">
+                  <div className="flex justify-between items-center border-b border-[var(--pm-border-color)] pb-2">
+                    <h4 className="font-bold text-[var(--pm-text-primary)] uppercase tracking-wider text-[0.7rem]">
                       {activeDrawer === 'added' && 'Added Products List'}
                       {activeDrawer === 'deleted' && 'Deleted Products List'}
                       {activeDrawer === 'modified' && 'Modified Tables List'}
@@ -1761,7 +1768,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setActiveDrawer(null)}
-                      className="text-gray-400 hover:text-white uppercase font-bold text-[0.65rem]"
+                      className="text-[var(--pm-text-secondary)] hover:text-[var(--pm-text-primary)] uppercase font-bold text-[0.65rem]"
                     >
                       ✕ Close
                     </button>
@@ -1782,22 +1789,22 @@ export const DatabaseToolsTab: React.FC = () => {
                                 color: '#10b981',
                               });
                             }}
-                            className="pm-btn pm-btn-sm text-[0.65rem]"
+                            className="pm-btn pm-btn-sm text-[0.65rem] cursor-pointer transition hover:-translate-y-[1px]"
                           >
                             Inspect All
                           </button>
                           <a
                             href={`${window.location.href}&ajax=1&action=export_diff&file=${encodeURIComponent(driftModalData.name)}&table=product_deltas&format=csv`}
-                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.65rem]"
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.65rem] inline-flex items-center justify-center cursor-pointer transition hover:-translate-y-[1px]"
                           >
                             Export CSV
                           </a>
                         </div>
-                        <div className="divide-y divide-white/[0.04]">
+                        <div className="divide-y divide-[var(--pm-border-color)]">
                           {(driftModalData.added || []).map((p: any) => (
-                            <div key={p.id_product} className="py-1 flex justify-between font-mono text-[0.7rem] text-gray-300">
+                            <div key={p.id_product} className="py-1.5 flex justify-between font-mono text-[0.7rem] text-[var(--pm-text-secondary)]">
                               <span>ID: {p.id_product} ({p.name})</span>
-                              <span className="text-emerald-400">${parseFloat(p.price).toFixed(2)}</span>
+                              <span className="text-emerald-400 font-bold">${parseFloat(p.price).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>
@@ -1818,22 +1825,22 @@ export const DatabaseToolsTab: React.FC = () => {
                                 color: '#ef4444',
                               });
                             }}
-                            className="pm-btn pm-btn-sm text-[0.65rem]"
+                            className="pm-btn pm-btn-sm text-[0.65rem] cursor-pointer transition hover:-translate-y-[1px]"
                           >
                             Inspect All
                           </button>
                           <a
                             href={`${window.location.href}&ajax=1&action=export_diff&file=${encodeURIComponent(driftModalData.name)}&table=product_deltas&format=csv`}
-                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.65rem]"
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.65rem] inline-flex items-center justify-center cursor-pointer transition hover:-translate-y-[1px]"
                           >
                             Export CSV
                           </a>
                         </div>
-                        <div className="divide-y divide-white/[0.04]">
+                        <div className="divide-y divide-[var(--pm-border-color)]">
                           {(driftModalData.deleted || []).map((p: any) => (
-                            <div key={p.id_product} className="py-1 flex justify-between font-mono text-[0.7rem] text-gray-300">
+                            <div key={p.id_product} className="py-1.5 flex justify-between font-mono text-[0.7rem] text-[var(--pm-text-secondary)]">
                               <span>ID: {p.id_product} ({p.name})</span>
-                              <span className="text-red-400 line-through">${parseFloat(p.price).toFixed(2)}</span>
+                              <span className="text-red-400 line-through font-bold">${parseFloat(p.price).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>
@@ -1842,14 +1849,14 @@ export const DatabaseToolsTab: React.FC = () => {
 
                     {/* Modified Tables List */}
                     {activeDrawer === 'modified' && (
-                      <div className="divide-y divide-white/[0.04]">
+                      <div className="divide-y divide-[var(--pm-border-color)]">
                         {getModifiedTables(driftModalData.checksum_status).map((t: string) => (
                           <div key={t} className="py-2 flex justify-between items-center text-xs">
-                            <span className="font-mono text-white">{t}</span>
+                            <span className="font-mono text-[var(--pm-text-primary)] font-semibold">{t}</span>
                             <button
                               type="button"
                               onClick={() => handleInspectRowDiff(t)}
-                              className="text-[0.65rem] text-indigo-400 hover:underline font-bold"
+                              className="text-[0.65rem] text-indigo-400 hover:text-indigo-300 hover:underline font-bold cursor-pointer"
                             >
                               View Diff
                             </button>
@@ -1860,10 +1867,10 @@ export const DatabaseToolsTab: React.FC = () => {
 
                     {/* Volatile Tables List */}
                     {activeDrawer === 'volatile' && (
-                      <div className="divide-y divide-white/[0.04]">
+                      <div className="divide-y divide-[var(--pm-border-color)]">
                         {getVolatileTables(driftModalData.checksum_status).map((t: string) => (
                           <div key={t} className="py-2 flex justify-between items-center text-xs">
-                            <span className="font-mono text-white">{t}</span>
+                            <span className="font-mono text-[var(--pm-text-primary)] font-semibold">{t}</span>
                             <span className="text-[0.65rem] text-amber-400 font-bold uppercase">Volatile Logs</span>
                           </div>
                         ))}
@@ -1874,14 +1881,14 @@ export const DatabaseToolsTab: React.FC = () => {
               )}
 
               {isLoadingRowDiff ? (
-                <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl text-center text-gray-400 font-mono">
+                <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] p-4 rounded-xl text-center text-[var(--pm-text-secondary)] font-mono">
                   ⌛ Loading row difference telemetry...
                 </div>
               ) : tableRowDiff && (
-                <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl space-y-3">
-                  <div className="flex justify-between items-center font-bold text-white border-b border-white/[0.06] pb-2">
+                <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] p-4 rounded-xl space-y-3">
+                  <div className="flex justify-between items-center font-bold text-[var(--pm-text-primary)] border-b border-[var(--pm-border-color)] pb-2">
                     <span>Table Row Modifications: {tableRowDiff.table}</span>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 text-[0.7rem]">
                       <span className="text-emerald-400">+{tableRowDiff.summary.added} Added</span>
                       <span className="text-red-400">-{tableRowDiff.summary.deleted} Deleted</span>
                       <span className="text-amber-400">~{tableRowDiff.summary.modified} Modified</span>
@@ -1891,13 +1898,13 @@ export const DatabaseToolsTab: React.FC = () => {
                   <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2">
                     {/* Modified Rows */}
                     {tableRowDiff.modified_rows?.map((r: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-black/25 border-amber-500/25 border-l-4 rounded-r-lg space-y-2">
-                        <span className="font-mono text-white font-bold block">PK Index: {r.pk}</span>
+                      <div key={idx} className="p-3 bg-[var(--pm-card-bg)] border-amber-500/30 border border-l-4 rounded-r-lg space-y-2">
+                        <span className="font-mono text-[var(--pm-text-primary)] font-bold block">PK Index: {r.pk}</span>
                         {Object.keys(r.changes).map(col => (
-                          <div key={col} className="bg-black/20 p-2 rounded text-[0.7rem] leading-relaxed">
-                            <span className="text-gray-400 font-mono">{col}: </span>
-                            <span className="text-red-400 line-through mr-2">{String(r.changes[col].backup || 'NULL')}</span>
-                            <span className="text-emerald-400">{String(r.changes[col].live || 'NULL')}</span>
+                          <div key={col} className="bg-[var(--pm-body-bg)] p-2 rounded text-[0.7rem] leading-relaxed border border-[var(--pm-border-color)]">
+                            <span className="text-[var(--pm-text-secondary)] font-mono">{col}: </span>
+                            <span className="text-red-400 line-through mr-2 font-mono">{String(r.changes[col].backup || 'NULL')}</span>
+                            <span className="text-emerald-400 font-mono">{String(r.changes[col].live || 'NULL')}</span>
                           </div>
                         ))}
                       </div>
@@ -1905,12 +1912,12 @@ export const DatabaseToolsTab: React.FC = () => {
 
                     {/* Added Rows */}
                     {tableRowDiff.added_rows?.map((r: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-black/25 border-emerald-500/25 border-l-4 rounded-r-lg">
+                      <div key={idx} className="p-3 bg-[var(--pm-card-bg)] border-emerald-500/30 border border-l-4 rounded-r-lg">
                         <span className="font-mono text-emerald-400 font-bold block mb-2">Added Row Data</span>
                         {Object.keys(r).map(col => (
-                          <div key={col} className="text-[0.7rem]">
-                            <span className="text-gray-500">{col}: </span>
-                            <span className="text-white">{String(r[col] || 'NULL')}</span>
+                          <div key={col} className="text-[0.7rem] text-[var(--pm-text-secondary)]">
+                            <span className="text-[var(--pm-text-secondary)]/60">{col}: </span>
+                            <span className="font-mono text-[var(--pm-text-primary)]">{String(r[col] || 'NULL')}</span>
                           </div>
                         ))}
                       </div>
@@ -1918,12 +1925,12 @@ export const DatabaseToolsTab: React.FC = () => {
 
                     {/* Deleted Rows */}
                     {tableRowDiff.deleted_rows?.map((r: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-black/25 border-red-500/25 border-l-4 rounded-r-lg">
+                      <div key={idx} className="p-3 bg-[var(--pm-card-bg)] border-red-500/30 border border-l-4 rounded-r-lg">
                         <span className="font-mono text-red-400 font-bold block mb-2">Deleted Row Data</span>
                         {Object.keys(r).map(col => (
-                          <div key={col} className="text-[0.7rem] line-through text-gray-500">
+                          <div key={col} className="text-[0.7rem] line-through text-[var(--pm-text-secondary)]/50">
                             <span>{col}: </span>
-                            <span>{String(r[col] || 'NULL')}</span>
+                            <span className="font-mono">{String(r[col] || 'NULL')}</span>
                           </div>
                         ))}
                       </div>
@@ -1934,8 +1941,8 @@ export const DatabaseToolsTab: React.FC = () => {
 
               {/* Database Tables Content Integrity Table */}
               <div className="space-y-2">
-                <span className="font-bold text-gray-400 uppercase tracking-wider block">Database Tables Content Integrity</span>
-                <div className="max-h-[220px] overflow-y-auto bg-black/10 border border-white/[0.06] rounded-lg p-3 space-y-2">
+                <span className="font-bold text-[var(--pm-text-secondary)] uppercase tracking-wider block">Database Tables Content Integrity</span>
+                <div className="max-h-[220px] overflow-y-auto bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] rounded-lg p-3 space-y-2">
                   {driftModalData.checksum_status &&
                     Object.keys(driftModalData.checksum_status).map(tbl => {
                       const c = driftModalData.checksum_status[tbl];
@@ -1943,15 +1950,15 @@ export const DatabaseToolsTab: React.FC = () => {
                       const isVolatile = c.volatile === true;
 
                       return (
-                        <div key={tbl} className="flex justify-between items-center py-2 border-b border-white/[0.04]">
+                        <div key={tbl} className="flex justify-between items-center py-2 border-b border-[var(--pm-border-color)] last:border-b-0">
                           <div>
-                            <span className="font-mono font-semibold text-white block">{tbl}</span>
-                            <span className="text-[0.65rem] text-gray-500">
+                            <span className="font-mono font-semibold text-[var(--pm-text-primary)] block">{tbl}</span>
+                            <span className="text-[0.65rem] text-[var(--pm-text-secondary)]">
                               Rows: {c.backup_rows} ➔ {c.active_rows}
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="font-mono text-[0.7rem] text-gray-400">
+                            <span className="font-mono text-[0.7rem] text-[var(--pm-text-secondary)]">
                               {c.backup ? c.backup : 'N/A'} ➔ {c.active}
                             </span>
                             <span className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-md ${
@@ -1969,15 +1976,15 @@ export const DatabaseToolsTab: React.FC = () => {
 
               {/* Staging Telemetry Log Checksum */}
               <div className="space-y-2">
-                <span className="font-bold text-gray-400 uppercase tracking-wider block">Staging Telemetry Log Checksum</span>
-                <pre className="bg-black text-[0.7rem] text-emerald-400 p-4 rounded-lg font-mono max-h-[140px] overflow-y-auto border border-white/[0.06] whitespace-pre-wrap">
+                <span className="font-bold text-[var(--pm-text-secondary)] uppercase tracking-wider block">Staging Telemetry Log Checksum</span>
+                <pre className="bg-black text-[0.7rem] text-emerald-400 p-4 rounded-lg font-mono max-h-[140px] overflow-y-auto border border-[var(--pm-border-color)] whitespace-pre-wrap">
                   {driftModalData.log_metadata}
                 </pre>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-white/[0.06] bg-black/10 flex justify-end">
+            <div className="p-4 border-t border-[var(--pm-border-color)] bg-black/10 flex justify-end">
               <button
                 type="button"
                 onClick={() => {
@@ -1985,7 +1992,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   setTableRowDiff(null);
                   setActiveDrawer(null);
                 }}
-                className="pm-btn pm-btn-neutral text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase"
+                className="pm-btn pm-btn-neutral text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase cursor-pointer"
               >
                 Close Details
               </button>
@@ -1997,15 +2004,15 @@ export const DatabaseToolsTab: React.FC = () => {
       {/* INSPECT ALL DELTAS SUB-MODAL */}
       {inspectAllModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#12121a] border border-white/[0.08] rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="p-4 border-b border-white/[0.06] flex justify-between items-center bg-black/10">
-              <h3 className="text-sm font-bold text-white uppercase">
+          <div className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] text-[var(--pm-text-primary)]">
+            <div className="p-4 border-b border-[var(--pm-border-color)] flex justify-between items-center bg-black/10">
+              <h3 className="text-sm font-bold text-[var(--pm-text-primary)] uppercase">
                 {inspectAllModal.title} ({inspectAllModal.items.length})
               </h3>
               <button
                 type="button"
                 onClick={() => setInspectAllModal(null)}
-                className="text-gray-400 hover:text-white text-lg font-bold"
+                className="text-[var(--pm-text-secondary)] hover:text-[var(--pm-text-primary)] text-lg font-bold"
               >
                 &times;
               </button>
@@ -2014,27 +2021,27 @@ export const DatabaseToolsTab: React.FC = () => {
               {inspectAllModal.items.map((i: any) => (
                 <div
                   key={i.id_product}
-                  className="p-4 rounded-lg flex justify-between items-center bg-black/25"
+                  className="p-4 rounded-lg flex justify-between items-center bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)]"
                   style={{ borderLeft: `4px solid ${inspectAllModal.color}` }}
                 >
                   <div className="flex flex-col gap-1 text-xs">
                     <div className="flex justify-between items-center">
-                      <span className="font-mono font-bold text-white">ID: {i.id_product}</span>
-                      <span className="text-gray-500 font-mono">Ref: {i.reference || 'N/A'}</span>
+                      <span className="font-mono font-bold text-[var(--pm-text-primary)]">ID: {i.id_product}</span>
+                      <span className="text-[var(--pm-text-secondary)] font-mono">Ref: {i.reference || 'N/A'}</span>
                     </div>
-                    <span className="text-gray-400">{i.name}</span>
+                    <span className="text-[var(--pm-text-secondary)]">{i.name}</span>
                   </div>
-                  <span className="text-white font-mono font-bold text-xs">
+                  <span className="text-[var(--pm-text-primary)] font-mono font-bold text-xs">
                     ${parseFloat(i.price).toFixed(2)}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="p-4 border-t border-white/[0.06] bg-black/10 flex justify-end">
+            <div className="p-4 border-t border-[var(--pm-border-color)] bg-black/10 flex justify-end">
               <button
                 type="button"
                 onClick={() => setInspectAllModal(null)}
-                className="pm-btn pm-btn-neutral text-xs font-bold px-4 py-2 rounded-lg transition uppercase"
+                className="pm-btn pm-btn-neutral text-xs font-bold px-4 py-2 rounded-lg transition uppercase cursor-pointer"
               >
                 Back
               </button>
