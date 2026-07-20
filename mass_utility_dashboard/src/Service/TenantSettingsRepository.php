@@ -93,4 +93,29 @@ class TenantSettingsRepository implements TenantSettingsRepositoryInterface
             $this->logger->log("Failed to delete setting {$key} from SQLite: " . $e->getMessage(), 'ERROR');
         }
     }
+
+    /**
+     * Retrieve all configurations as a key-value array.
+     */
+    public function getAll(): array
+    {
+        try {
+            $pdo = $this->connectionManager->getConnection();
+            $stmt = $pdo->query('SELECT `name`, `value` FROM `tenant_settings`');
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $settings = [];
+            foreach ($rows as $row) {
+                $decoded = json_decode($row['value'], true);
+                if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+                    $settings[$row['name']] = $row['value'];
+                } else {
+                    $settings[$row['name']] = $decoded;
+                }
+            }
+            return $settings;
+        } catch (Exception $e) {
+            $this->logger->log("Failed to fetch all settings: " . $e->getMessage(), 'ERROR');
+            return [];
+        }
+    }
 }
