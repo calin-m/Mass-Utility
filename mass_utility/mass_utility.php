@@ -747,7 +747,7 @@ class Mass_Utility extends Module
                                     <span style="font-size: 0.75rem; color: var(--bridge-muted); font-weight: normal; margin-top: 0.2rem;">Click to expand file permission checks and auto-heal loose settings.</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    ' . ($showFixButton ? '<a href="' . $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&action=fix_bridge_permissions" style="background: var(--bridge-accent); border: none; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.7rem; color: #fff; font-weight: bold; text-decoration: none;">⚡ Auto-Fix</a>' : '') . '
+                                    ' . ($showFixButton ? '<a href="javascript:void(0);" onclick="event.stopPropagation(); window.location.href=\'' . $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&action=fix_bridge_permissions\';" style="background: var(--bridge-accent); border: none; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.7rem; color: #fff; font-weight: bold; text-decoration: none;">⚡ Auto-Fix</a>' : '') . '
                                     <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ' . ($showFixButton ? 'background: rgba(245, 158, 11, 0.15); color: var(--bridge-warning);' : 'background: rgba(16, 185, 129, 0.15); color: var(--bridge-success);') . '">
                                         ' . ($showFixButton ? '⚠️ HARMONIZE' : '🟢 SECURE') . '
                                     </span>
