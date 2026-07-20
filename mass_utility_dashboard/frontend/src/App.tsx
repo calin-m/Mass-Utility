@@ -4,7 +4,7 @@ import { SettingsTab } from './components/SettingsTab';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-[#09090e] text-[#e3e3e3] p-6 font-sans">
+    <div className="min-h-screen bg-[#09090e] text-[#e3e3e3] p-6" style={{ fontFamily: 'var(--pm-font-family, system-ui, -apple-system, sans-serif)' }}>
       <header className="mb-6 flex justify-between items-center border-b border-white/[0.06] pb-4">
         <div>
           <h1 className="text-2xl font-black tracking-wider bg-gradient-to-r from-[#a78bfa] to-[#8b5cf6] bg-clip-text text-transparent uppercase">Project Mass v2</h1>

@@ -3,6 +3,7 @@
 // @Calls: get_diagnostics, fix_diagnostics_permissions
 
 import React, { useState } from 'react';
+import { FetchService } from '../utils/FetchService';
 
 interface DiagnosticPath {
   path: string;
@@ -28,13 +29,11 @@ export const SettingsSecurity: React.FC = () => {
     setIsLoading(true);
     setErrorMsg('');
     try {
-      if (typeof (window as any).FetchEngine !== 'undefined') {
-        const response = await (window as any).FetchEngine.post('get_diagnostics', {});
-        if (response && response.success && response.diagnostics) {
-          setDiagnostics(response.diagnostics);
-        } else {
-          setErrorMsg('Security diagnostics audit failed to run.');
-        }
+      const response = await FetchService.post('get_diagnostics', {});
+      if (response && response.success && response.diagnostics) {
+        setDiagnostics(response.diagnostics);
+      } else {
+        setErrorMsg('Security diagnostics audit failed to run.');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Network error during diagnostics request.');
@@ -46,14 +45,12 @@ export const SettingsSecurity: React.FC = () => {
   const fixPermissions = async () => {
     setIsFixing(true);
     try {
-      if (typeof (window as any).FetchEngine !== 'undefined') {
-        const response = await (window as any).FetchEngine.post('fix_diagnostics_permissions', {});
-        if (response && response.success) {
-          alert('Permissions successfully secured to standard 0755/0644 values.');
-          runAudit();
-        } else {
-          alert('Failed to write permissions changes.');
-        }
+      const response = await FetchService.post('fix_diagnostics_permissions', {});
+      if (response && response.success) {
+        alert('Permissions successfully secured to standard 0755/0644 values.');
+        runAudit();
+      } else {
+        alert('Failed to write permissions changes.');
       }
     } catch (err: any) {
       alert('Network error during permissions correction: ' + err.message);

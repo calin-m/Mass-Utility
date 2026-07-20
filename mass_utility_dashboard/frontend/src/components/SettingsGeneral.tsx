@@ -3,6 +3,7 @@
 // @Calls: save_settings, get_auth_status, disconnect_google_drive
 
 import React, { useState, useEffect } from 'react';
+import { FetchService } from '../utils/FetchService';
 
 interface SettingsGeneralProps {
   settings: Record<string, any>;
@@ -168,20 +169,26 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
     }
   }, [fileChunk, dbChunk]);
 
-  const checkGdriveStatus = () => {
+  const checkGdriveStatus = async () => {
     setIsGdriveChecking(true);
-    if (typeof (window as any).FetchEngine !== 'undefined') {
-      (window as any).FetchEngine.post('get_auth_status')
-        .then((data: any) => {
-          setGdriveState({
-            authenticated: data.authenticated,
-            configured: data.configured,
-            authUrl: data.auth_url || '',
-            syncedCount: (data.synced_files || []).length,
-          });
-        })
-        .catch((err: any) => console.error('Gdrive check failed:', err))
-        .finally(() => setIsGdriveChecking(false));
+    try {
+      const data = await FetchService.post('get_auth_status');
+      setGdriveState({
+        authenticated: data.authenticated,
+        configured: data.configured,
+        authUrl: data.auth_url || '',
+        syncedCount: (data.synced_files || []).length,
+      });
+    } catch (err: any) {
+      console.error('Gdrive check failed:', err);
+      setGdriveState({
+        authenticated: false,
+        configured: false,
+        authUrl: '',
+        syncedCount: 0,
+      });
+    } finally {
+      setIsGdriveChecking(false);
     }
   };
 
@@ -204,7 +211,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
     }
     setIsGdriveDisconnecting(true);
     try {
-      await (window as any).FetchEngine.post('disconnect_google_drive');
+      await FetchService.post('disconnect_google_drive');
       checkGdriveStatus();
     } catch (err: any) {
       alert('Error disconnecting: ' + err.message);

@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { SettingsGeneral } from './SettingsGeneral';
 import { SettingsInfo } from './SettingsInfo';
 import { SettingsSecurity } from './SettingsSecurity';
+import { FetchService } from '../utils/FetchService';
 
 export const SettingsTab: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<'general' | 'info' | 'security'>('general');
@@ -21,32 +22,30 @@ export const SettingsTab: React.FC = () => {
   const handleSaveSettings = async (updatedSettings: Record<string, any>) => {
     setIsSaving(true);
     try {
-      if (typeof (window as any).FetchEngine !== 'undefined') {
-        const response = await (window as any).FetchEngine.post('save_settings', {
-          settings: updatedSettings
-        });
-        if (response && response.success) {
-          // Merge settings
-          const merged = { ...settings, ...updatedSettings };
-          setSettings(merged);
-          
-          // Hydrate PM_CONFIG as well
-          if ((window as any).PM_CONFIG) {
-            (window as any).PM_CONFIG.settings = merged;
-          }
+      const response = await FetchService.post('save_settings', {
+        settings: updatedSettings
+      });
+      if (response && response.success) {
+        // Merge settings
+        const merged = { ...settings, ...updatedSettings };
+        setSettings(merged);
+        
+        // Hydrate PM_CONFIG as well
+        if ((window as any).PM_CONFIG) {
+          (window as any).PM_CONFIG.settings = merged;
+        }
 
-          if (typeof (window as any).showPremiumToast === 'function') {
-            (window as any).showPremiumToast('Settings saved successfully', 'success');
-          } else {
-            alert('Settings saved successfully!');
-          }
+        if (typeof (window as any).showPremiumToast === 'function') {
+          (window as any).showPremiumToast('Settings saved successfully', 'success');
         } else {
-          const errMsg = response?.error || 'Failed to save settings.';
-          if (typeof (window as any).showPremiumToast === 'function') {
-            (window as any).showPremiumToast(errMsg, 'error');
-          } else {
-            alert(errMsg);
-          }
+          alert('Settings saved successfully!');
+        }
+      } else {
+        const errMsg = response?.error || 'Failed to save settings.';
+        if (typeof (window as any).showPremiumToast === 'function') {
+          (window as any).showPremiumToast(errMsg, 'error');
+        } else {
+          alert(errMsg);
         }
       }
     } catch (err: any) {
