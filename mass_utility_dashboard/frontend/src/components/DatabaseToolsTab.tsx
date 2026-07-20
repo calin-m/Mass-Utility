@@ -933,7 +933,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     <select
                       value={selectedPreset}
                       onChange={(e) => handleLoadPreset(e.target.value)}
-                      className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] text-xs text-[var(--pm-text-primary)] rounded-lg px-2.5 py-1 focus:outline-none cursor-pointer"
+                      className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] text-xs text-[var(--pm-text-primary)] rounded-md px-2.5 py-1.5 focus:outline-none cursor-pointer shadow-sm hover:bg-[var(--pm-body-bg)] transition-all duration-200"
                     >
                       <option value="">-- None / Load Template --</option>
                       {backupPresets.map(p => <option key={p} value={p}>{p}</option>)}
@@ -1075,15 +1075,15 @@ export const DatabaseToolsTab: React.FC = () => {
                               </div>
                               <div className="flex gap-2 mt-1.5 flex-wrap">
                                 {isCloud ? (
-                                  <span className="pm-status-pill bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
+                                  <span className="pm-status-pill bg-pm-purple/10 text-pm-purple border border-pm-purple/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
                                     ☁️ Cloud Only
                                   </span>
                                 ) : b.is_uploaded ? (
-                                  <span className="pm-status-pill bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
+                                  <span className="pm-status-pill bg-pm-purple/10 text-pm-purple border border-pm-purple/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
                                     📁 Uploaded
                                   </span>
                                 ) : (
-                                  <span className="pm-status-pill success px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
+                                  <span className="pm-status-pill bg-pm-success/10 text-pm-success border border-pm-success/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
                                     💾 Local
                                   </span>
                                 )}

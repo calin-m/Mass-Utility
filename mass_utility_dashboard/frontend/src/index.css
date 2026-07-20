@@ -172,7 +172,7 @@ body {
 }
 
 .pm-table-v2 th {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--pm-text-secondary, #64748b);
@@ -197,7 +197,7 @@ body {
 }
 
 .pm-table-v2 td {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   color: var(--pm-text-primary, #1e293b);
   vertical-align: middle;
 }
