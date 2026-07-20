@@ -41,7 +41,12 @@ class FetchEngine {
             formData.set('token', window.PM_CONFIG.securityToken);
         }
 
-        return fetch(url, { method: 'POST', body: formData })
+        const headers = {};
+        if (window.PM_CONFIG && window.PM_CONFIG.csrfToken) {
+            headers['X-CSRF-Token'] = window.PM_CONFIG.csrfToken;
+        }
+
+        return fetch(url, { method: 'POST', body: formData, headers: headers })
             .then(res => {
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}: ${res.statusText}`);

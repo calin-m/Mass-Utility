@@ -41,6 +41,7 @@ class SettingsManager
     const PM_BACKUP_CLOUD_MAX_DAYS = 'PM_BACKUP_CLOUD_MAX_DAYS';
     const PM_BACKUP_FREQUENCY = 'PM_BACKUP_FREQUENCY';
     const PM_BACKUP_CRON_AUTO = 'PM_BACKUP_CRON_AUTO';
+    const PM_CLEANUP_BACKUPS = 'PM_CLEANUP_BACKUPS';
     const PM_LICENSE_KEY = 'PM_LICENSE_KEY';
     const PM_LICENSE_TOKEN = 'PM_LICENSE_TOKEN';
     const PM_LICENSE_SIGNATURE = 'PM_LICENSE_SIGNATURE';
@@ -68,6 +69,7 @@ class SettingsManager
         self::PM_BACKUP_CLOUD_MAX_DAYS => "0",
         self::PM_BACKUP_FREQUENCY => "0",
         self::PM_BACKUP_CRON_AUTO => "1",
+        self::PM_CLEANUP_BACKUPS => "1",
         self::PM_LICENSE_KEY => "",
         self::PM_LICENSE_TOKEN => "",
         self::PM_LICENSE_SIGNATURE => "",

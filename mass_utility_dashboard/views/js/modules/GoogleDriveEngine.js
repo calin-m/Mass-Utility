@@ -112,6 +112,10 @@ class GoogleDriveEngine {
             this.syncedFiles = data.synced_files || [];
             this.isGoogleAuthenticated = data.authenticated;
 
+            if (data.has_failed_jobs) {
+                window.showPremiumToast('⚠️ Failed backup jobs detected in history! Check the logs tab.', 'error');
+            }
+
             if (!data.configured) {
                 controlPanel.style.display = 'block';
                 badge.className = 'pm-status-pill danger';

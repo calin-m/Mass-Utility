@@ -102,11 +102,56 @@ function getBridgeToken(\MassUtility\SaaS\Service\TenantSettingsRepository $sett
     return '';
 }
 
+function cleanupOldBackups(string $backupsDir, int $maxAgeSeconds = 86400): void {
+    if (!is_dir($backupsDir)) {
+        return;
+    }
+    $now = time();
+    $files = scandir($backupsDir);
+    if ($files === false) {
+        return;
+    }
+    foreach ($files as $file) {
+        if ($file === '.' || $file === '..') {
+            continue;
+        }
+        $filePath = $backupsDir . '/' . $file;
+        if (is_dir($filePath)) {
+            if (strpos($file, 'catalog_backup_') === 0 || strpos($file, 'site_backup_') === 0 || strpos($file, 'job_') === 0) {
+                $mtime = filemtime($filePath);
+                if ($now - $mtime > $maxAgeSeconds) {
+                    $subFiles = scandir($filePath);
+                    if ($subFiles !== false) {
+                        foreach ($subFiles as $subFile) {
+                            if ($subFile === '.' || $subFile === '..') continue;
+                            @unlink($filePath . '/' . $subFile);
+                        }
+                    }
+                    @rmdir($filePath);
+                }
+            }
+        } else {
+            $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+            $isTarget = in_array($ext, ['gz', 'tar', 'log'], true) || strpos($file, 'catalog_backup_') === 0 || strpos($file, 'site_backup_') === 0;
+            if ($isTarget) {
+                $mtime = filemtime($filePath);
+                if ($now - $mtime > $maxAgeSeconds) {
+                    @unlink($filePath);
+                }
+            }
+        }
+    }
+}
+
 $bridgeToken = getBridgeToken($settingsRepo, dirname(__DIR__));
 
 // Initialize session for authentication
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Process OTT (One-Time Token) from Bridge if present
@@ -788,11 +833,12 @@ if ($path === '/' || $path === '/index.html') {
             $html = str_replace($placeholder, $tabContent, $html);
         }
 
-        // Dynamically inject base path into the frontend config block to support relative AJAX calls
+        // Dynamically inject base path and CSRF token into the frontend config block to support relative AJAX calls
         $basePathJs = json_encode($basePath);
+        $csrfTokenJs = json_encode($_SESSION['csrf_token'] ?? '');
         $html = str_replace(
             'window.PM_CONFIG = {',
-            "window.PM_CONFIG = {\n        basePath: {$basePathJs},",
+            "window.PM_CONFIG = {\n        basePath: {$basePathJs},\n        csrfToken: {$csrfTokenJs},",
             $html
         );
         
@@ -828,7 +874,20 @@ if ($path === '/api/ping') {
 if (strpos($path, '/api/v1/') === 0) {
     header('Content-Type: application/json');
     $action = substr($path, 8); // Extract action name
-    
+
+    // CSRF Check for session-authenticated browser requests
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_SERVER['HTTP_X_BRIDGE_TOKEN'])) {
+        $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+        $clientCsrfToken = $headers['x-csrf-token'] ?? $_POST['csrf_token'] ?? '';
+        $sessionCsrfToken = $_SESSION['csrf_token'] ?? '';
+        
+        if (empty($sessionCsrfToken) || $clientCsrfToken !== $sessionCsrfToken) {
+            header('HTTP/1.1 403 Forbidden');
+            echo json_encode(['success' => false, 'error' => 'CSRF validation failed. Please refresh the page and try again.']);
+            exit;
+        }
+    }
+
     $logger = new \MassUtility\SaaS\Service\Logger();
     $sqliteManager = new \MassUtility\SaaS\Service\SQLiteConnectionManager($logger);
     $settingsRepo = new \MassUtility\SaaS\Service\TenantSettingsRepository($sqliteManager, $logger);
@@ -1695,6 +1754,12 @@ if (strpos($path, '/api/v1/') === 0) {
         }
 
         if ($action === 'get_auth_status') {
+            // Trigger local backups directory cleanup if enabled
+            $cleanupEnabled = (string)$settingsRepo->get('PM_CLEANUP_BACKUPS');
+            if ($cleanupEnabled !== '0') {
+                cleanupOldBackups(dirname(__DIR__) . '/backups');
+            }
+
             $gdriveClient = new \MassUtility\SaaS\Service\SaaSGoogleOAuthBroker($logger, $settingsRepo);
             $merchantReturnUrl = '#';
             try {
@@ -1723,6 +1788,14 @@ if (strpos($path, '/api/v1/') === 0) {
                     $syncedFiles[] = $row['backup_name'];
                 }
             } catch (\Throwable $e) {}
+
+            $hasFailedJobs = false;
+            try {
+                $failedStmt = $pdo->query("SELECT COUNT(*) FROM `mass_update_log` WHERE `state` = 'failed'");
+                if ($failedStmt) {
+                    $hasFailedJobs = ($failedStmt->fetchColumn() > 0);
+                }
+            } catch (\Throwable $e) {}
             
             echo json_encode([
                 'success' => true,
@@ -1730,7 +1803,8 @@ if (strpos($path, '/api/v1/') === 0) {
                 'authenticated' => $gdriveClient->isAuthenticated(),
                 'auth_url' => $authUrl,
                 'synced_files' => $syncedFiles,
-                'client_id' => ''
+                'client_id' => '',
+                'has_failed_jobs' => $hasFailedJobs
             ]);
             exit;
         }

@@ -72,6 +72,16 @@
             <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">If a backup exists in both places, which one should be downloaded when you click "Download"? (It will automatically fallback if one is deleted).</p>
         </div>
 
+        <!-- Automated Backups Staging Cleanup -->
+        <div style="margin-bottom: 1rem; border-top: 1px solid var(--pm-border-color); padding-top: 1rem;">
+            <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Automated Backup Staging Cleanup</label>
+            <select id="pm-setting-cleanup-backups" class="pm-form-control" style="width: 100%; font-size: 0.8rem; padding: 0.4rem 0.6rem; max-width: 300px;">
+                <option value="1">Enabled (Delete local staging files > 24 hours)</option>
+                <option value="0">Disabled (Retain all local files indefinitely)</option>
+            </select>
+            <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Cleans up local temporary backup files (.tar, .sql.gz, and .log) created during the offsite cloud backup staging process to prevent shared hosting quota exhaustion.</p>
+        </div>
+
         <!-- Connection Control Panel -->
         <div id="pm-gdrive-control-panel" style="display: none; background: rgba(var(--pm-purple-rgb), 0.03); border: 1px dashed rgba(var(--pm-purple-rgb), 0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">

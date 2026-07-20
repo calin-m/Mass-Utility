@@ -43,7 +43,56 @@ class TableBackupManager
                 throw new Exception('Failed to create manifest temp directory at: ' . $manifestTmp);
             }
         }
+        
+        // Run staging cleanup if enabled
+        $cleanupEnabled = (string)$this->settingsManager->getSetting(SettingsManager::PM_CLEANUP_BACKUPS);
+        if ($cleanupEnabled !== '0') {
+            $this->cleanupOldStagingFiles();
+        }
+
         $this->targetTables = $this->getDefaultTargetTables();
+    }
+
+    private function cleanupOldStagingFiles(int $maxAgeSeconds = 86400): void
+    {
+        if (!is_dir($this->backupDir)) {
+            return;
+        }
+        $now = time();
+        $files = scandir($this->backupDir);
+        if ($files === false) {
+            return;
+        }
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+            $filePath = $this->backupDir . $file;
+            if (is_dir($filePath)) {
+                if (strpos($file, 'catalog_backup_') === 0 || strpos($file, 'site_backup_') === 0 || strpos($file, 'job_') === 0) {
+                    $mtime = filemtime($filePath);
+                    if ($now - $mtime > $maxAgeSeconds) {
+                        $subFiles = scandir($filePath);
+                        if ($subFiles !== false) {
+                            foreach ($subFiles as $subFile) {
+                                if ($subFile === '.' || $subFile === '..') continue;
+                                @unlink($filePath . '/' . $subFile);
+                            }
+                        }
+                        @rmdir($filePath);
+                    }
+                }
+            } else {
+                $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+                $isTarget = in_array($ext, ['gz', 'tar', 'log'], true) || strpos($file, 'catalog_backup_') === 0 || strpos($file, 'site_backup_') === 0;
+                if ($isTarget) {
+                    $mtime = filemtime($filePath);
+                    if ($now - $mtime > $maxAgeSeconds) {
+                        @unlink($filePath);
+                    }
+                }
+            }
+        }
     }
 
     public function getTargetTables(): array

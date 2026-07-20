@@ -1,4 +1,7 @@
 <?php
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 /**
  * Project Mass - Database Audit Trail Diff Engine
  * Boundary Isolation Shield to mathematically prove zero side-effects during mutations.

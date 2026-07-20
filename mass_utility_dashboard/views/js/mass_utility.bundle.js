@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-20 05:44:52 UTC
+ * Generated: 2026-07-20 06:11:17 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -318,7 +318,12 @@ class FetchEngine {
             formData.set('token', window.PM_CONFIG.securityToken);
         }
 
-        return fetch(url, { method: 'POST', body: formData })
+        const headers = {};
+        if (window.PM_CONFIG && window.PM_CONFIG.csrfToken) {
+            headers['X-CSRF-Token'] = window.PM_CONFIG.csrfToken;
+        }
+
+        return fetch(url, { method: 'POST', body: formData, headers: headers })
             .then(res => {
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -584,6 +589,9 @@ window.SettingsEngine = (function() {
         }
         if (document.getElementById('pm-setting-gdrive-default-download')) {
             document.getElementById('pm-setting-gdrive-default-download').value = settings.PM_GDRIVE_DEFAULT_DOWNLOAD || "cloud";
+        }
+        if (document.getElementById('pm-setting-cleanup-backups')) {
+            document.getElementById('pm-setting-cleanup-backups').value = settings.PM_CLEANUP_BACKUPS !== undefined ? settings.PM_CLEANUP_BACKUPS : "1";
         }
         if (document.getElementById('pm-setting-db-chunk')) {
             document.getElementById('pm-setting-db-chunk').value = settings.PM_DB_CHUNK_ROWS || '5000';
@@ -874,6 +882,7 @@ window.SettingsEngine = (function() {
                         PM_ENABLE_GDPR_SWEEPER: 1,
                         PM_DEFAULT_DRY_RUN: document.getElementById('pm-setting-default-dry-run').checked ? 1 : 0,
                         PM_GDRIVE_DEFAULT_DOWNLOAD: document.getElementById('pm-setting-gdrive-default-download') ? document.getElementById('pm-setting-gdrive-default-download').value : (settings.PM_GDRIVE_DEFAULT_DOWNLOAD || 'cloud'),
+                        PM_CLEANUP_BACKUPS: document.getElementById('pm-setting-cleanup-backups') ? document.getElementById('pm-setting-cleanup-backups').value : (settings.PM_CLEANUP_BACKUPS !== undefined ? settings.PM_CLEANUP_BACKUPS : '1'),
                         PM_UI_FONT: document.getElementById('pm-setting-ui-font').value,
                         PM_UI_THEME: document.getElementById('pm-setting-ui-theme').value,
                         PM_CUSTOM_DISK_QUOTA_GB: document.getElementById('pm-setting-custom-quota').value || "0",
@@ -3706,6 +3715,10 @@ class GoogleDriveEngine {
         .then(data => {
             this.syncedFiles = data.synced_files || [];
             this.isGoogleAuthenticated = data.authenticated;
+
+            if (data.has_failed_jobs) {
+                window.showPremiumToast('⚠️ Failed backup jobs detected in history! Check the logs tab.', 'error');
+            }
 
             if (!data.configured) {
                 controlPanel.style.display = 'block';
