@@ -150,6 +150,13 @@ When the merchant administrator clicks **Launch Standalone Dashboard** in the Pr
 *   **PrestaShop Module Blocker**: On configuration page load, the module does a fast cURL verification call to the licensing portal. If the portal confirms that the key has been suspended or expired, the module toggles a `$licenseSuspended` flag, disables dashboard launcher buttons, and displays a prominent warning notice.
 *   **Automatic Recovery**: If the license is reactivated on the Super-Admin side, both the PrestaShop module and the Standalone Dashboard automatically recognize the status update and resume full operations on the next load, with no copy-paste key entries required.
 
+### 3.5 Self-Healing Multi-Server Permission Auditing & Hardening
+To prevent security leaks from misconfigured files or loose folder permissions (such as `0777` modes) on shared environments, the framework includes an automated, self-healing diagnostic checking suite:
+*   **Granular Checks**: Returns the exact 4-digit octal permissions (e.g. `0755`, `0644`) for all critical folders (`data/`, `backups/`) and configuration files (`.htaccess`, `api.php`, `pm_cloud_backups.db`).
+*   **Non-Destructive Auto-Fix**: If mismatched permissions are detected, the administrator can trigger the **Auto-Fix & Harden** action. This runs native PHP `chmod` routines to secure directories to `0755` and files to `0644`.
+*   **Zero-Trust Whitelist**: The endpoints accept no directory traversal inputs. The targeted paths are strictly whitelisted and hardcoded on the backend.
+*   **Missing Directory Recovery**: If the `backups/` directory or `.htaccess` protection files are missing, the tool automatically creates them on the fly using secure defaults.
+
 ---
 
 ## 🔌 4. API Endpoints Reference
