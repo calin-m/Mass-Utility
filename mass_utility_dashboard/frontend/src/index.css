@@ -202,4 +202,59 @@ body {
   vertical-align: middle;
 }
 
+/* Polymorphic Modal System Sync matching SDK components.css */
+.pm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 15, 25, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.pm-modal-card {
+  background-color: var(--pm-card-bg, #ffffff);
+  color: var(--pm-text-primary, #1e293b);
+  border: 1px solid var(--pm-border-color, #e2e8f0);
+  border-radius: 20px;
+  padding: 2.25rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  font-family: var(--pm-font-family, system-ui, -apple-system, sans-serif);
+}
+
+.pm-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--pm-border-color, #e2e8f0);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pm-modal-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--pm-card-title, var(--pm-text-primary, #1e293b));
+}
+
+.pm-modal-close-icon {
+  font-size: 1.5rem;
+  color: var(--pm-text-secondary, #64748b);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: color 0.2s;
+}
+
+.pm-modal-close-icon:hover {
+  color: var(--pm-text-primary, #1e293b);
+}
+
 
