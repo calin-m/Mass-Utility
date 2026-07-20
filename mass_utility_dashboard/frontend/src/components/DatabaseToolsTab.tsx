@@ -17,6 +17,9 @@ interface BackupFile {
   is_uploaded?: boolean;
   is_local?: boolean;
   is_cloud?: boolean;
+  is_pinned?: boolean;
+  sql_download_url?: string;
+  log_download_url?: string;
 }
 
 interface TableMetric {
@@ -477,7 +480,7 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   const handleOptimizeTable = async (tableName: string) => {
-    const confirm = window.confirm(`Are you sure you want to optimize table ${tableName}?MySQL will recreate the table to reclaim unused disk space and rebuild indexes.`);
+    const confirm = window.confirm(`Are you sure you want to optimize table ${tableName}? MySQL will recreate the table to reclaim unused disk space and rebuild indexes.`);
     if (!confirm) return;
 
     try {
@@ -592,7 +595,7 @@ export const DatabaseToolsTab: React.FC = () => {
               setTimeout(runNextSweepChunk, 200);
             } else {
               // Mark complete
-              setSweeperStats(prev => prev ? { ...prev, stats: { ...prev.stats, total: 0 } } : null);
+              setOrphanedImages([]);
               runNextSweepChunk();
             }
           }
@@ -699,6 +702,15 @@ export const DatabaseToolsTab: React.FC = () => {
     }
   };
 
+  const handleTogglePinBackup = async (backupName: string) => {
+    try {
+      const res = await FetchService.post('toggle_pin_backup', { file: backupName });
+      if (res && res.success) {
+        fetchBackups();
+      }
+    } catch (e) {}
+  };
+
   const handleDeleteBackup = async (backupName: string) => {
     const confirm = window.confirm(`Delete local backup archive ${backupName}?`);
     if (!confirm) return;
@@ -730,7 +742,7 @@ export const DatabaseToolsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('backup')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
             activeSubTab === 'backup'
               ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
               : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
@@ -741,7 +753,7 @@ export const DatabaseToolsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('restore')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
             activeSubTab === 'restore'
               ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
               : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
@@ -752,7 +764,7 @@ export const DatabaseToolsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('profiler')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
             activeSubTab === 'profiler'
               ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
               : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
@@ -763,7 +775,7 @@ export const DatabaseToolsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('sweeper')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
             activeSubTab === 'sweeper'
               ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
               : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
@@ -790,7 +802,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     type="button"
                     onClick={handleStartBackup}
                     disabled={isBackupRunning}
-                    className="bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:scale-[1.02] active:scale-[0.97]"
+                    className="bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                   >
                     📥 Generate Backup
                   </button>
@@ -945,44 +957,105 @@ export const DatabaseToolsTab: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.04]">
-                    {backups.map(b => (
-                      <tr key={b.basename} className="hover:bg-white/[0.01] transition">
-                        <td className="p-4 font-mono font-semibold text-white">
-                          <div className="flex items-center gap-2">
-                            <span>{b.basename}</span>
-                            <span
-                              className="cursor-pointer opacity-60 hover:opacity-100"
-                              onClick={() => {
-                                navigator.clipboard.writeText(b.basename);
-                                alert('Filename copied!');
-                              }}
-                              title="Copy filename"
+                    {backups.map(b => {
+                      const isLocal = b.is_local !== false;
+                      const isCloud = b.is_cloud === true;
+                      const isPinned = b.is_pinned === true;
+
+                      return (
+                        <tr key={b.basename} className="hover:bg-white/[0.01] transition">
+                          <td className="p-4 font-mono font-semibold text-white">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span>{b.basename}</span>
+                                <span
+                                  className="cursor-pointer opacity-60 hover:opacity-100"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(b.basename);
+                                    alert('Filename copied!');
+                                  }}
+                                  title="Copy filename"
+                                >
+                                  📋
+                                </span>
+                              </div>
+                              <div className="flex gap-2 mt-1.5 flex-wrap">
+                                {isCloud ? (
+                                  <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase">
+                                    ☁️ Cloud Only
+                                  </span>
+                                ) : b.is_uploaded ? (
+                                  <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase">
+                                    📁 Uploaded
+                                  </span>
+                                ) : (
+                                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase">
+                                    💾 Local
+                                  </span>
+                                )}
+                                {b.duration && (
+                                  <span className="text-[0.65rem] text-gray-500">
+                                    Completed in: {b.duration}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 text-gray-400">{(b.sql_size / 1024 / 1024).toFixed(2)} MB</td>
+                          <td className="p-4 text-gray-400">{(b.log_size / 1024).toFixed(1)} KB</td>
+                          <td className="p-4 text-gray-400">{new Date(b.date * 1000).toLocaleString()}</td>
+                          <td className="p-4 text-right space-x-2">
+                            {/* SQL download link */}
+                            {b.sql_download_url && (
+                              <a
+                                href={b.sql_download_url}
+                                className="bg-slate-700 hover:bg-slate-600 border border-white/[0.08] text-white px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem] inline-block"
+                              >
+                                ⬇️ SQL
+                              </a>
+                            )}
+                            {/* Log download link */}
+                            {b.log_filename && b.log_download_url && (
+                              <a
+                                href={b.log_download_url}
+                                className="bg-slate-800 hover:bg-slate-700 border border-white/[0.04] text-gray-400 px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem] inline-block"
+                              >
+                                📄 Log
+                              </a>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleCheckCompareDrift(b.basename)}
+                              className="bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-[#c084fc] px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem]"
                             >
-                              📋
-                            </span>
-                          </div>
-                        </td>
-                        <td className="p-4 text-gray-400">{(b.sql_size / 1024 / 1024).toFixed(2)} MB</td>
-                        <td className="p-4 text-gray-400">{(b.log_size / 1024).toFixed(1)} KB</td>
-                        <td className="p-4 text-gray-400">{new Date(b.date * 1000).toLocaleString()}</td>
-                        <td className="p-4 text-right space-x-2">
-                          <button
-                            type="button"
-                            onClick={() => handleCheckCompareDrift(b.basename)}
-                            className="bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-[#c084fc] px-3 py-1.5 rounded-lg transition uppercase font-bold"
-                          >
-                            🔍 Diff
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteBackup(b.basename)}
-                            className="bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg transition uppercase font-bold"
-                          >
-                            🗑️ Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                              🔍 Diff
+                            </button>
+                            {isLocal && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteBackup(b.basename)}
+                                  className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem]"
+                                >
+                                  🗑️ Delete
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleTogglePinBackup(b.basename)}
+                                  className={`border px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem] ${
+                                    isPinned
+                                      ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-400'
+                                      : 'bg-slate-800 hover:bg-slate-700 border-white/[0.04] text-gray-400'
+                                  }`}
+                                >
+                                  {isPinned ? '📌 Unpin' : '📌 Pin'}
+                                </button>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {backups.length === 0 && (
                       <tr>
                         <td colSpan={5} className="p-8 text-center text-gray-500">No database archives compiled.</td>
@@ -1020,7 +1093,7 @@ export const DatabaseToolsTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleTakeStoreLive}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase hover:-translate-y-[1px] active:translate-y-0"
                 >
                   ⚡ Take Store Live Now
                 </button>
@@ -1055,7 +1128,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleCancelUpload}
-                    className="bg-black/20 hover:bg-black/30 border border-white/[0.1] text-gray-300 px-4 py-2 rounded-lg text-xs font-bold transition uppercase"
+                    className="bg-black/20 hover:bg-black/30 border border-white/[0.1] text-gray-300 px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0"
                   >
                     Cancel
                   </button>
@@ -1063,7 +1136,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     type="button"
                     onClick={handleUploadStageFile}
                     disabled={isUploading}
-                    className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-xs font-bold transition uppercase"
+                    className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0"
                   >
                     {isUploading ? `Uploading (${uploadPercent}%)` : 'Stage Upload'}
                   </button>
@@ -1094,22 +1167,45 @@ export const DatabaseToolsTab: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.04]">
-                    {backups.map(b => (
-                      <tr key={b.basename} className="hover:bg-white/[0.01] transition">
-                        <td className="p-4 font-mono font-semibold text-white">{b.basename}</td>
-                        <td className="p-4 text-gray-400">{(b.sql_size / 1024 / 1024).toFixed(2)} MB</td>
-                        <td className="p-4 text-gray-400">{new Date(b.date * 1000).toLocaleString()}</td>
-                        <td className="p-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleStartRestore(b.basename)}
-                            className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold"
-                          >
-                            Restore
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {backups.map(b => {
+                      const isLocal = b.is_local !== false;
+
+                      return (
+                        <tr key={b.basename} className="hover:bg-white/[0.01] transition">
+                          <td className="p-4 font-mono font-semibold text-white">{b.basename}</td>
+                          <td className="p-4 text-gray-400">{(b.sql_size / 1024 / 1024).toFixed(2)} MB</td>
+                          <td className="p-4 text-gray-400">{new Date(b.date * 1000).toLocaleString()}</td>
+                          <td className="p-4 text-right space-x-2">
+                            {isLocal ? (
+                              <button
+                                type="button"
+                                onClick={() => handleStartRestore(b.basename)}
+                                className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold hover:-translate-y-[1px] active:translate-y-0"
+                              >
+                                ⚡ Restore
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleStartRestore(b.basename)}
+                                className="bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold hover:-translate-y-[1px] active:translate-y-0"
+                              >
+                                ☁️ Restore
+                              </button>
+                            )}
+                            {isLocal && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteBackup(b.basename)}
+                                className="bg-slate-800 hover:bg-slate-700 border border-white/[0.04] text-gray-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold hover:-translate-y-[1px] active:translate-y-0"
+                              >
+                                🗑️ Delete
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1177,7 +1273,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   type="button"
                   onClick={handleFetchProfilerReport}
                   disabled={isProfiling}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                 >
                   {isProfiling ? 'Analyzing...' : 'Refresh Profile'}
                 </button>
@@ -1243,7 +1339,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleOptimizeTable(t.name)}
-                                className="bg-emerald-600/10 hover:bg-emerald-600/25 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold"
+                                className="bg-emerald-600/10 hover:bg-emerald-600/25 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold hover:-translate-y-[1px] active:translate-y-0"
                               >
                                 ⚡ Optimize
                               </button>
@@ -1288,7 +1384,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   type="button"
                   onClick={handleSweeperScan}
                   disabled={isScanningSweeper}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                 >
                   {isScanningSweeper ? 'Scanning...' : '🔍 Pre-Flight Scan'}
                 </button>
@@ -1353,7 +1449,7 @@ export const DatabaseToolsTab: React.FC = () => {
                       type="button"
                       onClick={handleExecuteSweeper}
                       disabled={isSweeperRunning}
-                      className="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider"
+                      className="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                     >
                       💥 Execute Sweeper
                     </button>
@@ -1404,7 +1500,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     onClick={() => {
                       sweeperAbortedRef.current = true;
                     }}
-                    className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-bold px-3.5 py-1.5 rounded-lg transition uppercase tracking-wider"
+                    className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-bold px-3.5 py-1.5 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                   >
                     🛑 Abort Operation
                   </button>
