@@ -123,6 +123,63 @@ export const DatabaseToolsTab: React.FC = () => {
     fetchBackupPresets();
   }, []);
 
+  // Resilient formatters supporting both raw numbers and pre-formatted strings
+  const formatSqlSize = (size: any) => {
+    if (typeof size === 'number') {
+      return (size / 1024 / 1024).toFixed(2) + ' MB';
+    }
+    return size || 'Unknown Size';
+  };
+
+  const formatLogSize = (size: any) => {
+    if (typeof size === 'number') {
+      return (size / 1024).toFixed(2) + ' KB';
+    }
+    return size || '0 KB';
+  };
+
+  const formatDate = (dateVal: any) => {
+    if (typeof dateVal === 'number') {
+      const d = new Date(dateVal * 1000);
+      return d.getFullYear() + '-' + 
+             String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+             String(d.getDate()).padStart(2, '0') + ' ' + 
+             String(d.getHours()).padStart(2, '0') + ':' + 
+             String(d.getMinutes()).padStart(2, '0') + ':' + 
+             String(d.getSeconds()).padStart(2, '0');
+    }
+    return dateVal || 'Unknown Date';
+  };
+
+  // Environment-aware confirmation and alert wrappers
+  const showConfirm = (title: string, message: string, expectedPhrase: string | null, callback: () => void) => {
+    const win = window as any;
+    if (win.showPremiumConfirmModal) {
+      win.showPremiumConfirmModal(title, message, expectedPhrase, callback);
+    } else {
+      // Local dev fallback
+      if (expectedPhrase) {
+        const input = window.prompt(`Type "${expectedPhrase}" to confirm:\n${message}`);
+        if (input?.toLowerCase() === expectedPhrase.toLowerCase()) {
+          callback();
+        }
+      } else {
+        if (window.confirm(message)) {
+          callback();
+        }
+      }
+    }
+  };
+
+  const showAlert = (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const win = window as any;
+    if (win.showPremiumAlert) {
+      win.showPremiumAlert(title, message, type);
+    } else {
+      window.alert(`${title}\n\n${message}`);
+    }
+  };
+
   const fetchCategorizedTables = async () => {
     try {
       const res = await FetchService.post('get_categorized_tables');
@@ -172,32 +229,41 @@ export const DatabaseToolsTab: React.FC = () => {
     } catch (e) {}
   };
 
-  const handleSavePreset = async () => {
-    const name = window.prompt('Enter new preset name:');
-    if (!name) return;
-    try {
-      const res = await FetchService.post('save_preset', { name, type: 'database', tables: JSON.stringify(selectedTables) });
-      if (res && res.success) {
-        alert('Preset saved successfully.');
-        fetchBackupPresets();
-        setSelectedPreset(name);
-      }
-    } catch (e) {}
+  const handleSavePreset = () => {
+    const win = window as any;
+    const promptCallback = async (name: string) => {
+      if (!name) return;
+      try {
+        const res = await FetchService.post('save_preset', { name, type: 'database', tables: JSON.stringify(selectedTables) });
+        if (res && res.success) {
+          showAlert('Preset Saved', 'Preset saved successfully.', 'success');
+          fetchBackupPresets();
+          setSelectedPreset(name);
+        }
+      } catch (e) {}
+    };
+
+    if (win.showPremiumPromptModal) {
+      win.showPremiumPromptModal('Save Preset', 'Enter new preset name:', 'Preset Name', promptCallback);
+    } else {
+      const name = window.prompt('Enter new preset name:');
+      if (name) promptCallback(name);
+    }
   };
 
-  const handleDeletePreset = async () => {
+  const handleDeletePreset = () => {
     if (!selectedPreset) return;
-    const confirm = window.confirm(`Delete preset ${selectedPreset}?`);
-    if (!confirm) return;
-    try {
-      const res = await FetchService.post('delete_preset', { name: selectedPreset, type: 'database' });
-      if (res && res.success) {
-        alert('Preset deleted.');
-        fetchBackupPresets();
-        setSelectedPreset('');
-        setSelectedTables([]);
-      }
-    } catch (e) {}
+    showConfirm('Delete Preset', `Delete preset ${selectedPreset}?`, null, async () => {
+      try {
+        const res = await FetchService.post('delete_preset', { name: selectedPreset, type: 'database' });
+        if (res && res.success) {
+          showAlert('Preset Deleted', 'Preset deleted successfully.', 'success');
+          fetchBackupPresets();
+          setSelectedPreset('');
+          setSelectedTables([]);
+        }
+      } catch (e) {}
+    });
   };
 
   // Table selection logic helpers
@@ -230,30 +296,29 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   // AJAX Backup execution trigger
-  const handleStartBackup = async () => {
+  const handleStartBackup = () => {
     if (selectedTables.length === 0) {
-      alert('You must select at least one database table to archive.');
+      showAlert('No Tables Selected', 'You must select at least one database table to archive.', 'error');
       return;
     }
-    const confirm = window.confirm(`You are about to backup ${selectedTables.length} tables. Proceed?`);
-    if (!confirm) return;
+    showConfirm('Database Backup', `You are about to backup ${selectedTables.length} tables. Proceed?`, null, async () => {
+      setIsBackupRunning(true);
+      setBackupProgressPercent(0);
+      setBackupProgressText('Initializing database backup job...');
 
-    setIsBackupRunning(true);
-    setBackupProgressPercent(0);
-    setBackupProgressText('Initializing database backup job...');
-
-    try {
-      const res = await FetchService.post('create_backup', { tables: JSON.stringify(selectedTables) });
-      if (res && res.success && res.job_id) {
-        setCurrentJobId(res.job_id);
-        pollBackupProgress(res.job_id);
-      } else {
-        throw new Error(res.error || 'Backup initialization failed.');
+      try {
+        const res = await FetchService.post('create_backup', { tables: JSON.stringify(selectedTables) });
+        if (res && res.success && res.job_id) {
+          setCurrentJobId(res.job_id);
+          pollBackupProgress(res.job_id);
+        } else {
+          throw new Error(res.error || 'Backup initialization failed.');
+        }
+      } catch (e: any) {
+        showAlert('Backup Error', e.message, 'error');
+        setIsBackupRunning(false);
       }
-    } catch (e: any) {
-      alert(e.message);
-      setIsBackupRunning(false);
-    }
+    });
   };
 
   const pollBackupProgress = (jobId: string) => {
@@ -267,11 +332,11 @@ export const DatabaseToolsTab: React.FC = () => {
 
         if (res.status === 'completed') {
           setIsBackupRunning(false);
-          alert('Database backup completed successfully.');
+          showAlert('Backup Completed', 'Database backup completed successfully.', 'success');
           fetchBackups();
         } else if (res.status === 'cancelled') {
           setIsBackupRunning(false);
-          alert('Backup cancelled.');
+          showAlert('Backup Cancelled', 'Backup cancelled.', 'info');
           fetchBackups();
         } else if (res.status === 'failed') {
           throw new Error(res.error || 'Backup job failed.');
@@ -279,7 +344,7 @@ export const DatabaseToolsTab: React.FC = () => {
           setTimeout(poll, 1500);
         }
       } catch (e: any) {
-        alert(e.message);
+        showAlert('Backup Failed', e.message, 'error');
         setIsBackupRunning(false);
       }
     };
@@ -295,89 +360,88 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   // Restore logic execution chunked loops
-  const handleStartRestore = async (backupName: string) => {
-    const confirm = window.confirm(`WARNING: This will overwrite active catalog tables using the backup "${backupName}". Is it 100% safe to proceed?`);
-    if (!confirm) return;
+  const handleStartRestore = (backupName: string) => {
+    showConfirm('Restore Catalog', `WARNING: This will overwrite active catalog tables using the backup "${backupName}". Is it 100% safe to proceed?`, 'RESTORE', async () => {
+      setIsRestoreRunning(true);
+      setRestoreProgressPercent(0);
+      setRestoreProgressText('Preparing SQL staging area...');
+      setRestoreStatsExecuted('0 / 0');
+      setRestoreStatsAction('Pre-flight check...');
+      setRestoreStatsShop('Enforcing limits...');
+      setRestoreLogTerminal('STAGE 1: Enforcing safety bounds. Putting shop to Maintenance...\n');
 
-    setIsRestoreRunning(true);
-    setRestoreProgressPercent(0);
-    setRestoreProgressText('Preparing SQL staging area...');
-    setRestoreStatsExecuted('0 / 0');
-    setRestoreStatsAction('Pre-flight check...');
-    setRestoreStatsShop('Enforcing limits...');
-    setRestoreLogTerminal('STAGE 1: Enforcing safety bounds. Putting shop to Maintenance...\n');
+      try {
+        const prep = await FetchService.post('prepare_restore', { backup_name: backupName });
+        if (!prep || !prep.statement_count) {
+          throw new Error(prep.error || 'Failed to stage restore script.');
+        }
 
-    try {
-      const prep = await FetchService.post('prepare_restore', { backup_name: backupName });
-      if (!prep || !prep.statement_count) {
-        throw new Error(prep.error || 'Failed to stage restore script.');
-      }
+        const totalStatements = prep.statement_count;
+        const wasShopEnabled = prep.was_shop_enabled;
 
-      const totalStatements = prep.statement_count;
-      const wasShopEnabled = prep.was_shop_enabled;
+        setRestoreLogTerminal(prev => prev + `Success: Staged ${totalStatements} SQL statements.\nSTAGE 2: Commencing chunked execution loop...\n`);
 
-      setRestoreLogTerminal(prev => prev + `Success: Staged ${totalStatements} SQL statements.\nSTAGE 2: Commencing chunked execution loop...\n`);
+        let offset = 0;
+        const limit = 100;
 
-      let offset = 0;
-      const limit = 100;
+        const runChunk = async () => {
+          if (offset >= totalStatements) {
+            // Finalize restore
+            setRestoreStatsAction('Finalizing settings...');
+            setRestoreLogTerminal(prev => prev + `STAGE 3: Finalizing transaction records...\n`);
+            try {
+              const finalRes = await FetchService.post('complete_restore', { backup_name: backupName, was_shop_enabled: wasShopEnabled ? 1 : 0 });
+              setRestoreProgressPercent(100);
+              setRestoreLogTerminal(prev => prev + `\nSUCCESS: Database restoration sequence completed smoothly!\n`);
+              setIsRestoreRunning(false);
 
-      const runChunk = async () => {
-        if (offset >= totalStatements) {
-          // Finalize restore
-          setRestoreStatsAction('Finalizing settings...');
-          setRestoreLogTerminal(prev => prev + `STAGE 3: Finalizing transaction records...\n`);
-          try {
-            const finalRes = await FetchService.post('complete_restore', { backup_name: backupName, was_shop_enabled: wasShopEnabled ? 1 : 0 });
-            setRestoreProgressPercent(100);
-            setRestoreLogTerminal(prev => prev + `\nSUCCESS: Database restoration sequence completed smoothly!\n`);
-            setIsRestoreRunning(false);
-
-            if (finalRes.shop_status === 'MAINTENANCE') {
-              setShowShopLiveAlert(true);
-            } else {
-              alert('Success! Database restored and store set LIVE.');
+              if (finalRes.shop_status === 'MAINTENANCE') {
+                setShowShopLiveAlert(true);
+              } else {
+                showAlert('Restore Successful', 'Database restored and store set LIVE.', 'success');
+              }
+            } catch (err: any) {
+              setRestoreLogTerminal(prev => prev + `\nFINALIZATION ERROR: ${err.message}\n`);
+              setIsRestoreRunning(false);
             }
-          } catch (err: any) {
-            setRestoreLogTerminal(prev => prev + `\nFINALIZATION ERROR: ${err.message}\n`);
-            setIsRestoreRunning(false);
+            return;
           }
-          return;
-        }
 
-        setRestoreStatsAction(`Executing statements ${offset} to ${Math.min(totalStatements, offset + limit)}`);
-        try {
-          const chunkRes = await FetchService.post('execute_restore_chunk', { backup_name: backupName, offset, limit });
-          const executed = chunkRes.executed_count;
-          offset = chunkRes.new_offset;
+          setRestoreStatsAction(`Executing statements ${offset} to ${Math.min(totalStatements, offset + limit)}`);
+          try {
+            const chunkRes = await FetchService.post('execute_restore_chunk', { backup_name: backupName, offset, limit });
+            const executed = chunkRes.executed_count;
+            offset = chunkRes.new_offset;
 
-          const pct = Math.min(100, Math.round((offset / totalStatements) * 100));
-          setRestoreProgressPercent(pct);
-          setRestoreStatsExecuted(`${offset} / ${totalStatements}`);
-          setRestoreLogTerminal(prev => prev + `Executed statement chunk: queries ${offset - executed} to ${offset} completed.\n`);
+            const pct = Math.min(100, Math.round((offset / totalStatements) * 100));
+            setRestoreProgressPercent(pct);
+            setRestoreStatsExecuted(`${offset} / ${totalStatements}`);
+            setRestoreLogTerminal(prev => prev + `Executed statement chunk: queries ${offset - executed} to ${offset} completed.\n`);
 
-          // Recurse
-          setTimeout(runChunk, 100);
-        } catch (err: any) {
-          setRestoreLogTerminal(prev => prev + `\nCRITICAL FAILURE: ${err.message}\n`);
-          setIsRestoreRunning(false);
-          alert('Restore failed: ' + err.message);
-        }
-      };
+            // Recurse
+            setTimeout(runChunk, 100);
+          } catch (err: any) {
+            setRestoreLogTerminal(prev => prev + `\nCRITICAL FAILURE: ${err.message}\n`);
+            setIsRestoreRunning(false);
+            showAlert('Restore Chunk Error', err.message, 'error');
+          }
+        };
 
-      runChunk();
+        runChunk();
 
-    } catch (e: any) {
-      setRestoreLogTerminal(prev => prev + `\nPRE-FLIGHT ERROR: ${e.message}\n`);
-      setIsRestoreRunning(false);
-      alert('Restore pre-flight failed: ' + e.message);
-    }
+      } catch (e: any) {
+        setRestoreLogTerminal(prev => prev + `\nPRE-FLIGHT ERROR: ${e.message}\n`);
+        setIsRestoreRunning(false);
+        showAlert('Restore Pre-flight Error', e.message, 'error');
+      }
+    });
   };
 
   const handleTakeStoreLive = async () => {
     try {
       const res = await FetchService.post('set_shop_live');
       if (res && res.success) {
-        alert(res.message);
+        showAlert('Status Updated', res.message, 'success');
         setShowShopLiveAlert(false);
       }
     } catch (e) {}
@@ -482,17 +546,16 @@ export const DatabaseToolsTab: React.FC = () => {
     }
   };
 
-  const handleOptimizeTable = async (tableName: string) => {
-    const confirm = window.confirm(`Are you sure you want to optimize table ${tableName}? MySQL will recreate the table to reclaim unused disk space and rebuild indexes.`);
-    if (!confirm) return;
-
-    try {
-      const res = await FetchService.post('optimize_table', { table: tableName });
-      if (res && res.success) {
-        alert(`Successfully optimized table: ${tableName}`);
-        handleFetchProfilerReport();
-      }
-    } catch (e) {}
+  const handleOptimizeTable = (tableName: string) => {
+    showConfirm('Optimize Table', `Are you sure you want to optimize table ${tableName}? MySQL will recreate the table to reclaim unused disk space and rebuild indexes.`, null, async () => {
+      try {
+        const res = await FetchService.post('optimize_table', { table: tableName });
+        if (res && res.success) {
+          showAlert('Optimized', `Successfully optimized table: ${tableName}`, 'success');
+          handleFetchProfilerReport();
+        }
+      } catch (e) {}
+    });
   };
 
   // 4. Data Sweeper logic chunked purge loops
@@ -520,7 +583,7 @@ export const DatabaseToolsTab: React.FC = () => {
 
   const handleExecuteSweeper = () => {
     if (!purgeStats && !purgeCarts && !purgeImages) {
-      alert('Please check at least one of the data domains to purge.');
+      showAlert('Selection Required', 'Please check at least one of the data domains to purge.', 'error');
       return;
     }
 
@@ -530,18 +593,16 @@ export const DatabaseToolsTab: React.FC = () => {
     const totalExpected = (purgeStats ? statsCount : 0) + (purgeCarts ? cartsCount : 0) + (purgeImages ? imagesCount : 0);
 
     if (totalExpected === 0) {
-      alert('No expired items matching selection.');
+      showAlert('Empty Scan', 'No expired items matching selection.', 'info');
       return;
     }
 
-    const confirm = window.confirm(`You are about to permanently sweep ${totalExpected.toLocaleString()} items. This operation cannot be undone. Proceed?`);
-    if (!confirm) return;
-
-    setIsSweeperRunning(true);
-    sweeperAbortedRef.current = false;
-    setSweeperProgressPercent(0);
-    setSweeperProgressText('Initializing sweep routines...');
-    setSweeperConsole('[SYSTEM] Launching clean sweep sequence...');
+    showConfirm('Data Sweeper Purge', `You are about to permanently sweep ${totalExpected.toLocaleString()} items. This operation cannot be undone. Proceed?`, 'SWEEP', () => {
+      setIsSweeperRunning(true);
+      sweeperAbortedRef.current = false;
+      setSweeperProgressPercent(0);
+      setSweeperProgressText('Initializing sweep routines...');
+      setSweeperConsole('[SYSTEM] Launching clean sweep sequence...');
 
     let totalDeleted = 0;
     const chunkSize = 5000;
@@ -670,12 +731,13 @@ export const DatabaseToolsTab: React.FC = () => {
       setSweeperProgressText('Purge sweep complete!');
       setSweeperConsole(prev => prev + `\n[SYSTEM] Purge operation completed successfully. Total cleaned: ${totalDeleted.toLocaleString()} items.`);
       setIsSweeperRunning(false);
-      alert(`Purge complete. Cleaned ${totalDeleted.toLocaleString()} total items.`);
+      showAlert('Purge Complete', `Purge complete. Cleaned ${totalDeleted.toLocaleString()} total items.`, 'success');
       handleSweeperScan();
     };
 
     setTimeout(runNextSweepChunk, 500);
-  };
+  });
+};
 
   // Compare Drift Modals Detail View
   const handleCheckCompareDrift = async (backupName: string) => {
@@ -687,7 +749,7 @@ export const DatabaseToolsTab: React.FC = () => {
         setDriftModalData({ name: backupName, ...res });
       }
     } catch (e) {
-      alert('Failed to run comparison.');
+      showAlert('Audit Failed', 'Failed to run comparison.', 'error');
     }
   };
 
@@ -700,7 +762,7 @@ export const DatabaseToolsTab: React.FC = () => {
         setTableRowDiff({ table: tableName, ...res.diffs });
       }
     } catch (e) {
-      alert('Failed to load table row differences.');
+      showAlert('Drift Error', 'Failed to load table row differences.', 'error');
     } finally {
       setIsLoadingRowDiff(false);
     }
@@ -715,28 +777,28 @@ export const DatabaseToolsTab: React.FC = () => {
     } catch (e) {}
   };
 
-  const handleDeleteBackup = async (backupName: string) => {
-    const confirm = window.confirm(`Delete local backup archive ${backupName}?`);
-    if (!confirm) return;
-    try {
-      const res = await FetchService.post('delete_backup', { file: backupName }); // FIXED from 'backup' to 'file'
-      if (res && res.success) {
-        alert('Backup deleted.');
-        fetchBackups();
-      }
-    } catch (e) {}
+  const handleDeleteBackup = (backupName: string) => {
+    showConfirm('Delete Backup', `Delete local backup archive ${backupName}?`, null, async () => {
+      try {
+        const res = await FetchService.post('delete_backup', { file: backupName });
+        if (res && res.success) {
+          showAlert('Deleted', 'Backup deleted.', 'success');
+          fetchBackups();
+        }
+      } catch (e) {}
+    });
   };
 
-  const handleClearBackupHistory = async () => {
-    const confirm = window.confirm('Clear all backup history? This will delete all local archives permanently.');
-    if (!confirm) return;
-    try {
-      const res = await FetchService.post('clear_backup_history');
-      if (res && res.success) {
-        alert('All local database archives deleted.');
-        fetchBackups();
-      }
-    } catch (e) {}
+  const handleClearBackupHistory = () => {
+    showConfirm('Clear History', 'Clear all backup history? This will delete all local archives permanently.', 'CLEAR ALL', async () => {
+      try {
+        const res = await FetchService.post('clear_backup_history');
+        if (res && res.success) {
+          showAlert('Cleared', 'All local database archives deleted.', 'success');
+          fetchBackups();
+        }
+      } catch (e) {}
+    });
   };
 
   // Compute stats inside comparison modal
@@ -1026,52 +1088,54 @@ export const DatabaseToolsTab: React.FC = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="p-4 text-gray-400">{(b.sql_size / 1024 / 1024).toFixed(2)} MB</td>
-                          <td className="p-4 text-gray-400">{(b.log_size / 1024).toFixed(1)} KB</td>
-                          <td className="p-4 text-gray-400">{new Date(b.date * 1000).toLocaleString()}</td>
+                          <td className="p-4 text-gray-400 font-mono">{formatSqlSize(b.sql_size)}</td>
+                          <td className="p-4 text-gray-400 font-mono">{formatLogSize(b.log_size)}</td>
+                          <td className="p-4 text-gray-400">{formatDate(b.date)}</td>
                           <td className="p-4 text-right space-x-2">
                             {/* SQL download link */}
                             {b.sql_download_url && (
                               <a
                                 href={b.sql_download_url}
-                                className="pm-btn pm-btn-sm text-[0.7rem] inline-block"
+                                className="pm-btn pm-btn-sm text-[0.7rem] inline-flex items-center justify-center gap-1"
+                                title="Download SQL Dump"
                               >
-                                ⬇️ SQL
+                                <span>⬇️</span> SQL
                               </a>
                             )}
                             {/* Log download link */}
                             {b.log_filename && b.log_download_url && (
                               <a
                                 href={b.log_download_url}
-                                className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] inline-block"
+                                className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] inline-flex items-center justify-center gap-1"
+                                title="Download Telemetry Log"
                               >
-                                📄 Log
+                                <span>📄</span> Log
                               </a>
                             )}
                             <button
                               type="button"
                               onClick={() => handleCheckCompareDrift(b.basename)}
-                              className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem]"
+                              className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] inline-flex items-center justify-center gap-1"
                             >
-                              🔍 Diff
+                              <span>🔍</span> Diff
                             </button>
                             {isLocal && (
                               <>
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteBackup(b.basename)}
-                                  className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem]"
+                                  className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] inline-flex items-center justify-center gap-1"
                                 >
-                                  🗑️ Delete
+                                  <span>🗑️</span> Delete
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleTogglePinBackup(b.basename)}
-                                  className={`pm-btn pm-btn-sm text-[0.7rem] ${
+                                  className={`pm-btn pm-btn-sm text-[0.7rem] inline-flex items-center justify-center gap-1 ${
                                     isPinned ? 'pm-btn-success' : 'pm-btn-neutral'
                                   }`}
                                 >
-                                  {isPinned ? '📌 Unpin' : '📌 Pin'}
+                                  <span>📌</span> {isPinned ? 'Unpin' : 'Pin'}
                                 </button>
                               </>
                             )}
@@ -1196,33 +1260,33 @@ export const DatabaseToolsTab: React.FC = () => {
                       return (
                         <tr key={b.basename} className="hover:bg-white/[0.01] transition">
                           <td className="p-4 font-mono font-semibold text-white">{b.basename}</td>
-                          <td className="p-4 text-gray-400">{(b.sql_size / 1024 / 1024).toFixed(2)} MB</td>
-                          <td className="p-4 text-gray-400">{new Date(b.date * 1000).toLocaleString()}</td>
+                          <td className="p-4 text-gray-400 font-mono">{formatSqlSize(b.sql_size)}</td>
+                          <td className="p-4 text-gray-400">{formatDate(b.date)}</td>
                           <td className="p-4 text-right space-x-2">
                             {isLocal ? (
                               <button
                                 type="button"
                                 onClick={() => handleStartRestore(b.basename)}
-                                className="pm-btn pm-btn-danger text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-danger text-[0.7rem] inline-flex items-center justify-center gap-1 hover:-translate-y-[1px] active:translate-y-0"
                               >
-                                ⚡ Restore
+                                <span>⚡</span> Restore
                               </button>
                             ) : (
                               <button
                                 type="button"
                                 onClick={() => handleStartRestore(b.basename)}
-                                className="pm-btn pm-btn-purple text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-purple text-[0.7rem] inline-flex items-center justify-center gap-1 hover:-translate-y-[1px] active:translate-y-0"
                               >
-                                ☁️ Restore
+                                <span>☁️</span> Restore
                               </button>
                             )}
                             {isLocal && (
                               <button
                                 type="button"
                                 onClick={() => handleDeleteBackup(b.basename)}
-                                className="pm-btn pm-btn-neutral text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-neutral text-[0.7rem] inline-flex items-center justify-center gap-1 hover:-translate-y-[1px] active:translate-y-0"
                               >
-                                🗑️ Delete
+                                <span>🗑️</span> Delete
                               </button>
                             )}
                           </td>
