@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
+namespace MassUtility\Service;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-namespace MassUtility\Service;
 
 /**
  * BridgeProgressTracker handles job execution state and percent tracking for asynchronous background processes on the Bridge side.

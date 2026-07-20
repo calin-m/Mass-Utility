@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
+namespace MassUtility\Service;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-namespace MassUtility\Service;
 
 /**
  * SaaSSQLEscaper: Standalone escaping utility to polyfill PrestaShop's pSQL and bqSQL.

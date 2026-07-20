@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace MassUtility\Controller\Api;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 use Context;
 use Configuration;
 use Exception;

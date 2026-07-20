@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
+namespace MassUtility\Controller\Api;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-namespace MassUtility\Controller\Api;
 
 /**
  * The foundation base class for all API endpoints. Enforces the DRY Controller Mandate.

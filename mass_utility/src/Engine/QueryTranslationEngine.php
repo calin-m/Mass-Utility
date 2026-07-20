@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
+namespace MassUtility\Engine;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-namespace MassUtility\Engine;
 
 use Exception;
 use MassUtility\Service\SaaSSQLEscaper;

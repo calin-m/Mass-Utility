@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
+namespace MassUtility\Service;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-namespace MassUtility\Service;
 
 use Exception;
 
