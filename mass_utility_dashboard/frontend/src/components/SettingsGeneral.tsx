@@ -133,6 +133,20 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
     checkGdriveStatus();
   }, [settings]);
 
+  // Listen for OAuth success message from callback popup window
+  useEffect(() => {
+    const handleAuthMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'google_drive_auth_success') {
+        if (typeof (window as any).showPremiumToast === 'function') {
+          (window as any).showPremiumToast('Google Drive connected successfully!', 'success');
+        }
+        checkGdriveStatus();
+      }
+    };
+    window.addEventListener('message', handleAuthMessage);
+    return () => window.removeEventListener('message', handleAuthMessage);
+  }, []);
+
   // Evaluate warnings on change
   useEffect(() => {
     const cores = (window as any).PM_CONFIG?.cores ?? 2;
