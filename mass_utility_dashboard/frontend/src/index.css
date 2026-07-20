@@ -122,4 +122,84 @@ body {
   opacity: 1;
 }
 
+/* PrestaShop Admin-like Panel Layouts */
+.pm-panel-v2 {
+  background-color: var(--pm-card-bg, #ffffff);
+  border: 1px solid var(--pm-border-color, #e2e8f0);
+  border-radius: 5px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.pm-panel-header-v2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--pm-card-title, var(--pm-text-primary, #1e293b));
+  border-bottom: 1px solid var(--pm-border-color, #e2e8f0);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* PrestaShop Admin-like Table Layouts */
+.pm-table-container-v2 {
+  overflow-x: auto;
+  border-radius: 5px;
+  border: 1px solid var(--pm-border-color, #e2e8f0);
+}
+
+.pm-table-v2 {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+.pm-table-v2 thead {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-bottom: 2px solid var(--pm-border-color, #e2e8f0);
+}
+
+:root.dark .pm-table-v2 thead {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.pm-table-v2 th {
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--pm-text-secondary, #64748b);
+  letter-spacing: 0.02em;
+}
+
+.pm-table-v2 tr {
+  border-bottom: 1px solid var(--pm-border-color, #e2e8f0);
+  transition: background-color 0.15s ease-in-out;
+}
+
+.pm-table-v2 tr:last-child {
+  border-bottom: none;
+}
+
+.pm-table-v2 tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.015);
+}
+
+:root.dark .pm-table-v2 tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+.pm-table-v2 td {
+  padding: 0.75rem 1rem;
+  color: var(--pm-text-primary, #1e293b);
+  vertical-align: middle;
+}
+
 

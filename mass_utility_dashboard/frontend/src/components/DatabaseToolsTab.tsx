@@ -884,11 +884,11 @@ export const DatabaseToolsTab: React.FC = () => {
         {/* SUBTAB 1: GENERATE BACKUP */}
         {activeSubTab === 'backup' && (
           <div className="space-y-6">
-            <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex justify-between items-center border-b border-white/[0.06] pb-3 flex-wrap gap-4">
+            <div className="pm-panel-v2 space-y-4">
+              <div className="pm-panel-header-v2 border-b-0 pb-0">
                 <div className="flex items-center gap-3">
                   <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></span>
-                  <h3 className="text-sm font-bold tracking-wide text-white uppercase">Pre-Flight Database Catalog Exporter</h3>
+                  <h3 className="text-sm font-bold tracking-wide uppercase">Pre-Flight Database Catalog Exporter</h3>
                 </div>
 
                 <div className="flex gap-2">
@@ -896,7 +896,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     type="button"
                     onClick={handleStartBackup}
                     disabled={isBackupRunning}
-                    className="pm-btn bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
+                    className="pm-btn bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
                   >
                     📥 Generate Backup &amp; Log Archive
                   </button>
@@ -904,12 +904,12 @@ export const DatabaseToolsTab: React.FC = () => {
               </div>
 
               {isBackupRunning && (
-                <div className="bg-black/10 border border-white/[0.06] rounded-xl p-4 space-y-3">
-                  <div className="flex justify-between text-xs text-gray-400">
+                <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between text-xs text-[var(--pm-text-secondary)]">
                     <span>{backupProgressText}</span>
                     <span>{backupProgressPercent}%</span>
                   </div>
-                  <div className="w-full h-2.5 bg-black/35 rounded-full overflow-hidden border border-white/[0.04]">
+                  <div className="w-full h-2.5 bg-black/35 rounded-full overflow-hidden border border-[var(--pm-border-color)]">
                     <div
                       className="h-full bg-[#8b5cf6] transition-all duration-300"
                       style={{ width: `${backupProgressPercent}%` }}
@@ -918,7 +918,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleCancelBackup}
-                    className="pm-btn pm-btn-danger text-[0.65rem] px-3 py-1 rounded-md transition uppercase font-bold"
+                    className="pm-btn pm-btn-danger text-[0.65rem] px-3 py-1 rounded-md transition uppercase font-bold cursor-pointer"
                   >
                     🛑 Stop Backup
                   </button>
@@ -926,14 +926,14 @@ export const DatabaseToolsTab: React.FC = () => {
               )}
 
               {/* Table Selection Customizer */}
-              <div className="bg-black/10 border border-white/[0.06] rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-3 border-b border-white/[0.06] pb-3 flex-wrap justify-between">
+              <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] rounded-xl p-5 space-y-4">
+                <div className="flex items-center gap-3 border-b border-[var(--pm-border-color)] pb-3 flex-wrap justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Preset Loadout:</span>
+                    <span className="text-xs font-bold text-[var(--pm-text-secondary)] uppercase tracking-wider">Preset Loadout:</span>
                     <select
                       value={selectedPreset}
                       onChange={(e) => handleLoadPreset(e.target.value)}
-                      className="bg-[#171725] border border-white/[0.1] text-xs text-white rounded-lg px-2.5 py-1 focus:outline-none"
+                      className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] text-xs text-[var(--pm-text-primary)] rounded-lg px-2.5 py-1 focus:outline-none cursor-pointer"
                     >
                       <option value="">-- None / Load Template --</option>
                       {backupPresets.map(p => <option key={p} value={p}>{p}</option>)}
@@ -941,7 +941,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleSavePreset}
-                      className="pm-btn pm-btn-success text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase"
+                      className="pm-btn pm-btn-success text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase cursor-pointer"
                     >
                       Save Preset
                     </button>
@@ -949,7 +949,7 @@ export const DatabaseToolsTab: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleDeletePreset}
-                        className="pm-btn pm-btn-danger text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase"
+                        className="pm-btn pm-btn-danger text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase cursor-pointer"
                       >
                         Delete
                       </button>
@@ -960,7 +960,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     <input
                       type="checkbox"
                       onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="rounded bg-black/10 border-white/[0.1] text-[#8b5cf6]"
+                      className="rounded bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
                     />
                     Select All Tables (Full Backup)
                   </label>
@@ -976,9 +976,9 @@ export const DatabaseToolsTab: React.FC = () => {
                     const isExpanded = expandedDomains[domain] || false;
 
                     return (
-                      <div key={domain} className="bg-black/10 border border-white/[0.06] rounded-xl p-4 flex flex-col justify-between space-y-3">
+                      <div key={domain} className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] rounded-xl p-4 flex flex-col justify-between space-y-3">
                         <div>
-                          <label className="flex items-center gap-2.5 text-xs font-bold text-white uppercase tracking-wider cursor-pointer">
+                          <label className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider cursor-pointer text-[var(--pm-text-primary)]">
                             <input
                               type="checkbox"
                               checked={isAllSelected}
@@ -986,23 +986,23 @@ export const DatabaseToolsTab: React.FC = () => {
                                 if (el) el.indeterminate = isSomeSelected;
                               }}
                               onChange={(e) => handleDomainSelect(domain, e.target.checked)}
-                              className="rounded bg-black/10 border-white/[0.1] text-[#8b5cf6]"
+                              className="rounded bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
                             />
                             {domain.replace('_', ' ')}
                           </label>
-                          <p className="text-[0.65rem] text-gray-400 mt-1">{tables.length} tables mapped</p>
+                          <p className="text-[0.65rem] text-[var(--pm-text-secondary)] mt-1">{tables.length} tables mapped</p>
                         </div>
 
                         <div>
                           {isExpanded && (
-                            <div className="border-l-2 border-white/[0.06] pl-3 py-2 space-y-1.5 max-h-[150px] overflow-y-auto mb-2 text-xs">
+                            <div className="border-l-2 border-[var(--pm-border-color)] pl-3 py-2 space-y-1.5 max-h-[150px] overflow-y-auto mb-2 text-xs">
                               {tables.map(tbl => (
-                                <label key={tbl} className="flex items-center gap-2 cursor-pointer text-gray-300 font-mono text-[0.7rem] overflow-wrap-anywhere">
+                                <label key={tbl} className="flex items-center gap-2 cursor-pointer text-[var(--pm-text-secondary)] font-mono text-[0.7rem] overflow-wrap-anywhere">
                                   <input
                                     type="checkbox"
                                     checked={selectedTables.includes(tbl)}
                                     onChange={() => handleTableToggle(tbl)}
-                                    className="rounded bg-black/10 border-white/[0.1] text-[#8b5cf6]"
+                                    className="rounded bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
                                   />
                                   {tbl}
                                 </label>
@@ -1012,7 +1012,7 @@ export const DatabaseToolsTab: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => toggleDomainCollapse(domain)}
-                            className="text-[0.65rem] text-[#8b5cf6] font-bold uppercase transition"
+                            className="text-[0.65rem] text-[#8b5cf6] font-bold uppercase transition cursor-pointer hover:underline"
                           >
                             {isExpanded ? 'Hide Tables ▲' : 'Show Tables ▼'}
                           </button>
@@ -1025,23 +1025,23 @@ export const DatabaseToolsTab: React.FC = () => {
             </div>
 
             {/* Backups List Grid */}
-            <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex justify-between items-center border-b border-white/[0.06] pb-3 flex-wrap gap-4">
-                <h3 className="text-sm font-bold tracking-wide text-white uppercase flex items-center gap-2">
+            <div className="pm-panel-v2 space-y-4">
+              <div className="pm-panel-header-v2 pb-3 flex-wrap gap-4 border-b-0">
+                <h3 className="text-sm font-bold tracking-wide uppercase flex items-center gap-2">
                   <span>📁</span> Historical Backups Repository
                 </h3>
                 <button
                   type="button"
                   onClick={handleClearBackupHistory}
-                  className="pm-btn pm-btn-danger text-xs px-3 py-1.5 rounded-lg transition uppercase tracking-wider"
+                  className="pm-btn pm-btn-danger text-xs px-3 py-1.5 rounded-lg transition uppercase tracking-wider cursor-pointer"
                 >
                   🗑️ Clear Backups
                 </button>
               </div>
 
-              <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-black/15 text-gray-400 uppercase font-bold border-b border-white/[0.06]">
+              <div className="pm-table-container-v2">
+                <table className="pm-table-v2">
+                  <thead>
                     <tr>
                       <th className="p-4">Backup File Name</th>
                       <th className="p-4">SQL Size</th>
@@ -1050,15 +1050,15 @@ export const DatabaseToolsTab: React.FC = () => {
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/[0.04]">
+                  <tbody>
                     {backups.map(b => {
                       const isLocal = b.is_local !== false;
                       const isCloud = b.is_cloud === true;
                       const isPinned = b.is_pinned === true;
 
                       return (
-                        <tr key={b.basename} className="hover:bg-white/[0.01] transition">
-                          <td className="p-4 font-mono font-semibold text-white">
+                        <tr key={b.basename}>
+                          <td className="p-4 font-mono font-semibold">
                             <div>
                               <div className="flex items-center gap-2">
                                 <span>{b.basename}</span>
@@ -1088,16 +1088,16 @@ export const DatabaseToolsTab: React.FC = () => {
                                   </span>
                                 )}
                                 {b.duration && (
-                                  <span className="text-[0.65rem] text-gray-500">
+                                  <span className="text-[0.65rem] text-[var(--pm-text-secondary)]">
                                     Completed in: {b.duration}
                                   </span>
                                 )}
                               </div>
                             </div>
                           </td>
-                          <td className="p-4 text-gray-400 font-mono">{formatSqlSize(b.sql_size)}</td>
-                          <td className="p-4 text-gray-400 font-mono">{formatLogSize(b.log_size)}</td>
-                          <td className="p-4 text-gray-400">{formatDate(b.date)}</td>
+                          <td className="p-4 font-mono">{formatSqlSize(b.sql_size)}</td>
+                          <td className="p-4 font-mono">{formatLogSize(b.log_size)}</td>
+                          <td className="p-4">{formatDate(b.date)}</td>
                           <td className="p-4 text-right space-x-2">
                             {/* SQL download link */}
                             {b.sql_download_url && (
@@ -1248,11 +1248,13 @@ export const DatabaseToolsTab: React.FC = () => {
             </div>
 
             {/* Select Local Backups list */}
-            <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-              <h3 className="text-sm font-bold tracking-wide text-white uppercase">Select Backup to Restore</h3>
-              <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-black/15 text-gray-400 uppercase font-bold border-b border-white/[0.06]">
+            <div className="pm-panel-v2 space-y-4">
+              <div className="pm-panel-header-v2 border-b-0 pb-0">
+                <h3 className="text-sm font-bold tracking-wide uppercase">Select Backup to Restore</h3>
+              </div>
+              <div className="pm-table-container-v2">
+                <table className="pm-table-v2">
+                  <thead>
                     <tr>
                       <th className="p-4">Backup File</th>
                       <th className="p-4">Size</th>
@@ -1260,15 +1262,15 @@ export const DatabaseToolsTab: React.FC = () => {
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/[0.04]">
+                  <tbody>
                     {backups.map(b => {
                       const isLocal = b.is_local !== false;
 
                       return (
-                        <tr key={b.basename} className="hover:bg-white/[0.01] transition">
-                          <td className="p-4 font-mono font-semibold text-white">{b.basename}</td>
-                          <td className="p-4 text-gray-400 font-mono">{formatSqlSize(b.sql_size)}</td>
-                          <td className="p-4 text-gray-400">{formatDate(b.date)}</td>
+                        <tr key={b.basename}>
+                          <td className="p-4 font-mono font-semibold">{b.basename}</td>
+                          <td className="p-4 font-mono">{formatSqlSize(b.sql_size)}</td>
+                          <td className="p-4">{formatDate(b.date)}</td>
                           <td className="p-4 text-right space-x-2">
                             {isLocal ? (
                               <button
