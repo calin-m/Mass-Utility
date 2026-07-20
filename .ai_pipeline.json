@@ -5,6 +5,7 @@
         "source": "./"
     },
     "scripts": {
+        "validate_js": "php .bench/scripts/cli_validate_js.php",
         "auto_document": "python .orchestra/.conductor/tools/cli_auto_documenter.py",
         "build": "php .bench/scripts/build_js.php",
         "map_frontend": "php .bench/scripts/generate_frontend_map.php",
@@ -13,6 +14,7 @@
         "security_audit": "python .orchestra/.conductor/tools/cli_security_audit.py"
     },
     "pre_commit_hooks": [
+        "validate_js",
         "auto_document",
         "build",
         "map_frontend",
