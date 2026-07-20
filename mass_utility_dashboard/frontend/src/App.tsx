@@ -1,6 +1,6 @@
 // @Arch[UI_Components]
 // @Description: Root React component managing dashboard state and layout tabs.
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('general');
