@@ -1,4 +1,4 @@
-// @Arch[FrontendEntry]
+// @Arch[UI_Components]
 // @Description: Entry point that mounts the React SPA into the DOM.
 import React from 'react';
 import ReactDOM from 'react-dom/client';
