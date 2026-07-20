@@ -313,6 +313,65 @@ export class FetchService {
           }
         };
 
+      case 'preview_query':
+        return {
+          success: true,
+          count: 42,
+          sql: 'SELECT * FROM `ps_product` WHERE `active` = 1 AND `price` > 19.99',
+          sample_ids: [101, 102, 105, 108, 112, 115, 120]
+        };
+
+      case 'execute_mutations': {
+        const offset = Number(payload.offset) || 0;
+        const limit = Number(payload.limit) || 100;
+        const isDone = offset + limit >= 42;
+        return {
+          success: true,
+          done: isDone,
+          new_offset: offset + limit,
+          log_content: `[MUTATOR] Processed batch offset ${offset}. Status: SUCCESS\n`,
+          message: 'Batch executed successfully'
+        };
+      }
+
+      case 'get_mutation_history':
+        return {
+          success: true,
+          history: [
+            {
+              job_id: 'job_20260720_001',
+              date: '2026-07-20 12:00:00',
+              actions: 'SET price TO 19.99',
+              affected_count: 42,
+              state: 'SUCCESS',
+              has_revert: true,
+              raw_payload: '{"condition_tree":{"logical_operator":"AND","rules":[{"field":"product.active","operator":"EQUAL","value":1}],"groups":[]}}',
+              revert_payload: '{"reverts":[{"table":"ps_product","pk":"101","changes":{"price":{"original":"25.00","new":"19.99"}}}]}'
+            }
+          ]
+        };
+
+      case 'rollback_mutation':
+        return {
+          success: true,
+          log_content: '[ROLLBACK] Restored active indices. Safe rollbacks completed.'
+        };
+
+      case 'reapply_mutation':
+        return {
+          success: true,
+          log_content: '[REAPPLY] Re-applied actions rules. Baseline updated.'
+        };
+
+      case 'delete_mutation_job':
+        return { success: true };
+
+      case 'clear_mutation_history':
+        return { success: true };
+
+      case 'clear_logs':
+        return { success: true };
+
       default:
         return { success: true };
     }

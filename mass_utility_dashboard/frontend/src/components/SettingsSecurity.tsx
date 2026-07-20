@@ -4,6 +4,7 @@
 
 import React, { useState } from 'react';
 import { FetchService } from '../utils/FetchService';
+import { useModal } from '../utils/overlay';
 
 interface DiagnosticPath {
   path: string;
@@ -20,6 +21,7 @@ interface DiagnosticDetails {
 }
 
 export const SettingsSecurity: React.FC = () => {
+  const { showAlert } = useModal();
   const [isLoading, setIsLoading] = useState(false);
   const [isFixing, setIsFixing] = useState(false);
   const [diagnostics, setDiagnostics] = useState<DiagnosticDetails | null>(null);
@@ -47,13 +49,13 @@ export const SettingsSecurity: React.FC = () => {
     try {
       const response = await FetchService.post('fix_diagnostics_permissions', {});
       if (response && response.success) {
-        alert('Permissions successfully secured to standard 0755/0644 values.');
+        showAlert('Permissions Secured', 'Permissions successfully secured to standard 0755/0644 values.', 'success');
         runAudit();
       } else {
-        alert('Failed to write permissions changes.');
+        showAlert('Permissions Error', 'Failed to write permissions changes.', 'error');
       }
     } catch (err: any) {
-      alert('Network error during permissions correction: ' + err.message);
+      showAlert('Permissions Error', 'Network error during permissions correction: ' + err.message, 'error');
     } finally {
       setIsFixing(false);
     }

@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FetchService } from '../utils/FetchService';
+import { useModal } from '../utils/overlay';
 
 interface SettingsGeneralProps {
   settings: Record<string, any>;
@@ -205,19 +206,20 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
     }
   };
 
+  const { showAlert, showConfirm } = useModal();
   const handleDisconnectGdrive = async () => {
-    if (!window.confirm('Are you sure you want to disconnect Google Drive? This will reset cloud cache configurations.')) {
-      return;
-    }
-    setIsGdriveDisconnecting(true);
-    try {
-      await FetchService.post('disconnect_google_drive');
-      checkGdriveStatus();
-    } catch (err: any) {
-      alert('Error disconnecting: ' + err.message);
-    } finally {
-      setIsGdriveDisconnecting(false);
-    }
+    showConfirm('Disconnect Cloud Storage', 'Are you sure you want to disconnect Google Drive? This will reset cloud cache configurations.', 'DISCONNECT', async () => {
+      setIsGdriveDisconnecting(true);
+      try {
+        await FetchService.post('disconnect_google_drive');
+        checkGdriveStatus();
+        showAlert('Cloud Storage Disconnected', 'Google Drive account disconnected successfully.', 'info');
+      } catch (err: any) {
+        showAlert('Disconnect Failed', 'Error disconnecting: ' + err.message, 'error');
+      } finally {
+        setIsGdriveDisconnecting(false);
+      }
+    });
   };
 
   const handleSave = () => {

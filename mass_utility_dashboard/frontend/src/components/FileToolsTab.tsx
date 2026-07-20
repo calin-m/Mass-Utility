@@ -7,8 +7,10 @@ import { FolderSelector, FolderEntry } from './FolderSelector';
 import { BackupProgress } from './BackupProgress';
 import { BackupsGrid, BackupEntry } from './BackupsGrid';
 import { FetchService } from '../utils/FetchService';
+import { useModal } from '../utils/overlay';
 
 export const FileToolsTab: React.FC = () => {
+  const { showAlert, showConfirm } = useModal();
   const [profile, setProfile] = useState<string>('custom');
   const [folders, setFolders] = useState<FolderEntry[]>([]);
   const [backups, setBackups] = useState<BackupEntry[]>([]);
@@ -69,38 +71,37 @@ export const FileToolsTab: React.FC = () => {
         exclusions: JSON.stringify(uncheckedPaths),
       });
       if (!data.success) {
-        alert(data.error || 'Failed to save directory exclusions.');
+        showAlert('Exclusion Error', data.error || 'Failed to save directory exclusions.', 'error');
       }
     } catch (err: any) {
-      alert('Network error saving exclusions: ' + err.message);
+      showAlert('Exclusion Network Error', 'Network error saving exclusions: ' + err.message, 'error');
     }
   };
 
   const handleStartBackup = async () => {
-    const confirmMsg = `You are about to initiate a file system archive sequence targeting the selected files and directories.\n\nIf the chosen profile contains many files, this can temporarily spike CPU utilization and IOPS on your server.\n\nAre you sure you want to proceed?\n\nPlease click OK to confirm.`;
-    if (!window.confirm(confirmMsg)) {
-      return;
-    }
-
-    setIsGenerating(true);
-    setIsCancelling(false);
-    setProgressPercent(0);
-    setProgressText('Initializing Engine...');
+    const confirmMsg = `You are about to initiate a file system archive sequence targeting the selected files and directories.<br><br>If the chosen profile contains many files, this can temporarily spike CPU utilization and IOPS on your server.`;
     
-    try {
-      const data = await FetchService.post('start_file_backup', { profile });
-      if (data.success && data.job_id) {
-        setActiveJobId(data.job_id);
-        setProgressText('Compiling archive in memory-safe chunks...');
-        startJobMonitoring(data.job_id);
-      } else {
-        alert(data.error || 'Backup initialization failed.');
+    showConfirm('Initiate Files Backup', confirmMsg, 'BACKUP', async () => {
+      setIsGenerating(true);
+      setIsCancelling(false);
+      setProgressPercent(0);
+      setProgressText('Initializing Engine...');
+      
+      try {
+        const data = await FetchService.post('start_file_backup', { profile });
+        if (data.success && data.job_id) {
+          setActiveJobId(data.job_id);
+          setProgressText('Compiling archive in memory-safe chunks...');
+          startJobMonitoring(data.job_id);
+        } else {
+          showAlert('Backup Setup Failed', data.error || 'Backup initialization failed.', 'error');
+          setIsGenerating(false);
+        }
+      } catch (err: any) {
+        showAlert('Backup Setup Failed', 'Error initializing backup job: ' + err.message, 'error');
         setIsGenerating(false);
       }
-    } catch (err: any) {
-      alert('Error initializing backup job: ' + err.message);
-      setIsGenerating(false);
-    }
+    });
   };
 
   const handleCancelBackup = async () => {
@@ -110,23 +111,21 @@ export const FileToolsTab: React.FC = () => {
     try {
       await FetchService.post('cancel_job', { job_id: activeJobId });
     } catch (err: any) {
-      alert('Cancellation request failed: ' + err.message);
+      showAlert('Cancellation Failed', 'Cancellation request failed: ' + err.message, 'error');
       setIsCancelling(false);
     }
   };
 
   const handleClearAllBackups = async () => {
-    const doubleConfirm = window.confirm(
-      'Are you sure you want to permanently delete all generated ZIP/TAR archives? This cannot be undone.'
-    );
-    if (!doubleConfirm) return;
-
-    try {
-      const data = await FetchService.post('clear_file_backups');
-      setBackups(data.backups || []);
-    } catch (err: any) {
-      alert('Failed to clear backups repository: ' + err.message);
-    }
+    showConfirm('Clear All Backups', 'Are you sure you want to permanently delete all generated ZIP/TAR archives? This cannot be undone.', 'DELETE ALL', async () => {
+      try {
+        const data = await FetchService.post('clear_file_backups');
+        setBackups(data.backups || []);
+        showAlert('Archives Cleared', 'All backup archives deleted successfully.', 'info');
+      } catch (err: any) {
+        showAlert('Clear Failed', 'Failed to clear backups repository: ' + err.message, 'error');
+      }
+    });
   };
 
   // SSE and Polling worker routines
@@ -167,7 +166,7 @@ export const FileToolsTab: React.FC = () => {
     } else if (d.status === 'failed') {
       cleanupJobMonitoring();
       setProgressText('❌ Backup Failed.');
-      alert('Backup failure detected: ' + (d.error || 'Server worker error.'));
+      showAlert('Backup Failed', 'Backup failure detected: ' + (d.error || 'Server worker error.'), 'error');
       setTimeout(() => {
         setIsGenerating(false);
         setActiveJobId(null);

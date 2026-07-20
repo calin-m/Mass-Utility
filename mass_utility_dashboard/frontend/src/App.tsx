@@ -1,15 +1,22 @@
 // @Arch[UI_Components]
 // @Description: Root React component managing dashboard state, layout navigation tabs, and light/dark theme switchers.
+// @Calls: logout
 
 import { useState, useEffect } from 'react';
 import { SettingsTab } from './components/SettingsTab';
 import { FileToolsTab } from './components/FileToolsTab';
 import { GovernorTab } from './components/GovernorTab';
 import { DatabaseToolsTab } from './components/DatabaseToolsTab';
+import { QueryMutateTab } from './components/QueryMutateTab';
+import { MutationHistoryTab } from './components/MutationHistoryTab';
+import { EventLogsTab } from './components/EventLogsTab';
+import { ModalProvider, useModal } from './utils/overlay';
+import { FetchService } from './utils/FetchService';
 
 type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'logs' | 'settings';
 
-export default function App() {
+function AppContent() {
+  const { showConfirm } = useModal();
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     // Preserve tab on reload
     try {
@@ -22,6 +29,46 @@ export default function App() {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
+
+  // Hydrate PM_CONFIG and PM_CAPABILITIES on boot
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        const data = await FetchService.post('hydrate_dashboard');
+        if (data.success) {
+          const config = (window as any).PM_CONFIG || {};
+          config.categories = data.categories || [];
+          config.manufacturers = data.manufacturers || [];
+          config.profiles = data.profiles || [];
+          config.presets = data.presets || {};
+          config.backups = data.backups || [];
+          config.settings = data.settings || {};
+          
+          // Decode active token
+          let caps = {
+            backup_destinations: ['local'],
+            backup_automation: false,
+            rollback_history_limit: 0,
+            query_visual_execute: false,
+            governor_autopilot: false,
+            sweeper_execution: false
+          };
+          const licenseToken = data.settings?.PM_LICENSE_TOKEN;
+          if (licenseToken) {
+            try {
+              const decoded = JSON.parse(atob(licenseToken));
+              if (decoded.features && decoded.features.capabilities) {
+                caps = decoded.features.capabilities;
+              }
+            } catch (e) {}
+          }
+          (window as any).PM_CAPABILITIES = caps;
+          (window as any).PM_CONFIG = config;
+        }
+      } catch (e) {}
+    };
+    initData();
+  }, []);
 
   // Sync theme choices to document classes and localStorage
   useEffect(() => {
@@ -77,34 +124,18 @@ export default function App() {
   }, []);
 
   const handleLogout = () => {
-    const confirm = window.confirm('Are you sure you want to log out?');
-    if (confirm) {
-      // Redirect to legacy module logout action
+    showConfirm('Confirm Logout', 'Are you sure you want to log out from the administrative utility dashboard?', 'LOGOUT', () => {
       const config = (window as any).PM_CONFIG || {};
       const basePath = config.basePath || '';
       const cleanBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
       window.location.href = `${cleanBase}/index.php?action=logout`;
-    }
-  };
-
-  const handleLegacyFallback = (tabId: string) => {
-    // Redirect back to legacy Smarty view, checking first the tab radio input
-    const config = (window as any).PM_CONFIG || {};
-    const basePath = config.basePath || '';
-    const cleanBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-    
-    // Store selected tab into session so when legacy loads it triggers the active tab radio
-    try {
-      sessionStorage.setItem('pm_active_tab', tabId);
-    } catch (e) {}
-    
-    window.location.href = `${cleanBase}/index.php`;
+    });
   };
 
   return (
     <div
       className={`min-h-screen p-6 transition-colors duration-300 ${
-        darkMode ? 'bg-[#09090e] text-[#e3e3e3]' : 'bg-slate-50 text-slate-800'
+        darkMode ? 'bg-[#09090e] text-[#e3e3e3]' : 'bg-slate-55 text-slate-800'
       }`}
       style={{ fontFamily: 'var(--pm-font-family, system-ui, -apple-system, sans-serif)' }}
     >
@@ -123,7 +154,7 @@ export default function App() {
           </h1>
           <p
             className={`text-xs mt-1 uppercase tracking-widest ${
-              darkMode ? 'text-gray-400' : 'text-slate-500 font-semibold'
+              darkMode ? 'text-gray-400' : 'text-slate-550 font-semibold'
             }`}
           >
             Enterprise-grade database &amp; file management
@@ -145,7 +176,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Legacy Mode Nav Toggles */}
+      {/* Navigation Tabs Nav Toggles */}
       <div className={`flex justify-between items-center border-b pb-4 mb-6 flex-wrap gap-4 transition-colors duration-300 ${
         darkMode ? 'border-white/[0.06]' : 'border-slate-200'
       }`}>
@@ -192,7 +223,7 @@ export default function App() {
                 : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
-            ⚡ Query & Mutate
+            ⚡ Query &amp; Mutate
           </button>
           <button
             type="button"
@@ -257,62 +288,20 @@ export default function App() {
       >
         {activeTab === 'settings' && <SettingsTab />}
         {activeTab === 'files' && <FileToolsTab />}
-        
         {activeTab === 'governor' && <GovernorTab />}
-
         {activeTab === 'database' && <DatabaseToolsTab />}
-
-        {activeTab === 'query' && (
-          <div className="text-center py-12 space-y-4">
-            <span className="text-4xl">⚡</span>
-            <h3 className="text-lg font-bold">Query Wizard (Migration Pending)</h3>
-            <p className={`text-sm max-w-md mx-auto ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-              The drag-and-drop Visual AST mutation compiler rules tree dashboard is currently operating under the legacy layout.
-            </p>
-            <button
-              type="button"
-              onClick={() => handleLegacyFallback('pm-tab-query-mutate')}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition"
-            >
-              🔄 Launch Legacy Query Wizard
-            </button>
-          </div>
-        )}
-
-        {activeTab === 'history' && (
-          <div className="text-center py-12 space-y-4">
-            <span className="text-4xl">🕒</span>
-            <h3 className="text-lg font-bold">Mutation History (Migration Pending)</h3>
-            <p className={`text-sm max-w-md mx-auto ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-              Change audit logs, row snapshot diff trees, and safe undo reversion rollbacks are currently operating under the legacy layout.
-            </p>
-            <button
-              type="button"
-              onClick={() => handleLegacyFallback('pm-tab-history')}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition"
-            >
-              🔄 Launch Legacy History Tab
-            </button>
-          </div>
-        )}
-
-        {activeTab === 'logs' && (
-          <div className="text-center py-12 space-y-4">
-            <span className="text-4xl">📜</span>
-            <h3 className="text-lg font-bold">Event Logs (Migration Pending)</h3>
-            <p className={`text-sm max-w-md mx-auto ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-              The SaaS operation event journals and server-sent telemetry queues are currently operating under the legacy layout.
-            </p>
-            <button
-              type="button"
-              onClick={() => handleLegacyFallback('pm-tab-logs')}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition"
-            >
-              🔄 Launch Legacy Event Logs
-            </button>
-          </div>
-        )}
+        {activeTab === 'query' && <QueryMutateTab />}
+        {activeTab === 'history' && <MutationHistoryTab />}
+        {activeTab === 'logs' && <EventLogsTab />}
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ModalProvider>
+      <AppContent />
+    </ModalProvider>
   );
 }

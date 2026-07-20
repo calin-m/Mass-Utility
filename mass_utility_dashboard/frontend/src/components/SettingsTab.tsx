@@ -7,8 +7,10 @@ import { SettingsGeneral } from './SettingsGeneral';
 import { SettingsInfo } from './SettingsInfo';
 import { SettingsSecurity } from './SettingsSecurity';
 import { FetchService } from '../utils/FetchService';
+import { useModal } from '../utils/overlay';
 
 export const SettingsTab: React.FC = () => {
+  const { showAlert } = useModal();
   const [activeSubTab, setActiveSubTab] = useState<'general' | 'info' | 'security'>('general');
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -35,26 +37,14 @@ export const SettingsTab: React.FC = () => {
           (window as any).PM_CONFIG.settings = merged;
         }
 
-        if (typeof (window as any).showPremiumToast === 'function') {
-          (window as any).showPremiumToast('Settings saved successfully', 'success');
-        } else {
-          alert('Settings saved successfully!');
-        }
+        showAlert('Settings Saved', 'Settings saved successfully!', 'success');
       } else {
         const errMsg = response?.error || 'Failed to save settings.';
-        if (typeof (window as any).showPremiumToast === 'function') {
-          (window as any).showPremiumToast(errMsg, 'error');
-        } else {
-          alert(errMsg);
-        }
+        showAlert('Save Failed', errMsg, 'error');
       }
     } catch (err: any) {
       const msg = err.message || 'Network error while saving settings.';
-      if (typeof (window as any).showPremiumToast === 'function') {
-        (window as any).showPremiumToast(msg, 'error');
-      } else {
-        alert(msg);
-      }
+      showAlert('Save Failed', msg, 'error');
     } finally {
       setIsSaving(false);
     }

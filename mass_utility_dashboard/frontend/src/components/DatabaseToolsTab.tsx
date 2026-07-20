@@ -509,22 +509,22 @@ export const DatabaseToolsTab: React.FC = () => {
         try {
           const res = JSON.parse(this.responseText);
           if (res.success) {
-            alert('File uploaded and staged successfully.');
+            showAlert('Upload Staged', 'File uploaded and staged successfully.', 'success');
             fetchBackups();
           } else {
-            alert(res.error || 'Upload staging failed.');
+            showAlert('Upload Failed', res.error || 'Upload staging failed.', 'error');
           }
         } catch (e) {
-          alert('Upload completed, but response was invalid.');
+          showAlert('Upload Response Error', 'Upload completed, but response was invalid.', 'error');
         }
       } else {
-        alert('Upload failed with status: ' + this.status);
+        showAlert('Upload Network Error', 'Upload failed with status: ' + this.status, 'error');
       }
     };
 
     xhr.onerror = () => {
       setIsUploading(false);
-      alert('Upload staging network error.');
+      showAlert('Upload Connection Failed', 'Upload staging network error.', 'error');
     };
 
     xhr.send(formData);
@@ -1066,7 +1066,7 @@ export const DatabaseToolsTab: React.FC = () => {
                                   className="cursor-pointer opacity-60 hover:opacity-100"
                                   onClick={() => {
                                     navigator.clipboard.writeText(b.basename);
-                                    alert('Filename copied!');
+                                    showAlert('Copied', 'Filename copied!', 'success');
                                   }}
                                   title="Copy filename"
                                 >

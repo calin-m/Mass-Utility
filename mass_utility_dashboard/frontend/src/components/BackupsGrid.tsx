@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { FetchService } from '../utils/FetchService';
+import { useModal } from '../utils/overlay';
 
 export interface BackupEntry {
   basename: string;
@@ -30,37 +31,38 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
   onRefresh,
   onClearAll,
 }) => {
+  const { showAlert, showConfirm } = useModal();
   const [verifyingFile, setVerifyingFile] = useState<string | null>(null);
   const [pinningFile, setPinningFile] = useState<string | null>(null);
   const [restoringFile, setRestoringFile] = useState<string | null>(null);
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert('Copied to clipboard: ' + text);
+    showAlert('Copied', 'Copied to clipboard: ' + text, 'success');
   };
 
   const handleVerify = async (name: string) => {
     setVerifyingFile(name);
     try {
       const data = await FetchService.post('verify_backup_integrity', { file: name });
-      alert(data.message || 'Cryptographic Integrity Verified Successfully!');
+      showAlert('Integrity Check Passed', data.message || 'Cryptographic Integrity Verified Successfully!', 'success');
     } catch (err: any) {
-      alert('Integrity Check Failed: ' + err.message);
+      showAlert('Integrity Check Failed', err.message || 'Verification failed.', 'error');
     } finally {
       setVerifyingFile(null);
     }
   };
 
   const handleDelete = async (name: string) => {
-    if (!window.confirm(`Are you sure you want to delete ${name}?`)) {
-      return;
-    }
-    try {
-      const data = await FetchService.post('delete_file_backup', { file: name });
-      onRefresh(data.backups || []);
-    } catch (err: any) {
-      alert('Delete Failed: ' + err.message);
-    }
+    showConfirm('Delete Backup', `Are you sure you want to permanently delete the backup archive <strong>${name}</strong>?`, 'DELETE', async () => {
+      try {
+        const data = await FetchService.post('delete_file_backup', { file: name });
+        onRefresh(data.backups || []);
+        showAlert('Backup Deleted', 'The backup file has been deleted from host filesystem.', 'info');
+      } catch (err: any) {
+        showAlert('Delete Failed', err.message || 'Could not delete backup.', 'error');
+      }
+    });
   };
 
   const handleTogglePin = async (name: string) => {
@@ -70,31 +72,30 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       if (data.success) {
         onRefresh(data.backups || []);
       } else {
-        alert(data.error || 'Failed to toggle pin state.');
+        showAlert('Failed to Pin', data.error || 'Failed to toggle pin state.', 'error');
       }
     } catch (err: any) {
-      alert('Error toggling pin: ' + err.message);
+      showAlert('Pin Failed', err.message || 'Error toggling pin.', 'error');
     } finally {
       setPinningFile(null);
     }
   };
 
   const handleCloudRestore = async (name: string) => {
-    if (!window.confirm(`Restore local copy of ${name} from Google Drive?`)) {
-      return;
-    }
-    setRestoringFile(name);
-    try {
-      const data = await FetchService.post('cloud_restore', { file: name, type: 'file' });
-      if (data.success) {
-        alert('Cloud backup successfully restored back to host filesystem.');
-        onRefresh(data.backups || []);
+    showConfirm('Restore Cloud Backup', `Restore local copy of <strong>${name}</strong> from Google Drive storage?`, 'RESTORE', async () => {
+      setRestoringFile(name);
+      try {
+        const data = await FetchService.post('cloud_restore', { file: name, type: 'file' });
+        if (data.success) {
+          showAlert('Restore Complete', 'Cloud backup successfully restored back to host filesystem.', 'success');
+          onRefresh(data.backups || []);
+        }
+      } catch (err: any) {
+        showAlert('Cloud Restore Failed', err.message || 'Could not restore cloud backup.', 'error');
+      } finally {
+        setRestoringFile(null);
       }
-    } catch (err: any) {
-      alert('Cloud restore failed: ' + err.message);
-    } finally {
-      setRestoringFile(null);
-    }
+    });
   };
 
   const formatDate = (timestamp: number) => {
