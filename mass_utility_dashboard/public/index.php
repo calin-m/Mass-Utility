@@ -355,7 +355,7 @@ function startBridgeJob(string $jobId, string $type, int $totalItems): bool
     ];
     $dir = dirname($filePath);
     if (!is_dir($dir)) {
-        @mkdir($dir, 0777, true);
+        @mkdir($dir, 0755, true);
     }
     return file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX) !== false;
 }

@@ -427,7 +427,7 @@ class GoogleDriveClient
 
         $dir = dirname($localPath);
         if (!is_dir($dir)) {
-            if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+            if (!mkdir($dir, 0755, true) && !is_dir($dir)) {
                 throw new Exception("Failed to create destination directory: $dir");
             }
         }

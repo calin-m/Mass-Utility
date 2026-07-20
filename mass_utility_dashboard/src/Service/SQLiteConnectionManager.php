@@ -36,7 +36,7 @@ class SQLiteConnectionManager
         try {
             $dbDir = dirname($this->dbPath);
             if (!is_dir($dbDir)) {
-                if (!mkdir($dbDir, 0777, true) && !is_dir($dbDir)) {
+                if (!mkdir($dbDir, 0755, true) && !is_dir($dbDir)) {
                     throw new Exception("Unable to create SQLite database directory: {$dbDir}");
                 }
             }

@@ -14,7 +14,7 @@ class BridgeProgressTracker
     {
         $this->backupDir = _PS_MODULE_DIR_ . 'mass_utility/backups/';
         if (!is_dir($this->backupDir)) {
-            @mkdir($this->backupDir, 0777, true);
+            @mkdir($this->backupDir, 0755, true);
         }
     }
 

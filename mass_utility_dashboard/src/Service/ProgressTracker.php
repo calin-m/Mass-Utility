@@ -14,7 +14,7 @@ class ProgressTracker
     {
         $this->backupDir = dirname(dirname(__DIR__)) . '/.sandbox/backups/';
         if (!is_dir($this->backupDir)) {
-            @mkdir($this->backupDir, 0777, true);
+            @mkdir($this->backupDir, 0755, true);
         }
     }
 
