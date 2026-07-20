@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { SettingsTab } from './components/SettingsTab';
 import { FileToolsTab } from './components/FileToolsTab';
+import { GovernorTab } from './components/GovernorTab';
 
 type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'logs' | 'settings';
 
@@ -256,22 +257,7 @@ export default function App() {
         {activeTab === 'settings' && <SettingsTab />}
         {activeTab === 'files' && <FileToolsTab />}
         
-        {activeTab === 'governor' && (
-          <div className="text-center py-12 space-y-4">
-            <span className="text-4xl">🛡️</span>
-            <h3 className="text-lg font-bold">Safety Governor (Migration Pending)</h3>
-            <p className={`text-sm max-w-md mx-auto ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-              The visual server safety engine and load throttle profiles are currently operating under the legacy Smarty layout.
-            </p>
-            <button
-              type="button"
-              onClick={() => handleLegacyFallback('pm-tab-governor')}
-              className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition"
-            >
-              🔄 Launch Legacy Governor Tab
-            </button>
-          </div>
-        )}
+        {activeTab === 'governor' && <GovernorTab />}
 
         {activeTab === 'database' && (
           <div className="text-center py-12 space-y-4">
