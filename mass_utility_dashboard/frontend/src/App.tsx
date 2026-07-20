@@ -41,6 +41,39 @@ export default function App() {
     } catch (e) {}
   }, [activeTab]);
 
+  // Mousemove spotlight proximity listener
+  useEffect(() => {
+    let cursorTicking = false;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (cursorTicking) return;
+      cursorTicking = true;
+
+      requestAnimationFrame(() => {
+        const elements = document.querySelectorAll('.pm-tab-label, .pm-sub-tab-btn, .pm-theme-btn');
+        elements.forEach((el) => {
+          const htmlEl = el as HTMLElement;
+          const rect = htmlEl.getBoundingClientRect();
+          const dx = Math.max(0, rect.left - e.clientX, e.clientX - rect.right);
+          const dy = Math.max(0, rect.top - e.clientY, e.clientY - rect.bottom);
+
+          if (Math.sqrt(dx * dx + dy * dy) < 150) {
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            htmlEl.style.setProperty('--mouse-x', `${x}px`);
+            htmlEl.style.setProperty('--mouse-y', `${y}px`);
+          }
+        });
+        cursorTicking = false;
+      });
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
   const handleLogout = () => {
     const confirm = window.confirm('Are you sure you want to log out?');
     if (confirm) {
@@ -99,19 +132,6 @@ export default function App() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setDarkMode(!darkMode)}
-            className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
-              darkMode
-                ? 'bg-white/[0.02] border-white/[0.1] text-yellow-400 hover:bg-white/[0.05]'
-                : 'bg-white border-slate-200 text-indigo-600 hover:bg-slate-100 shadow-sm'
-            }`}
-            title="Toggle Light/Dark Theme"
-          >
-            {darkMode ? '☀️ Light' : '🌙 Dark'}
-          </button>
-          
-          <button
-            type="button"
             onClick={handleLogout}
             className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 dark:text-red-400 px-3.5 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 hover:scale-[1.02] active:scale-[0.97]"
           >
@@ -131,9 +151,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => setActiveTab('governor')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
               activeTab === 'governor'
-                ? darkMode ? 'bg-[#8b5cf6] text-white shadow-lg' : 'bg-indigo-600 text-white shadow-md'
+                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
                 : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
@@ -142,9 +162,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => setActiveTab('database')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
               activeTab === 'database'
-                ? darkMode ? 'bg-[#8b5cf6] text-white shadow-lg' : 'bg-indigo-600 text-white shadow-md'
+                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
                 : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
@@ -153,9 +173,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => setActiveTab('files')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
               activeTab === 'files'
-                ? darkMode ? 'bg-[#8b5cf6] text-white shadow-lg' : 'bg-indigo-600 text-white shadow-md'
+                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
                 : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
@@ -164,9 +184,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => setActiveTab('query')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
               activeTab === 'query'
-                ? darkMode ? 'bg-[#8b5cf6] text-white shadow-lg' : 'bg-indigo-600 text-white shadow-md'
+                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
                 : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
@@ -175,9 +195,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => setActiveTab('history')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
               activeTab === 'history'
-                ? darkMode ? 'bg-[#8b5cf6] text-white shadow-lg' : 'bg-indigo-600 text-white shadow-md'
+                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
                 : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
@@ -186,9 +206,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => setActiveTab('logs')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
               activeTab === 'logs'
-                ? darkMode ? 'bg-[#8b5cf6] text-white shadow-lg' : 'bg-indigo-600 text-white shadow-md'
+                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
                 : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
@@ -196,17 +216,36 @@ export default function App() {
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('settings')}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
-            activeTab === 'settings'
-              ? darkMode ? 'bg-[#8b5cf6] text-white shadow-lg' : 'bg-indigo-600 text-white shadow-md'
-              : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
-          }`}
-        >
-          ⚙️ Settings
-        </button>
+        <div className="flex gap-2 items-center">
+          <button
+            type="button"
+            onClick={() => setActiveTab('settings')}
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] uppercase tracking-wider ${
+              activeTab === 'settings'
+                ? darkMode
+                  ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10'
+                  : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md shadow-indigo-600/5'
+                : darkMode
+                ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]'
+                : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+            }`}
+          >
+            ⚙️ Settings
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setDarkMode(!darkMode)}
+            className={`pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.97] border ${
+              darkMode
+                ? 'bg-white/[0.02] border-white/[0.06] text-yellow-400 hover:bg-white/[0.05]'
+                : 'bg-white border-slate-200 text-indigo-600 hover:bg-slate-50 shadow-sm'
+            }`}
+            title="Toggle Light/Dark Theme"
+          >
+            {darkMode ? '☀️ Light' : '🌙 Dark'}
+          </button>
+        </div>
       </div>
 
       <main
