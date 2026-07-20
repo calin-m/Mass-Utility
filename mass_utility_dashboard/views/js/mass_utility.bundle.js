@@ -1,6 +1,6 @@
 /**
  * Project Mass - Compiled JS Bundle
- * Generated: 2026-07-20 04:36:10 UTC
+ * Generated: 2026-07-20 04:53:37 UTC
  */
 
 /* --- UiEngine.js --- */
@@ -934,12 +934,121 @@ window.SettingsEngine = (function() {
                 const targetId = btn.getAttribute('data-sub-tab');
                 const paneGeneral = document.getElementById('pm-settings-pane-general');
                 const paneInfo = document.getElementById('pm-settings-pane-info');
+                const paneSecurity = document.getElementById('pm-settings-pane-security');
                 if (paneGeneral && paneInfo) {
                     paneGeneral.style.display = (targetId === 'pm-settings-pane-general') ? 'block' : 'none';
                     paneInfo.style.display = (targetId === 'pm-settings-pane-info') ? 'block' : 'none';
+                    if (paneSecurity) {
+                        paneSecurity.style.display = (targetId === 'pm-settings-pane-security') ? 'block' : 'none';
+                    }
                 }
             });
         });
+
+        // Run Security Diagnostics Scan
+        const runDiagBtn = document.getElementById('pm-btn-run-diagnostics');
+        if (runDiagBtn) {
+            runDiagBtn.addEventListener('click', async function() {
+                runDiagBtn.disabled = true;
+                const originalText = runDiagBtn.textContent;
+                runDiagBtn.textContent = '⚡ Running Audit...';
+                
+                const resultsContainer = document.getElementById('pm-diagnostics-results-container');
+                if (resultsContainer) {
+                    resultsContainer.innerHTML = '<p class="pm-text-sm" style="color: var(--pm-primary);">Initiating multi-server security scan...</p>'; // nosec
+                }
+
+                try {
+                    const response = await window.FetchEngine.post('get_diagnostics', {});
+                    if (response && response.success && response.diagnostics) {
+                        const d = response.diagnostics;
+                        let html = '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+                        
+                        html += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                                <div>
+                                    <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Git Repository Security (.git Exposure)</strong>
+                                    <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.2rem;">Checks if the underlying .git directory is accessible from public HTTP traffic.</p>
+                                </div>
+                                <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.git_exposed ? 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);' : 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);'}">
+                                    ${d.git_exposed ? '⚠️ EXPOSED' : '🟢 SECURE'}
+                                </span>
+                            </div>
+                        `;
+
+                        html += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                                <div>
+                                    <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Vault DB Security (.db Download Exposure)</strong>
+                                    <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.2rem;">Checks if your SQLite database file can be downloaded directly from the web.</p>
+                                </div>
+                                <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.db_exposed ? 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);' : 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);'}">
+                                    ${d.db_exposed ? '⚠️ EXPOSED' : '🟢 SECURE'}
+                                </span>
+                            </div>
+                        `;
+
+                        html += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                                <div>
+                                    <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">Decoupled Bridge Encryption (SSL/TLS Transport)</strong>
+                                    <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.2rem;">Checks if communications between SaaS Dashboard and client Bridge are encrypted (HTTPS).</p>
+                                </div>
+                                <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.bridge_encrypted ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(245, 158, 11, 0.1); color: var(--pm-warning);'}">
+                                    ${d.bridge_encrypted ? '🟢 HTTPS ENCRYPTED' : '⚠️ HTTP UNENCRYPTED'}
+                                </span>
+                            </div>
+                        `;
+
+                        html += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                                <div>
+                                    <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Browser Transport Encryption (SSL/TLS Connection)</strong>
+                                    <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.2rem;">Checks if your active dashboard administration session is running over HTTPS.</p>
+                                </div>
+                                <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.ssl_enforced ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(245, 158, 11, 0.1); color: var(--pm-warning);'}">
+                                    ${d.ssl_enforced ? '🟢 SSL ON' : '⚠️ SSL OFF'}
+                                </span>
+                            </div>
+                        `;
+
+                        html += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                                <div>
+                                    <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Local Write Access (data/ Folder)</strong>
+                                    <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.2rem;">Verifies write permissions for local settings storage and presets registries.</p>
+                                </div>
+                                <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.data_dir_writeable ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);'}">
+                                    ${d.data_dir_writeable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY'}
+                                </span>
+                            </div>
+                        `;
+
+                        html += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); border-radius: 8px;">
+                                <div>
+                                    <strong style="font-size: 0.9rem; color: var(--pm-text-primary);">SaaS Archive Write Access (backups/ Folder)</strong>
+                                    <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.2rem;">Verifies write permissions for staging ZIP/TAR archives.</p>
+                                </div>
+                                <span style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; ${d.backups_dir_writeable ? 'background: rgba(16, 185, 129, 0.1); color: var(--pm-success);' : 'background: rgba(239, 68, 68, 0.1); color: var(--pm-danger);'}">
+                                    ${d.backups_dir_writeable ? '🟢 WRITEABLE' : '⚠️ READ-ONLY'}
+                                </span>
+                            </div>
+                        `;
+
+                        html += '</div>';
+                        resultsContainer.innerHTML = html; // nosec
+                    } else {
+                        resultsContainer.innerHTML = '<p class="pm-text-sm" style="color: var(--pm-danger);">Security diagnostics audit failed to run.</p>'; // nosec
+                    }
+                } catch (err) {
+                    resultsContainer.innerHTML = '<p class="pm-text-sm" style="color: var(--pm-danger);">Network error during diagnostics request.</p>'; // nosec
+                } finally {
+                    runDiagBtn.disabled = false;
+                    runDiagBtn.textContent = originalText;
+                }
+            });
+        }
     }
 
     return {

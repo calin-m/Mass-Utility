@@ -1253,6 +1253,68 @@ if (strpos($path, '/api/v1/') === 0) {
             exit;
         }
 
+        if ($action === 'get_diagnostics') {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $selfUrl = $scheme . '://' . $host . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+
+            // 1. Check .git exposure
+            $gitExposed = false;
+            $ch = curl_init($selfUrl . '/../.git/config');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($code === 200) {
+                $gitExposed = true;
+            }
+
+            // 2. Check SQLite exposure
+            $dbExposed = false;
+            $ch = curl_init($selfUrl . '/../data/pm_cloud_backups.db');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($code === 200) {
+                $dbExposed = true;
+            }
+
+            // 3. Check Bridge protocol (transport encryption check)
+            $bridgeUrl = $settingsRepo->get('PM_BRIDGE_URL') ?? '';
+            $bridgeEncrypted = true;
+            if (!empty($bridgeUrl) && strpos(strtolower($bridgeUrl), 'https://') !== 0) {
+                $bridgeEncrypted = false;
+            }
+
+            // 4. Check folder permissions and PHP execution modes
+            $dataDir = dirname(__DIR__) . '/data';
+            $backupsDir = dirname(__DIR__) . '/backups';
+            $dataDirWriteable = is_writable($dataDir);
+            $backupsDirWriteable = is_writable($backupsDir) || (!is_dir($backupsDir) && is_writable(dirname(__DIR__)));
+            
+            $sslEnforced = ($scheme === 'https');
+
+            echo json_encode([
+                'success' => true,
+                'diagnostics' => [
+                    'git_exposed' => $gitExposed,
+                    'db_exposed' => $dbExposed,
+                    'bridge_encrypted' => $bridgeEncrypted,
+                    'data_dir_writeable' => $dataDirWriteable,
+                    'backups_dir_writeable' => $backupsDirWriteable,
+                    'ssl_enforced' => $sslEnforced
+                ]
+            ]);
+            exit;
+        }
+
         if ($action === 'save_preset') {
             $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
             $name = $payload['name'] ?? '';

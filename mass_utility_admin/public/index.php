@@ -74,7 +74,11 @@ try {
         $hasAdmin = ((int)$stmt->fetchColumn() > 0);
     }
 } catch (\Exception $e) {
-    // Database file exists but tables don't exist yet
+    // If the database file actually exists but we failed to query it, this is a database lock/error, NOT a clean install state!
+    if (file_exists($dbPath) && filesize($dbPath) > 0) {
+        header('HTTP/1.1 500 Internal Server Error');
+        die("Database temporary lock or connection error. Please refresh the page.");
+    }
     $hasAdmin = false;
 }
 

@@ -3,6 +3,7 @@
     <div class="pm-sub-tabs" style="margin-bottom: 1.5rem;">
         <button type="button" class="pm-settings-tab-btn pm-sub-tab-btn active" data-sub-tab="pm-settings-pane-general">⚙️ General Settings</button>
         <button type="button" class="pm-settings-tab-btn pm-sub-tab-btn" data-sub-tab="pm-settings-pane-info">📖 Documentation & Info</button>
+        <button type="button" class="pm-settings-tab-btn pm-sub-tab-btn" data-sub-tab="pm-settings-pane-security">🛡️ Security & Health</button>
     </div>
 
     <!-- Inner Sub-panel 1: General Settings -->
@@ -429,6 +430,28 @@
             <li><strong>Database export timeouts:</strong> Reduce the <em>Database Row Chunk</em> to 1000 or 500 rows.</li>
             <li><strong>Cloud Sync setup:</strong> Input Google developer client credentials and ensure the Redirect URI is properly registered in Google Cloud Console.</li>
         </ul>
+    </div>
+
+    <!-- Inner Sub-panel 3: Security & Health -->
+    <div class="pm-settings-tab-content" id="pm-settings-pane-security" style="display: none;">
+        <div class="pm-section-header">
+            <h2 class="pm-h2">🛡️ Security & Health Diagnostics</h2>
+            <p class="pm-text-muted">Audit the files, permissions, and transport safety of your decoupled monorepo deployment.</p>
+        </div>
+
+        <div class="pm-card pm-mb-6">
+            <div class="pm-card-title pm-flex-between">
+                <div>
+                    <span class="pm-card-title-icon" style="background-color: var(--pm-primary);"></span>
+                    System Diagnostics Scan
+                </div>
+                <button type="button" class="pm-btn pm-btn-primary pm-text-xs" id="pm-btn-run-diagnostics">⚡ Run Security Audit</button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;" id="pm-diagnostics-results-container">
+                <p class="pm-text-sm pm-text-muted">Click the button above to run security checks on the SaaS server and the PrestaShop Bridge connection.</p>
+            </div>
+        </div>
     </div>
 </div>
 </div>

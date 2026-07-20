@@ -39,8 +39,12 @@ class SQLiteConnectionManager
                 if (!mkdir($dbDir, 0777, true) && !is_dir($dbDir)) {
                     throw new Exception("Unable to create SQLite database directory: {$dbDir}");
                 }
-                // Zero-Trust Vault Hardening
-                @file_put_contents($dbDir . '/.htaccess', "Require all denied\nDeny from all\n");
+            }
+            
+            // Keep the SQLite directory secure with .htaccess checks
+            $htaccessPath = $dbDir . '/.htaccess';
+            if (!file_exists($htaccessPath)) {
+                @file_put_contents($htaccessPath, "Require all denied\nDeny from all\n");
             }
 
             // Keep the SQLite file secure with permissions if created
