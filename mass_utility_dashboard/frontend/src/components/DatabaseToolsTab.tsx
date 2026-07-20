@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FetchService } from '../utils/FetchService';
 
 type SubTabType = 'backup' | 'restore' | 'profiler' | 'sweeper';
+type DrawerType = 'added' | 'deleted' | 'modified' | 'volatile' | null;
 
 interface BackupFile {
   basename: string;
@@ -110,8 +111,10 @@ export const DatabaseToolsTab: React.FC = () => {
 
   // 5. Drift Diff Modal state
   const [driftModalData, setDriftModalData] = useState<any | null>(null);
+  const [activeDrawer, setActiveDrawer] = useState<DrawerType>(null);
   const [tableRowDiff, setTableRowDiff] = useState<any | null>(null);
   const [isLoadingRowDiff, setIsLoadingRowDiff] = useState(false);
+  const [inspectAllModal, setInspectAllModal] = useState<{ open: boolean; title: string; items: any[]; color: string } | null>(null);
 
   // Load basic configurations on mount
   useEffect(() => {
@@ -677,6 +680,7 @@ export const DatabaseToolsTab: React.FC = () => {
   // Compare Drift Modals Detail View
   const handleCheckCompareDrift = async (backupName: string) => {
     setTableRowDiff(null);
+    setActiveDrawer(null);
     try {
       const res = await FetchService.post('compare_backup', { file: backupName });
       if (res) {
@@ -715,7 +719,7 @@ export const DatabaseToolsTab: React.FC = () => {
     const confirm = window.confirm(`Delete local backup archive ${backupName}?`);
     if (!confirm) return;
     try {
-      const res = await FetchService.post('delete_backup', { backup: backupName });
+      const res = await FetchService.post('delete_backup', { file: backupName }); // FIXED from 'backup' to 'file'
       if (res && res.success) {
         alert('Backup deleted.');
         fetchBackups();
@@ -735,6 +739,27 @@ export const DatabaseToolsTab: React.FC = () => {
     } catch (e) {}
   };
 
+  // Compute stats inside comparison modal
+  const getModifiedCount = (checksumStatus: any) => {
+    if (!checksumStatus) return 0;
+    return Object.values(checksumStatus).filter((c: any) => c.match === false && !c.volatile).length;
+  };
+
+  const getVolatileCount = (checksumStatus: any) => {
+    if (!checksumStatus) return 0;
+    return Object.values(checksumStatus).filter((c: any) => c.match === false && c.volatile).length;
+  };
+
+  const getModifiedTables = (checksumStatus: any) => {
+    if (!checksumStatus) return [];
+    return Object.keys(checksumStatus).filter((k: string) => checksumStatus[k].match === false && !checksumStatus[k].volatile);
+  };
+
+  const getVolatileTables = (checksumStatus: any) => {
+    if (!checksumStatus) return [];
+    return Object.keys(checksumStatus).filter((k: string) => checksumStatus[k].match === false && checksumStatus[k].volatile);
+  };
+
   return (
     <div className="w-full space-y-6">
       {/* Dynamic Sub-tab Pills */}
@@ -744,7 +769,7 @@ export const DatabaseToolsTab: React.FC = () => {
           onClick={() => setActiveSubTab('backup')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
             activeSubTab === 'backup'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
+              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 shadow-sm'
               : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
           }`}
         >
@@ -755,7 +780,7 @@ export const DatabaseToolsTab: React.FC = () => {
           onClick={() => setActiveSubTab('restore')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
             activeSubTab === 'restore'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
+              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 shadow-sm'
               : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
           }`}
         >
@@ -766,7 +791,7 @@ export const DatabaseToolsTab: React.FC = () => {
           onClick={() => setActiveSubTab('profiler')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
             activeSubTab === 'profiler'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
+              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 shadow-sm'
               : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
           }`}
         >
@@ -777,7 +802,7 @@ export const DatabaseToolsTab: React.FC = () => {
           onClick={() => setActiveSubTab('sweeper')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
             activeSubTab === 'sweeper'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
+              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 shadow-sm'
               : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
           }`}
         >
@@ -802,9 +827,9 @@ export const DatabaseToolsTab: React.FC = () => {
                     type="button"
                     onClick={handleStartBackup}
                     disabled={isBackupRunning}
-                    className="bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
+                    className="pm-btn bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                   >
-                    📥 Generate Backup
+                    📥 Generate Backup &amp; Log Archive
                   </button>
                 </div>
               </div>
@@ -824,7 +849,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleCancelBackup}
-                    className="text-[0.65rem] bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-1 rounded-md transition uppercase font-bold"
+                    className="pm-btn pm-btn-danger text-[0.65rem] px-3 py-1 rounded-md transition uppercase font-bold"
                   >
                     🛑 Stop Backup
                   </button>
@@ -835,19 +860,19 @@ export const DatabaseToolsTab: React.FC = () => {
               <div className="bg-black/10 border border-white/[0.06] rounded-xl p-5 space-y-4">
                 <div className="flex items-center gap-3 border-b border-white/[0.06] pb-3 flex-wrap justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Presets:</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Preset Loadout:</span>
                     <select
                       value={selectedPreset}
                       onChange={(e) => handleLoadPreset(e.target.value)}
                       className="bg-[#171725] border border-white/[0.1] text-xs text-white rounded-lg px-2.5 py-1 focus:outline-none"
                     >
-                      <option value="">-- Load Preset --</option>
+                      <option value="">-- None / Load Template --</option>
                       {backupPresets.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                     <button
                       type="button"
                       onClick={handleSavePreset}
-                      className="bg-[#10b981]/15 hover:bg-[#10b981]/25 border border-[#10b981]/30 text-emerald-400 text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase"
+                      className="pm-btn pm-btn-success text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase"
                     >
                       Save Preset
                     </button>
@@ -855,7 +880,7 @@ export const DatabaseToolsTab: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleDeletePreset}
-                        className="bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase"
+                        className="pm-btn pm-btn-danger text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase"
                       >
                         Delete
                       </button>
@@ -939,9 +964,9 @@ export const DatabaseToolsTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleClearBackupHistory}
-                  className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-bold px-3 py-1.5 rounded-lg transition uppercase tracking-wider"
+                  className="pm-btn pm-btn-danger text-xs px-3 py-1.5 rounded-lg transition uppercase tracking-wider"
                 >
-                  Clear History
+                  🗑️ Clear Backups
                 </button>
               </div>
 
@@ -981,15 +1006,15 @@ export const DatabaseToolsTab: React.FC = () => {
                               </div>
                               <div className="flex gap-2 mt-1.5 flex-wrap">
                                 {isCloud ? (
-                                  <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase">
+                                  <span className="pm-status-pill bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
                                     ☁️ Cloud Only
                                   </span>
                                 ) : b.is_uploaded ? (
-                                  <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase">
+                                  <span className="pm-status-pill bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
                                     📁 Uploaded
                                   </span>
                                 ) : (
-                                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase">
+                                  <span className="pm-status-pill success px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
                                     💾 Local
                                   </span>
                                 )}
@@ -1009,7 +1034,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             {b.sql_download_url && (
                               <a
                                 href={b.sql_download_url}
-                                className="bg-slate-700 hover:bg-slate-600 border border-white/[0.08] text-white px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem] inline-block"
+                                className="pm-btn pm-btn-sm text-[0.7rem] inline-block"
                               >
                                 ⬇️ SQL
                               </a>
@@ -1018,7 +1043,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             {b.log_filename && b.log_download_url && (
                               <a
                                 href={b.log_download_url}
-                                className="bg-slate-800 hover:bg-slate-700 border border-white/[0.04] text-gray-400 px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem] inline-block"
+                                className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] inline-block"
                               >
                                 📄 Log
                               </a>
@@ -1026,7 +1051,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleCheckCompareDrift(b.basename)}
-                              className="bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-[#c084fc] px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem]"
+                              className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem]"
                             >
                               🔍 Diff
                             </button>
@@ -1035,17 +1060,15 @@ export const DatabaseToolsTab: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteBackup(b.basename)}
-                                  className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem]"
+                                  className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem]"
                                 >
                                   🗑️ Delete
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleTogglePinBackup(b.basename)}
-                                  className={`border px-2.5 py-1.5 rounded-lg transition uppercase font-bold text-[0.7rem] ${
-                                    isPinned
-                                      ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-400'
-                                      : 'bg-slate-800 hover:bg-slate-700 border-white/[0.04] text-gray-400'
+                                  className={`pm-btn pm-btn-sm text-[0.7rem] ${
+                                    isPinned ? 'pm-btn-success' : 'pm-btn-neutral'
                                   }`}
                                 >
                                   {isPinned ? '📌 Unpin' : '📌 Pin'}
@@ -1093,7 +1116,7 @@ export const DatabaseToolsTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleTakeStoreLive}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase hover:-translate-y-[1px] active:translate-y-0"
+                  className="pm-btn pm-btn-success text-xs font-bold px-4 py-2 rounded-lg transition uppercase hover:-translate-y-[1px] active:translate-y-0"
                 >
                   ⚡ Take Store Live Now
                 </button>
@@ -1128,7 +1151,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleCancelUpload}
-                    className="bg-black/20 hover:bg-black/30 border border-white/[0.1] text-gray-300 px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0"
+                    className="pm-btn pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0"
                   >
                     Cancel
                   </button>
@@ -1136,7 +1159,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     type="button"
                     onClick={handleUploadStageFile}
                     disabled={isUploading}
-                    className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0"
+                    className="pm-btn px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0"
                   >
                     {isUploading ? `Uploading (${uploadPercent}%)` : 'Stage Upload'}
                   </button>
@@ -1180,7 +1203,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleStartRestore(b.basename)}
-                                className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-danger text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0"
                               >
                                 ⚡ Restore
                               </button>
@@ -1188,7 +1211,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleStartRestore(b.basename)}
-                                className="bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-purple text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0"
                               >
                                 ☁️ Restore
                               </button>
@@ -1197,7 +1220,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleDeleteBackup(b.basename)}
-                                className="bg-slate-800 hover:bg-slate-700 border border-white/[0.04] text-gray-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-neutral text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0"
                               >
                                 🗑️ Delete
                               </button>
@@ -1273,7 +1296,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   type="button"
                   onClick={handleFetchProfilerReport}
                   disabled={isProfiling}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
+                  className="pm-btn pm-btn-success text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                 >
                   {isProfiling ? 'Analyzing...' : 'Refresh Profile'}
                 </button>
@@ -1339,7 +1362,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleOptimizeTable(t.name)}
-                                className="bg-emerald-600/10 hover:bg-emerald-600/25 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-lg transition uppercase font-bold hover:-translate-y-[1px] active:translate-y-0"
+                                className="pm-btn pm-btn-success text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0"
                               >
                                 ⚡ Optimize
                               </button>
@@ -1384,7 +1407,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   type="button"
                   onClick={handleSweeperScan}
                   disabled={isScanningSweeper}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
+                  className="pm-btn px-4 py-2 rounded-lg text-xs font-bold transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                 >
                   {isScanningSweeper ? 'Scanning...' : '🔍 Pre-Flight Scan'}
                 </button>
@@ -1449,7 +1472,7 @@ export const DatabaseToolsTab: React.FC = () => {
                       type="button"
                       onClick={handleExecuteSweeper}
                       disabled={isSweeperRunning}
-                      className="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
+                      className="pm-btn pm-btn-danger text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                     >
                       💥 Execute Sweeper
                     </button>
@@ -1500,7 +1523,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     onClick={() => {
                       sweeperAbortedRef.current = true;
                     }}
-                    className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-bold px-3.5 py-1.5 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
+                    className="pm-btn pm-btn-danger text-xs font-bold px-3.5 py-1.5 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
                   >
                     🛑 Abort Operation
                   </button>
@@ -1531,19 +1554,21 @@ export const DatabaseToolsTab: React.FC = () => {
         )}
       </div>
 
-      {/* COMPARISON DRIFT OVERLAY MODAL */}
+      {/* COMPARISON DRIFT OVERLAY MODAL (Key Sync Audit Modal matching legacy layout) */}
       {driftModalData && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[#12121a] border border-white/[0.08] rounded-xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Header */}
             <div className="p-4 border-b border-white/[0.06] flex justify-between items-center bg-black/10">
               <h3 className="text-sm font-bold text-white uppercase flex items-center gap-2">
-                <span>🔍</span> Drift comparison details: {driftModalData.name}
+                <span>🛡️</span> Key Sync Audit: {driftModalData.name}
               </h3>
               <button
                 type="button"
                 onClick={() => {
                   setDriftModalData(null);
                   setTableRowDiff(null);
+                  setActiveDrawer(null);
                 }}
                 className="text-gray-400 hover:text-white text-lg font-bold"
               >
@@ -1551,11 +1576,302 @@ export const DatabaseToolsTab: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Column: Tables list */}
-              <div className="space-y-4 border-r border-white/[0.06] pr-6">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">Tables Checksum statuses</h4>
-                <div className="space-y-2 max-h-[50vh] overflow-y-auto divide-y divide-white/[0.04]">
+            {/* Body */}
+            <div className="p-6 overflow-y-auto flex-grow space-y-6 text-xs">
+              
+              {/* Staging Database Integrity Metric Row */}
+              <div className="flex justify-between items-center bg-black/20 p-3 rounded-lg border border-white/[0.06]">
+                <span className="font-bold text-gray-400 uppercase tracking-wider">Staging Database Integrity</span>
+                <span
+                  className="font-bold uppercase font-sans text-sm"
+                  style={{
+                    color:
+                      driftModalData.added_count === 0 &&
+                      driftModalData.deleted_count === 0 &&
+                      driftModalData.backup_rows === driftModalData.active_rows
+                        ? driftModalData.checksum_drift
+                          ? '#f59e0b'
+                          : '#10b981'
+                        : '#ef4444',
+                  }}
+                >
+                  {driftModalData.added_count === 0 &&
+                  driftModalData.deleted_count === 0 &&
+                  driftModalData.backup_rows === driftModalData.active_rows
+                    ? driftModalData.checksum_drift
+                      ? 'CONTENT DRIFT DETECTED (Row counts match, but content checksums differ)'
+                      : 'STABLE (100% Identical)'
+                    : 'STRUCTURAL DRIFT DETECTED (Row count discrepancy)'}
+                </span>
+              </div>
+
+              {/* Grid Layout Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl">
+                  <span className="text-gray-400 block mb-1 uppercase font-bold text-[0.65rem] tracking-wider">Backup Tables Rows</span>
+                  <div className="text-2xl font-bold font-sans text-white">{driftModalData.backup_rows.toLocaleString()}</div>
+                </div>
+
+                <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl">
+                  <span className="text-gray-400 block mb-1 uppercase font-bold text-[0.65rem] tracking-wider">Active Tables Rows</span>
+                  <div className="text-2xl font-bold font-sans text-white">{driftModalData.active_rows.toLocaleString()}</div>
+                </div>
+
+                <div
+                  onClick={() => {
+                    if (driftModalData.added_count > 0) setActiveDrawer(activeDrawer === 'added' ? null : 'added');
+                  }}
+                  className={`border p-4 rounded-xl transition ${
+                    driftModalData.added_count > 0
+                      ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 cursor-pointer'
+                      : 'bg-black/10 border-white/[0.06] opacity-60'
+                  }`}
+                >
+                  <span className="text-gray-400 block mb-1 uppercase font-bold text-[0.65rem] tracking-wider">Added Products (Deltas)</span>
+                  <div className="text-2xl font-bold font-sans text-emerald-400">+{driftModalData.added_count}</div>
+                  {driftModalData.added_count > 0 && <span className="text-[0.65rem] text-emerald-500 mt-1 block">Click to view list</span>}
+                </div>
+
+                <div
+                  onClick={() => {
+                    if (driftModalData.deleted_count > 0) setActiveDrawer(activeDrawer === 'deleted' ? null : 'deleted');
+                  }}
+                  className={`border p-4 rounded-xl transition ${
+                    driftModalData.deleted_count > 0
+                      ? 'bg-red-500/5 border-red-500/20 hover:bg-red-500/10 cursor-pointer'
+                      : 'bg-black/10 border-white/[0.06] opacity-60'
+                  }`}
+                >
+                  <span className="text-gray-400 block mb-1 uppercase font-bold text-[0.65rem] tracking-wider">Deleted Products (Deltas)</span>
+                  <div className="text-2xl font-bold font-sans text-red-400">-{driftModalData.deleted_count}</div>
+                  {driftModalData.deleted_count > 0 && <span className="text-[0.65rem] text-red-500 mt-1 block">Click to view list</span>}
+                </div>
+
+                <div
+                  onClick={() => {
+                    const mCount = getModifiedCount(driftModalData.checksum_status);
+                    if (mCount > 0) setActiveDrawer(activeDrawer === 'modified' ? null : 'modified');
+                  }}
+                  className={`border p-4 rounded-xl transition ${
+                    getModifiedCount(driftModalData.checksum_status) > 0
+                      ? 'bg-red-500/5 border-red-500/20 hover:bg-red-500/10 cursor-pointer'
+                      : 'bg-black/10 border-white/[0.06] opacity-60'
+                  }`}
+                >
+                  <span className="text-gray-400 block mb-1 uppercase font-bold text-[0.65rem] tracking-wider">Modified Tables</span>
+                  <div className="text-2xl font-bold font-sans text-red-400">
+                    {getModifiedCount(driftModalData.checksum_status)}
+                  </div>
+                  {getModifiedCount(driftModalData.checksum_status) > 0 && <span className="text-[0.65rem] text-red-500 mt-1 block">Click to view list</span>}
+                </div>
+
+                <div
+                  onClick={() => {
+                    const vCount = getVolatileCount(driftModalData.checksum_status);
+                    if (vCount > 0) setActiveDrawer(activeDrawer === 'volatile' ? null : 'volatile');
+                  }}
+                  className={`border p-4 rounded-xl transition ${
+                    getVolatileCount(driftModalData.checksum_status) > 0
+                      ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10 cursor-pointer'
+                      : 'bg-black/10 border-white/[0.06] opacity-60'
+                  }`}
+                >
+                  <span className="text-gray-400 block mb-1 uppercase font-bold text-[0.65rem] tracking-wider">Volatile Tables</span>
+                  <div className="text-2xl font-bold font-sans text-amber-400">
+                    {getVolatileCount(driftModalData.checksum_status)}
+                  </div>
+                  {getVolatileCount(driftModalData.checksum_status) > 0 && <span className="text-[0.65rem] text-amber-500 mt-1 block">Click to view list</span>}
+                </div>
+              </div>
+
+              {/* Collapsible Drawer (Details Drawer) */}
+              {activeDrawer && (
+                <div className="bg-black/20 border border-white/[0.06] p-4 rounded-xl space-y-4">
+                  <div className="flex justify-between items-center border-b border-white/[0.06] pb-2">
+                    <h4 className="font-bold text-white uppercase tracking-wider text-[0.7rem]">
+                      {activeDrawer === 'added' && 'Added Products List'}
+                      {activeDrawer === 'deleted' && 'Deleted Products List'}
+                      {activeDrawer === 'modified' && 'Modified Tables List'}
+                      {activeDrawer === 'volatile' && 'Volatile Tables List'}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setActiveDrawer(null)}
+                      className="text-gray-400 hover:text-white uppercase font-bold text-[0.65rem]"
+                    >
+                      ✕ Close
+                    </button>
+                  </div>
+
+                  <div className="max-h-[160px] overflow-y-auto space-y-2 pr-2">
+                    {/* Added Products Drawer List */}
+                    {activeDrawer === 'added' && (
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInspectAllModal({
+                                open: true,
+                                title: 'Added Products Deltas',
+                                items: driftModalData.added || [],
+                                color: '#10b981',
+                              });
+                            }}
+                            className="pm-btn pm-btn-sm text-[0.65rem]"
+                          >
+                            Inspect All
+                          </button>
+                          <a
+                            href={`${window.location.href}&ajax=1&action=export_diff&file=${encodeURIComponent(driftModalData.name)}&table=product_deltas&format=csv`}
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.65rem]"
+                          >
+                            Export CSV
+                          </a>
+                        </div>
+                        <div className="divide-y divide-white/[0.04]">
+                          {(driftModalData.added || []).map((p: any) => (
+                            <div key={p.id_product} className="py-1 flex justify-between font-mono text-[0.7rem] text-gray-300">
+                              <span>ID: {p.id_product} ({p.name})</span>
+                              <span className="text-emerald-400">${parseFloat(p.price).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Deleted Products Drawer List */}
+                    {activeDrawer === 'deleted' && (
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInspectAllModal({
+                                open: true,
+                                title: 'Deleted Products Deltas',
+                                items: driftModalData.deleted || [],
+                                color: '#ef4444',
+                              });
+                            }}
+                            className="pm-btn pm-btn-sm text-[0.65rem]"
+                          >
+                            Inspect All
+                          </button>
+                          <a
+                            href={`${window.location.href}&ajax=1&action=export_diff&file=${encodeURIComponent(driftModalData.name)}&table=product_deltas&format=csv`}
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.65rem]"
+                          >
+                            Export CSV
+                          </a>
+                        </div>
+                        <div className="divide-y divide-white/[0.04]">
+                          {(driftModalData.deleted || []).map((p: any) => (
+                            <div key={p.id_product} className="py-1 flex justify-between font-mono text-[0.7rem] text-gray-300">
+                              <span>ID: {p.id_product} ({p.name})</span>
+                              <span className="text-red-400 line-through">${parseFloat(p.price).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Modified Tables List */}
+                    {activeDrawer === 'modified' && (
+                      <div className="divide-y divide-white/[0.04]">
+                        {getModifiedTables(driftModalData.checksum_status).map((t: string) => (
+                          <div key={t} className="py-2 flex justify-between items-center text-xs">
+                            <span className="font-mono text-white">{t}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleInspectRowDiff(t)}
+                              className="text-[0.65rem] text-indigo-400 hover:underline font-bold"
+                            >
+                              View Diff
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Volatile Tables List */}
+                    {activeDrawer === 'volatile' && (
+                      <div className="divide-y divide-white/[0.04]">
+                        {getVolatileTables(driftModalData.checksum_status).map((t: string) => (
+                          <div key={t} className="py-2 flex justify-between items-center text-xs">
+                            <span className="font-mono text-white">{t}</span>
+                            <span className="text-[0.65rem] text-amber-400 font-bold uppercase">Volatile Logs</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {isLoadingRowDiff ? (
+                <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl text-center text-gray-400 font-mono">
+                  ⌛ Loading row difference telemetry...
+                </div>
+              ) : tableRowDiff && (
+                <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl space-y-3">
+                  <div className="flex justify-between items-center font-bold text-white border-b border-white/[0.06] pb-2">
+                    <span>Table Row Modifications: {tableRowDiff.table}</span>
+                    <div className="flex gap-3">
+                      <span className="text-emerald-400">+{tableRowDiff.summary.added} Added</span>
+                      <span className="text-red-400">-{tableRowDiff.summary.deleted} Deleted</span>
+                      <span className="text-amber-400">~{tableRowDiff.summary.modified} Modified</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2">
+                    {/* Modified Rows */}
+                    {tableRowDiff.modified_rows?.map((r: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-black/25 border-amber-500/25 border-l-4 rounded-r-lg space-y-2">
+                        <span className="font-mono text-white font-bold block">PK Index: {r.pk}</span>
+                        {Object.keys(r.changes).map(col => (
+                          <div key={col} className="bg-black/20 p-2 rounded text-[0.7rem] leading-relaxed">
+                            <span className="text-gray-400 font-mono">{col}: </span>
+                            <span className="text-red-400 line-through mr-2">{String(r.changes[col].backup || 'NULL')}</span>
+                            <span className="text-emerald-400">{String(r.changes[col].live || 'NULL')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+
+                    {/* Added Rows */}
+                    {tableRowDiff.added_rows?.map((r: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-black/25 border-emerald-500/25 border-l-4 rounded-r-lg">
+                        <span className="font-mono text-emerald-400 font-bold block mb-2">Added Row Data</span>
+                        {Object.keys(r).map(col => (
+                          <div key={col} className="text-[0.7rem]">
+                            <span className="text-gray-500">{col}: </span>
+                            <span className="text-white">{String(r[col] || 'NULL')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+
+                    {/* Deleted Rows */}
+                    {tableRowDiff.deleted_rows?.map((r: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-black/25 border-red-500/25 border-l-4 rounded-r-lg">
+                        <span className="font-mono text-red-400 font-bold block mb-2">Deleted Row Data</span>
+                        {Object.keys(r).map(col => (
+                          <div key={col} className="text-[0.7rem] line-through text-gray-500">
+                            <span>{col}: </span>
+                            <span>{String(r[col] || 'NULL')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Database Tables Content Integrity Table */}
+              <div className="space-y-2">
+                <span className="font-bold text-gray-400 uppercase tracking-wider block">Database Tables Content Integrity</span>
+                <div className="max-h-[220px] overflow-y-auto bg-black/10 border border-white/[0.06] rounded-lg p-3 space-y-2">
                   {driftModalData.checksum_status &&
                     Object.keys(driftModalData.checksum_status).map(tbl => {
                       const c = driftModalData.checksum_status[tbl];
@@ -1563,29 +1879,23 @@ export const DatabaseToolsTab: React.FC = () => {
                       const isVolatile = c.volatile === true;
 
                       return (
-                        <div key={tbl} className="pt-2 flex justify-between items-center text-xs">
+                        <div key={tbl} className="flex justify-between items-center py-2 border-b border-white/[0.04]">
                           <div>
-                            <span className="font-mono text-white block">{tbl}</span>
+                            <span className="font-mono font-semibold text-white block">{tbl}</span>
                             <span className="text-[0.65rem] text-gray-500">
                               Rows: {c.backup_rows} ➔ {c.active_rows}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono text-[0.7rem] text-gray-400">
+                              {c.backup ? c.backup : 'N/A'} ➔ {c.active}
+                            </span>
                             <span className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-md ${
                               isMatch ? 'bg-emerald-500/10 text-emerald-400' :
-                              isVolatile ? 'bg-amber-500/10 text-amber-400' : 'bg-red-500/10 text-red-400'
+                              isVolatile ? 'bg-amber-500/15 text-amber-400 border border-amber-500/35' : 'bg-red-500/10 text-red-400'
                             }`}>
                               {isMatch ? 'IDENTICAL' : isVolatile ? 'VOLATILE' : 'MODIFIED'}
                             </span>
-                            {!isMatch && !isVolatile && (
-                              <button
-                                type="button"
-                                onClick={() => handleInspectRowDiff(tbl)}
-                                className="text-[0.65rem] text-indigo-400 hover:underline font-bold"
-                              >
-                                View Diff
-                              </button>
-                            )}
                           </div>
                         </div>
                       );
@@ -1593,85 +1903,76 @@ export const DatabaseToolsTab: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right Column: Row Diff inspection */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">Row Diff details</h4>
-                
-                {isLoadingRowDiff && (
-                  <div className="text-center py-10 text-xs text-gray-500">Querying row diffs...</div>
-                )}
-
-                {tableRowDiff && (
-                  <div className="space-y-4">
-                    <div className="bg-black/10 border border-white/[0.06] p-3 rounded-lg flex justify-between text-xs font-bold text-white">
-                      <span>Table: {tableRowDiff.table}</span>
-                      <div className="flex gap-3">
-                        <span className="text-emerald-400">+{tableRowDiff.summary.added}</span>
-                        <span className="text-red-400">-{tableRowDiff.summary.deleted}</span>
-                        <span className="text-amber-400">~{tableRowDiff.summary.modified}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3 max-h-[45vh] overflow-y-auto pr-2 text-xs">
-                      {/* Render Modified */}
-                      {tableRowDiff.modified_rows?.map((r: any, idx: number) => (
-                        <div key={idx} className="p-3 bg-black/20 border border-amber-500/25 border-l-4 rounded-r-lg space-y-2">
-                          <span className="font-mono text-white font-bold block">PrimaryKey: {r.pk}</span>
-                          {Object.keys(r.changes).map(col => (
-                            <div key={col} className="bg-black/20 p-2 rounded text-[0.7rem] leading-relaxed">
-                              <span className="text-gray-400 font-mono">{col}: </span>
-                              <span className="text-red-400 line-through mr-2">{String(r.changes[col].backup || 'NULL')}</span>
-                              <span className="text-emerald-400">{String(r.changes[col].live || 'NULL')}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-
-                      {/* Render Added */}
-                      {tableRowDiff.added_rows?.map((r: any, idx: number) => (
-                        <div key={idx} className="p-3 bg-black/20 border-emerald-500/25 border-l-4 rounded-r-lg">
-                          <span className="font-mono text-emerald-400 font-bold block mb-2">Staged Entry (Added)</span>
-                          {Object.keys(r).map(col => (
-                            <div key={col} className="text-[0.7rem]">
-                              <span className="text-gray-500">{col}: </span>
-                              <span className="text-white">{String(r[col] || 'NULL')}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-
-                      {/* Render Deleted */}
-                      {tableRowDiff.deleted_rows?.map((r: any, idx: number) => (
-                        <div key={idx} className="p-3 bg-black/20 border-red-500/25 border-l-4 rounded-r-lg">
-                          <span className="font-mono text-red-400 font-bold block mb-2">Deleted Entry</span>
-                          {Object.keys(r).map(col => (
-                            <div key={col} className="text-[0.7rem] line-through text-gray-500">
-                              <span>{col}: </span>
-                              <span>{String(r[col] || 'NULL')}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {!tableRowDiff && !isLoadingRowDiff && (
-                  <div className="text-center py-20 text-xs text-gray-500">Select any modified table from the left column to audit row-level transaction differences.</div>
-                )}
+              {/* Staging Telemetry Log Checksum */}
+              <div className="space-y-2">
+                <span className="font-bold text-gray-400 uppercase tracking-wider block">Staging Telemetry Log Checksum</span>
+                <pre className="bg-black text-[0.7rem] text-emerald-400 p-4 rounded-lg font-mono max-h-[140px] overflow-y-auto border border-white/[0.06] whitespace-pre-wrap">
+                  {driftModalData.log_metadata}
+                </pre>
               </div>
             </div>
 
+            {/* Footer */}
             <div className="p-4 border-t border-white/[0.06] bg-black/10 flex justify-end">
               <button
                 type="button"
                 onClick={() => {
                   setDriftModalData(null);
                   setTableRowDiff(null);
+                  setActiveDrawer(null);
                 }}
-                className="bg-black/25 hover:bg-black/35 border border-white/[0.1] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase"
+                className="pm-btn pm-btn-neutral text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase"
               >
                 Close Details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INSPECT ALL DELTAS SUB-MODAL */}
+      {inspectAllModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#12121a] border border-white/[0.08] rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="p-4 border-b border-white/[0.06] flex justify-between items-center bg-black/10">
+              <h3 className="text-sm font-bold text-white uppercase">
+                {inspectAllModal.title} ({inspectAllModal.items.length})
+              </h3>
+              <button
+                type="button"
+                onClick={() => setInspectAllModal(null)}
+                className="text-gray-400 hover:text-white text-lg font-bold"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-grow space-y-3">
+              {inspectAllModal.items.map((i: any) => (
+                <div
+                  key={i.id_product}
+                  className="p-4 rounded-lg flex justify-between items-center bg-black/25"
+                  style={{ borderLeft: `4px solid ${inspectAllModal.color}` }}
+                >
+                  <div className="flex flex-col gap-1 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono font-bold text-white">ID: {i.id_product}</span>
+                      <span className="text-gray-500 font-mono">Ref: {i.reference || 'N/A'}</span>
+                    </div>
+                    <span className="text-gray-400">{i.name}</span>
+                  </div>
+                  <span className="text-white font-mono font-bold text-xs">
+                    ${parseFloat(i.price).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="p-4 border-t border-white/[0.06] bg-black/10 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setInspectAllModal(null)}
+                className="pm-btn pm-btn-neutral text-xs font-bold px-4 py-2 rounded-lg transition uppercase"
+              >
+                Back
               </button>
             </div>
           </div>

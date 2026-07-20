@@ -270,19 +270,28 @@ export class FetchService {
       case 'set_shop_live':
         return { success: true, message: 'Shop set LIVE successfully.' };
 
-      case 'compare_compare': // wait, compare_backup
+      case 'compare_compare':
       case 'compare_backup':
         return {
           success: true,
+          backup_name: payload.file || 'db_backup_2026-07-20_120000.sql.gz',
           checksum_drift: true,
           added_count: 2,
           deleted_count: 1,
           backup_rows: 150,
           active_rows: 151,
+          added: [
+            { id_product: '1501', reference: 'REF-NEW1', name: 'Simulated Product 1', price: '19.99' },
+            { id_product: '1502', reference: 'REF-NEW2', name: 'Simulated Product 2', price: '24.99' }
+          ],
+          deleted: [
+            { id_product: '12', reference: 'REF-OLD', name: 'Orphaned legacy Product', price: '5.50' }
+          ],
+          log_metadata: 'Staging telemetry checksum verified: 0xDEADBEEF\nTarget DB: prestashop_active\nCompiled at: 2026-07-20 12:00:00',
           checksum_status: {
-            ps_product: { match: false, backup_rows: 1500, active_rows: 1502, volatile: false },
-            ps_category: { match: true, backup_rows: 50, active_rows: 50, volatile: false },
-            ps_connections: { match: false, backup_rows: 45000, active_rows: 45050, volatile: true }
+            ps_product: { match: false, backup_rows: 1500, active_rows: 1502, volatile: false, backup: '0xABC123', active: '0xDEF456' },
+            ps_category: { match: true, backup_rows: 50, active_rows: 50, volatile: false, backup: '0x111111', active: '0x111111' },
+            ps_connections: { match: false, backup_rows: 45000, active_rows: 45050, volatile: true, backup: '0x999999', active: '0x888888' }
           }
         };
 
