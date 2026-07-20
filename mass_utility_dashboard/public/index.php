@@ -732,6 +732,30 @@ if ($path === '/' || $path === '/index.html') {
         exit;
     }
 
+    // Serve compiled React SPA if route is v2
+    if (isset($_GET['route']) && $_GET['route'] === 'v2') {
+        $reactIndex = dirname(__DIR__) . '/public/v2/index.html';
+        if (file_exists($reactIndex)) {
+            $html = file_get_contents($reactIndex);
+            
+            $configJson = json_encode([
+                'basePath' => $basePath,
+                'csrfToken' => $_SESSION['csrf_token'] ?? '',
+                'settings' => $settingsRepo->getAll()
+            ]);
+            
+            $html = str_replace(
+                '</head>',
+                '<script>window.PM_CONFIG = ' . $configJson . ';</script></head>',
+                $html
+            );
+            
+            header('Content-Type: text/html');
+            echo $html;
+            exit;
+        }
+    }
+
     header('Content-Type: text/html');
     $templatePath = dirname(__DIR__) . '/views/templates/admin/configure.tpl';
     if (file_exists($templatePath)) {
