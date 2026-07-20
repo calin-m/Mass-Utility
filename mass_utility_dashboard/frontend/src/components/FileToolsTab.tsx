@@ -244,14 +244,14 @@ export const FileToolsTab: React.FC = () => {
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <span className="w-3 h-3 bg-[#f59e0b] rounded-full shadow-lg shadow-[#f59e0b]/50"></span>
-            <h3 className="text-md font-bold tracking-wide text-white uppercase">File Backup System</h3>
+            <span className="w-3 h-3 bg-pm-warning rounded-full shadow-lg shadow-pm-warning/50"></span>
+            <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">File Backup System</h3>
           </div>
           <button
             type="button"
             disabled={isGenerating}
             onClick={handleStartBackup}
-            className="bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:bg-gray-800 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase"
+            className="bg-pm-primary hover:opacity-90 disabled:bg-pm-input disabled:text-pm-text-secondary text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase"
           >
             {isGenerating ? '⚙️ Processing...' : '📥 Generate Site Backup'}
           </button>
@@ -259,12 +259,12 @@ export const FileToolsTab: React.FC = () => {
 
         {/* Profile Select */}
         <div className="flex items-center gap-4 border-t border-pm-border pt-4 flex-wrap">
-          <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">Backup Profile Matrix:</span>
+          <span className="text-xs font-bold text-pm-text-secondary uppercase tracking-wider">Backup Profile Matrix:</span>
           <select
             value={profile}
             disabled={isGenerating}
             onChange={e => setProfile(e.target.value)}
-            className="bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#8b5cf6]/50 min-w-[200px]"
+            className="bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 text-xs text-pm-text focus:outline-none focus:border-pm-primary/50 min-w-[200px]"
           >
             <option value="custom">Custom / Load Profile</option>
             <option value="full">Full Backup (All Files)</option>
@@ -286,7 +286,7 @@ export const FileToolsTab: React.FC = () => {
           </div>
         )}
 
-        <p className="text-xs text-gray-400 leading-relaxed border-t border-pm-border pt-4">
+        <p className="text-xs text-pm-text-secondary leading-relaxed border-t border-pm-border pt-4">
           Generates a streaming TAR archive of the PrestaShop filesystem based on the selected segment profile. The engine uses an asynchronous chunking algorithm to respect hosting limits and prevent Gateway Timeouts.
         </p>
       </div>
@@ -294,7 +294,7 @@ export const FileToolsTab: React.FC = () => {
       {/* Directory Exclusion Grid */}
       {isLoadingTree ? (
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl flex items-center justify-center">
-          <span className="text-xs text-gray-400">⏳ Scanning filesystem directories...</span>
+          <span className="text-xs text-pm-text-secondary">⏳ Scanning filesystem directories...</span>
         </div>
       ) : (
         <FolderSelector

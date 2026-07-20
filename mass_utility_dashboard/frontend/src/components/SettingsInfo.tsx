@@ -112,12 +112,12 @@ export const SettingsInfo: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Documentation Card */}
-      <div className="dark:bg-pm-card dark:border-pm-border bg-white border border-slate-200 rounded-xl p-6 shadow-xl">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <div className="flex items-center gap-3 mb-4">
-          <span className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-lg shadow-[#8b5cf6]/50"></span>
-          <h3 className="text-md font-bold tracking-wide dark:text-white text-slate-800 uppercase">1. Core Architectural Pipeline Guide</h3>
+          <span className="w-3 h-3 bg-pm-primary rounded-full shadow-lg shadow-pm-primary/50"></span>
+          <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">1. Core Architectural Pipeline Guide</h3>
         </div>
-        <p className="text-sm dark:text-gray-400 text-slate-500 mb-6 leading-relaxed">
+        <p className="text-sm text-pm-text-secondary mb-6 leading-relaxed">
           In-depth guide on the Mass Utility module's architecture and procedural operations. Click on any section below to expand details.
         </p>
 
@@ -127,28 +127,28 @@ export const SettingsInfo: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="border dark:border-pm-border border-slate-200 rounded-lg overflow-hidden dark:bg-black/10 bg-slate-50/50 transition-all duration-300"
+                className="border border-pm-border rounded-lg overflow-hidden bg-pm-input/30 transition-all duration-300"
               >
                 <button
                   type="button"
                   onClick={() => toggleAccordion(idx)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left font-semibold text-sm dark:text-white text-slate-800 hover:bg-white/[0.02] focus:outline-none"
+                  className="w-full flex items-center justify-between px-5 py-4 text-left font-semibold text-sm text-pm-text hover:bg-pm-input/20 focus:outline-none"
                 >
                   <span className="flex items-center gap-3">
                     <span className="text-md">{sec.icon}</span>
                     <span>{sec.title}</span>
                   </span>
-                  <span className={`text-xs dark:text-gray-400 text-slate-500 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                  <span className={`text-xs text-pm-text-secondary transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
                     ▼
                   </span>
                 </button>
 
                 <div
                   className={`transition-all duration-300 ease-in-out ${
-                    isOpen ? 'max-h-[500px] border-t dark:border-pm-border border-slate-200 p-5' : 'max-h-0'
+                    isOpen ? 'max-h-[500px] border-t border-pm-border p-5' : 'max-h-0'
                   } overflow-hidden`}
                 >
-                  <ol className="list-decimal pl-5 space-y-2 text-xs dark:text-gray-300 text-slate-600 leading-relaxed">
+                  <ol className="list-decimal pl-5 space-y-2 text-xs text-pm-text-secondary leading-relaxed">
                     {sec.content.map((item, i) => (
                       <li key={i}>{item}</li>
                     ))}
@@ -161,20 +161,20 @@ export const SettingsInfo: React.FC = () => {
       </div>
 
       {/* Troubleshooting Card */}
-      <div className="dark:bg-pm-card dark:border-pm-border bg-white border border-slate-200 rounded-xl p-6 shadow-xl space-y-4">
-        <h3 className="text-md font-bold tracking-wide text-[#ef4444] uppercase flex items-center gap-3">
-          <span className="w-3 h-3 bg-[#ef4444] rounded-full shadow-lg shadow-[#ef4444]/50"></span>
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
+        <h3 className="text-md font-bold tracking-wide text-pm-danger uppercase flex items-center gap-3">
+          <span className="w-3 h-3 bg-pm-danger rounded-full shadow-lg shadow-pm-danger/50"></span>
           2. Administrator Troubleshooting
         </h3>
-        <ul className="list-disc pl-5 space-y-2.5 text-xs dark:text-gray-400 text-slate-500 leading-relaxed">
+        <ul className="list-disc pl-5 space-y-2.5 text-xs text-pm-text-secondary leading-relaxed">
           <li>
-            <strong className="dark:text-white text-slate-800">File backup fails:</strong> Lower the <em className="dark:text-[#a78bfa] text-indigo-600">TAR Streaming Append Threshold</em> to 10MB or 20MB in General Settings.
+            <strong className="text-pm-text">File backup fails:</strong> Lower the <em className="text-pm-primary">TAR Streaming Append Threshold</em> to 10MB or 20MB in General Settings.
           </li>
           <li>
-            <strong className="dark:text-white text-slate-800">Database export timeouts:</strong> Reduce the <em className="dark:text-[#a78bfa] text-indigo-600">Database Row Chunk</em> to 1000 or 500 rows.
+            <strong className="text-pm-text">Database export timeouts:</strong> Reduce the <em className="text-pm-primary">Database Row Chunk</em> to 1000 or 500 rows.
           </li>
           <li>
-            <strong className="dark:text-white text-slate-800">Cloud Sync setup:</strong> Input Google developer client credentials and ensure the Redirect URI is properly registered in Google Cloud Console.
+            <strong className="text-pm-text">Cloud Sync setup:</strong> Input Google developer client credentials and ensure the Redirect URI is properly registered in Google Cloud Console.
           </li>
         </ul>
       </div>

@@ -150,14 +150,14 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               dangerouslySetInnerHTML={{ __html: state.message }}
             />
 
-            {(state.expectedPhrase || state.type === 'prompt') && (
+             {(state.expectedPhrase || state.type === 'prompt') && (
               <div className="mb-5">
                 <input
                   type="text"
                   value={inputValue}
                   onChange={handleInputChange}
                   placeholder={state.expectedPhrase ? `Type '${state.expectedPhrase.toUpperCase()}' to confirm` : state.placeholder}
-                  className="w-full px-3 py-2 text-xs border border-pm-border bg-pm-input text-[var(--pm-text-primary)] rounded-lg font-mono text-center focus:outline-none focus:border-pm-purple/50 uppercase"
+                  className="w-full px-3 py-2 text-xs border border-pm-border bg-pm-input text-[var(--pm-text-primary)] rounded-lg font-mono text-center focus:outline-none focus:border-pm-primary/50 uppercase"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !isConfirmDisabled) {
@@ -169,12 +169,12 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             )}
 
             <div className="flex justify-between items-center pt-2">
-              <span className="text-[10px] text-gray-500"><kbd className="bg-white/5 border border-white/10 px-1 py-0.5 rounded text-[9px] mr-1">Esc</kbd> to close</span>
+              <span className="text-[10px] text-pm-text-secondary"><kbd className="bg-pm-input border border-pm-border px-1 py-0.5 rounded text-[9px] mr-1">Esc</kbd> to close</span>
               <div className="flex gap-2">
                 {state.type !== 'alert' && (
                   <button
                     onClick={closeModal}
-                    className="pm-btn px-4 py-2 text-xs font-bold bg-pm-input hover:bg-pm-border text-[var(--pm-text-primary)] rounded-lg transition"
+                    className="pm-btn px-4 py-2 text-xs font-bold bg-pm-input hover:bg-pm-border text-pm-text rounded-lg transition"
                   >
                     Cancel
                   </button>

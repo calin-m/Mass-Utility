@@ -142,17 +142,11 @@ function AppContent() {
       >
         <div>
           <h1
-            className={`text-2xl font-black tracking-wider bg-gradient-to-r ${
-              darkMode ? 'from-[#a78bfa] to-[#8b5cf6]' : 'from-indigo-600 to-violet-600'
-            } bg-clip-text text-transparent uppercase`}
+            className="text-2xl font-black tracking-wider bg-gradient-to-r from-pm-primary to-pm-purple bg-clip-text text-transparent uppercase"
           >
             ⚡ Mass Utility
           </h1>
-          <p
-            className={`text-xs mt-1 uppercase tracking-widest ${
-              darkMode ? 'text-gray-400' : 'text-slate-550 font-semibold'
-            }`}
-          >
+          <p className="text-xs mt-1 uppercase tracking-widest text-pm-text-secondary">
             Enterprise-grade database &amp; file management
           </p>
         </div>
@@ -162,7 +156,7 @@ function AppContent() {
           <button
             type="button"
             onClick={handleLogout}
-            className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 dark:text-red-400 px-3.5 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 hover:-translate-y-[1px] active:translate-y-0"
+            className="bg-pm-danger/10 hover:bg-pm-danger/20 border border-pm-danger/20 text-pm-danger px-3.5 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 hover:-translate-y-[1px] active:translate-y-0"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
@@ -178,10 +172,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('governor')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
               activeTab === 'governor'
-                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
             }`}
           >
             🛡️ Safety Governor
@@ -189,10 +183,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('database')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
               activeTab === 'database'
-                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
             }`}
           >
             🗄️ Database Tools
@@ -200,10 +194,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('files')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
               activeTab === 'files'
-                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
             }`}
           >
             📂 File Backups
@@ -211,10 +205,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('query')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
               activeTab === 'query'
-                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
             }`}
           >
             ⚡ Query &amp; Mutate
@@ -222,10 +216,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('history')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
               activeTab === 'history'
-                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
             }`}
           >
             🕒 Mutation History
@@ -233,10 +227,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('logs')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
               activeTab === 'logs'
-                ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
             }`}
           >
             📜 Event Logs
@@ -247,27 +241,19 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('settings')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
               activeTab === 'settings'
-                ? darkMode
-                  ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10'
-                  : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md shadow-indigo-600/5'
-                : darkMode
-                ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border'
-                : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md shadow-pm-primary/5'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
             }`}
           >
             ⚙️ Settings
           </button>
-
+ 
           <button
             type="button"
             onClick={() => setDarkMode(!darkMode)}
-            className={`pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 border ${
-              darkMode
-                ? 'bg-white/[0.02] border-pm-border text-yellow-400 hover:bg-white/[0.05]'
-                : 'bg-white border-slate-200 text-indigo-600 hover:bg-slate-50 shadow-sm'
-            }`}
+            className="pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 border bg-pm-input border-pm-border text-pm-text hover:bg-pm-input/80 shadow-sm"
             title="Toggle Light/Dark Theme"
           >
             {darkMode ? '☀️ Light' : '🌙 Dark'}

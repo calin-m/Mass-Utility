@@ -53,14 +53,14 @@ export const SettingsTab: React.FC = () => {
   return (
     <div className="w-full">
       {/* Sub-navigation Pills */}
-      <div className="flex gap-2 border-b dark:border-pm-border border-slate-200 pb-4 mb-6 flex-wrap">
+      <div className="flex gap-2 border-b border-pm-border pb-4 mb-6 flex-wrap">
         <button
           type="button"
           onClick={() => setActiveSubTab('general')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
             activeSubTab === 'general'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
-              : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
+              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
           ⚙️ General Settings
@@ -68,10 +68,10 @@ export const SettingsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('info')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
             activeSubTab === 'info'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
-              : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
+              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
           📖 Documentation & Info
@@ -79,10 +79,10 @@ export const SettingsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('security')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
             activeSubTab === 'security'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
-              : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
+              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
           🛡️ Security & Health

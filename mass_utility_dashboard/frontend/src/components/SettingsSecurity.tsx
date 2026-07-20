@@ -71,14 +71,14 @@ export const SettingsSecurity: React.FC = () => {
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <span className="w-3 h-3 bg-[#a78bfa] rounded-full shadow-lg shadow-[#a78bfa]/50"></span>
-            <h3 className="text-md font-bold tracking-wide text-white uppercase">System Diagnostics Scan</h3>
+            <span className="w-3 h-3 bg-pm-primary rounded-full shadow-lg shadow-pm-primary/50"></span>
+            <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">System Diagnostics Scan</h3>
           </div>
           <button
             type="button"
             disabled={isLoading}
             onClick={runAudit}
-            className="bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:bg-gray-800 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase flex items-center gap-2"
+            className="bg-pm-primary hover:bg-opacity-90 disabled:bg-pm-input disabled:text-pm-text-secondary text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase flex items-center gap-2"
           >
             {isLoading ? (
               <>
@@ -95,13 +95,13 @@ export const SettingsSecurity: React.FC = () => {
         </div>
 
         {errorMsg && (
-          <div className="bg-[#ef4444]/10 border border-[#ef4444]/20 text-[#ef4444] rounded-lg p-4 text-xs font-semibold">
+          <div className="bg-pm-danger/10 border border-pm-danger/20 text-pm-danger rounded-lg p-4 text-xs font-semibold">
             ⚠️ {errorMsg}
           </div>
         )}
 
         {!diagnostics && !errorMsg && (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-pm-text-secondary">
             Click the button above to run security checks on the SaaS server and the PrestaShop Bridge connection.
           </p>
         )}
@@ -109,52 +109,52 @@ export const SettingsSecurity: React.FC = () => {
         {diagnostics && (
           <div className="space-y-4">
             {/* Git exposed */}
-            <div className="flex items-center justify-between p-4 bg-black/10 border border-white/[0.05] rounded-xl gap-4">
+            <div className="flex items-center justify-between p-4 bg-pm-input/30 border border-pm-border rounded-xl gap-4">
               <div>
-                <strong className="text-sm text-white block">SaaS Git Repository Security (.git Exposure)</strong>
-                <span className="text-xs text-gray-400 block mt-0.5">Checks if the underlying .git directory is accessible from public HTTP traffic.</span>
+                <strong className="text-sm text-pm-text block">SaaS Git Repository Security (.git Exposure)</strong>
+                <span className="text-xs text-pm-text-secondary block mt-0.5">Checks if the underlying .git directory is accessible from public HTTP traffic.</span>
               </div>
               <span className={`text-[0.7rem] font-bold px-3 py-1.5 rounded border uppercase ${
-                diagnostics.git_exposed ? 'bg-[#ef4444]/10 text-[#ef4444] border-[#ef4444]/20' : 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20'
+                diagnostics.git_exposed ? 'bg-pm-danger/10 text-pm-danger border-pm-danger/20' : 'bg-pm-success/10 text-pm-success border-pm-success/20'
               }`}>
                 {diagnostics.git_exposed ? '⚠️ EXPOSED' : '🟢 SECURE'}
               </span>
             </div>
 
             {/* DB exposed */}
-            <div className="flex items-center justify-between p-4 bg-black/10 border border-white/[0.05] rounded-xl gap-4">
+            <div className="flex items-center justify-between p-4 bg-pm-input/30 border border-pm-border rounded-xl gap-4">
               <div>
-                <strong className="text-sm text-white block">SaaS Vault DB Security (.db Download Exposure)</strong>
-                <span className="text-xs text-gray-400 block mt-0.5">Checks if your SQLite database file can be downloaded directly from the web.</span>
+                <strong className="text-sm text-pm-text block">SaaS Vault DB Security (.db Download Exposure)</strong>
+                <span className="text-xs text-pm-text-secondary block mt-0.5">Checks if your SQLite database file can be downloaded directly from the web.</span>
               </div>
               <span className={`text-[0.7rem] font-bold px-3 py-1.5 rounded border uppercase ${
-                diagnostics.db_exposed ? 'bg-[#ef4444]/10 text-[#ef4444] border-[#ef4444]/20' : 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20'
+                diagnostics.db_exposed ? 'bg-pm-danger/10 text-pm-danger border-pm-danger/20' : 'bg-pm-success/10 text-pm-success border-pm-success/20'
               }`}>
                 {diagnostics.db_exposed ? '⚠️ EXPOSED' : '🟢 SECURE'}
               </span>
             </div>
 
             {/* Bridge transport encryption */}
-            <div className="flex items-center justify-between p-4 bg-black/10 border border-white/[0.05] rounded-xl gap-4">
+            <div className="flex items-center justify-between p-4 bg-pm-input/30 border border-pm-border rounded-xl gap-4">
               <div>
-                <strong className="text-sm text-white block">Decoupled Bridge Encryption (SSL/TLS Transport)</strong>
-                <span className="text-xs text-gray-400 block mt-0.5">Checks if communications between SaaS Dashboard and client Bridge are encrypted (HTTPS).</span>
+                <strong className="text-sm text-pm-text block">Decoupled Bridge Encryption (SSL/TLS Transport)</strong>
+                <span className="text-xs text-pm-text-secondary block mt-0.5">Checks if communications between SaaS Dashboard and client Bridge are encrypted (HTTPS).</span>
               </div>
               <span className={`text-[0.7rem] font-bold px-3 py-1.5 rounded border uppercase ${
-                diagnostics.bridge_encrypted ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20' : 'bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/20'
+                diagnostics.bridge_encrypted ? 'bg-pm-success/10 text-pm-success border-pm-success/20' : 'bg-pm-warning/10 text-pm-warning border-pm-warning/20'
               }`}>
                 {diagnostics.bridge_encrypted ? '🟢 HTTPS ENCRYPTED' : '⚠️ HTTP UNENCRYPTED'}
               </span>
             </div>
 
             {/* Session encryption */}
-            <div className="flex items-center justify-between p-4 bg-black/10 border border-white/[0.05] rounded-xl gap-4">
+            <div className="flex items-center justify-between p-4 bg-pm-input/30 border border-pm-border rounded-xl gap-4">
               <div>
-                <strong className="text-sm text-white block">SaaS Browser Transport Encryption (SSL/TLS Connection)</strong>
-                <span className="text-xs text-gray-400 block mt-0.5">Checks if your active dashboard administration session is running over HTTPS.</span>
+                <strong className="text-sm text-pm-text block">SaaS Browser Transport Encryption (SSL/TLS Connection)</strong>
+                <span className="text-xs text-pm-text-secondary block mt-0.5">Checks if your active dashboard administration session is running over HTTPS.</span>
               </div>
               <span className={`text-[0.7rem] font-bold px-3 py-1.5 rounded border uppercase ${
-                diagnostics.ssl_enforced ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20' : 'bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/20'
+                diagnostics.ssl_enforced ? 'bg-pm-success/10 text-pm-success border-pm-success/20' : 'bg-pm-warning/10 text-pm-warning border-pm-warning/20'
               }`}>
                 {diagnostics.ssl_enforced ? '🟢 SSL ON' : '⚠️ SSL OFF'}
               </span>
@@ -162,14 +162,14 @@ export const SettingsSecurity: React.FC = () => {
 
             {/* Permissions Details */}
             {diagnostics.paths && (
-              <div className="border border-pm-border rounded-xl overflow-hidden bg-black/15">
-                <div className="px-5 py-4 border-b border-pm-border bg-white/[0.01] flex justify-between items-center flex-wrap gap-4">
+              <div className="border border-pm-border rounded-xl overflow-hidden bg-pm-input/20">
+                <div className="px-5 py-4 border-b border-pm-border bg-pm-input/10 flex justify-between items-center flex-wrap gap-4">
                   <div>
-                    <strong className="text-sm text-white block">SaaS Files & Folders Hardening Status</strong>
-                    <span className="text-xs text-gray-400 block mt-0.5">Checks permissions safety for configuration logs and storage folders.</span>
+                    <strong className="text-sm text-pm-text block">SaaS Files & Folders Hardening Status</strong>
+                    <span className="text-xs text-pm-text-secondary block mt-0.5">Checks permissions safety for configuration logs and storage folders.</span>
                   </div>
                   <span className={`text-[0.7rem] font-bold px-3 py-1.5 rounded border uppercase ${
-                    hasMismatchedPaths ? 'bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/20' : 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20'
+                    hasMismatchedPaths ? 'bg-pm-warning/10 text-pm-warning border-pm-warning/20' : 'bg-pm-success/10 text-pm-success border-pm-success/20'
                   }`}>
                     {hasMismatchedPaths ? '⚠️ HARMONIZE' : '🟢 SECURE'}
                   </span>
@@ -179,11 +179,11 @@ export const SettingsSecurity: React.FC = () => {
                   {Object.entries(diagnostics.paths).map(([key, p]) => {
                     const isMismatched = p.current !== p.recommended;
                     return (
-                      <div key={key} className="flex justify-between items-center text-xs py-1 border-b border-white/[0.03] last:border-b-0">
-                        <span className="font-mono text-gray-400">{p.path}</span>
-                        <span className="text-gray-300">
-                          Current: <strong className={isMismatched ? 'text-[#f59e0b]' : 'text-[#10b981]'}>{p.current}</strong>{' '}
-                          (Recommended: <strong className="text-white">{p.recommended}</strong>)
+                      <div key={key} className="flex justify-between items-center text-xs py-1 border-b border-pm-border/30 last:border-b-0">
+                        <span className="font-mono text-pm-text-secondary">{p.path}</span>
+                        <span className="text-pm-text-secondary">
+                          Current: <strong className={isMismatched ? 'text-pm-warning' : 'text-pm-success'}>{p.current}</strong>{' '}
+                          (Recommended: <strong className="text-pm-text">{p.recommended}</strong>)
                         </span>
                       </div>
                     );
@@ -195,7 +195,7 @@ export const SettingsSecurity: React.FC = () => {
                         type="button"
                         disabled={isFixing}
                         onClick={fixPermissions}
-                        className="bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:bg-gray-800 text-white text-[0.7rem] font-bold px-4 py-2 rounded-lg transition-all uppercase flex items-center gap-1.5"
+                        className="bg-pm-primary hover:bg-opacity-90 disabled:bg-pm-input disabled:text-pm-text-secondary text-white text-[0.7rem] font-bold px-4 py-2 rounded-lg transition-all uppercase flex items-center gap-1.5"
                       >
                         {isFixing ? 'Fixing...' : '⚡ Auto-Fix & Harden Permissions'}
                       </button>

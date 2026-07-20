@@ -259,10 +259,10 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-[#10b981] rounded-full shadow-lg shadow-[#10b981]/50 animate-pulse"></div>
-            <h3 className="text-md font-bold tracking-wide text-white uppercase">⭐️ License Subscription Details</h3>
+            <div className="w-3 h-3 bg-pm-success rounded-full shadow-lg shadow-pm-success/50 animate-pulse"></div>
+            <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">⭐️ License Subscription Details</h3>
           </div>
-          <span className="bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1.5 rounded-lg border border-[#10b981]/20 uppercase">
+          <span className="bg-pm-success/10 text-pm-success text-xs font-bold px-3 py-1.5 rounded-lg border border-pm-success/20 uppercase">
             Active License
           </span>
         </div>
@@ -270,43 +270,43 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-pm-border">
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">License Subscription Key</label>
-              <div className="font-mono text-lg font-bold text-[#f59e0b] tracking-wider py-1">
+              <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-1">License Subscription Key</label>
+              <div className="font-mono text-lg font-bold text-pm-warning tracking-wider py-1">
                 {settings.PM_LICENSE_KEY ? `${settings.PM_LICENSE_KEY.substring(0, 9)}-••••-••••-••••` : 'None'}
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Subscription Package Tier</label>
-              <div className="text-md font-extrabold text-[#8b5cf6] uppercase tracking-wider py-1">
+              <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-1">Subscription Package Tier</label>
+              <div className="text-md font-extrabold text-pm-primary uppercase tracking-wider py-1">
                 {tierName} TIER
               </div>
             </div>
           </div>
 
           <div className="md:border-l border-pm-border md:pl-6">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3">Active Feature Capabilities</label>
-            <ul className="grid grid-cols-1 gap-2.5 text-xs text-gray-300">
+            <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-3">Active Feature Capabilities</label>
+            <ul className="grid grid-cols-1 gap-2.5 text-xs text-pm-text-secondary">
               <li className="flex items-center gap-2.5">
-                <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full"></span> Raw SQL Execution (Terminal)
+                <span className="w-1.5 h-1.5 bg-pm-success rounded-full"></span> Raw SQL Execution (Terminal)
               </li>
               <li className="flex items-center gap-2.5">
-                <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full"></span> Local Backups (Manual)
+                <span className="w-1.5 h-1.5 bg-pm-success rounded-full"></span> Local Backups (Manual)
               </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.query_visual_execute ? 'text-gray-500' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.query_visual_execute ? 'bg-[#10b981]' : 'bg-gray-600'}`}></span>
-                Visual Query Builder (AST Editor) {!capabilities.query_visual_execute && <span className="text-[0.65rem] bg-[#334155] text-gray-400 font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
+              <li className={`flex items-center gap-2.5 ${!capabilities.query_visual_execute ? 'text-pm-text-secondary/40' : ''}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.query_visual_execute ? 'bg-pm-success' : 'bg-pm-text-secondary/40'}`}></span>
+                Visual Query Builder (AST Editor) {!capabilities.query_visual_execute && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
               </li>
-              <li className={`flex items-center gap-2.5 ${!isCloudEnabled ? 'text-gray-500' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isCloudEnabled ? 'bg-[#10b981]' : 'bg-gray-600'}`}></span>
-                Offsite Cloud Backup (Google Drive) {!isCloudEnabled && <span className="text-[0.65rem] bg-[#334155] text-gray-400 font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
+              <li className={`flex items-center gap-2.5 ${!isCloudEnabled ? 'text-pm-text-secondary/40' : ''}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isCloudEnabled ? 'bg-pm-success' : 'bg-pm-text-secondary/40'}`}></span>
+                Offsite Cloud Backup (Google Drive) {!isCloudEnabled && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
               </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.backup_automation ? 'text-gray-500' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.backup_automation ? 'bg-[#10b981]' : 'bg-gray-600'}`}></span>
-                Scheduled Backups (Cron CLI) {!capabilities.backup_automation && <span className="text-[0.65rem] bg-[#334155] text-gray-400 font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
+              <li className={`flex items-center gap-2.5 ${!capabilities.backup_automation ? 'text-pm-text-secondary/40' : ''}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.backup_automation ? 'bg-pm-success' : 'bg-pm-text-secondary/40'}`}></span>
+                Scheduled Backups (Cron CLI) {!capabilities.backup_automation && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
               </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.governor_autopilot ? 'text-gray-500' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.governor_autopilot ? 'bg-[#10b981]' : 'bg-gray-600'}`}></span>
-                Safety Auto-Pilot Tuning {!capabilities.governor_autopilot && <span className="text-[0.65rem] bg-[#334155] text-gray-400 font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
+              <li className={`flex items-center gap-2.5 ${!capabilities.governor_autopilot ? 'text-pm-text-secondary/40' : ''}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.governor_autopilot ? 'bg-pm-success' : 'bg-pm-text-secondary/40'}`}></span>
+                Safety Auto-Pilot Tuning {!capabilities.governor_autopilot && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
               </li>
             </ul>
           </div>
@@ -317,28 +317,28 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       <div className={`bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl transition-opacity duration-300 ${!isCloudEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
-            <span className="w-3 h-3 bg-[#a855f7] rounded-full shadow-lg shadow-[#a855f7]/50"></span>
-            <h3 className="text-md font-bold tracking-wide text-white uppercase">☁️ Cloud Backup & Retention Policies</h3>
+            <span className="w-3 h-3 bg-pm-purple rounded-full shadow-lg shadow-pm-purple/50"></span>
+            <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">☁️ Cloud Backup & Retention Policies</h3>
           </div>
           <span className={`text-xs font-bold px-3 py-1.5 rounded-lg border uppercase ${
-            isGdriveChecking ? 'bg-gray-800 text-gray-400 border-gray-700' :
-            gdriveState.authenticated ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20' : 'bg-[#ef4444]/10 text-[#ef4444] border-[#ef4444]/20'
+            isGdriveChecking ? 'bg-pm-input text-pm-text-secondary border-pm-border' :
+            gdriveState.authenticated ? 'bg-pm-success/10 text-pm-success border-pm-success/20' : 'bg-pm-danger/10 text-pm-danger border-pm-danger/20'
           }`}>
             {isGdriveChecking ? 'Checking...' : gdriveState.authenticated ? 'Connected' : 'Disconnected'}
           </span>
         </div>
 
-        <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+        <p className="text-sm text-pm-text-secondary mb-6 leading-relaxed">
           Configure Google Drive offsite storage integration, manage local and cloud retention policies, and schedule background backup crons.
         </p>
 
         {/* OAuth Connection Panel */}
-        <div className="bg-[#a855f7]/5 border border-[#a855f7]/20 rounded-lg p-5 mb-6 flex justify-between items-center flex-wrap gap-4">
+        <div className="bg-pm-purple/5 border border-pm-purple/20 rounded-lg p-5 mb-6 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <strong className="text-sm text-white block mb-1">
+            <strong className="text-sm text-pm-text block mb-1">
               {isGdriveChecking ? 'Verifying cloud credentials...' : gdriveState.authenticated ? 'Authorized with Google Cloud' : 'Access Authorization Needed'}
             </strong>
-            <span className="text-xs text-gray-400 block">
+            <span className="text-xs text-pm-text-secondary block">
               {isGdriveChecking ? 'Querying integration status...' : gdriveState.authenticated ? `Active Session | Synced Backups: ${gdriveState.syncedCount}` : 'Provide tenant access to transfer archive streams.'}
             </span>
           </div>
@@ -348,7 +348,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               <button
                 type="button"
                 onClick={handleConnectGdrive}
-                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs font-bold px-5 py-2.5 rounded-lg shadow-lg hover:shadow-[#8b5cf6]/20 transition-all uppercase"
+                className="bg-pm-primary hover:bg-opacity-90 text-white text-xs font-bold px-5 py-2.5 rounded-lg shadow-lg hover:shadow-pm-primary/20 transition-all uppercase"
               >
                 ⚡ Authenticate & Connect
               </button>
@@ -358,7 +358,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                 type="button"
                 disabled={isGdriveDisconnecting}
                 onClick={handleDisconnectGdrive}
-                className="bg-[#ef4444]/15 hover:bg-[#ef4444]/25 text-[#ef4444] border border-[#ef4444]/25 text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase"
+                className="bg-pm-danger/15 hover:bg-pm-danger/25 text-pm-danger border border-pm-danger/25 text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase"
               >
                 {isGdriveDisconnecting ? 'Disconnecting...' : '🔌 Disconnect Account'}
               </button>
@@ -368,11 +368,11 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
 
         {/* Dual Tier Retention Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-pm-border mb-6">
-          <div className="p-5 border border-pm-border rounded-xl bg-black/10">
-            <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2">💾 Local Retention (Host Server)</h4>
+          <div className="p-5 border border-pm-border rounded-xl bg-pm-input/50">
+            <h4 className="text-sm font-bold text-pm-text mb-4 flex items-center gap-2">💾 Local Retention (Host Server)</h4>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1.5">Max Local Backups to Keep</label>
+                <label className="text-xs font-semibold text-pm-text-secondary block mb-1.5">Max Local Backups to Keep</label>
                 <input
                   type="number"
                   disabled={!isHistoryEnabled}
@@ -478,11 +478,11 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               type="checkbox"
               checked={backupCronAuto}
               onChange={e => setBackupCronAuto(e.target.checked)}
-              className="w-4 h-4 bg-pm-input border border-pm-border rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0 mt-0.5"
+              className="w-4 h-4 bg-pm-input border border-pm-border rounded text-pm-primary focus:ring-0 focus:ring-offset-0 mt-0.5"
             />
             <div>
-              <span className="text-sm font-semibold text-white block">Enable Scheduled Background Backups (via Cron CLI)</span>
-              <span className="text-xs text-gray-400 block mt-0.5">
+              <span className="text-sm font-semibold text-pm-text block">Enable Scheduled Background Backups (via Cron CLI)</span>
+              <span className="text-xs text-pm-text-secondary block mt-0.5">
                 If disabled, automated crontab execution calls of cli_backup.php will exit early. Manual backups remain functional.
               </span>
             </div>
@@ -494,11 +494,11 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <div>
-            <h3 className="text-md font-bold tracking-wide text-white uppercase flex items-center gap-3">
-              <span className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-lg shadow-[#8b5cf6]/50"></span>
+            <h3 className="text-md font-bold tracking-wide text-pm-text uppercase flex items-center gap-3">
+              <span className="w-3 h-3 bg-pm-primary rounded-full shadow-lg shadow-pm-primary/50"></span>
               ⚡ Engine Performance Mode
             </h3>
-            <p className="text-sm text-gray-400 mt-1 max-w-xl leading-relaxed">
+            <p className="text-sm text-pm-text-secondary mt-1 max-w-xl leading-relaxed">
               Controls the CPU governor. Automatically throttles SQL queries and TAR compression based on real-time server load.
             </p>
           </div>
@@ -506,7 +506,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
           {/* Governor Pill slider */}
           <div className="flex bg-pm-input border border-pm-border p-1 rounded-lg text-xs font-bold relative w-[300px]">
             <div
-              className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-md transition-transform duration-300 ease-out pointer-events-none ${
+              className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-pm-primary/10 border border-pm-primary/20 rounded-md transition-transform duration-300 ease-out pointer-events-none ${
                 governorMode === 'manual' ? 'translate-x-full' : 'translate-x-0'
               }`}
             ></div>
@@ -516,7 +516,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               disabled={!capabilities.governor_autopilot}
               onClick={() => setGovernorMode('auto')}
               className={`flex-1 py-2 text-center rounded-md z-10 transition-colors uppercase ${
-                governorMode === 'auto' ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+                governorMode === 'auto' ? 'text-pm-text' : 'text-pm-text-secondary hover:text-pm-text'
               }`}
             >
               🤖 Auto-Pilot
@@ -525,7 +525,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               type="button"
               onClick={() => setGovernorMode('manual')}
               className={`flex-1 py-2 text-center rounded-md z-10 transition-colors uppercase ${
-                governorMode === 'manual' ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+                governorMode === 'manual' ? 'text-pm-text' : 'text-pm-text-secondary hover:text-pm-text'
               }`}
             >
               ⚙️ Manual Settings
@@ -536,20 +536,20 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         {/* Governor Settings Container */}
         <div className="relative mt-6">
           {governorMode === 'auto' && (
-            <div className="absolute inset-0 bg-[#09090e]/40 backdrop-blur-[2px] z-10 flex justify-center items-center rounded-xl border border-pm-border">
-              <div className="bg-pm-input text-xs font-semibold px-4 py-2.5 rounded-full border border-pm-border shadow-2xl flex items-center gap-2 text-white">
+            <div className="absolute inset-0 bg-pm-body/40 backdrop-blur-[2px] z-10 flex justify-center items-center rounded-xl border border-pm-border">
+              <div className="bg-pm-input text-xs font-semibold px-4 py-2.5 rounded-full border border-pm-border shadow-2xl flex items-center gap-2 text-pm-text">
                 <span>🔒</span> Currently managed by 🤖 Auto-Pilot. Toggle to Manual mode to override values.
               </div>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-5 border border-pm-border rounded-xl bg-black/10">
-              <label className="text-xs font-semibold text-white block mb-2">TAR Streaming Append Threshold (MB)</label>
+            <div className="p-5 border border-pm-border rounded-xl bg-pm-input/30">
+              <label className="text-xs font-semibold text-pm-text block mb-2">TAR Streaming Append Threshold (MB)</label>
               <select
                 value={fileChunk}
                 onChange={e => setFileChunk(e.target.value)}
-                className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 mb-2"
+                className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 mb-2"
               >
                 <option value="10">10 MB (Ultra Safe - Shared Hosting)</option>
                 <option value="20">20 MB (Safe - Shared Hosting)</option>
@@ -558,15 +558,15 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                 <option value="60">60 MB (Fast - VPS)</option>
                 <option value="120">120 MB (Extreme - Dedicated Server)</option>
               </select>
-              {fileWarning && <div className="text-xs text-[#ef4444] font-medium px-1 mt-1">{fileWarning}</div>}
+              {fileWarning && <div className="text-xs text-pm-danger font-medium px-1 mt-1">{fileWarning}</div>}
             </div>
 
-            <div className="p-5 border border-pm-border rounded-xl bg-black/10">
-              <label className="text-xs font-semibold text-white block mb-2">Database Backup Row Chunk</label>
+            <div className="p-5 border border-pm-border rounded-xl bg-pm-input/30">
+              <label className="text-xs font-semibold text-pm-text block mb-2">Database Backup Row Chunk</label>
               <select
                 value={dbChunk}
                 onChange={e => setDbChunk(e.target.value)}
-                className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 mb-2"
+                className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 mb-2"
               >
                 <option value="250">250 Rows (Ultra Safe)</option>
                 <option value="500">500 Rows (Ultra Safe)</option>
@@ -576,7 +576,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                 <option value="10000">10,000 Rows (Fast)</option>
                 <option value="20000">20,000 Rows (Extreme)</option>
               </select>
-              {dbWarning && <div className="text-xs text-[#ef4444] font-medium px-1 mt-1">{dbWarning}</div>}
+              {dbWarning && <div className="text-xs text-pm-danger font-medium px-1 mt-1">{dbWarning}</div>}
             </div>
           </div>
         </div>
@@ -585,11 +585,11 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       {/* Safety Guards & Disk Overrides */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-          <h3 className="text-md font-bold tracking-wide text-white uppercase flex items-center gap-3">
-            <span className="w-3 h-3 bg-[#10b981] rounded-full shadow-lg shadow-[#10b981]/50"></span>
+          <h3 className="text-md font-bold tracking-wide text-pm-text uppercase flex items-center gap-3">
+            <span className="w-3 h-3 bg-pm-success rounded-full shadow-lg shadow-pm-success/50"></span>
             🛡️ Safety Guards
           </h3>
-          <p className="text-sm text-gray-400 leading-relaxed">
+          <p className="text-sm text-pm-text-secondary leading-relaxed">
             Protect your database against accidental mass updates by forcing queries to simulate execution before going live.
           </p>
 
@@ -598,59 +598,59 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               type="checkbox"
               checked={defaultDryRun}
               onChange={e => setDefaultDryRun(e.target.checked)}
-              className="w-4 h-4 bg-pm-input border border-pm-border rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0"
+              className="w-4 h-4 bg-pm-input border border-pm-border rounded text-pm-primary focus:ring-0 focus:ring-offset-0"
             />
-            <span className="text-sm font-semibold text-white">Enforce "Dry Run (Simulate)" By Default</span>
+            <span className="text-sm font-semibold text-pm-text">Enforce "Dry Run (Simulate)" By Default</span>
           </label>
 
-          <div className="bg-[#10b981]/5 border-l-2 border-[#10b981] rounded p-4 text-xs text-gray-300 leading-relaxed">
-            <strong className="text-[#10b981] block mb-1">What does Simulation Mode do?</strong>
+          <div className="bg-pm-success/5 border-l-2 border-pm-success rounded p-4 text-xs text-pm-text-secondary leading-relaxed">
+            <strong className="text-pm-success block mb-1">What does Simulation Mode do?</strong>
             It compiles your visual blocks into SQL and performs a strict read-only validation. It returns the exact rows that would be affected before executing.
           </div>
         </div>
 
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-          <h3 className="text-md font-bold tracking-wide text-white uppercase flex items-center gap-3">
-            <span className="w-3 h-3 bg-[#ef4444] rounded-full shadow-lg shadow-[#ef4444]/50"></span>
+          <h3 className="text-md font-bold tracking-wide text-pm-text uppercase flex items-center gap-3">
+            <span className="w-3 h-3 bg-pm-danger rounded-full shadow-lg shadow-pm-danger/50"></span>
             ⚙️ Server Environment Fallbacks
           </h3>
-          <p className="text-sm text-gray-400 leading-relaxed">
+          <p className="text-sm text-pm-text-secondary leading-relaxed">
             Only use these if the dashboard fails to auto-detect your hosting limits.
           </p>
 
           <div>
-            <label className="text-xs font-semibold text-white block mb-1.5">Override cPanel Disk Quota (GB)</label>
+            <label className="text-xs font-semibold text-pm-text block mb-1.5">Override cPanel Disk Quota (GB)</label>
             <input
               type="number"
               value={customQuota}
               onChange={e => setCustomQuota(e.target.value)}
-              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50"
               placeholder="0 for Auto"
               min="0"
               step="0.5"
             />
-            <p className="text-[0.7rem] text-gray-500 mt-1.5">If your host disables UAPI access, enter your SSD limit (e.g. 20) to calibrate metrics.</p>
+            <p className="text-[0.7rem] text-pm-text-secondary mt-1.5">If your host disables UAPI access, enter your SSD limit (e.g. 20) to calibrate metrics.</p>
           </div>
         </div>
       </div>
 
       {/* UI Customizations */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
-        <h3 className="text-md font-bold tracking-wide text-white uppercase flex items-center gap-3 mb-6">
-          <span className="w-3 h-3 bg-[#3b82f6] rounded-full shadow-lg shadow-[#3b82f6]/50"></span>
+        <h3 className="text-md font-bold tracking-wide text-pm-text uppercase flex items-center gap-3 mb-6">
+          <span className="w-3 h-3 bg-pm-primary rounded-full shadow-lg shadow-pm-primary/50"></span>
           🎨 UI & Appearance
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="text-xs font-semibold text-white block mb-1.5">Base Typography</label>
+            <label className="text-xs font-semibold text-pm-text block mb-1.5">Base Typography</label>
             <select
               value={uiFont}
               onChange={e => {
                 setUiFont(e.target.value);
                 document.documentElement.style.setProperty('--pm-font-family', e.target.value);
               }}
-              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50"
             >
               <option value="system-ui, -apple-system, sans-serif">System Native (Fastest, Default)</option>
               <option value="Inter, sans-serif">Inter (Apple-like)</option>
@@ -659,11 +659,11 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
             </select>
           </div>
           <div>
-            <label className="text-xs font-semibold text-white block mb-1.5">Dashboard UI Theme</label>
+            <label className="text-xs font-semibold text-pm-text block mb-1.5">Dashboard UI Theme</label>
             <select
               value={uiTheme}
               onChange={e => setUiTheme(e.target.value)}
-              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50"
             >
               <option value="classic">Classic Obsidian (Default)</option>
             </select>
@@ -677,7 +677,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
           type="button"
           disabled={isSaving}
           onClick={handleSave}
-          className="bg-[#10b981] hover:bg-[#059669] disabled:bg-gray-800 text-white text-md font-bold px-8 py-3 rounded-lg shadow-lg hover:shadow-[#10b981]/25 transition-all uppercase flex items-center gap-2"
+          className="bg-pm-success hover:bg-opacity-95 disabled:bg-pm-input disabled:text-pm-text-secondary text-white text-md font-bold px-8 py-3 rounded-lg shadow-lg hover:shadow-pm-success/25 transition-all uppercase flex items-center gap-2"
         >
           {isSaving ? (
             <>

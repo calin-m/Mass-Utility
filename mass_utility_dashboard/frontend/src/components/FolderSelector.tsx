@@ -60,20 +60,20 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
     <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="flex items-center gap-3">
-          <span className="w-3 h-3 bg-[#3b82f6] rounded-full shadow-lg shadow-[#3b82f6]/50"></span>
-          <h3 className="text-md font-bold tracking-wide text-white uppercase">Backup Folder Selection</h3>
+          <span className="w-3 h-3 bg-pm-primary rounded-full shadow-lg shadow-pm-primary/50"></span>
+          <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">Backup Folder Selection</h3>
         </div>
-        <span className="text-[0.7rem] bg-[#3b82f6]/10 text-[#60a5fa] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">
+        <span className="text-[0.7rem] bg-pm-primary/10 text-pm-primary px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">
           🔒 Auto-Applies
         </span>
       </div>
 
-      <p className="text-sm text-gray-400 leading-relaxed">
+      <p className="text-sm text-pm-text-secondary leading-relaxed">
         Check the directories you wish to include in your backups. Unchecking heavy directories (e.g. cache folders) can make backup operations up to 10x faster and prevent execution timeouts.
       </p>
 
       {!isCustom && (
-        <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/20 text-[#f59e0b] p-4 rounded-lg text-xs leading-relaxed flex items-center gap-2">
+        <div className="bg-pm-warning/10 border border-pm-warning/20 text-pm-warning p-4 rounded-lg text-xs leading-relaxed flex items-center gap-2">
           <span>
             ⚠️ <strong>Profile Active:</strong> Manual selections are disabled. The active profile automatically determines which folders are included (grayed out). Switch to <em>Custom / Load Profile</em> to customize folders.
           </span>
@@ -82,7 +82,7 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
 
       <div className="bg-pm-input border border-pm-border rounded-lg p-5 max-h-[400px] overflow-y-auto">
         {folders.length === 0 ? (
-          <div className="flex items-center justify-center py-6 text-xs text-gray-500">
+          <div className="flex items-center justify-center py-6 text-xs text-pm-text-secondary">
             ⏳ Scanning filesystem and calculating directory sizes...
           </div>
         ) : (
@@ -95,9 +95,9 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                   className={`flex items-center justify-between p-3.5 rounded-lg border transition-all duration-200 ${
                     disabled
                       ? checked
-                        ? 'bg-[#3b82f6]/5 border-[#3b82f6]/15 opacity-80 cursor-not-allowed'
-                        : 'bg-white/[0.01] border-transparent opacity-40 cursor-not-allowed'
-                      : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04] hover:border-pm-border cursor-pointer'
+                        ? 'bg-pm-primary/5 border-pm-primary/15 opacity-80 cursor-not-allowed'
+                        : 'bg-pm-input/50 border-transparent opacity-40 cursor-not-allowed'
+                      : 'bg-pm-input/20 border-pm-border/30 hover:bg-pm-input/40 hover:border-pm-border cursor-pointer'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -106,17 +106,17 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                       checked={checked}
                       disabled={disabled}
                       onChange={e => onToggleFolder(item.path, e.target.checked)}
-                      className="w-4 h-4 rounded border-pm-border text-[#8b5cf6] focus:ring-0 focus:ring-offset-0 cursor-inherit accent-[#8b5cf6]"
+                      className="w-4 h-4 rounded border-pm-border text-pm-primary focus:ring-0 focus:ring-offset-0 cursor-inherit accent-pm-primary"
                     />
                     <span className="text-md">📁</span>
-                    <span className="text-xs font-semibold text-white truncate max-w-[120px]">{item.name}</span>
+                    <span className="text-xs font-semibold text-pm-text truncate max-w-[120px]">{item.name}</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[0.65rem] text-gray-400 bg-white/[0.05] px-1.5 py-0.5 rounded">
+                    <span className="text-[0.65rem] text-pm-text-secondary bg-pm-input px-1.5 py-0.5 rounded">
                       {item.file_count} files
                     </span>
-                    <span className="text-[0.65rem] font-bold text-[#8b5cf6] bg-[#8b5cf6]/10 px-1.5 py-0.5 rounded">
+                    <span className="text-[0.65rem] font-bold text-pm-primary bg-pm-primary/10 px-1.5 py-0.5 rounded">
                       {item.size_formatted}
                     </span>
                   </div>
