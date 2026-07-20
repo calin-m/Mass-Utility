@@ -91,14 +91,14 @@
                 <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Default download source fallback when backups exist in both locations.</p>
             </div>
 
-            <!-- Automated Backups Staging Cleanup -->
+            <!-- Delete Local Copy After Successful Cloud Sync -->
             <div>
-                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Automated Backup Staging Cleanup</label>
+                <label class="pm-font-semibold pm-text-xs pm-mb-1" style="display: block; color: var(--pm-text-primary);">Delete local copy after successful Cloud Sync</label>
                 <select id="pm-setting-cleanup-backups" class="pm-form-control" style="width: 100%; font-size: 0.8rem; padding: 0.4rem 0.6rem;">
-                    <option value="1">Enabled (Delete local staging files &gt; 24 hours)</option>
-                    <option value="0">Disabled (Retain all local files indefinitely)</option>
+                    <option value="1">Yes (Delete local file immediately on successful upload)</option>
+                    <option value="0">No (Retain local copies, manage via Local Retention below)</option>
                 </select>
-                <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Automatically purges staging `.tar` / `.sql.gz` / `.log` files after cloud sync is complete.</p>
+                <p class="pm-text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Immediately deletes the local backup copy after it has been safely uploaded to Google Drive to save SSD storage.</p>
             </div>
         </div>
 

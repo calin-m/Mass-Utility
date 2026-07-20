@@ -226,6 +226,32 @@ class GoogleDriveApiController extends AbstractApiController
             // Trigger Cloud Retention sweep logic on successful upload
             $this->sweepCloudBackups($type);
 
+            // Delete local copy immediately if PM_CLEANUP_BACKUPS is enabled
+            $settingsManager = new \MassUtility\Service\SettingsManager();
+            $cleanupEnabled = (string)$settingsManager->getSetting(\MassUtility\Service\SettingsManager::PM_CLEANUP_BACKUPS);
+            if ($cleanupEnabled === '1') {
+                $paths = $this->resolveBackupPaths($file, $type);
+                $archivePath = $paths['archive'];
+                $logPath = $paths['log'];
+                if (file_exists($archivePath)) {
+                    @unlink($archivePath);
+                }
+                if (file_exists($logPath)) {
+                    @unlink($logPath);
+                }
+                $dir = dirname($archivePath) . '/';
+                if (is_dir($dir)) {
+                    $subFiles = scandir($dir);
+                    if ($subFiles !== false) {
+                        foreach ($subFiles as $subFile) {
+                            if ($subFile === '.' || $subFile === '..') continue;
+                            @unlink($dir . '/' . $subFile);
+                        }
+                    }
+                    @rmdir($dir);
+                }
+            }
+
             $backups = $this->getHydratedBackups($type);
 
             $this->sendJsonResponse([
