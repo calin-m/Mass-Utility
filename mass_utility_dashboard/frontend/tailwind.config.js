@@ -15,7 +15,10 @@ export default {
           purple: 'var(--pm-purple)',
           card: 'var(--pm-card-bg)',
           input: 'var(--pm-input-bg)',
-          border: 'var(--pm-border-color)'
+          border: 'var(--pm-border-color)',
+          text: 'var(--pm-text-primary)',
+          'text-secondary': 'var(--pm-text-secondary)',
+          body: 'var(--pm-body-bg)'
         }
       }
     },

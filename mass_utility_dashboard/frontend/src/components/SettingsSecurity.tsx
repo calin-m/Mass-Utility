@@ -68,7 +68,7 @@ export const SettingsSecurity: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 bg-[#a78bfa] rounded-full shadow-lg shadow-[#a78bfa]/50"></span>
@@ -162,8 +162,8 @@ export const SettingsSecurity: React.FC = () => {
 
             {/* Permissions Details */}
             {diagnostics.paths && (
-              <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-black/15">
-                <div className="px-5 py-4 border-b border-white/[0.04] bg-white/[0.01] flex justify-between items-center flex-wrap gap-4">
+              <div className="border border-pm-border rounded-xl overflow-hidden bg-black/15">
+                <div className="px-5 py-4 border-b border-pm-border bg-white/[0.01] flex justify-between items-center flex-wrap gap-4">
                   <div>
                     <strong className="text-sm text-white block">SaaS Files & Folders Hardening Status</strong>
                     <span className="text-xs text-gray-400 block mt-0.5">Checks permissions safety for configuration logs and storage folders.</span>

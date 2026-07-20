@@ -53,7 +53,7 @@ export const SettingsTab: React.FC = () => {
   return (
     <div className="w-full">
       {/* Sub-navigation Pills */}
-      <div className="flex gap-2 border-b dark:border-white/[0.06] border-slate-200 pb-4 mb-6 flex-wrap">
+      <div className="flex gap-2 border-b dark:border-pm-border border-slate-200 pb-4 mb-6 flex-wrap">
         <button
           type="button"
           onClick={() => setActiveSubTab('general')}

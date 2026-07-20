@@ -256,7 +256,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
   return (
     <div className="space-y-6">
       {/* License Subscription Info Card */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 bg-[#10b981] rounded-full shadow-lg shadow-[#10b981]/50 animate-pulse"></div>
@@ -267,7 +267,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
           </span>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/[0.06]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-pm-border">
           <div className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">License Subscription Key</label>
@@ -283,7 +283,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
             </div>
           </div>
 
-          <div className="md:border-l border-white/[0.06] md:pl-6">
+          <div className="md:border-l border-pm-border md:pl-6">
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3">Active Feature Capabilities</label>
             <ul className="grid grid-cols-1 gap-2.5 text-xs text-gray-300">
               <li className="flex items-center gap-2.5">
@@ -314,7 +314,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       </div>
 
       {/* Cloud Sync & Retention Control Card */}
-      <div className={`bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl transition-opacity duration-300 ${!isCloudEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div className={`bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl transition-opacity duration-300 ${!isCloudEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 bg-[#a855f7] rounded-full shadow-lg shadow-[#a855f7]/50"></span>
@@ -367,8 +367,8 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         </div>
 
         {/* Dual Tier Retention Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/[0.06] mb-6">
-          <div className="p-5 border border-white/[0.06] rounded-xl bg-black/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-pm-border mb-6">
+          <div className="p-5 border border-pm-border rounded-xl bg-black/10">
             <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2">💾 Local Retention (Host Server)</h4>
             <div className="space-y-4">
               <div>
@@ -378,7 +378,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                   disabled={!isHistoryEnabled}
                   value={backupMaxCount}
                   onChange={e => setBackupMaxCount(e.target.value)}
-                  className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
                   min="0"
                 />
                 <p className="text-[0.7rem] text-gray-500 mt-1">Set to 0 for infinite backups (never delete).</p>
@@ -390,7 +390,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                   disabled={!isHistoryEnabled}
                   value={backupMaxDays}
                   onChange={e => setBackupMaxDays(e.target.value)}
-                  className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
                   min="0"
                 />
                 <p className="text-[0.7rem] text-gray-500 mt-1">Set to 0 to keep backups regardless of age.</p>
@@ -398,7 +398,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
             </div>
           </div>
 
-          <div className="p-5 border border-white/[0.06] rounded-xl bg-black/10">
+          <div className="p-5 border border-pm-border rounded-xl bg-black/10">
             <h4 className="text-sm font-bold text-[#f59e0b] mb-4 flex items-center gap-2">☁️ Cloud Retention (Google Drive)</h4>
             <div className="space-y-4">
               <div>
@@ -408,7 +408,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                   disabled={!isHistoryEnabled || !gdriveState.authenticated}
                   value={backupCloudMaxCount}
                   onChange={e => setBackupCloudMaxCount(e.target.value)}
-                  className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
                   min="0"
                 />
                 <p className="text-[0.7rem] text-gray-500 mt-1">Set to 0 for infinite cloud backups.</p>
@@ -420,7 +420,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                   disabled={!isHistoryEnabled || !gdriveState.authenticated}
                   value={backupCloudMaxDays}
                   onChange={e => setBackupCloudMaxDays(e.target.value)}
-                  className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
                   min="0"
                 />
                 <p className="text-[0.7rem] text-gray-500 mt-1">Set to 0 to ignore cloud backup age limits.</p>
@@ -430,13 +430,13 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         </div>
 
         {/* General Backup Configs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/[0.06] mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-pm-border mb-6">
           <div>
             <label className="text-xs font-semibold text-white block mb-1.5">Default Download Source</label>
             <select
               value={gdriveDefaultDownload}
               onChange={e => setGdriveDefaultDownload(e.target.value)}
-              className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
             >
               <option value="cloud">Cloud (Google Drive)</option>
               <option value="local">Local Filesystem</option>
@@ -447,7 +447,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
             <select
               value={cleanupBackups}
               onChange={e => setCleanupBackups(e.target.value)}
-              className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
             >
               <option value="1">Yes (Delete local file immediately on successful upload)</option>
               <option value="0">No (Retain local copies, manage via Local Retention)</option>
@@ -456,14 +456,14 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         </div>
 
         {/* Cron options */}
-        <div className="pt-6 border-t border-white/[0.06] space-y-4">
+        <div className="pt-6 border-t border-pm-border space-y-4">
           <div>
             <label className="text-xs font-semibold text-white block mb-1.5">Backup Frequency Throttle</label>
             <select
               disabled={!backupCronAuto}
               value={backupFrequency}
               onChange={e => setBackupFrequency(e.target.value)}
-              className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
             >
               <option value="0">No Throttling (Always execute backup when triggered)</option>
               <option value="3600">Hourly (Minimum 1 hour between backups)</option>
@@ -478,7 +478,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               type="checkbox"
               checked={backupCronAuto}
               onChange={e => setBackupCronAuto(e.target.checked)}
-              className="w-4 h-4 bg-[#171725] border border-white/[0.1] rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0 mt-0.5"
+              className="w-4 h-4 bg-pm-input border border-pm-border rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0 mt-0.5"
             />
             <div>
               <span className="text-sm font-semibold text-white block">Enable Scheduled Background Backups (via Cron CLI)</span>
@@ -491,7 +491,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       </div>
 
       {/* CPU Governor card */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <div>
             <h3 className="text-md font-bold tracking-wide text-white uppercase flex items-center gap-3">
@@ -504,7 +504,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
           </div>
 
           {/* Governor Pill slider */}
-          <div className="flex bg-[#171725] border border-white/[0.08] p-1 rounded-lg text-xs font-bold relative w-[300px]">
+          <div className="flex bg-pm-input border border-pm-border p-1 rounded-lg text-xs font-bold relative w-[300px]">
             <div
               className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-md transition-transform duration-300 ease-out pointer-events-none ${
                 governorMode === 'manual' ? 'translate-x-full' : 'translate-x-0'
@@ -536,20 +536,20 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         {/* Governor Settings Container */}
         <div className="relative mt-6">
           {governorMode === 'auto' && (
-            <div className="absolute inset-0 bg-[#09090e]/40 backdrop-blur-[2px] z-10 flex justify-center items-center rounded-xl border border-white/[0.04]">
-              <div className="bg-[#171725] text-xs font-semibold px-4 py-2.5 rounded-full border border-white/[0.08] shadow-2xl flex items-center gap-2 text-white">
+            <div className="absolute inset-0 bg-[#09090e]/40 backdrop-blur-[2px] z-10 flex justify-center items-center rounded-xl border border-pm-border">
+              <div className="bg-pm-input text-xs font-semibold px-4 py-2.5 rounded-full border border-pm-border shadow-2xl flex items-center gap-2 text-white">
                 <span>🔒</span> Currently managed by 🤖 Auto-Pilot. Toggle to Manual mode to override values.
               </div>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-5 border border-white/[0.06] rounded-xl bg-black/10">
+            <div className="p-5 border border-pm-border rounded-xl bg-black/10">
               <label className="text-xs font-semibold text-white block mb-2">TAR Streaming Append Threshold (MB)</label>
               <select
                 value={fileChunk}
                 onChange={e => setFileChunk(e.target.value)}
-                className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 mb-2"
+                className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 mb-2"
               >
                 <option value="10">10 MB (Ultra Safe - Shared Hosting)</option>
                 <option value="20">20 MB (Safe - Shared Hosting)</option>
@@ -561,12 +561,12 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               {fileWarning && <div className="text-xs text-[#ef4444] font-medium px-1 mt-1">{fileWarning}</div>}
             </div>
 
-            <div className="p-5 border border-white/[0.06] rounded-xl bg-black/10">
+            <div className="p-5 border border-pm-border rounded-xl bg-black/10">
               <label className="text-xs font-semibold text-white block mb-2">Database Backup Row Chunk</label>
               <select
                 value={dbChunk}
                 onChange={e => setDbChunk(e.target.value)}
-                className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 mb-2"
+                className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 mb-2"
               >
                 <option value="250">250 Rows (Ultra Safe)</option>
                 <option value="500">500 Rows (Ultra Safe)</option>
@@ -584,7 +584,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
 
       {/* Safety Guards & Disk Overrides */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
           <h3 className="text-md font-bold tracking-wide text-white uppercase flex items-center gap-3">
             <span className="w-3 h-3 bg-[#10b981] rounded-full shadow-lg shadow-[#10b981]/50"></span>
             🛡️ Safety Guards
@@ -598,7 +598,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               type="checkbox"
               checked={defaultDryRun}
               onChange={e => setDefaultDryRun(e.target.checked)}
-              className="w-4 h-4 bg-[#171725] border border-white/[0.1] rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0"
+              className="w-4 h-4 bg-pm-input border border-pm-border rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0"
             />
             <span className="text-sm font-semibold text-white">Enforce "Dry Run (Simulate)" By Default</span>
           </label>
@@ -609,7 +609,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
           </div>
         </div>
 
-        <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
           <h3 className="text-md font-bold tracking-wide text-white uppercase flex items-center gap-3">
             <span className="w-3 h-3 bg-[#ef4444] rounded-full shadow-lg shadow-[#ef4444]/50"></span>
             ⚙️ Server Environment Fallbacks
@@ -624,7 +624,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               type="number"
               value={customQuota}
               onChange={e => setCustomQuota(e.target.value)}
-              className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
               placeholder="0 for Auto"
               min="0"
               step="0.5"
@@ -635,7 +635,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       </div>
 
       {/* UI Customizations */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <h3 className="text-md font-bold tracking-wide text-white uppercase flex items-center gap-3 mb-6">
           <span className="w-3 h-3 bg-[#3b82f6] rounded-full shadow-lg shadow-[#3b82f6]/50"></span>
           🎨 UI & Appearance
@@ -650,7 +650,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                 setUiFont(e.target.value);
                 document.documentElement.style.setProperty('--pm-font-family', e.target.value);
               }}
-              className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
             >
               <option value="system-ui, -apple-system, sans-serif">System Native (Fastest, Default)</option>
               <option value="Inter, sans-serif">Inter (Apple-like)</option>
@@ -663,7 +663,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
             <select
               value={uiTheme}
               onChange={e => setUiTheme(e.target.value)}
-              className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
             >
               <option value="classic">Classic Obsidian (Default)</option>
             </select>

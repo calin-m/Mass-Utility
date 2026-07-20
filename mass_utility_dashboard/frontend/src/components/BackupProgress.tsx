@@ -17,7 +17,7 @@ export const BackupProgress: React.FC<BackupProgressProps> = ({
   isCancelling,
 }) => {
   return (
-    <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-5 shadow-xl space-y-4 transition-all duration-300">
+    <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-xl space-y-4 transition-all duration-300">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <span className="text-xs font-bold text-white uppercase tracking-wider">Active Backup Progress</span>
         <button
@@ -35,7 +35,7 @@ export const BackupProgress: React.FC<BackupProgressProps> = ({
           <span>{progressText}</span>
           <span className="font-bold text-white">{Math.round(progressPercent)}%</span>
         </div>
-        <div className="w-full h-2.5 bg-black/35 rounded-full overflow-hidden border border-white/[0.04]">
+        <div className="w-full h-2.5 bg-black/35 rounded-full overflow-hidden border border-pm-border">
           <div
             className="h-full bg-gradient-to-r from-[#a78bfa] to-[#8b5cf6] rounded-full transition-all duration-200 ease-linear"
             style={{ width: `${progressPercent}%` }}

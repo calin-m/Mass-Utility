@@ -99,7 +99,7 @@ export const EventLogsTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center flex-wrap gap-4 border-b border-white/[0.06] pb-4 mb-4">
+      <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-4 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg">📋</div>
           <div>
@@ -125,7 +125,7 @@ export const EventLogsTab: React.FC = () => {
       </div>
 
       {/* Terminal Settings and Filter */}
-      <div className="flex flex-wrap gap-4 bg-[#12121a] border border-white/[0.08] p-4 rounded-xl items-center justify-between shadow-md">
+      <div className="flex flex-wrap gap-4 bg-pm-card border border-pm-border p-4 rounded-xl items-center justify-between shadow-md">
         <div className="flex items-center gap-3 flex-grow max-w-md">
           <span className="text-xs text-gray-400 font-bold uppercase">Filter Content:</span>
           <input
@@ -133,7 +133,7 @@ export const EventLogsTab: React.FC = () => {
             placeholder="Search log stream line-by-line..."
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
-            className="w-full bg-black/20 border border-white/[0.08] text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#8b5cf6]/50"
+            className="w-full bg-black/20 border border-pm-border text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#8b5cf6]/50"
           />
         </div>
 
@@ -143,7 +143,7 @@ export const EventLogsTab: React.FC = () => {
               type="checkbox"
               checked={autoPoll}
               onChange={(e) => setAutoPoll(e.target.checked)}
-              className="w-4 h-4 bg-black/20 border border-white/[0.1] rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0"
+              className="w-4 h-4 bg-black/20 border border-pm-border rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0"
             />
             Live Polling (5s)
           </label>
@@ -159,8 +159,8 @@ export const EventLogsTab: React.FC = () => {
       </div>
 
       {/* Terminal logs container */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl overflow-hidden shadow-xl flex flex-col">
-        <div className="bg-black/40 px-4 py-2 border-b border-white/[0.06] flex items-center justify-between">
+      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-xl flex flex-col">
+        <div className="bg-black/40 px-4 py-2 border-b border-pm-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></span>
             <span className="text-[10px] font-bold text-gray-400 uppercase font-mono">telemetry@mass-utility.sh</span>

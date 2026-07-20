@@ -241,7 +241,7 @@ export const FileToolsTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* File Backup Control Panel */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 bg-[#f59e0b] rounded-full shadow-lg shadow-[#f59e0b]/50"></span>
@@ -258,13 +258,13 @@ export const FileToolsTab: React.FC = () => {
         </div>
 
         {/* Profile Select */}
-        <div className="flex items-center gap-4 border-t border-white/[0.06] pt-4 flex-wrap">
+        <div className="flex items-center gap-4 border-t border-pm-border pt-4 flex-wrap">
           <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">Backup Profile Matrix:</span>
           <select
             value={profile}
             disabled={isGenerating}
             onChange={e => setProfile(e.target.value)}
-            className="bg-[#171725] border border-white/[0.1] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#8b5cf6]/50 min-w-[200px]"
+            className="bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#8b5cf6]/50 min-w-[200px]"
           >
             <option value="custom">Custom / Load Profile</option>
             <option value="full">Full Backup (All Files)</option>
@@ -276,7 +276,7 @@ export const FileToolsTab: React.FC = () => {
         </div>
 
         {isGenerating && (
-          <div className="border-t border-white/[0.06] pt-4">
+          <div className="border-t border-pm-border pt-4">
             <BackupProgress
               progressText={progressText}
               progressPercent={progressPercent}
@@ -286,14 +286,14 @@ export const FileToolsTab: React.FC = () => {
           </div>
         )}
 
-        <p className="text-xs text-gray-400 leading-relaxed border-t border-white/[0.06] pt-4">
+        <p className="text-xs text-gray-400 leading-relaxed border-t border-pm-border pt-4">
           Generates a streaming TAR archive of the PrestaShop filesystem based on the selected segment profile. The engine uses an asynchronous chunking algorithm to respect hosting limits and prevent Gateway Timeouts.
         </p>
       </div>
 
       {/* Directory Exclusion Grid */}
       {isLoadingTree ? (
-        <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl flex items-center justify-center">
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl flex items-center justify-center">
           <span className="text-xs text-gray-400">⏳ Scanning filesystem directories...</span>
         </div>
       ) : (

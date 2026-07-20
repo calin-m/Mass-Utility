@@ -112,7 +112,7 @@ export const SettingsInfo: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Documentation Card */}
-      <div className="dark:bg-[#12121a] dark:border-white/[0.08] bg-white border border-slate-200 rounded-xl p-6 shadow-xl">
+      <div className="dark:bg-pm-card dark:border-pm-border bg-white border border-slate-200 rounded-xl p-6 shadow-xl">
         <div className="flex items-center gap-3 mb-4">
           <span className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-lg shadow-[#8b5cf6]/50"></span>
           <h3 className="text-md font-bold tracking-wide dark:text-white text-slate-800 uppercase">1. Core Architectural Pipeline Guide</h3>
@@ -127,7 +127,7 @@ export const SettingsInfo: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="border dark:border-white/[0.06] border-slate-200 rounded-lg overflow-hidden dark:bg-black/10 bg-slate-50/50 transition-all duration-300"
+                className="border dark:border-pm-border border-slate-200 rounded-lg overflow-hidden dark:bg-black/10 bg-slate-50/50 transition-all duration-300"
               >
                 <button
                   type="button"
@@ -145,7 +145,7 @@ export const SettingsInfo: React.FC = () => {
 
                 <div
                   className={`transition-all duration-300 ease-in-out ${
-                    isOpen ? 'max-h-[500px] border-t dark:border-white/[0.04] border-slate-200 p-5' : 'max-h-0'
+                    isOpen ? 'max-h-[500px] border-t dark:border-pm-border border-slate-200 p-5' : 'max-h-0'
                   } overflow-hidden`}
                 >
                   <ol className="list-decimal pl-5 space-y-2 text-xs dark:text-gray-300 text-slate-600 leading-relaxed">
@@ -161,7 +161,7 @@ export const SettingsInfo: React.FC = () => {
       </div>
 
       {/* Troubleshooting Card */}
-      <div className="dark:bg-[#12121a] dark:border-white/[0.08] bg-white border border-slate-200 rounded-xl p-6 shadow-xl space-y-4">
+      <div className="dark:bg-pm-card dark:border-pm-border bg-white border border-slate-200 rounded-xl p-6 shadow-xl space-y-4">
         <h3 className="text-md font-bold tracking-wide text-[#ef4444] uppercase flex items-center gap-3">
           <span className="w-3 h-3 bg-[#ef4444] rounded-full shadow-lg shadow-[#ef4444]/50"></span>
           2. Administrator Troubleshooting

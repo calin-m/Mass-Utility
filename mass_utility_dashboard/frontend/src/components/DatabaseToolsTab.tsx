@@ -832,7 +832,7 @@ export const DatabaseToolsTab: React.FC = () => {
   return (
     <div className="w-full space-y-6">
       {/* Dynamic Sub-tab Pills */}
-      <div className="flex gap-2 border-b dark:border-white/[0.06] border-slate-200 pb-4 mb-6 flex-wrap">
+      <div className="flex gap-2 border-b dark:border-pm-border border-slate-200 pb-4 mb-6 flex-wrap">
         <button
           type="button"
           onClick={() => setActiveSubTab('backup')}
@@ -1165,8 +1165,8 @@ export const DatabaseToolsTab: React.FC = () => {
         {/* SUBTAB 2: RESTORE / IMPORT */}
         {activeSubTab === 'restore' && (
           <div className="space-y-6">
-            <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex items-center gap-3 border-b border-white/[0.06] pb-3">
+            <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
+              <div className="flex items-center gap-3 border-b border-pm-border pb-3">
                 <span className="w-2.5 h-2.5 bg-red-500 rounded-full"></span>
                 <h3 className="text-sm font-bold tracking-wide text-white uppercase">Database Restore &amp; Import Manager</h3>
               </div>
@@ -1195,14 +1195,14 @@ export const DatabaseToolsTab: React.FC = () => {
             )}
 
             {/* Drag Drop File Zone */}
-            <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
+            <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
               <h3 className="text-sm font-bold tracking-wide text-white uppercase">📤 Upload External SQL File</h3>
 
               <div
                 onDragOver={handleDragOver}
                 onDrop={handleFileDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/[0.06] hover:border-indigo-500/40 rounded-xl p-8 text-center cursor-pointer transition bg-black/10 space-y-3"
+                className="border-2 border-dashed border-pm-border hover:border-indigo-500/40 rounded-xl p-8 text-center cursor-pointer transition bg-black/10 space-y-3"
               >
                 <div className="text-3xl">📁</div>
                 <p className="text-xs text-gray-300">
@@ -1238,7 +1238,7 @@ export const DatabaseToolsTab: React.FC = () => {
               )}
 
               {isUploading && (
-                <div className="w-full h-1.5 bg-black/35 rounded-full overflow-hidden border border-white/[0.04]">
+                <div className="w-full h-1.5 bg-black/35 rounded-full overflow-hidden border border-pm-border">
                   <div
                     className="h-full bg-[#8b5cf6] transition-all duration-300"
                     style={{ width: `${uploadPercent}%` }}
@@ -1309,8 +1309,8 @@ export const DatabaseToolsTab: React.FC = () => {
 
             {/* Restoration HUD */}
             {isRestoreRunning && (
-              <div className="bg-[#12121a] border border-red-500/20 rounded-xl p-6 shadow-xl space-y-4">
-                <div className="flex justify-between items-center border-b border-white/[0.06] pb-3">
+              <div className="bg-pm-card border border-red-500/20 rounded-xl p-6 shadow-xl space-y-4">
+                <div className="flex justify-between items-center border-b border-pm-border pb-3">
                   <h3 className="text-sm font-bold tracking-wide text-red-400 uppercase">Database Restore Active</h3>
                   <span className="bg-red-500/10 text-red-400 text-[0.65rem] font-bold px-2 py-0.5 rounded uppercase">
                     Running
@@ -1331,15 +1331,15 @@ export const DatabaseToolsTab: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
-                  <div className="p-3 bg-black/10 border border-white/[0.06] rounded-lg">
+                  <div className="p-3 bg-black/10 border border-pm-border rounded-lg">
                     <span className="text-gray-400 block mb-1">Statements Executed</span>
                     <span className="text-white font-mono">{restoreStatsExecuted}</span>
                   </div>
-                  <div className="p-3 bg-black/10 border border-white/[0.06] rounded-lg">
+                  <div className="p-3 bg-black/10 border border-pm-border rounded-lg">
                     <span className="text-gray-400 block mb-1">Current Action</span>
                     <span className="text-red-400 uppercase">{restoreStatsAction}</span>
                   </div>
-                  <div className="p-3 bg-black/10 border border-white/[0.06] rounded-lg">
+                  <div className="p-3 bg-black/10 border border-pm-border rounded-lg">
                     <span className="text-gray-400 block mb-1">Shop State</span>
                     <span className="text-yellow-400 uppercase">{restoreStatsShop}</span>
                   </div>
@@ -1347,7 +1347,7 @@ export const DatabaseToolsTab: React.FC = () => {
 
                 <div className="space-y-2">
                   <p className="text-[0.65rem] text-gray-400 uppercase tracking-wider font-bold">Execution Logs</p>
-                  <pre className="bg-black text-[0.7rem] text-red-400 p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-white/[0.06] whitespace-pre-wrap">
+                  <pre className="bg-black text-[0.7rem] text-red-400 p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-pm-border whitespace-pre-wrap">
                     {restoreLogTerminal}
                   </pre>
                 </div>
@@ -1359,8 +1359,8 @@ export const DatabaseToolsTab: React.FC = () => {
         {/* SUBTAB 3: DB PROFILER & OPTIMIZE */}
         {activeSubTab === 'profiler' && (
           <div className="space-y-6">
-            <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex justify-between items-center border-b border-white/[0.06] pb-3 flex-wrap gap-4">
+            <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
+              <div className="flex justify-between items-center border-b border-pm-border pb-3 flex-wrap gap-4">
                 <div className="flex items-center gap-3">
                   <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
                   <h3 className="text-sm font-bold tracking-wide text-white uppercase">Automated Database Profiler &amp; Space Optimizer</h3>
@@ -1383,13 +1383,13 @@ export const DatabaseToolsTab: React.FC = () => {
               <>
                 {/* Health Cards scores */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-5 shadow-lg text-center flex flex-col justify-center items-center">
+                  <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg text-center flex flex-col justify-center items-center">
                     <span className="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest block mb-2">Health Grade</span>
                     <div className="text-4xl font-black text-emerald-400 font-sans leading-none">{profilerReport.grade}</div>
                     <span className="text-[0.65rem] text-gray-500 mt-2">{profilerReport.grade_label}</span>
                   </div>
 
-                  <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-5 shadow-lg flex flex-col justify-between">
+                  <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg flex flex-col justify-between">
                     <div>
                       <span className="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest block mb-2">Overallocated Space</span>
                       <div className="text-2xl font-bold text-white font-mono">{profilerReport.total_free_pretty}</div>
@@ -1397,7 +1397,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     <span className="text-[0.65rem] text-gray-500 mt-2">Can be reclaimed immediately</span>
                   </div>
 
-                  <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-5 shadow-lg flex flex-col justify-between">
+                  <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg flex flex-col justify-between">
                     <div>
                       <span className="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest block mb-2">Average Fragmentation</span>
                       <div className="text-2xl font-bold text-white font-mono">{profilerReport.fragmentation_ratio_avg}</div>
@@ -1407,11 +1407,11 @@ export const DatabaseToolsTab: React.FC = () => {
                 </div>
 
                 {/* Table fragmentation grid */}
-                <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
+                <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
                   <h3 className="text-sm font-bold tracking-wide text-white uppercase">Table Fragmentation details</h3>
-                  <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+                  <div className="overflow-x-auto rounded-xl border border-pm-border">
                     <table className="w-full text-xs text-left">
-                      <thead className="bg-black/15 text-gray-400 uppercase font-bold border-b border-white/[0.06]">
+                      <thead className="bg-black/15 text-gray-400 uppercase font-bold border-b border-pm-border">
                         <tr>
                           <th className="p-4">Table Name</th>
                           <th className="p-4">Engine</th>
@@ -1454,21 +1454,21 @@ export const DatabaseToolsTab: React.FC = () => {
         {/* SUBTAB 4: DATA SWEEPER */}
         {activeSubTab === 'sweeper' && (
           <div className="space-y-6">
-            <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex justify-between items-center border-b border-white/[0.06] pb-3 flex-wrap gap-4">
+            <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
+              <div className="flex justify-between items-center border-b border-pm-border pb-3 flex-wrap gap-4">
                 <div className="flex items-center gap-3">
                   <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-pulse"></span>
                   <h3 className="text-sm font-bold tracking-wide text-white uppercase">Database Cleanup Sweeper</h3>
                 </div>
               </div>
 
-              <div className="bg-black/10 border border-white/[0.06] rounded-xl p-4 flex items-center justify-between flex-wrap gap-4">
+              <div className="bg-black/10 border border-pm-border rounded-xl p-4 flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3 text-xs">
                   <span className="text-gray-400 uppercase font-bold">Retention Bounds:</span>
                   <select
                     value={retentionDays}
                     onChange={(e) => setRetentionDays(e.target.value)}
-                    className="bg-[#171725] border border-white/[0.1] text-xs text-white rounded-lg px-2.5 py-1.5 focus:outline-none"
+                    className="bg-pm-input border border-pm-border text-xs text-white rounded-lg px-2.5 py-1.5 focus:outline-none"
                   >
                     <option value="30">Older than 30 Days (Recommended)</option>
                     <option value="90">Older than 90 Days</option>
@@ -1488,12 +1488,12 @@ export const DatabaseToolsTab: React.FC = () => {
             </div>
 
             {sweeperStats && (
-              <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-5">
+              <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-5">
                 <h3 className="text-sm font-bold tracking-wide text-white uppercase">Reclaimable Bloat Summary</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
                   {/* Visitor Log Bloat */}
-                  <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl space-y-2">
+                  <div className="bg-black/10 border border-pm-border p-4 rounded-xl space-y-2">
                     <h4 className="font-bold text-white text-xs uppercase flex items-center gap-2">
                       <span>📉</span> visitor logs
                     </h4>
@@ -1501,13 +1501,13 @@ export const DatabaseToolsTab: React.FC = () => {
                       <div className="flex justify-between"><span>Connections:</span><span className="font-semibold text-white">{sweeperStats.stats.connections.toLocaleString()}</span></div>
                       <div className="flex justify-between"><span>Page views:</span><span className="font-semibold text-white">{sweeperStats.stats.connections_page.toLocaleString()}</span></div>
                       <div className="flex justify-between"><span>Guest records:</span><span className="font-semibold text-white">{sweeperStats.stats.guests.toLocaleString()}</span></div>
-                      <hr className="border-white/[0.06] my-1" />
+                      <hr className="border-pm-border my-1" />
                       <div className="flex justify-between font-bold"><span>Total stats:</span><span className="text-indigo-400">{sweeperStats.stats.total.toLocaleString()}</span></div>
                     </div>
                   </div>
 
                   {/* Cart Bloat */}
-                  <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl space-y-2">
+                  <div className="bg-black/10 border border-pm-border p-4 rounded-xl space-y-2">
                     <h4 className="font-bold text-white text-xs uppercase flex items-center gap-2">
                       <span>🛒</span> Abandoned Carts
                     </h4>
@@ -1515,20 +1515,20 @@ export const DatabaseToolsTab: React.FC = () => {
                       <div className="flex justify-between"><span>Carts log:</span><span className="font-semibold text-white">{sweeperStats.carts.carts.toLocaleString()}</span></div>
                       <div className="flex justify-between"><span>Carts products:</span><span className="font-semibold text-white">{sweeperStats.carts.cart_products.toLocaleString()}</span></div>
                       <div className="flex justify-between"><span>Applied rules:</span><span className="font-semibold text-white">{sweeperStats.carts.cart_rules.toLocaleString()}</span></div>
-                      <hr className="border-white/[0.06] my-1" />
+                      <hr className="border-pm-border my-1" />
                       <div className="flex justify-between font-bold"><span>Total Carts:</span><span className="text-indigo-400">{sweeperStats.carts.total.toLocaleString()}</span></div>
                     </div>
                   </div>
 
                   {/* Image Bloat */}
-                  <div className="bg-black/10 border border-white/[0.06] p-4 rounded-xl space-y-2">
+                  <div className="bg-black/10 border border-pm-border p-4 rounded-xl space-y-2">
                     <h4 className="font-bold text-white text-xs uppercase flex items-center gap-2">
                       <span>🖼️</span> Orphaned Images
                     </h4>
                     <div className="space-y-1">
                       <div className="flex justify-between"><span>Scanned files:</span><span className="font-semibold text-white">{orphanedImagesTotalCount.toLocaleString()}</span></div>
                       <div className="flex justify-between"><span>Orphans found:</span><span className="font-semibold text-white">{orphanedImages.length.toLocaleString()}</span></div>
-                      <hr className="border-white/[0.06] my-1" />
+                      <hr className="border-pm-border my-1" />
                       <div className="flex justify-between font-bold"><span>Reclaimable:</span><span className="text-indigo-400">{orphanedImagesSizePretty}</span></div>
                     </div>
                   </div>
@@ -1557,7 +1557,7 @@ export const DatabaseToolsTab: React.FC = () => {
                         type="checkbox"
                         checked={purgeStats}
                         onChange={(e) => setPurgeStats(e.target.checked)}
-                        className="rounded bg-black/10 border-white/[0.1] text-red-500"
+                        className="rounded bg-black/10 border-pm-border text-red-500"
                       />
                       visitor statistics ({sweeperStats.stats.total.toLocaleString()} rows)
                     </label>
@@ -1566,7 +1566,7 @@ export const DatabaseToolsTab: React.FC = () => {
                         type="checkbox"
                         checked={purgeCarts}
                         onChange={(e) => setPurgeCarts(e.target.checked)}
-                        className="rounded bg-black/10 border-white/[0.1] text-red-500"
+                        className="rounded bg-black/10 border-pm-border text-red-500"
                       />
                       Abandoned Carts ({sweeperStats.carts.total.toLocaleString()} rows)
                     </label>
@@ -1575,7 +1575,7 @@ export const DatabaseToolsTab: React.FC = () => {
                         type="checkbox"
                         checked={purgeImages}
                         onChange={(e) => setPurgeImages(e.target.checked)}
-                        className="rounded bg-black/10 border-white/[0.1] text-red-500"
+                        className="rounded bg-black/10 border-pm-border text-red-500"
                       />
                       Orphaned Images ({orphanedImages.length.toLocaleString()} files)
                     </label>
@@ -1586,8 +1586,8 @@ export const DatabaseToolsTab: React.FC = () => {
 
             {/* Sweeper Active Progress card */}
             {isSweeperRunning && (
-              <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-                <div className="flex justify-between items-center border-b border-white/[0.06] pb-3">
+              <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
+                <div className="flex justify-between items-center border-b border-pm-border pb-3">
                   <h3 className="text-sm font-bold tracking-wide text-white uppercase flex items-center gap-2">
                     <span>🧹</span> database clean sweep in progress
                   </h3>
@@ -1617,7 +1617,7 @@ export const DatabaseToolsTab: React.FC = () => {
 
                 <div className="space-y-2">
                   <p className="text-[0.65rem] text-gray-400 font-bold uppercase tracking-wider">Console Output Log</p>
-                  <pre className="bg-black text-[0.7rem] text-gray-300 p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-white/[0.06] whitespace-pre-wrap">
+                  <pre className="bg-black text-[0.7rem] text-gray-300 p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-pm-border whitespace-pre-wrap">
                     {sweeperConsole}
                   </pre>
                 </div>

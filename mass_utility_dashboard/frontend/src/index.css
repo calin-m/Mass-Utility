@@ -11,63 +11,34 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Light Theme Fallback overrides for hardcoded layout utilities */
-:root:not(.dark) .bg-\[\#12121a\] {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+:root {
+  --pm-body-bg: #f8fafc;
+  --pm-card-bg: #ffffff;
+  --pm-border-color: #e2e8f0;
+  --pm-text-primary: #1e293b;
+  --pm-text-secondary: #64748b;
+  --pm-primary: #8b5cf6;
+  --pm-success: #10b981;
+  --pm-warning: #f59e0b;
+  --pm-danger: #ef4444;
+  --pm-purple: #8b5cf6;
+  --pm-input-bg: #f1f5f9;
+  --pm-terminal-bg: #f8fafc;
 }
-:root:not(.dark) .bg-\[\#171725\] {
-  background-color: #f8fafc !important;
-  border-color: #cbd5e1 !important;
-  color: #1e293b !important;
-}
-:root:not(.dark) .border-white\/\[0\.08\],
-:root:not(.dark) .border-white\/\[0\.06\],
-:root:not(.dark) .border-white\/\[0\.1\] {
-  border-color: #e2e8f0 !important;
-}
-:root:not(.dark) .text-white {
-  color: #1e293b !important;
-}
-:root:not(.dark) .text-gray-400 {
-  color: #64748b !important;
-}
-:root:not(.dark) .text-gray-300 {
-  color: #475569 !important;
-}
-:root:not(.dark) .bg-black\/10,
-:root:not(.dark) .bg-black\/15 {
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
-}
-:root:not(.dark) .bg-black\/35 {
-  background-color: #e2e8f0 !important;
-}
-:root:not(.dark) .bg-white\/\[0\.02\] {
-  background-color: #f8fafc !important;
-}
-:root:not(.dark) .bg-white\/\[0\.05\] {
-  background-color: #f1f5f9 !important;
-}
-:root:not(.dark) .bg-white\/\[0\.01\] {
-  background-color: #ffffff !important;
-}
-:root:not(.dark) .bg-white\/\[0\.04\] {
-  background-color: #e2e8f0 !important;
-}
-:root:not(.dark) .text-gray-200 {
-  color: #334155 !important;
-}
-:root:not(.dark) .bg-\[\#a855f7\]\/5 {
-  background-color: rgba(168, 85, 247, 0.04) !important;
-  border-color: rgba(168, 85, 247, 0.15) !important;
-}
-:root:not(.dark) .bg-\[\#10b981\]\/10 {
-  background-color: rgba(16, 185, 129, 0.08) !important;
-}
-:root:not(.dark) .bg-\[\#09090e\] {
-  background-color: #f8fafc !important;
+
+:root.dark, :root .dark, .dark {
+  --pm-body-bg: #09090e;
+  --pm-card-bg: #12121a;
+  --pm-border-color: rgba(255, 255, 255, 0.08);
+  --pm-text-primary: #e3e3e3;
+  --pm-text-secondary: #a0aec0;
+  --pm-primary: #a78bfa;
+  --pm-success: #10b981;
+  --pm-warning: #f59e0b;
+  --pm-danger: #ef4444;
+  --pm-purple: #a78bfa;
+  --pm-input-bg: #171725;
+  --pm-terminal-bg: #05070f;
 }
 
 /* Proximity spotlight cursor-tracking glow styles */

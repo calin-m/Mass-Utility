@@ -134,15 +134,11 @@ function AppContent() {
 
   return (
     <div
-      className={`min-h-screen p-6 transition-colors duration-300 ${
-        darkMode ? 'bg-[#09090e] text-[#e3e3e3]' : 'bg-slate-55 text-slate-800'
-      }`}
+      className="min-h-screen p-6 transition-colors duration-300 bg-pm-body text-pm-text"
       style={{ fontFamily: 'var(--pm-font-family, system-ui, -apple-system, sans-serif)' }}
     >
       <header
-        className={`mb-6 flex justify-between items-center border-b pb-4 flex-wrap gap-4 transition-colors duration-300 ${
-          darkMode ? 'border-white/[0.06]' : 'border-slate-200'
-        }`}
+        className="mb-6 flex justify-between items-center border-b border-pm-border pb-4 flex-wrap gap-4 transition-colors duration-300"
       >
         <div>
           <h1
@@ -177,9 +173,7 @@ function AppContent() {
       </header>
 
       {/* Navigation Tabs Nav Toggles */}
-      <div className={`flex justify-between items-center border-b pb-4 mb-6 flex-wrap gap-4 transition-colors duration-300 ${
-        darkMode ? 'border-white/[0.06]' : 'border-slate-200'
-      }`}>
+      <div className="flex justify-between items-center border-b border-pm-border pb-4 mb-6 flex-wrap gap-4 transition-colors duration-300">
         <div className="flex gap-2 flex-wrap">
           <button
             type="button"
@@ -187,7 +181,7 @@ function AppContent() {
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
               activeTab === 'governor'
                 ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
             🛡️ Safety Governor
@@ -198,7 +192,7 @@ function AppContent() {
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
               activeTab === 'database'
                 ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
             🗄️ Database Tools
@@ -209,7 +203,7 @@ function AppContent() {
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
               activeTab === 'files'
                 ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
             📂 File Backups
@@ -220,7 +214,7 @@ function AppContent() {
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
               activeTab === 'query'
                 ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
             ⚡ Query &amp; Mutate
@@ -231,7 +225,7 @@ function AppContent() {
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
               activeTab === 'history'
                 ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
             🕒 Mutation History
@@ -242,7 +236,7 @@ function AppContent() {
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
               activeTab === 'logs'
                 ? darkMode ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10' : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md'
-                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
+                : darkMode ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border' : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
             📜 Event Logs
@@ -259,7 +253,7 @@ function AppContent() {
                   ? 'bg-white/[0.05] text-[#a78bfa] border border-[#8b5cf6]/30 shadow-lg shadow-[#8b5cf6]/10'
                   : 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-md shadow-indigo-600/5'
                 : darkMode
-                ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-white/[0.06]'
+                ? 'bg-white/[0.02] text-gray-400 hover:text-gray-200 border border-pm-border'
                 : 'bg-white text-slate-500 hover:text-slate-700 border border-slate-200 shadow-sm'
             }`}
           >
@@ -271,7 +265,7 @@ function AppContent() {
             onClick={() => setDarkMode(!darkMode)}
             className={`pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 border ${
               darkMode
-                ? 'bg-white/[0.02] border-white/[0.06] text-yellow-400 hover:bg-white/[0.05]'
+                ? 'bg-white/[0.02] border-pm-border text-yellow-400 hover:bg-white/[0.05]'
                 : 'bg-white border-slate-200 text-indigo-600 hover:bg-slate-50 shadow-sm'
             }`}
             title="Toggle Light/Dark Theme"
@@ -282,9 +276,7 @@ function AppContent() {
       </div>
 
       <main
-        className={`border rounded-xl p-6 shadow-2xl transition-all duration-300 ${
-          darkMode ? 'bg-[#12121a] border-white/[0.08]' : 'bg-white border-slate-200'
-        }`}
+        className="border border-pm-border bg-pm-card rounded-xl p-6 shadow-2xl transition-all duration-300"
       >
         {activeTab === 'settings' && <SettingsTab />}
         {activeTab === 'files' && <FileToolsTab />}

@@ -92,7 +92,7 @@ export const GovernorTab = () => {
   return (
     <div className="space-y-6">
       {/* Status Hero Block */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-2xl p-6 shadow-xl flex justify-between items-center flex-wrap gap-4 transition-all duration-300">
+      <div className="bg-pm-card border border-pm-border rounded-2xl p-6 shadow-xl flex justify-between items-center flex-wrap gap-4 transition-all duration-300">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -121,15 +121,15 @@ export const GovernorTab = () => {
       </div>
 
       {/* Pre-Flight Checklist Grid */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl">
-        <div className="flex items-center gap-3 mb-5 border-b border-white/[0.06] pb-3">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
+        <div className="flex items-center gap-3 mb-5 border-b border-pm-border pb-3">
           <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full"></span>
           <h3 className="text-sm font-bold tracking-wide text-white uppercase">Phase 0 Pre-Flight Safety Audits</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Lock Audit */}
-          <div className="p-4 bg-black/10 border border-white/[0.06] rounded-xl flex flex-col justify-between space-y-2">
+          <div className="p-4 bg-black/10 border border-pm-border rounded-xl flex flex-col justify-between space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span>🔒</span> Database Locks
@@ -146,7 +146,7 @@ export const GovernorTab = () => {
           </div>
 
           {/* Disk Space */}
-          <div className="p-4 bg-black/10 border border-white/[0.06] rounded-xl flex flex-col justify-between space-y-2">
+          <div className="p-4 bg-black/10 border border-pm-border rounded-xl flex flex-col justify-between space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span>💾</span> Staging Disk Space
@@ -163,7 +163,7 @@ export const GovernorTab = () => {
           </div>
 
           {/* Memory */}
-          <div className="p-4 bg-black/10 border border-white/[0.06] rounded-xl flex flex-col justify-between space-y-2">
+          <div className="p-4 bg-black/10 border border-pm-border rounded-xl flex flex-col justify-between space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span>🧠</span> PHP Runtime Memory
@@ -180,7 +180,7 @@ export const GovernorTab = () => {
           </div>
 
           {/* File Permissions */}
-          <div className="p-4 bg-black/10 border border-white/[0.06] rounded-xl flex flex-col justify-between space-y-2">
+          <div className="p-4 bg-black/10 border border-pm-border rounded-xl flex flex-col justify-between space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span>🛡️</span> Staging File Permissions
@@ -200,8 +200,8 @@ export const GovernorTab = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Real-time Limits */}
-        <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-3 border-b border-white/[0.06] pb-3">
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-3 border-b border-pm-border pb-3">
             <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
             <h3 className="text-sm font-bold tracking-wide text-white uppercase">Governor Limits</h3>
           </div>
@@ -235,8 +235,8 @@ export const GovernorTab = () => {
         </div>
 
         {/* Engine Specs */}
-        <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-3 border-b border-white/[0.06] pb-3">
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-3 border-b border-pm-border pb-3">
             <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
             <h3 className="text-sm font-bold tracking-wide text-white uppercase">Hardware &amp; Engine Specs</h3>
           </div>
@@ -275,7 +275,7 @@ export const GovernorTab = () => {
       </div>
 
       {/* Expandable PHP limits card */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
         <button
           type="button"
           onClick={() => setExpandedIni(!expandedIni)}
@@ -289,8 +289,8 @@ export const GovernorTab = () => {
         </button>
 
         {expandedIni && data.ini && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-5 border-t border-white/[0.06] transition-all duration-300">
-            <div className="p-4 bg-black/10 border border-white/[0.06] rounded-xl space-y-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-5 border-t border-pm-border transition-all duration-300">
+            <div className="p-4 bg-black/10 border border-pm-border rounded-xl space-y-2.5">
               <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span>⏱️</span> Execution Limits
               </h4>
@@ -310,7 +310,7 @@ export const GovernorTab = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-black/10 border border-white/[0.06] rounded-xl space-y-2.5">
+            <div className="p-4 bg-black/10 border border-pm-border rounded-xl space-y-2.5">
               <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span>📦</span> Memory &amp; Upload
               </h4>
@@ -330,7 +330,7 @@ export const GovernorTab = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-black/10 border border-white/[0.06] rounded-xl space-y-2.5">
+            <div className="p-4 bg-black/10 border border-pm-border rounded-xl space-y-2.5">
               <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <span>🍪</span> Session Boundaries
               </h4>

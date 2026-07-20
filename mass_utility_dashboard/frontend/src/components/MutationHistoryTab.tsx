@@ -180,7 +180,7 @@ export const MutationHistoryTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center flex-wrap gap-4 border-b border-white/[0.06] pb-4 mb-4">
+      <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-4 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg">⏳</div>
           <div>
@@ -199,7 +199,7 @@ export const MutationHistoryTab: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-wrap gap-4 bg-[#12121a] border border-white/[0.08] p-4 rounded-xl items-center justify-between shadow-md">
+      <div className="flex flex-wrap gap-4 bg-pm-card border border-pm-border p-4 rounded-xl items-center justify-between shadow-md">
         <div className="flex items-center gap-3 flex-grow max-w-md">
           <span className="text-xs text-gray-400 font-bold uppercase">Search:</span>
           <input
@@ -207,13 +207,13 @@ export const MutationHistoryTab: React.FC = () => {
             placeholder="Search by Job ID or Actions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-black/20 border border-white/[0.08] text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#8b5cf6]/50"
+            className="w-full bg-black/20 border border-pm-border text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#8b5cf6]/50"
           />
         </div>
 
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-400 font-bold uppercase">Status Filter:</span>
-          <div className="flex bg-black/20 border border-white/[0.08] p-1 rounded-lg">
+          <div className="flex bg-black/20 border border-pm-border p-1 rounded-lg">
             {['ALL', 'SUCCESS', 'ROLLED_BACK', 'FAILED'].map(st => (
               <button
                 key={st}
@@ -230,11 +230,11 @@ export const MutationHistoryTab: React.FC = () => {
       </div>
 
       {/* Grid Ledger Table */}
-      <div className="bg-[#12121a] border border-white/[0.08] rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/[0.06] bg-black/10 text-[10px] text-gray-400 uppercase tracking-wider">
+              <tr className="border-b border-pm-border bg-black/10 text-[10px] text-gray-400 uppercase tracking-wider">
                 <th className="px-6 py-4 font-bold">Execution Date</th>
                 <th className="px-6 py-4 font-bold">Job ID</th>
                 <th className="px-6 py-4 font-bold">Targeted Mutation Actions</th>
@@ -335,8 +335,8 @@ export const MutationHistoryTab: React.FC = () => {
       {/* View Job Overlay Modal Drawer */}
       {selectedJob && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-[99999]">
-          <div className="bg-[#12121a] text-white border border-white/[0.08] rounded-2xl p-6 shadow-2xl w-full max-w-3xl mx-4 relative max-h-[85vh] flex flex-col">
-            <div className="flex justify-between items-center border-b border-white/[0.06] pb-3 mb-4 flex-shrink-0">
+          <div className="bg-pm-card text-white border border-pm-border rounded-2xl p-6 shadow-2xl w-full max-w-3xl mx-4 relative max-h-[85vh] flex flex-col">
+            <div className="flex justify-between items-center border-b border-pm-border pb-3 mb-4 flex-shrink-0">
               <h2 className="text-sm font-bold uppercase tracking-wider text-white">
                 Ledger Payload Audit Details: {selectedJob.job_id}
               </h2>
@@ -362,14 +362,14 @@ export const MutationHistoryTab: React.FC = () => {
 
               <div>
                 <span className="text-xs font-bold text-gray-400 block uppercase mb-1">Actions String</span>
-                <div className="bg-black/20 border border-white/[0.08] p-3 rounded-lg text-xs font-mono text-gray-200">
+                <div className="bg-black/20 border border-pm-border p-3 rounded-lg text-xs font-mono text-gray-200">
                   {selectedJob.actions}
                 </div>
               </div>
 
               <div>
                 <span className="text-xs font-bold text-gray-400 block uppercase mb-1">AST Query Parameters (JSON)</span>
-                <pre className="bg-[#05070f] border border-white/[0.06] p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-40">
+                <pre className="bg-[#05070f] border border-pm-border p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-40">
                   {JSON.stringify(JSON.parse(selectedJob.raw_payload), null, 2)}
                 </pre>
               </div>
@@ -377,7 +377,7 @@ export const MutationHistoryTab: React.FC = () => {
               {selectedJob.revert_payload && (
                 <div>
                   <span className="text-xs font-bold text-gray-400 block uppercase mb-1">Reversion Backups Map (JSON)</span>
-                  <pre className="bg-[#05070f] border border-white/[0.06] p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-40">
+                  <pre className="bg-[#05070f] border border-pm-border p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-40">
                     {JSON.stringify(JSON.parse(selectedJob.revert_payload), null, 2)}
                   </pre>
                 </div>
@@ -393,7 +393,7 @@ export const MutationHistoryTab: React.FC = () => {
               )}
             </div>
 
-            <div className="border-t border-white/[0.06] pt-4 mt-4 flex justify-end flex-shrink-0">
+            <div className="border-t border-pm-border pt-4 mt-4 flex justify-end flex-shrink-0">
               <button
                 onClick={() => setSelectedJob(null)}
                 className="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition"

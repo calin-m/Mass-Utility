@@ -57,7 +57,7 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
   };
 
   return (
-    <div className="bg-[#12121a] border border-white/[0.08] rounded-xl p-6 shadow-xl space-y-4">
+    <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <span className="w-3 h-3 bg-[#3b82f6] rounded-full shadow-lg shadow-[#3b82f6]/50"></span>
@@ -80,7 +80,7 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
         </div>
       )}
 
-      <div className="bg-[#171725] border border-white/[0.06] rounded-lg p-5 max-h-[400px] overflow-y-auto">
+      <div className="bg-pm-input border border-pm-border rounded-lg p-5 max-h-[400px] overflow-y-auto">
         {folders.length === 0 ? (
           <div className="flex items-center justify-center py-6 text-xs text-gray-500">
             ⏳ Scanning filesystem and calculating directory sizes...
@@ -97,7 +97,7 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                       ? checked
                         ? 'bg-[#3b82f6]/5 border-[#3b82f6]/15 opacity-80 cursor-not-allowed'
                         : 'bg-white/[0.01] border-transparent opacity-40 cursor-not-allowed'
-                      : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04] hover:border-white/[0.1] cursor-pointer'
+                      : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04] hover:border-pm-border cursor-pointer'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                       checked={checked}
                       disabled={disabled}
                       onChange={e => onToggleFolder(item.path, e.target.checked)}
-                      className="w-4 h-4 rounded border-white/[0.1] text-[#8b5cf6] focus:ring-0 focus:ring-offset-0 cursor-inherit accent-[#8b5cf6]"
+                      className="w-4 h-4 rounded border-pm-border text-[#8b5cf6] focus:ring-0 focus:ring-offset-0 cursor-inherit accent-[#8b5cf6]"
                     />
                     <span className="text-md">📁</span>
                     <span className="text-xs font-semibold text-white truncate max-w-[120px]">{item.name}</span>
