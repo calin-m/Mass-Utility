@@ -48,6 +48,9 @@
         ".orchestra"
     ],
     "ignore_ghost_files": [
+        "mass_utility_dashboard/frontend/postcss.config.js",
+        "mass_utility_dashboard/frontend/tailwind.config.js",
+        "mass_utility_dashboard/frontend/src/index.css",
         "mass_utility/build/generate_interconnectivity_map.php",
         "mass_utility_dashboard/bin/build_js.php",
         "mass_utility_dashboard/.htaccess",
