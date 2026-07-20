@@ -484,4 +484,3 @@ window.openEdit = function(id, tier, status, expiry, domain) {
             }
         });
     }
-};
