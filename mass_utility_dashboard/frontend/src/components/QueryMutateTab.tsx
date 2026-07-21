@@ -623,9 +623,9 @@ export const QueryMutateTab: React.FC = () => {
                   const updated = handleUpdateRule(rule.id, { forceManualMode: true }, queryTree);
                   setQueryTree(updated);
                 }}
-                className="text-xs hover:bg-white/[0.05] p-1.5 rounded-lg text-pm-text-secondary"
+                className="text-xs hover:bg-white/[0.05] border border-pm-border px-2 py-1 rounded-lg text-pm-text-secondary flex items-center gap-1 focus:outline-none"
               >
-                📝
+                📝 Manual
               </button>
             </>
           ) : (
@@ -648,9 +648,9 @@ export const QueryMutateTab: React.FC = () => {
                     const updated = handleUpdateRule(rule.id, { forceManualMode: false }, queryTree);
                     setQueryTree(updated);
                   }}
-                  className="text-xs hover:bg-white/[0.05] p-1.5 rounded-lg text-pm-text-secondary"
+                  className="text-xs hover:bg-white/[0.05] border border-pm-border px-2 py-1 rounded-lg text-pm-text-secondary flex items-center gap-1 focus:outline-none"
                 >
-                  📋
+                  📋 Dropdown
                 </button>
               )}
             </>
@@ -663,9 +663,9 @@ export const QueryMutateTab: React.FC = () => {
             const updated = handleDeleteRule(rule.id, queryTree);
             setQueryTree(updated);
           }}
-          className="pm-btn pm-btn-danger text-xs p-1.5 rounded-lg"
+          className="pm-btn pm-btn-danger text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 font-bold focus:outline-none"
         >
-          🗑️
+          🗑️ Delete
         </button>
       </div>
     );

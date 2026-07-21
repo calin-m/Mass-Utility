@@ -14,10 +14,17 @@ interface ModalState {
   onCancel?: () => void;
 }
 
+interface ToastMessage {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
 interface ModalContextType {
   showAlert: (title: string, message: string, alertType?: 'success' | 'error' | 'info') => void;
   showConfirm: (title: string, message: string, expectedPhrase: string | null, onConfirm: () => void) => void;
   showPrompt: (title: string, message: string, placeholder: string, onConfirm: (val: string) => void) => void;
+  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -36,6 +43,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     message: ''
   });
 
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isConfirmDisabled, setIsConfirmDisabled] = useState(false);
 
@@ -90,6 +98,14 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const id = `toast-${Date.now()}-${Math.random()}`;
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
+
   const closeModal = () => {
     setState(prev => ({ ...prev, isOpen: false }));
     if (stateRef.current.onCancel) stateRef.current.onCancel();
@@ -136,8 +152,33 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ModalContext.Provider value={{ showAlert, showConfirm, showPrompt }}>
+    <ModalContext.Provider value={{ showAlert, showConfirm, showPrompt, showToast }}>
       {children}
+
+      {/* Floating Toast Notification Container */}
+      <div className="fixed bottom-5 right-5 z-[999999] flex flex-col gap-2 pointer-events-none">
+        {toasts.map(t => (
+          <div
+            key={t.id}
+            className={`pointer-events-auto min-w-[260px] max-w-sm px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border text-xs font-medium flex items-center justify-between gap-3 transition-all animate-fade-in ${
+              t.type === 'error'
+                ? 'bg-red-950/80 border-red-500/30 text-red-200 border-l-4 border-l-red-500'
+                : t.type === 'info'
+                ? 'bg-blue-950/80 border-blue-500/30 text-blue-200 border-l-4 border-l-blue-500'
+                : 'bg-emerald-950/80 border-emerald-500/30 text-emerald-200 border-l-4 border-l-emerald-500'
+            }`}
+          >
+            <span>{t.type === 'error' ? '❌' : t.type === 'info' ? 'ℹ️' : '✅'} {t.message}</span>
+            <button
+              onClick={() => setToasts(prev => prev.filter(item => item.id !== t.id))}
+              className="text-xs opacity-60 hover:opacity-100 font-bold ml-2"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+      </div>
+
       {state.isOpen && (
         <div className="pm-modal-overlay fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-[99999] transition-opacity duration-300">
           <div className="pm-modal-card rounded-2xl p-6 shadow-2xl w-full max-w-lg mx-4 relative animate-fade-in">

@@ -31,7 +31,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
   onRefresh,
   onClearAll,
 }) => {
-  const { showAlert, showConfirm } = useModal();
+  const { showAlert, showConfirm, showToast } = useModal();
   const [verifyingFile, setVerifyingFile] = useState<string | null>(null);
   const [pinningFile, setPinningFile] = useState<string | null>(null);
   const [restoringFile, setRestoringFile] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       try {
         const data = await FetchService.post('upload_gdrive', { file: name });
         if (data.success) {
-          showAlert('Cloud Upload Success', 'Backup archive successfully pushed to Google Drive offsite storage.', 'success');
+          showToast('Backup archive pushed to Google Drive offsite storage.', 'success');
           onRefresh(data.backups || []);
         } else {
           showAlert('Upload Failed', data.error || 'Failed to upload backup to cloud.', 'error');
@@ -58,7 +58,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
-    showAlert('Copied', 'Copied to clipboard: ' + text, 'success');
+    showToast('Copied to clipboard: ' + text, 'success');
   };
 
   const handleVerify = async (name: string) => {

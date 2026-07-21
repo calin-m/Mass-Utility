@@ -172,7 +172,7 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('governor')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'governor'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
                 : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
@@ -183,7 +183,7 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('database')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'database'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
                 : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
@@ -194,7 +194,7 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('files')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'files'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
                 : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
@@ -205,7 +205,7 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('query')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'query'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
                 : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
@@ -216,7 +216,7 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('history')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'history'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
                 : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
@@ -227,7 +227,7 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('logs')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'logs'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
                 : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
@@ -241,7 +241,7 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('settings')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'settings'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md shadow-pm-primary/5'
                 : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
@@ -253,7 +253,7 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setDarkMode(!darkMode)}
-            className="pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 border bg-pm-input border-pm-border text-pm-text hover:bg-pm-input/80 shadow-sm"
+            className="pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 border bg-pm-input border-pm-border text-pm-text hover:bg-pm-input/80 shadow-sm focus:outline-none"
             title="Toggle Light/Dark Theme"
           >
             {darkMode ? '☀️ Light' : '🌙 Dark'}
