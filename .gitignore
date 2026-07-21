@@ -24,3 +24,31 @@
 .bench/sandbox/
 .bench/db/
 .bench/tools_registry.json
+
+# >>> START ORCHESTRA FRAMEWORK AUTO-GENERATED BLOCK >>>
+.bench/sandbox/
+.bench/db/
+backups/
+
+# Temporary Test Files
+scratch/
+test_concat.*
+
+**/.bench/sandbox/*.sqlite
+**/logs/*.log
+**/bin/phpstan.phar
+
+# Python Compile Caches & System Clutter
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.DS_Store
+Thumbs.db
+
+# IDE Dotfiles (Opt-in only, do not commit)
+.cursorrules
+.windsurfrules
+.clinerules
+.ai_plan.md
+# <<< END ORCHESTRA FRAMEWORK AUTO-GENERATED BLOCK <<<

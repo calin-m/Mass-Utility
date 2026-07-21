@@ -137,6 +137,16 @@ export const DatabaseToolsTab: React.FC = () => {
     fetchBackupPresets();
   }, []);
 
+  // Auto-fetch profiler or sweeper stats on sub-tab activation if not loaded yet
+  useEffect(() => {
+    if (activeSubTab === 'profiler' && !profilerReport && !isProfiling) {
+      handleFetchProfilerReport();
+    }
+    if (activeSubTab === 'sweeper' && !sweeperStats && !isScanningSweeper) {
+      handleSweeperScan();
+    }
+  }, [activeSubTab]);
+
   // Resilient formatters supporting both raw numbers and pre-formatted strings
   const formatSqlSize = (size: any) => {
     if (typeof size === 'number') {
@@ -1393,8 +1403,26 @@ export const DatabaseToolsTab: React.FC = () => {
               </p>
             </div>
 
+            {isProfiling && !profilerReport && (
+              <div className="bg-pm-card border border-pm-border rounded-xl p-8 shadow-xl text-center space-y-3">
+                <div className="w-8 h-8 border-2 border-pm-success border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-xs text-pm-text-secondary font-bold uppercase tracking-wider">Analyzing database index fragmentation and disk overhead...</p>
+              </div>
+            )}
+
             {profilerReport && (
               <>
+                {/* Zero Fragmentation Success Banner */}
+                {profilerReport.tables.length === 0 && (
+                  <div className="bg-pm-success/10 border border-pm-success/25 rounded-xl p-5 flex items-center gap-4">
+                    <span className="text-2xl">🎉</span>
+                    <div>
+                      <h4 className="text-xs font-bold text-pm-text uppercase">No Fragmentation Detected</h4>
+                      <p className="text-xs text-pm-text-secondary mt-0.5">All PrestaShop core tables are fully optimized! Health grade: <strong className="text-pm-success">{profilerReport.grade}</strong></p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Health Cards scores */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg text-center flex flex-col justify-center items-center">

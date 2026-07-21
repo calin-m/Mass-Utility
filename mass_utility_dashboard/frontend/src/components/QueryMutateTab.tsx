@@ -645,7 +645,7 @@ export const QueryMutateTab: React.FC = () => {
             const updated = handleDeleteRule(rule.id, queryTree);
             setQueryTree(updated);
           }}
-          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 p-1.5 rounded-lg text-xs"
+          className="pm-btn pm-btn-danger text-xs p-1.5 rounded-lg"
         >
           🗑️
         </button>
@@ -684,7 +684,7 @@ export const QueryMutateTab: React.FC = () => {
                 const updated = handleAddRule(group.id, queryTree);
                 setQueryTree(updated);
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
+              className="pm-btn pm-btn-primary text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
             >
               + Add Rule
             </button>
@@ -694,7 +694,7 @@ export const QueryMutateTab: React.FC = () => {
                 const updated = handleAddGroup(group.id, queryTree);
                 setQueryTree(updated);
               }}
-              className="bg-pm-input hover:bg-pm-border text-pm-text text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
+              className="pm-btn pm-btn-neutral text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
             >
               + Add Group
             </button>
@@ -705,7 +705,7 @@ export const QueryMutateTab: React.FC = () => {
                   const updated = handleDeleteGroup(group.id, queryTree);
                   setQueryTree(updated);
                 }}
-                className="bg-pm-danger hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
+                className="pm-btn pm-btn-danger text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
               >
                 Delete Group
               </button>
@@ -828,7 +828,7 @@ export const QueryMutateTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setMutationRules(prev => prev.filter(r => r.id !== rule.id))}
-          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 p-1.5 rounded-lg text-xs"
+          className="pm-btn pm-btn-danger text-xs p-1.5 rounded-lg"
         >
           🗑️
         </button>
@@ -862,15 +862,17 @@ export const QueryMutateTab: React.FC = () => {
             ))}
           </select>
           <button
+            type="button"
             onClick={() => handleSavePreset('master')}
-            className="bg-emerald-600 hover:bg-emerald-500 text-pm-text font-bold px-2.5 py-1 rounded transition"
+            className="pm-btn pm-btn-success text-xs font-bold px-2.5 py-1.5 rounded-lg transition"
           >
             Save
           </button>
           <button
+            type="button"
             onClick={() => handleDeletePreset('master', selectedMasterPreset)}
             disabled={!selectedMasterPreset}
-            className="bg-red-600 hover:bg-red-500 disabled:opacity-30 text-pm-text font-bold px-2.5 py-1 rounded transition"
+            className="pm-btn pm-btn-danger text-xs font-bold px-2.5 py-1.5 rounded-lg transition disabled:opacity-30"
           >
             Delete
           </button>
@@ -897,8 +899,8 @@ export const QueryMutateTab: React.FC = () => {
                 <option key={p.id_preset} value={p.id_preset}>{p.name}</option>
               ))}
             </select>
-            <button onClick={() => handleSavePreset('query')} className="bg-gray-800 text-pm-text px-2 py-1 rounded text-xs hover:bg-gray-700">Save</button>
-            <button onClick={() => handleDeletePreset('query', selectedQueryPreset)} disabled={!selectedQueryPreset} className="bg-red-950 text-red-400 px-2 py-1 rounded text-xs hover:bg-red-900 disabled:opacity-20">Delete</button>
+            <button type="button" onClick={() => handleSavePreset('query')} className="pm-btn pm-btn-neutral px-2 py-1 rounded text-xs">Save</button>
+            <button type="button" onClick={() => handleDeletePreset('query', selectedQueryPreset)} disabled={!selectedQueryPreset} className="pm-btn pm-btn-danger px-2 py-1 rounded text-xs disabled:opacity-30">Delete</button>
           </div>
         </div>
 
@@ -923,7 +925,7 @@ export const QueryMutateTab: React.FC = () => {
             type="button"
             disabled={isCompiling}
             onClick={handleCompilePreview}
-            className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-pm-text text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase tracking-wide disabled:opacity-40"
+            className="pm-btn pm-btn-purple text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase tracking-wide disabled:opacity-40"
           >
             {isCompiling ? '⚡ Compiling AST & Resolving Joins...' : '⚡ Compile & Preview Affected Products'}
           </button>
@@ -939,13 +941,13 @@ export const QueryMutateTab: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-black/10 border border-pm-border p-4 rounded-xl">
+            <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl">
               <span className="text-[10px] text-pm-text-secondary uppercase tracking-wider block">Affected Products Count</span>
               <div className="text-xl font-bold text-pm-text mt-1">{previewCount}</div>
             </div>
-            <div className="bg-black/10 border border-pm-border p-4 rounded-xl">
+            <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl">
               <span className="text-[10px] text-pm-text-secondary uppercase tracking-wider block">Target Scope Security Status</span>
-              <div className="text-sm font-bold text-emerald-400 mt-1.5 uppercase">SAFE &amp; PARAMETERIZED</div>
+              <div className="text-sm font-bold text-pm-success mt-1.5 uppercase">SAFE &amp; PARAMETERIZED</div>
             </div>
           </div>
 
@@ -984,8 +986,8 @@ export const QueryMutateTab: React.FC = () => {
                   <option key={p.id_preset} value={p.id_preset}>{p.name}</option>
                 ))}
               </select>
-              <button onClick={() => handleSavePreset('mutate')} className="bg-gray-800 text-pm-text px-2 py-1 rounded text-xs hover:bg-gray-700">Save</button>
-              <button onClick={() => handleDeletePreset('mutate', selectedMutatePreset)} disabled={!selectedMutatePreset} className="bg-red-950 text-red-400 px-2 py-1 rounded text-xs hover:bg-red-900 disabled:opacity-20">Delete</button>
+              <button type="button" onClick={() => handleSavePreset('mutate')} className="pm-btn pm-btn-neutral px-2 py-1 rounded text-xs">Save</button>
+              <button type="button" onClick={() => handleDeletePreset('mutate', selectedMutatePreset)} disabled={!selectedMutatePreset} className="pm-btn pm-btn-danger px-2 py-1 rounded text-xs disabled:opacity-30">Delete</button>
             </div>
           </div>
 
@@ -1004,7 +1006,7 @@ export const QueryMutateTab: React.FC = () => {
               type="button"
               disabled={isExecuting}
               onClick={() => setMutationRules(prev => [...prev, { id: `m-${Math.random()}`, field: 'price', type: 'SET', value: '' }])}
-              className="bg-pm-input hover:bg-pm-border text-pm-text text-xs font-bold px-4 py-2 rounded-lg transition"
+              className="pm-btn pm-btn-neutral text-xs font-bold px-4 py-2 rounded-lg transition"
             >
               ➕ Add Mutation Action
             </button>
@@ -1012,7 +1014,7 @@ export const QueryMutateTab: React.FC = () => {
               type="button"
               disabled={isExecuting || mutationRules.length === 0}
               onClick={handleExecuteMutations}
-              className="bg-red-600 hover:bg-red-500 text-pm-text text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase tracking-wide disabled:opacity-40 flex items-center gap-2"
+              className="pm-btn pm-btn-danger text-white text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase tracking-wide disabled:opacity-40 flex items-center gap-2"
             >
               {isExecuting ? (
                 <>
@@ -1037,6 +1039,7 @@ export const QueryMutateTab: React.FC = () => {
             </div>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => {
                   const blob = new Blob([mutationLogs], { type: 'text/plain' });
                   const url = URL.createObjectURL(blob);
@@ -1048,18 +1051,19 @@ export const QueryMutateTab: React.FC = () => {
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                 }}
-                className="bg-gray-800 hover:bg-gray-700 text-[10px] text-pm-text-secondary font-bold px-2 py-1 rounded transition"
+                className="pm-btn pm-btn-neutral text-[10px] text-pm-text-secondary font-bold px-2 py-1 rounded transition"
               >
                 📥 Save Log
               </button>
               <button
+                type="button"
                 onClick={async () => {
                   try {
                     await FetchService.post('clear_saas_log');
                     setMutationLogs('No mutation logs compiled yet.');
                   } catch (e) {}
                 }}
-                className="bg-red-950/20 border border-red-900/30 hover:bg-red-900/10 text-red-400 text-[10px] font-bold px-2 py-1 rounded transition"
+                className="pm-btn pm-btn-danger text-[10px] font-bold px-2 py-1 rounded transition"
               >
                 🗑️ Clear
               </button>

@@ -68,6 +68,7 @@
         "mass_utility_dashboard/views/js/mass_utility.js",
         "README.md",
         "WORKSPACE.md",
+        "GEMINI.md",
         ".ai_plan.md",
         "mass_utility/bin/test_license_encryption.php",
         "mass_utility_dashboard/bin/migration.php",
