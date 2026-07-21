@@ -32,7 +32,7 @@ class DatabaseProfilerEngine
     {
         try {
             $prefix = _DB_PREFIX_;
-            $sql = "SELECT TABLE_NAME, ENGINE, DATA_LENGTH, INDEX_LENGTH, DATA_FREE 
+            $sql = "SELECT TABLE_NAME, ENGINE, TABLE_ROWS, DATA_LENGTH, INDEX_LENGTH, DATA_FREE 
                     FROM information_schema.TABLES 
                     WHERE TABLE_SCHEMA = DATABASE() 
                       AND TABLE_NAME LIKE '" . pSQL($prefix) . "%'
@@ -51,6 +51,7 @@ class DatabaseProfilerEngine
             foreach ($rows as $row) {
                 $tableName = $row['TABLE_NAME'];
                 $engine = $row['ENGINE'];
+                $tableRows = (int)($row['TABLE_ROWS'] ?? 0);
                 $dataLength = (int)$row['DATA_LENGTH'];
                 $indexLength = (int)$row['INDEX_LENGTH'];
                 $dataFree = (int)$row['DATA_FREE'];
@@ -65,6 +66,7 @@ class DatabaseProfilerEngine
                     $fragmentedTables[] = [
                         'name' => $tableName,
                         'engine' => $engine,
+                        'rows' => $tableRows,
                         'size' => $tableSize,
                         'free' => $dataFree,
                         'ratio' => round($fragRatio, 2)

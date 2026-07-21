@@ -92,6 +92,9 @@ export const DatabaseToolsTab: React.FC = () => {
   // 3. Profiler state
   const [profilerReport, setProfilerReport] = useState<ProfilerReport | null>(null);
   const [isProfiling, setIsProfiling] = useState(false);
+  const [profilerSearch, setProfilerSearch] = useState('');
+  const [isBulkOptimizing, setIsBulkOptimizing] = useState(false);
+  const [bulkOptimizeProgress, setBulkOptimizeProgress] = useState('');
 
   // 4. Sweeper state
   const [retentionDays, setRetentionDays] = useState('30');
@@ -569,10 +572,37 @@ export const DatabaseToolsTab: React.FC = () => {
     try {
       const res = await FetchService.post('profile_database');
       if (res && res.success) {
-        setProfilerReport(res.profile as ProfilerReport);
+        const summary = res.summary || {};
+        const tables = res.fragmented_tables || [];
+
+        const gradeLabels: Record<string, string> = {
+          A: 'Excellent Health',
+          B: 'Good Health',
+          C: 'Minor Fragmentation',
+          D: 'High Overhead',
+          F: 'Action Required'
+        };
+
+        setProfilerReport({
+          grade: summary.grade || 'A',
+          grade_label: gradeLabels[summary.grade] || 'Optimal Health',
+          total_free_pretty: formatSqlSize(summary.total_free || 0),
+          fragmentation_ratio_avg: (summary.ratio || 0).toFixed(2) + '%',
+          tables_count: summary.total_tables || 0,
+          tables: tables.map((t: any) => ({
+            name: t.name,
+            engine: t.engine || 'InnoDB',
+            rows: t.rows || 0,
+            size_pretty: formatSqlSize(t.size || 0),
+            overhead_pretty: formatSqlSize(t.free || 0),
+            fragmentation_ratio: (t.ratio || 0).toFixed(2) + '%'
+          }))
+        });
+      } else {
+        showAlert('Profiler Error', res?.error || 'Failed to fetch database profile.', 'error');
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      showAlert('Profiler Exception', e.message || 'Error executing database profiler.', 'error');
     } finally {
       setIsProfiling(false);
     }
@@ -585,8 +615,33 @@ export const DatabaseToolsTab: React.FC = () => {
         if (res && res.success) {
           showAlert('Optimized', `Successfully optimized table: ${tableName}`, 'success');
           handleFetchProfilerReport();
+        } else {
+          showAlert('Optimization Failed', res?.error || `Failed to optimize table ${tableName}`, 'error');
         }
-      } catch (e) {}
+      } catch (e: any) {
+        showAlert('Optimization Error', e.message || `Error optimizing ${tableName}`, 'error');
+      }
+    });
+  };
+
+  const handleOptimizeAllTables = async () => {
+    if (!profilerReport || profilerReport.tables.length === 0) return;
+    const count = profilerReport.tables.length;
+    showConfirm('Optimize All Fragmented Tables', `Optimize all <strong>${count} fragmented tables</strong> sequentially to reclaim disk space and rebuild indexes?`, 'OPTIMIZE ALL', async () => {
+      setIsBulkOptimizing(true);
+      let successCount = 0;
+      for (let i = 0; i < profilerReport.tables.length; i++) {
+        const t = profilerReport.tables[i];
+        setBulkOptimizeProgress(`Optimizing ${i + 1}/${count}: ${t.name}...`);
+        try {
+          const res = await FetchService.post('optimize_table', { table: t.name });
+          if (res && res.success) successCount++;
+        } catch (err) {}
+      }
+      setIsBulkOptimizing(false);
+      setBulkOptimizeProgress('');
+      showAlert('Bulk Optimization Complete', `Optimized ${successCount} of ${count} fragmented tables.`, 'success');
+      handleFetchProfilerReport();
     });
   };
 
@@ -1451,7 +1506,43 @@ export const DatabaseToolsTab: React.FC = () => {
 
                 {/* Table fragmentation grid */}
                 <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-                  <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Table Fragmentation details</h3>
+                  <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-3">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Table Fragmentation details</h3>
+                      <span className="text-[10px] bg-pm-input border border-pm-border text-pm-text-secondary px-2 py-0.5 rounded-full font-mono">
+                        {profilerReport.tables.length} Fragmented
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <input
+                        type="text"
+                        placeholder="Search table by name..."
+                        value={profilerSearch}
+                        onChange={(e) => setProfilerSearch(e.target.value)}
+                        className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-primary/50"
+                      />
+
+                      {profilerReport.tables.length > 0 && (
+                        <button
+                          type="button"
+                          disabled={isBulkOptimizing}
+                          onClick={handleOptimizeAllTables}
+                          className="pm-btn pm-btn-success text-xs font-bold px-4 py-1.5 rounded-lg transition uppercase flex items-center gap-2"
+                        >
+                          {isBulkOptimizing ? (
+                            <>
+                              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                              {bulkOptimizeProgress || 'Optimizing All...'}
+                            </>
+                          ) : (
+                            '⚡ Optimize All Tables'
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="overflow-x-auto rounded-xl border border-pm-border">
                     <table className="w-full text-xs text-left">
                       <thead className="bg-pm-input/50 text-pm-text-secondary uppercase font-bold border-b border-pm-border">
@@ -1466,25 +1557,28 @@ export const DatabaseToolsTab: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-pm-border">
-                        {profilerReport.tables.map(t => (
-                          <tr key={t.name} className="hover:bg-pm-input/30 transition">
-                            <td className="p-4 font-mono font-semibold text-pm-text">{t.name}</td>
-                            <td className="p-4 text-pm-text-secondary">{t.engine}</td>
-                            <td className="p-4 text-pm-text-secondary">{t.rows.toLocaleString()}</td>
-                            <td className="p-4 text-pm-text-secondary">{t.size_pretty}</td>
-                            <td className="p-4 text-pm-text-secondary">{t.overhead_pretty}</td>
-                            <td className="p-4 font-semibold text-pm-text">{t.fragmentation_ratio}</td>
-                            <td className="p-4 text-right">
-                              <button
-                                type="button"
-                                onClick={() => handleOptimizeTable(t.name)}
-                                className="pm-btn pm-btn-success text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0"
-                              >
-                                ⚡ Optimize
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                        {profilerReport.tables
+                          .filter(t => !profilerSearch || t.name.toLowerCase().includes(profilerSearch.toLowerCase()))
+                          .map(t => (
+                            <tr key={t.name} className="hover:bg-pm-input/30 transition">
+                              <td className="p-4 font-mono font-semibold text-pm-text">{t.name}</td>
+                              <td className="p-4 text-pm-text-secondary">{t.engine}</td>
+                              <td className="p-4 text-pm-text-secondary">{t.rows.toLocaleString()}</td>
+                              <td className="p-4 text-pm-text-secondary">{t.size_pretty}</td>
+                              <td className="p-4 text-pm-text-secondary">{t.overhead_pretty}</td>
+                              <td className="p-4 font-semibold text-pm-text">{t.fragmentation_ratio}</td>
+                              <td className="p-4 text-right">
+                                <button
+                                  type="button"
+                                  disabled={isBulkOptimizing}
+                                  onClick={() => handleOptimizeTable(t.name)}
+                                  className="pm-btn pm-btn-success text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-30"
+                                >
+                                  ⚡ Optimize
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   </div>
