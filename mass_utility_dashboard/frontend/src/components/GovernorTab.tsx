@@ -48,7 +48,7 @@ interface ServerStatusResponse {
 export const GovernorTab = () => {
   const [data, setData] = useState<ServerStatusResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [expandedIni, setExpandedIni] = useState(false);
+  const [expandedIni, setExpandedIni] = useState(true);
 
   useEffect(() => {
     let active = true;

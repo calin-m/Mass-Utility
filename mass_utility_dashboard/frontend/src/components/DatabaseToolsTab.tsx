@@ -116,6 +116,20 @@ export const DatabaseToolsTab: React.FC = () => {
   const [isLoadingRowDiff, setIsLoadingRowDiff] = useState(false);
   const [inspectAllModal, setInspectAllModal] = useState<{ open: boolean; title: string; items: any[]; color: string } | null>(null);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (driftModalData) {
+          setDriftModalData(null);
+          setTableRowDiff(null);
+          setActiveDrawer(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [driftModalData]);
+
   // Load basic configurations on mount
   useEffect(() => {
     fetchCategorizedTables();
