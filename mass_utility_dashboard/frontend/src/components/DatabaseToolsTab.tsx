@@ -846,14 +846,14 @@ export const DatabaseToolsTab: React.FC = () => {
   return (
     <div className="w-full space-y-6">
       {/* Dynamic Sub-tab Pills */}
-      <div className="flex gap-2 border-b dark:border-pm-border border-slate-200 pb-4 mb-6 flex-wrap">
+      <div className="flex gap-2 border-b border-pm-border pb-4 mb-6 flex-wrap">
         <button
           type="button"
           onClick={() => setActiveSubTab('backup')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
             activeSubTab === 'backup'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 shadow-sm'
-              : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
+              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
           📥 Generate Backup
@@ -861,10 +861,10 @@ export const DatabaseToolsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('restore')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
             activeSubTab === 'restore'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 shadow-sm'
-              : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
+              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
           📤 Restore / Import
@@ -872,10 +872,10 @@ export const DatabaseToolsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('profiler')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
             activeSubTab === 'profiler'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 shadow-sm'
-              : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
+              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
           📈 DB Profiler &amp; Optimize
@@ -883,10 +883,10 @@ export const DatabaseToolsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('sweeper')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
             activeSubTab === 'sweeper'
-              ? 'dark:bg-[#8b5cf6]/10 dark:text-[#a78bfa] dark:border-[#8b5cf6]/20 bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 shadow-sm'
-              : 'dark:text-gray-400 dark:hover:text-gray-200 text-slate-500 hover:text-slate-700 border border-transparent'
+              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
           🧹 Data Sweeper
@@ -1181,21 +1181,21 @@ export const DatabaseToolsTab: React.FC = () => {
           <div className="space-y-6">
             <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
               <div className="flex items-center gap-3 border-b border-pm-border pb-3">
-                <span className="w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-                <h3 className="text-sm font-bold tracking-wide text-white uppercase">Database Restore &amp; Import Manager</h3>
+                <span className="w-2.5 h-2.5 bg-pm-danger rounded-full"></span>
+                <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Database Restore &amp; Import Manager</h3>
               </div>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-xs text-pm-text-secondary leading-relaxed">
                 Restore tables in chunked loops to completely bypass php execution limits. The store will automatically be switched to Maintenance Mode during restore execution.
               </p>
             </div>
 
             {showShopLiveAlert && (
-              <div className="bg-yellow-500/10 border border-yellow-500/25 rounded-xl p-5 flex justify-between items-center flex-wrap gap-4">
+              <div className="bg-pm-warning/10 border border-pm-warning/25 rounded-xl p-5 flex justify-between items-center flex-wrap gap-4">
                 <div className="flex items-start gap-3">
                   <span className="text-xl">⚠️</span>
                   <div>
-                    <h4 className="text-xs font-bold text-white uppercase">Store kept in Maintenance Mode</h4>
-                    <p className="text-xs text-gray-400 mt-1">Review the restored catalog details first before setting the shop live.</p>
+                    <h4 className="text-xs font-bold text-pm-text uppercase">Store kept in Maintenance Mode</h4>
+                    <p className="text-xs text-pm-text-secondary mt-1">Review the restored catalog details first before setting the shop live.</p>
                   </div>
                 </div>
                 <button
@@ -1210,16 +1210,16 @@ export const DatabaseToolsTab: React.FC = () => {
 
             {/* Drag Drop File Zone */}
             <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-              <h3 className="text-sm font-bold tracking-wide text-white uppercase">📤 Upload External SQL File</h3>
+              <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">📤 Upload External SQL File</h3>
 
               <div
                 onDragOver={handleDragOver}
                 onDrop={handleFileDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-pm-border hover:border-indigo-500/40 rounded-xl p-8 text-center cursor-pointer transition bg-black/10 space-y-3"
+                className="border-2 border-dashed border-pm-border hover:border-pm-primary/40 rounded-xl p-8 text-center cursor-pointer transition bg-pm-input/30 space-y-3"
               >
                 <div className="text-3xl">📁</div>
-                <p className="text-xs text-gray-300">
+                <p className="text-xs text-pm-text-secondary">
                   {selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : 'Click or drag external SQL/GZ file here...'}
                 </p>
                 <input
@@ -1323,45 +1323,45 @@ export const DatabaseToolsTab: React.FC = () => {
 
             {/* Restoration HUD */}
             {isRestoreRunning && (
-              <div className="bg-pm-card border border-red-500/20 rounded-xl p-6 shadow-xl space-y-4">
+              <div className="bg-pm-card border border-pm-danger/20 rounded-xl p-6 shadow-xl space-y-4">
                 <div className="flex justify-between items-center border-b border-pm-border pb-3">
-                  <h3 className="text-sm font-bold tracking-wide text-red-400 uppercase">Database Restore Active</h3>
-                  <span className="bg-red-500/10 text-red-400 text-[0.65rem] font-bold px-2 py-0.5 rounded uppercase">
+                  <h3 className="text-sm font-bold tracking-wide text-pm-danger uppercase">Database Restore Active</h3>
+                  <span className="bg-pm-danger/10 text-pm-danger text-[0.65rem] font-bold px-2 py-0.5 rounded uppercase">
                     Running
                   </span>
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between text-gray-400">
+                  <div className="flex justify-between text-pm-text-secondary">
                     <span>{restoreProgressText}</span>
                     <span>{restoreProgressPercent}%</span>
                   </div>
-                  <div className="w-full h-2.5 bg-black/35 rounded-full overflow-hidden">
+                  <div className="w-full h-2.5 bg-pm-input/80 rounded-full overflow-hidden border border-pm-border">
                     <div
-                      className="h-full bg-gradient-to-r from-red-500 to-yellow-500 transition-all duration-300"
+                      className="h-full bg-gradient-to-r from-pm-danger to-pm-warning transition-all duration-300"
                       style={{ width: `${restoreProgressPercent}%` }}
                     ></div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
-                  <div className="p-3 bg-black/10 border border-pm-border rounded-lg">
-                    <span className="text-gray-400 block mb-1">Statements Executed</span>
-                    <span className="text-white font-mono">{restoreStatsExecuted}</span>
+                  <div className="p-3 bg-pm-input/50 border border-pm-border rounded-lg">
+                    <span className="text-pm-text-secondary block mb-1">Statements Executed</span>
+                    <span className="text-pm-text font-mono">{restoreStatsExecuted}</span>
                   </div>
-                  <div className="p-3 bg-black/10 border border-pm-border rounded-lg">
-                    <span className="text-gray-400 block mb-1">Current Action</span>
-                    <span className="text-red-400 uppercase">{restoreStatsAction}</span>
+                  <div className="p-3 bg-pm-input/50 border border-pm-border rounded-lg">
+                    <span className="text-pm-text-secondary block mb-1">Current Action</span>
+                    <span className="text-pm-danger uppercase">{restoreStatsAction}</span>
                   </div>
-                  <div className="p-3 bg-black/10 border border-pm-border rounded-lg">
-                    <span className="text-gray-400 block mb-1">Shop State</span>
-                    <span className="text-yellow-400 uppercase">{restoreStatsShop}</span>
+                  <div className="p-3 bg-pm-input/50 border border-pm-border rounded-lg">
+                    <span className="text-pm-text-secondary block mb-1">Shop State</span>
+                    <span className="text-pm-warning uppercase">{restoreStatsShop}</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[0.65rem] text-gray-400 uppercase tracking-wider font-bold">Execution Logs</p>
-                  <pre className="bg-black text-[0.7rem] text-red-400 p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-pm-border whitespace-pre-wrap">
+                  <p className="text-[0.65rem] text-pm-text-secondary uppercase tracking-wider font-bold">Execution Logs</p>
+                  <pre className="bg-pm-input/80 text-[0.7rem] text-pm-danger p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-pm-border whitespace-pre-wrap">
                     {restoreLogTerminal}
                   </pre>
                 </div>
@@ -1376,8 +1376,8 @@ export const DatabaseToolsTab: React.FC = () => {
             <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
               <div className="flex justify-between items-center border-b border-pm-border pb-3 flex-wrap gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                  <h3 className="text-sm font-bold tracking-wide text-white uppercase">Automated Database Profiler &amp; Space Optimizer</h3>
+                  <span className="w-2.5 h-2.5 bg-pm-success rounded-full animate-pulse"></span>
+                  <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Automated Database Profiler &amp; Space Optimizer</h3>
                 </div>
                 <button
                   type="button"
@@ -1388,7 +1388,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   {isProfiling ? 'Analyzing...' : 'Refresh Profile'}
                 </button>
               </div>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-xs text-pm-text-secondary leading-relaxed">
                 Scans all tables in real-time to compute index fragmentation and disk overhead which slows down transactions.
               </p>
             </div>
@@ -1398,34 +1398,34 @@ export const DatabaseToolsTab: React.FC = () => {
                 {/* Health Cards scores */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg text-center flex flex-col justify-center items-center">
-                    <span className="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest block mb-2">Health Grade</span>
-                    <div className="text-4xl font-black text-emerald-400 font-sans leading-none">{profilerReport.grade}</div>
-                    <span className="text-[0.65rem] text-gray-500 mt-2">{profilerReport.grade_label}</span>
+                    <span className="text-[0.65rem] font-bold text-pm-text-secondary uppercase tracking-widest block mb-2">Health Grade</span>
+                    <div className="text-4xl font-black text-pm-success font-sans leading-none">{profilerReport.grade}</div>
+                    <span className="text-[0.65rem] text-pm-text-secondary mt-2">{profilerReport.grade_label}</span>
                   </div>
 
                   <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg flex flex-col justify-between">
                     <div>
-                      <span className="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest block mb-2">Overallocated Space</span>
-                      <div className="text-2xl font-bold text-white font-mono">{profilerReport.total_free_pretty}</div>
+                      <span className="text-[0.65rem] font-bold text-pm-text-secondary uppercase tracking-widest block mb-2">Overallocated Space</span>
+                      <div className="text-2xl font-bold text-pm-text font-mono">{profilerReport.total_free_pretty}</div>
                     </div>
-                    <span className="text-[0.65rem] text-gray-500 mt-2">Can be reclaimed immediately</span>
+                    <span className="text-[0.65rem] text-pm-text-secondary mt-2">Can be reclaimed immediately</span>
                   </div>
 
                   <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg flex flex-col justify-between">
                     <div>
-                      <span className="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest block mb-2">Average Fragmentation</span>
-                      <div className="text-2xl font-bold text-white font-mono">{profilerReport.fragmentation_ratio_avg}</div>
+                      <span className="text-[0.65rem] font-bold text-pm-text-secondary uppercase tracking-widest block mb-2">Average Fragmentation</span>
+                      <div className="text-2xl font-bold text-pm-text font-mono">{profilerReport.fragmentation_ratio_avg}</div>
                     </div>
-                    <span className="text-[0.65rem] text-gray-500 mt-2">{profilerReport.tables_count} monitored tables</span>
+                    <span className="text-[0.65rem] text-pm-text-secondary mt-2">{profilerReport.tables_count} monitored tables</span>
                   </div>
                 </div>
 
                 {/* Table fragmentation grid */}
                 <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-                  <h3 className="text-sm font-bold tracking-wide text-white uppercase">Table Fragmentation details</h3>
+                  <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Table Fragmentation details</h3>
                   <div className="overflow-x-auto rounded-xl border border-pm-border">
                     <table className="w-full text-xs text-left">
-                      <thead className="bg-black/15 text-gray-400 uppercase font-bold border-b border-pm-border">
+                      <thead className="bg-pm-input/50 text-pm-text-secondary uppercase font-bold border-b border-pm-border">
                         <tr>
                           <th className="p-4">Table Name</th>
                           <th className="p-4">Engine</th>
@@ -1436,15 +1436,15 @@ export const DatabaseToolsTab: React.FC = () => {
                           <th className="p-4 text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/[0.04]">
+                      <tbody className="divide-y divide-pm-border">
                         {profilerReport.tables.map(t => (
-                          <tr key={t.name} className="hover:bg-white/[0.01] transition">
-                            <td className="p-4 font-mono font-semibold text-white">{t.name}</td>
-                            <td className="p-4 text-gray-400">{t.engine}</td>
-                            <td className="p-4 text-gray-400">{t.rows.toLocaleString()}</td>
-                            <td className="p-4 text-gray-400">{t.size_pretty}</td>
-                            <td className="p-4 text-gray-400">{t.overhead_pretty}</td>
-                            <td className="p-4 font-semibold text-white">{t.fragmentation_ratio}</td>
+                          <tr key={t.name} className="hover:bg-pm-input/30 transition">
+                            <td className="p-4 font-mono font-semibold text-pm-text">{t.name}</td>
+                            <td className="p-4 text-pm-text-secondary">{t.engine}</td>
+                            <td className="p-4 text-pm-text-secondary">{t.rows.toLocaleString()}</td>
+                            <td className="p-4 text-pm-text-secondary">{t.size_pretty}</td>
+                            <td className="p-4 text-pm-text-secondary">{t.overhead_pretty}</td>
+                            <td className="p-4 font-semibold text-pm-text">{t.fragmentation_ratio}</td>
                             <td className="p-4 text-right">
                               <button
                                 type="button"
@@ -1471,18 +1471,18 @@ export const DatabaseToolsTab: React.FC = () => {
             <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
               <div className="flex justify-between items-center border-b border-pm-border pb-3 flex-wrap gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-pulse"></span>
-                  <h3 className="text-sm font-bold tracking-wide text-white uppercase">Database Cleanup Sweeper</h3>
+                  <span className="w-2.5 h-2.5 bg-pm-primary rounded-full animate-pulse"></span>
+                  <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Database Cleanup Sweeper</h3>
                 </div>
               </div>
 
-              <div className="bg-black/10 border border-pm-border rounded-xl p-4 flex items-center justify-between flex-wrap gap-4">
+              <div className="bg-pm-input/30 border border-pm-border rounded-xl p-4 flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="text-gray-400 uppercase font-bold">Retention Bounds:</span>
+                  <span className="text-pm-text-secondary uppercase font-bold">Retention Bounds:</span>
                   <select
                     value={retentionDays}
                     onChange={(e) => setRetentionDays(e.target.value)}
-                    className="bg-pm-input border border-pm-border text-xs text-white rounded-lg px-2.5 py-1.5 focus:outline-none"
+                    className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none"
                   >
                     <option value="30">Older than 30 Days (Recommended)</option>
                     <option value="90">Older than 90 Days</option>
@@ -1503,57 +1503,57 @@ export const DatabaseToolsTab: React.FC = () => {
 
             {sweeperStats && (
               <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-5">
-                <h3 className="text-sm font-bold tracking-wide text-white uppercase">Reclaimable Bloat Summary</h3>
+                <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Reclaimable Bloat Summary</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
                   {/* Visitor Log Bloat */}
-                  <div className="bg-black/10 border border-pm-border p-4 rounded-xl space-y-2">
-                    <h4 className="font-bold text-white text-xs uppercase flex items-center gap-2">
+                  <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl space-y-2">
+                    <h4 className="font-bold text-pm-text text-xs uppercase flex items-center gap-2">
                       <span>📉</span> visitor logs
                     </h4>
                     <div className="space-y-1">
-                      <div className="flex justify-between"><span>Connections:</span><span className="font-semibold text-white">{sweeperStats.stats.connections.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span>Page views:</span><span className="font-semibold text-white">{sweeperStats.stats.connections_page.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span>Guest records:</span><span className="font-semibold text-white">{sweeperStats.stats.guests.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-pm-text-secondary">Connections:</span><span className="font-semibold text-pm-text">{sweeperStats.stats.connections.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-pm-text-secondary">Page views:</span><span className="font-semibold text-pm-text">{sweeperStats.stats.connections_page.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-pm-text-secondary">Guest records:</span><span className="font-semibold text-pm-text">{sweeperStats.stats.guests.toLocaleString()}</span></div>
                       <hr className="border-pm-border my-1" />
-                      <div className="flex justify-between font-bold"><span>Total stats:</span><span className="text-indigo-400">{sweeperStats.stats.total.toLocaleString()}</span></div>
+                      <div className="flex justify-between font-bold"><span className="text-pm-text-secondary">Total stats:</span><span className="text-pm-primary">{sweeperStats.stats.total.toLocaleString()}</span></div>
                     </div>
                   </div>
 
                   {/* Cart Bloat */}
-                  <div className="bg-black/10 border border-pm-border p-4 rounded-xl space-y-2">
-                    <h4 className="font-bold text-white text-xs uppercase flex items-center gap-2">
+                  <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl space-y-2">
+                    <h4 className="font-bold text-pm-text text-xs uppercase flex items-center gap-2">
                       <span>🛒</span> Abandoned Carts
                     </h4>
                     <div className="space-y-1">
-                      <div className="flex justify-between"><span>Carts log:</span><span className="font-semibold text-white">{sweeperStats.carts.carts.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span>Carts products:</span><span className="font-semibold text-white">{sweeperStats.carts.cart_products.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span>Applied rules:</span><span className="font-semibold text-white">{sweeperStats.carts.cart_rules.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-pm-text-secondary">Carts log:</span><span className="font-semibold text-pm-text">{sweeperStats.carts.carts.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-pm-text-secondary">Carts products:</span><span className="font-semibold text-pm-text">{sweeperStats.carts.cart_products.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-pm-text-secondary">Applied rules:</span><span className="font-semibold text-pm-text">{sweeperStats.carts.cart_rules.toLocaleString()}</span></div>
                       <hr className="border-pm-border my-1" />
-                      <div className="flex justify-between font-bold"><span>Total Carts:</span><span className="text-indigo-400">{sweeperStats.carts.total.toLocaleString()}</span></div>
+                      <div className="flex justify-between font-bold"><span className="text-pm-text-secondary">Total Carts:</span><span className="text-pm-primary">{sweeperStats.carts.total.toLocaleString()}</span></div>
                     </div>
                   </div>
 
                   {/* Image Bloat */}
-                  <div className="bg-black/10 border border-pm-border p-4 rounded-xl space-y-2">
-                    <h4 className="font-bold text-white text-xs uppercase flex items-center gap-2">
+                  <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl space-y-2">
+                    <h4 className="font-bold text-pm-text text-xs uppercase flex items-center gap-2">
                       <span>🖼️</span> Orphaned Images
                     </h4>
                     <div className="space-y-1">
-                      <div className="flex justify-between"><span>Scanned files:</span><span className="font-semibold text-white">{orphanedImagesTotalCount.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span>Orphans found:</span><span className="font-semibold text-white">{orphanedImages.length.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-pm-text-secondary">Scanned files:</span><span className="font-semibold text-pm-text">{orphanedImagesTotalCount.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="text-pm-text-secondary">Orphans found:</span><span className="font-semibold text-pm-text">{orphanedImages.length.toLocaleString()}</span></div>
                       <hr className="border-pm-border my-1" />
-                      <div className="flex justify-between font-bold"><span>Reclaimable:</span><span className="text-indigo-400">{orphanedImagesSizePretty}</span></div>
+                      <div className="flex justify-between font-bold"><span className="text-pm-text-secondary">Reclaimable:</span><span className="text-pm-primary">{orphanedImagesSizePretty}</span></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Sweep Purge Actions */}
-                <div className="bg-red-500/5 border border-red-500/20 p-5 rounded-xl space-y-4">
+                <div className="bg-pm-danger/5 border border-pm-danger/20 p-5 rounded-xl space-y-4">
                   <div className="flex justify-between items-center flex-wrap gap-4">
                     <div>
-                      <h4 className="text-xs font-bold text-white uppercase">Execute Clean Sweep Operations</h4>
-                      <p className="text-[0.65rem] text-gray-400 mt-1">Chunked deletes of 5,000 rows prevent server timeout limits.</p>
+                      <h4 className="text-xs font-bold text-pm-text uppercase">Execute Clean Sweep Operations</h4>
+                      <p className="text-[0.65rem] text-pm-text-secondary mt-1">Chunked deletes of 5,000 rows prevent server timeout limits.</p>
                     </div>
                     <button
                       type="button"
@@ -1566,30 +1566,30 @@ export const DatabaseToolsTab: React.FC = () => {
                   </div>
 
                   <div className="flex gap-4 text-xs flex-wrap">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-pointer text-pm-text-secondary">
                       <input
                         type="checkbox"
                         checked={purgeStats}
                         onChange={(e) => setPurgeStats(e.target.checked)}
-                        className="rounded bg-black/10 border-pm-border text-red-500"
+                        className="rounded bg-pm-input border-pm-border text-pm-danger"
                       />
                       visitor statistics ({sweeperStats.stats.total.toLocaleString()} rows)
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-pointer text-pm-text-secondary">
                       <input
                         type="checkbox"
                         checked={purgeCarts}
                         onChange={(e) => setPurgeCarts(e.target.checked)}
-                        className="rounded bg-black/10 border-pm-border text-red-500"
+                        className="rounded bg-pm-input border-pm-border text-pm-danger"
                       />
                       Abandoned Carts ({sweeperStats.carts.total.toLocaleString()} rows)
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-pointer text-pm-text-secondary">
                       <input
                         type="checkbox"
                         checked={purgeImages}
                         onChange={(e) => setPurgeImages(e.target.checked)}
-                        className="rounded bg-black/10 border-pm-border text-red-500"
+                        className="rounded bg-pm-input border-pm-border text-pm-danger"
                       />
                       Orphaned Images ({orphanedImages.length.toLocaleString()} files)
                     </label>
@@ -1602,7 +1602,7 @@ export const DatabaseToolsTab: React.FC = () => {
             {isSweeperRunning && (
               <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
                 <div className="flex justify-between items-center border-b border-pm-border pb-3">
-                  <h3 className="text-sm font-bold tracking-wide text-white uppercase flex items-center gap-2">
+                  <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase flex items-center gap-2">
                     <span>🧹</span> database clean sweep in progress
                   </h3>
                   <button
@@ -1617,21 +1617,21 @@ export const DatabaseToolsTab: React.FC = () => {
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between text-gray-400">
+                  <div className="flex justify-between text-pm-text-secondary">
                     <span>{sweeperProgressText}</span>
                     <span>{sweeperProgressPercent}%</span>
                   </div>
-                  <div className="w-full h-2 bg-black/35 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-pm-input/80 rounded-full overflow-hidden border border-pm-border">
                     <div
-                      className="h-full bg-red-500 transition-all duration-300"
+                      className="h-full bg-pm-danger transition-all duration-300"
                       style={{ width: `${sweeperProgressPercent}%` }}
                     ></div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[0.65rem] text-gray-400 font-bold uppercase tracking-wider">Console Output Log</p>
-                  <pre className="bg-black text-[0.7rem] text-gray-300 p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-pm-border whitespace-pre-wrap">
+                  <p className="text-[0.65rem] text-pm-text-secondary font-bold uppercase tracking-wider">Console Output Log</p>
+                  <pre className="bg-pm-input/80 text-[0.7rem] text-pm-success p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-pm-border whitespace-pre-wrap">
                     {sweeperConsole}
                   </pre>
                 </div>
