@@ -563,7 +563,10 @@ export const QueryMutateTab: React.FC = () => {
       <div key={rule.id} className="flex gap-2 items-center flex-wrap bg-white/[0.01] border border-pm-border p-3 rounded-xl">
         <select
           value={rule.field}
-          onChange={(e) => handleUpdateRule(rule.id, { field: e.target.value, forceManualMode: false, value: '' }, queryTree)}
+          onChange={(e) => {
+            const updated = handleUpdateRule(rule.id, { field: e.target.value, forceManualMode: false, value: '' }, queryTree);
+            setQueryTree(updated);
+          }}
           className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-pm-purple/50"
         >
           <option value="product.active">Product: Active Status</option>
@@ -582,7 +585,10 @@ export const QueryMutateTab: React.FC = () => {
 
         <select
           value={rule.operator}
-          onChange={(e) => handleUpdateRule(rule.id, { operator: e.target.value }, queryTree)}
+          onChange={(e) => {
+            const updated = handleUpdateRule(rule.id, { operator: e.target.value }, queryTree);
+            setQueryTree(updated);
+          }}
           className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none"
         >
           <option value="EQUAL">Equals</option>
@@ -599,7 +605,10 @@ export const QueryMutateTab: React.FC = () => {
             <>
               <select
                 value={rule.value}
-                onChange={(e) => handleUpdateRule(rule.id, { value: e.target.value }, queryTree)}
+                onChange={(e) => {
+                  const updated = handleUpdateRule(rule.id, { value: e.target.value }, queryTree);
+                  setQueryTree(updated);
+                }}
                 className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none w-full"
               >
                 <option value="">- Select Target Value -</option>
@@ -610,7 +619,10 @@ export const QueryMutateTab: React.FC = () => {
               <button
                 type="button"
                 title="Switch to manual text input"
-                onClick={() => handleUpdateRule(rule.id, { forceManualMode: true }, queryTree)}
+                onClick={() => {
+                  const updated = handleUpdateRule(rule.id, { forceManualMode: true }, queryTree);
+                  setQueryTree(updated);
+                }}
                 className="text-xs hover:bg-white/[0.05] p-1.5 rounded-lg text-pm-text-secondary"
               >
                 📝
@@ -621,7 +633,10 @@ export const QueryMutateTab: React.FC = () => {
               <input
                 type="text"
                 value={rule.value}
-                onChange={(e) => handleUpdateRule(rule.id, { value: e.target.value }, queryTree)}
+                onChange={(e) => {
+                  const updated = handleUpdateRule(rule.id, { value: e.target.value }, queryTree);
+                  setQueryTree(updated);
+                }}
                 placeholder={isListOp ? "e.g. 101, 102, 103" : "Enter filter constraint..."}
                 className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-purple/50 flex-grow"
               />
@@ -629,7 +644,10 @@ export const QueryMutateTab: React.FC = () => {
                 <button
                   type="button"
                   title="Switch to selection dropdown list"
-                  onClick={() => handleUpdateRule(rule.id, { forceManualMode: false }, queryTree)}
+                  onClick={() => {
+                    const updated = handleUpdateRule(rule.id, { forceManualMode: false }, queryTree);
+                    setQueryTree(updated);
+                  }}
                   className="text-xs hover:bg-white/[0.05] p-1.5 rounded-lg text-pm-text-secondary"
                 >
                   📋

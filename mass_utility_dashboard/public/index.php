@@ -235,11 +235,11 @@ function mergeCloudBackups(array $localBackups, \PDO $pdo, string $adminModulesU
         
         // Point download URLs to dashboard proxy
         if ($type === 'database') {
-            $localB['sql_download_url'] = 'api/v1/download_backup?file=' . urlencode($localB['sql_filename'] ?? '');
-            $localB['log_download_url'] = !empty($localB['log_filename']) ? 'api/v1/download_backup?file=' . urlencode($localB['log_filename']) : '#';
+            $localB['sql_download_url'] = 'index.php?action=download_backup&file=' . urlencode($localB['sql_filename'] ?? '');
+            $localB['log_download_url'] = !empty($localB['log_filename']) ? 'index.php?action=download_backup&file=' . urlencode($localB['log_filename']) : '#';
         } else {
-            $localB['archive_download_url'] = 'api/v1/download_file_backup?file=' . urlencode($localB['basename'] ?? '');
-            $localB['log_download_url'] = !empty($localB['basename']) ? 'api/v1/download_file_backup_log?file=' . urlencode($localB['basename']) : '#';
+            $localB['archive_download_url'] = 'index.php?action=download_file_backup&file=' . urlencode($localB['basename'] ?? '');
+            $localB['log_download_url'] = !empty($localB['basename']) ? 'index.php?action=download_file_backup_log&file=' . urlencode($localB['basename']) : '#';
         }
         
         $merged[] = $localB;
@@ -275,8 +275,8 @@ function mergeCloudBackups(array $localBackups, \PDO $pdo, string $adminModulesU
         if ($type === 'database') {
             $sqlFilename = $baseName . '.sql.gz';
             $logFilename = $baseName . '.log';
-            $sqlDownloadUrl = 'api/v1/download_from_drive?file=' . urlencode($baseName) . '&type=database&filename=' . urlencode($sqlFilename);
-            $logDownloadUrl = 'api/v1/download_from_drive?file=' . urlencode($baseName) . '&type=database&filename=' . urlencode($logFilename);
+            $sqlDownloadUrl = 'index.php?action=download_from_drive&file=' . urlencode($baseName) . '&type=database&filename=' . urlencode($sqlFilename);
+            $logDownloadUrl = 'index.php?action=download_from_drive&file=' . urlencode($baseName) . '&type=database&filename=' . urlencode($logFilename);
 
             $merged[] = [
                 'basename' => $baseName,
@@ -293,9 +293,9 @@ function mergeCloudBackups(array $localBackups, \PDO $pdo, string $adminModulesU
                 'duration' => null
             ];
         } else {
-            $archiveDownloadUrl = 'api/v1/download_from_drive?file=' . urlencode($baseName) . '&type=file&filename=' . urlencode($baseName);
+            $archiveDownloadUrl = 'index.php?action=download_from_drive&file=' . urlencode($baseName) . '&type=file&filename=' . urlencode($baseName);
             $logName = preg_replace('/\.tar$/', '', $baseName) . '.tar.log';
-            $logDownloadUrl = 'api/v1/download_from_drive?file=' . urlencode($baseName) . '&type=file&filename=' . urlencode($logName);
+            $logDownloadUrl = 'index.php?action=download_from_drive&file=' . urlencode($baseName) . '&type=file&filename=' . urlencode($logName);
 
             $merged[] = [
                 'basename' => $baseName,

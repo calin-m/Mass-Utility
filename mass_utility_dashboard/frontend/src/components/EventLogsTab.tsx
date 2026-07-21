@@ -189,12 +189,12 @@ export const EventLogsTab: React.FC = () => {
             <span className="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></span>
             <span className="text-[10px] font-bold text-pm-text-secondary uppercase font-mono">telemetry@mass-utility.sh</span>
           </div>
-          <span className="text-[9px] text-gray-500 font-mono">UTF-8 • Line Buffered</span>
+          <span className="text-[9px] text-pm-text-secondary font-mono">UTF-8 • Line Buffered</span>
         </div>
 
-        <div className="p-4 bg-[var(--pm-terminal-bg,#05070f)] min-h-[400px] max-h-[500px] overflow-y-auto font-mono text-xs leading-relaxed select-all">
+        <div className="p-4 bg-pm-terminal-bg rounded-b-xl border-x border-b border-pm-border min-h-[350px] max-h-[550px] overflow-y-auto font-mono text-xs text-slate-300 space-y-1.5 scrollbar-thin scrollbar-thumb-white/10">
           {loading && !logs ? (
-            <div className="flex items-center justify-center h-[350px] text-gray-500 gap-2">
+            <div className="flex items-center justify-center h-[350px] text-pm-text-secondary gap-2">
               <span className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></span>
               Streaming host telemetry console...
             </div>

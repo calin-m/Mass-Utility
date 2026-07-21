@@ -14,14 +14,14 @@ body {
 :root {
   --pm-body-bg: #f8fafc;
   --pm-card-bg: #ffffff;
-  --pm-border-color: #e2e8f0;
-  --pm-text-primary: #1e293b;
-  --pm-text-secondary: #64748b;
-  --pm-primary: #8b5cf6;
-  --pm-success: #10b981;
-  --pm-warning: #f59e0b;
-  --pm-danger: #ef4444;
-  --pm-purple: #8b5cf6;
+  --pm-border-color: #cbd5e1;
+  --pm-text-primary: #0f172a;
+  --pm-text-secondary: #334155;
+  --pm-primary: #7c3aed;
+  --pm-success: #059669;
+  --pm-warning: #d97706;
+  --pm-danger: #dc2626;
+  --pm-purple: #7c3aed;
   --pm-input-bg: #f1f5f9;
   --pm-terminal-bg: #f8fafc;
 }
@@ -29,9 +29,9 @@ body {
 :root.dark, :root .dark, .dark {
   --pm-body-bg: #09090e;
   --pm-card-bg: #12121a;
-  --pm-border-color: rgba(255, 255, 255, 0.08);
-  --pm-text-primary: #e3e3e3;
-  --pm-text-secondary: #a0aec0;
+  --pm-border-color: rgba(255, 255, 255, 0.06);
+  --pm-text-primary: #e2e8f0;
+  --pm-text-secondary: #94a3b8;
   --pm-primary: #a78bfa;
   --pm-success: #10b981;
   --pm-warning: #f59e0b;

@@ -160,7 +160,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
           {backups.length === 0 ? (
             <tbody>
               <tr>
-                <td colSpan={4} className="px-5 py-12 text-center text-gray-500">
+                <td colSpan={4} className="px-5 py-12 text-center text-pm-text-secondary">
                   <div className="text-2xl animate-pulse mb-2">⏳</div>
                   <strong className="text-sm text-pm-text-secondary block mb-1">No File Backups Found</strong>
                   <span>Historical file system backups repository is currently empty.</span>
@@ -200,7 +200,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                   <tr key={idx} className={`hover:bg-white/[0.01] transition ${rowBorderClass}`}>
                     <td className="px-5 py-4 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono font-bold text-gray-200 select-all">{b.basename}</span>
+                        <span className="font-mono font-bold text-pm-text select-all">{b.basename}</span>
                         <button
                           type="button"
                           onClick={() => handleCopyText(b.basename)}
@@ -213,7 +213,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                       <div className="flex items-center gap-2 flex-wrap">
                         {badge}
                         {b.duration && (
-                          <span className="text-[0.65rem] text-gray-500">
+                          <span className="text-[0.65rem] text-pm-text-secondary">
                             Completed In: <strong className="text-pm-text-secondary">{b.duration}</strong>
                           </span>
                         )}

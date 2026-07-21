@@ -1232,7 +1232,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     })}
                     {backups.length === 0 && (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-gray-500">No database archives compiled.</td>
+                        <td colSpan={5} className="p-8 text-center text-pm-text-secondary">No database archives compiled.</td>
                       </tr>
                     )}
                   </tbody>
