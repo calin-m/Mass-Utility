@@ -35,6 +35,26 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
   const [verifyingFile, setVerifyingFile] = useState<string | null>(null);
   const [pinningFile, setPinningFile] = useState<string | null>(null);
   const [restoringFile, setRestoringFile] = useState<string | null>(null);
+  const [pushingCloudFile, setPushingCloudFile] = useState<string | null>(null);
+
+  const handleCloudPush = async (name: string) => {
+    showConfirm('Push to Google Drive', `Upload local backup <strong>${name}</strong> to Google Drive offsite storage?`, 'UPLOAD', async () => {
+      setPushingCloudFile(name);
+      try {
+        const data = await FetchService.post('upload_gdrive', { file: name });
+        if (data.success) {
+          showAlert('Cloud Upload Success', 'Backup archive successfully pushed to Google Drive offsite storage.', 'success');
+          onRefresh(data.backups || []);
+        } else {
+          showAlert('Upload Failed', data.error || 'Failed to upload backup to cloud.', 'error');
+        }
+      } catch (err: any) {
+        showAlert('Cloud Upload Error', err.message || 'Could not upload backup archive.', 'error');
+      } finally {
+        setPushingCloudFile(null);
+      }
+    });
+  };
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -238,6 +258,16 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
 
                         {b.is_local ? (
                           <>
+                            {!b.is_uploaded && (
+                              <button
+                                type="button"
+                                disabled={pushingCloudFile === b.basename}
+                                onClick={() => handleCloudPush(b.basename)}
+                                className="bg-[#8b5cf6]/15 hover:bg-[#8b5cf6]/25 text-[#c084fc] border border-[#8b5cf6]/25 px-2.5 py-1.5 rounded-lg transition"
+                              >
+                                {pushingCloudFile === b.basename ? 'Uploading...' : '☁️ Push to Cloud'}
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => handleDelete(b.basename)}

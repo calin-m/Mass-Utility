@@ -12,6 +12,7 @@ export const EventLogsTab: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [autoPoll, setAutoPoll] = useState(true);
   const [searchFilter, setSearchFilter] = useState('');
+  const [severityFilter, setSeverityFilter] = useState('ALL');
   
   const terminalEndRef = useRef<HTMLDivElement>(null);
   const pollTimerRef = useRef<any>(null);
@@ -89,11 +90,20 @@ export const EventLogsTab: React.FC = () => {
 
   // Filter logs line-by-line on frontend for high-speed searching
   const getFilteredLogs = () => {
-    if (!searchFilter.trim()) return logs;
-    const lines = logs.split('\n');
-    return lines
-      .filter(line => line.toLowerCase().includes(searchFilter.toLowerCase()))
-      .join('\n');
+    let filtered = logs;
+    if (severityFilter !== 'ALL') {
+      const lines = filtered.split('\n');
+      filtered = lines
+        .filter(line => line.toUpperCase().includes(severityFilter))
+        .join('\n');
+    }
+    if (searchFilter.trim()) {
+      const lines = filtered.split('\n');
+      filtered = lines
+        .filter(line => line.toLowerCase().includes(searchFilter.toLowerCase()))
+        .join('\n');
+    }
+    return filtered;
   };
 
   return (
@@ -111,13 +121,13 @@ export const EventLogsTab: React.FC = () => {
         <div className="flex gap-2">
           <button
             onClick={handleDownloadLogFile}
-            className="bg-pm-input hover:bg-pm-border text-pm-text text-xs font-bold px-4 py-2 rounded-lg transition uppercase"
+            className="pm-btn pm-btn-neutral px-4 py-2 text-xs font-bold uppercase"
           >
             📥 Download Log File
           </button>
           <button
             onClick={handleClearLogs}
-            className="bg-red-950/20 border border-red-900/30 hover:bg-red-900/10 text-red-400 text-xs font-bold px-4 py-2 rounded-lg transition uppercase"
+            className="pm-btn pm-btn-danger px-4 py-2 text-xs font-bold uppercase"
           >
             🗑️ Clear Telemetry
           </button>
@@ -127,23 +137,37 @@ export const EventLogsTab: React.FC = () => {
       {/* Terminal Settings and Filter */}
       <div className="flex flex-wrap gap-4 bg-pm-card border border-pm-border p-4 rounded-xl items-center justify-between shadow-md">
         <div className="flex items-center gap-3 flex-grow max-w-md">
-          <span className="text-xs text-pm-text-secondary font-bold uppercase">Filter Content:</span>
+          <span className="text-xs text-pm-text-secondary font-bold uppercase">Filter:</span>
           <input
             type="text"
             placeholder="Search log stream line-by-line..."
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
-            className="w-full bg-black/20 border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-[#8b5cf6]/50"
+            className="w-full bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-pm-primary/50"
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex bg-pm-input border border-pm-border p-1 rounded-lg">
+            {['ALL', 'ERROR', 'WARN', 'INFO'].map(st => (
+              <button
+                key={st}
+                onClick={() => setSeverityFilter(st)}
+                className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase transition ${
+                  severityFilter === st ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-text-secondary hover:text-pm-text'
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+
           <label className="flex items-center gap-2 text-xs font-bold text-pm-text-secondary uppercase cursor-pointer">
             <input
               type="checkbox"
               checked={autoPoll}
               onChange={(e) => setAutoPoll(e.target.checked)}
-              className="w-4 h-4 bg-black/20 border border-pm-border rounded text-[#8b5cf6] focus:ring-0 focus:ring-offset-0"
+              className="w-4 h-4 bg-pm-input border border-pm-border rounded text-pm-primary focus:ring-0 focus:ring-offset-0"
             />
             Live Polling (5s)
           </label>
@@ -151,7 +175,7 @@ export const EventLogsTab: React.FC = () => {
           <button
             onClick={() => fetchLogs()}
             disabled={loading}
-            className="bg-pm-input hover:bg-pm-border text-pm-text text-xs font-bold px-4 py-1.5 rounded-lg transition"
+            className="pm-btn pm-btn-neutral px-4 py-1.5 text-xs font-bold"
           >
             🔄 Refresh
           </button>

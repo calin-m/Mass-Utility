@@ -968,6 +968,22 @@ export const QueryMutateTab: React.FC = () => {
       {/* Step 2 Card: Configure & Execute Mutations */}
       {showStep2 && (
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4 border-l-4 border-l-red-500 animate-fade-in">
+          {/* AST Safety Banner */}
+          <div className={`p-3 rounded-lg border text-xs flex items-center justify-between font-mono ${
+            previewCount === 0 
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' 
+              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+          }`}>
+            <span className="flex items-center gap-2 font-bold">
+              {previewCount === 0 ? '⚠️ NOTICE:' : '🛡️ AST SAFETY SHIELD VERIFIED:'}
+            </span>
+            <span>
+              {previewCount === 0 
+                ? 'Target scope matches 0 products. Execution will yield no mutations.' 
+                : `Target scope strictly bound to ${previewCount} products. Parameterized AST WHERE criteria enforced.`}
+            </span>
+          </div>
+
           <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-3">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 bg-red-500 rounded-full"></span>

@@ -131,9 +131,8 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const handleConfirm = () => {
     if (state.onConfirm) {
       state.onConfirm(inputValue);
-    } else {
-      closeModal();
     }
+    closeModal();
   };
 
   return (

@@ -119,16 +119,17 @@ export const DatabaseToolsTab: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (driftModalData) {
+        if (driftModalData || inspectAllModal) {
           setDriftModalData(null);
           setTableRowDiff(null);
           setActiveDrawer(null);
+          setInspectAllModal(null);
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [driftModalData]);
+  }, [driftModalData, inspectAllModal]);
 
   // Load basic configurations on mount
   useEffect(() => {
