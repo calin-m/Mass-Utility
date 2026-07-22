@@ -228,4 +228,70 @@ body {
   color: var(--pm-text-primary, #1e293b);
 }
 
+/* Standard Button System (Ported from V1 Design System) */
+.pm-btn {
+  font-family: var(--pm-font-family, system-ui, -apple-system, sans-serif);
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  box-sizing: border-box;
+  text-decoration: none !important;
+  color: #ffffff !important;
+}
+
+.pm-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4 !important;
+}
+
+.pm-btn-primary {
+  background-color: var(--pm-primary, #6366f1) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+.pm-btn-primary:hover:not(:disabled) {
+  background-color: #4f46e5 !important;
+}
+
+.pm-btn-danger {
+  background-color: var(--pm-danger, #ef4444) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+.pm-btn-danger:hover:not(:disabled) {
+  background-color: #dc2626 !important;
+}
+
+.pm-btn-success {
+  background-color: var(--pm-success, #10b981) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+.pm-btn-success:hover:not(:disabled) {
+  background-color: #059669 !important;
+}
+
+.pm-btn-neutral {
+  background-color: var(--pm-neutral, #475569) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+.pm-btn-neutral:hover:not(:disabled) {
+  background-color: #334155 !important;
+}
+
+.pm-btn-purple {
+  background-color: var(--pm-purple, #8b5cf6) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+.pm-btn-purple:hover:not(:disabled) {
+  background-color: #7c3aed !important;
+}
+
 

@@ -7,7 +7,7 @@ import { FetchService } from '../utils/FetchService';
 import { useModal } from '../utils/overlay';
 
 export const EventLogsTab: React.FC = () => {
-  const { showAlert, showConfirm } = useModal();
+  const { showAlert, showConfirm, showToast } = useModal();
   const [logs, setLogs] = useState('');
   const [loading, setLoading] = useState(true);
   const [autoPoll, setAutoPoll] = useState(true);
@@ -67,7 +67,7 @@ export const EventLogsTab: React.FC = () => {
           const data = await FetchService.post('clear_saas_log');
           if (data.success) {
             setLogs('No logs compiled yet.');
-            showAlert('Logs Cleared', 'Host server telemetry logs cleared.', 'info');
+            showToast('Host server telemetry logs cleared.', 'info');
           }
         } catch (err: any) {
           showAlert('Clear Failed', err.message || 'Failed to clear logs.', 'error');

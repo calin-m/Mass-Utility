@@ -30,7 +30,7 @@ interface MutationAction {
 }
 
 export const QueryMutateTab: React.FC = () => {
-  const { showAlert, showConfirm, showPrompt } = useModal();
+  const { showAlert, showConfirm, showPrompt, showToast } = useModal();
 
   // Load options from window.PM_CONFIG
   const config = (window as any).PM_CONFIG || {};
@@ -427,7 +427,7 @@ export const QueryMutateTab: React.FC = () => {
           else if (type === 'mutate') setSelectedMutatePreset(String(data.id_preset));
           else setSelectedMasterPreset(String(data.id_preset));
           
-          showAlert('Preset Saved', `Preset "${name}" saved successfully.`, 'success');
+          showToast(`Preset "${name}" saved successfully.`, 'success');
         }
       } catch (err: any) {
         showAlert('Error Saving Preset', err.message || 'Failed to save preset.', 'error');
@@ -447,7 +447,7 @@ export const QueryMutateTab: React.FC = () => {
           if (type === 'query') setSelectedQueryPreset('');
           else if (type === 'mutate') setSelectedMutatePreset('');
           else setSelectedMasterPreset('');
-          showAlert('Preset Deleted', 'The preset was successfully removed.', 'info');
+          showToast('The preset was successfully removed.', 'info');
         }
       } catch (err: any) {
         showAlert('Delete Failed', err.message || 'Error deleting preset.', 'error');

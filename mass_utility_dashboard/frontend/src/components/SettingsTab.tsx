@@ -10,7 +10,7 @@ import { FetchService } from '../utils/FetchService';
 import { useModal } from '../utils/overlay';
 
 export const SettingsTab: React.FC = () => {
-  const { showAlert } = useModal();
+  const { showAlert, showToast } = useModal();
   const [activeSubTab, setActiveSubTab] = useState<'general' | 'info' | 'security'>('general');
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -37,7 +37,7 @@ export const SettingsTab: React.FC = () => {
           (window as any).PM_CONFIG.settings = merged;
         }
 
-        showAlert('Settings Saved', 'Settings saved successfully!', 'success');
+        showToast('Settings saved successfully!', 'success');
       } else {
         const errMsg = response?.error || 'Failed to save settings.';
         showAlert('Save Failed', errMsg, 'error');
