@@ -18,7 +18,7 @@ class AdminSettingsManager
         }
         @chmod($dbDir, 0755);
         if (file_exists($this->dbPath)) {
-            @chmod($this->dbPath, 0666);
+            @chmod($this->dbPath, 0644);
         }
         $pdo = new \PDO('sqlite:' . $this->dbPath);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);

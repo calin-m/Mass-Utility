@@ -58,7 +58,7 @@ class SQLiteConnectionManager
             $this->pdo->setAttribute(PDO::ATTR_TIMEOUT, 5);
 
             if (!$exists) {
-                @chmod($this->dbPath, 0666);
+                @chmod($this->dbPath, 0644);
             }
 
             // Attempt to optimize with Write-Ahead Logging (WAL) for concurrency

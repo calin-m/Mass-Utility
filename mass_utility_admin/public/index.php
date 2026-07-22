@@ -14,7 +14,7 @@ if (!is_dir($dbDir)) {
 }
 @chmod($dbDir, 0755);
 if (file_exists($dbPath)) {
-    @chmod($dbPath, 0666);
+    @chmod($dbPath, 0644);
 }
 
 $hasAdmin = false;
