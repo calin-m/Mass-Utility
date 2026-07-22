@@ -173,8 +173,8 @@ function AppContent() {
             onClick={() => setActiveTab('governor')}
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'governor'
-                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
             }`}
           >
             🛡️ Safety Governor
@@ -184,8 +184,8 @@ function AppContent() {
             onClick={() => setActiveTab('database')}
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'database'
-                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
             }`}
           >
             🗄️ Database Tools
@@ -195,8 +195,8 @@ function AppContent() {
             onClick={() => setActiveTab('files')}
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'files'
-                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
             }`}
           >
             📂 File Backups
@@ -206,8 +206,8 @@ function AppContent() {
             onClick={() => setActiveTab('query')}
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'query'
-                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
             }`}
           >
             ⚡ Query &amp; Mutate
@@ -217,8 +217,8 @@ function AppContent() {
             onClick={() => setActiveTab('history')}
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'history'
-                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
             }`}
           >
             🕒 Mutation History
@@ -228,8 +228,8 @@ function AppContent() {
             onClick={() => setActiveTab('logs')}
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'logs'
-                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
             }`}
           >
             📜 Event Logs
@@ -242,8 +242,8 @@ function AppContent() {
             onClick={() => setActiveTab('settings')}
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'settings'
-                ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md shadow-pm-primary/5'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
             }`}
           >
             ⚙️ Settings

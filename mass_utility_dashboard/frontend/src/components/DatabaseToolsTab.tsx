@@ -918,7 +918,7 @@ export const DatabaseToolsTab: React.FC = () => {
           onClick={() => setActiveSubTab('backup')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'backup'
-              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              ? 'bg-pm-card text-pm-primary border-pm-border shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
@@ -929,7 +929,7 @@ export const DatabaseToolsTab: React.FC = () => {
           onClick={() => setActiveSubTab('restore')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'restore'
-              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              ? 'bg-pm-card text-pm-primary border-pm-border shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
@@ -940,7 +940,7 @@ export const DatabaseToolsTab: React.FC = () => {
           onClick={() => setActiveSubTab('profiler')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'profiler'
-              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              ? 'bg-pm-card text-pm-primary border-pm-border shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
@@ -951,7 +951,7 @@ export const DatabaseToolsTab: React.FC = () => {
           onClick={() => setActiveSubTab('sweeper')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'sweeper'
-              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              ? 'bg-pm-card text-pm-primary border-pm-border shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >

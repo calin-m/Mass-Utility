@@ -59,7 +59,7 @@ export const SettingsTab: React.FC = () => {
           onClick={() => setActiveSubTab('general')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'general'
-              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              ? 'bg-pm-card text-pm-primary border-pm-border shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
@@ -70,7 +70,7 @@ export const SettingsTab: React.FC = () => {
           onClick={() => setActiveSubTab('info')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'info'
-              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              ? 'bg-pm-card text-pm-primary border-pm-border shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
@@ -81,7 +81,7 @@ export const SettingsTab: React.FC = () => {
           onClick={() => setActiveSubTab('security')}
           className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'security'
-              ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
+              ? 'bg-pm-card text-pm-primary border-pm-border shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
           }`}
         >
