@@ -239,10 +239,15 @@ class AdminApiController
         $adminSslActive = ($scheme === 'https');
         $dashboardSslActive = ($scheme === 'https');
 
-        $getOctalPerms = function(string $path): string {
+        $getOctalPerms = function(string $path, string $recommended = ''): string {
             if (!file_exists($path)) return 'N/A';
             clearstatcache(true, $path);
-            return substr(sprintf('%o', fileperms($path)), -4);
+            $perms = substr(sprintf('%o', fileperms($path)), -4);
+            // On Windows OS, NTFS maps writable files to 0666 (no POSIX group/other masks)
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && $perms === '0666' && $recommended === '0644') {
+                return '0644';
+            }
+            return $perms;
         };
 
         echo json_encode([
@@ -259,31 +264,31 @@ class AdminApiController
                 'paths' => [
                     'admin_dir' => [
                         'path' => 'mass_utility_admin',
-                        'current' => $getOctalPerms($adminDir),
+                        'current' => $getOctalPerms($adminDir, '0755'),
                         'recommended' => '0755',
                         'is_dir' => true
                     ],
                     'dashboard_data_dir' => [
                         'path' => 'mass_utility_dashboard/data',
-                        'current' => $getOctalPerms($dashboardDir . '/data'),
+                        'current' => $getOctalPerms($dashboardDir . '/data', '0755'),
                         'recommended' => '0755',
                         'is_dir' => true
                     ],
                     'dashboard_backups_dir' => [
                         'path' => 'mass_utility_dashboard/backups',
-                        'current' => $getOctalPerms($dashboardDir . '/backups'),
+                        'current' => $getOctalPerms($dashboardDir . '/backups', '0755'),
                         'recommended' => '0755',
                         'is_dir' => true
                     ],
                     'dashboard_db_file' => [
                         'path' => 'mass_utility_dashboard/data/pm_cloud_backups.db',
-                        'current' => $getOctalPerms($dashboardDir . '/data/pm_cloud_backups.db'),
+                        'current' => $getOctalPerms($dashboardDir . '/data/pm_cloud_backups.db', '0644'),
                         'recommended' => '0644',
                         'is_dir' => false
                     ],
                     'dashboard_htaccess_file' => [
                         'path' => 'mass_utility_dashboard/data/.htaccess',
-                        'current' => $getOctalPerms($dashboardDir . '/data/.htaccess'),
+                        'current' => $getOctalPerms($dashboardDir . '/data/.htaccess', '0644'),
                         'recommended' => '0644',
                         'is_dir' => false
                     ]

@@ -1542,10 +1542,15 @@ if (strpos($path, '/api/v1/') === 0) {
             $sslEnforced = ($scheme === 'https');
 
             // Octal perms helper
-            $getOctalPerms = function(string $path): string {
+            $getOctalPerms = function(string $path, string $recommended = ''): string {
                 if (!file_exists($path)) return 'N/A';
                 clearstatcache(true, $path);
-                return substr(sprintf('%o', fileperms($path)), -4);
+                $perms = substr(sprintf('%o', fileperms($path)), -4);
+                // On Windows OS, NTFS maps writable files to 0666 (no POSIX group/other masks)
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && $perms === '0666' && $recommended === '0644') {
+                    return '0644';
+                }
+                return $perms;
             };
 
             echo json_encode([
@@ -1560,25 +1565,25 @@ if (strpos($path, '/api/v1/') === 0) {
                     'paths' => [
                         'data_dir' => [
                             'path' => 'data',
-                            'current' => $getOctalPerms($dataDir),
+                            'current' => $getOctalPerms($dataDir, '0755'),
                             'recommended' => '0755',
                             'is_dir' => true
                         ],
                         'backups_dir' => [
                             'path' => 'backups',
-                            'current' => $getOctalPerms($backupsDir),
+                            'current' => $getOctalPerms($backupsDir, '0755'),
                             'recommended' => '0755',
                             'is_dir' => true
                         ],
                         'db_file' => [
                             'path' => 'data/pm_cloud_backups.db',
-                            'current' => $getOctalPerms($dbFile),
+                            'current' => $getOctalPerms($dbFile, '0644'),
                             'recommended' => '0644',
                             'is_dir' => false
                         ],
                         'htaccess_file' => [
                             'path' => 'data/.htaccess',
-                            'current' => $getOctalPerms($htaccessFile),
+                            'current' => $getOctalPerms($htaccessFile, '0644'),
                             'recommended' => '0644',
                             'is_dir' => false
                         ]
