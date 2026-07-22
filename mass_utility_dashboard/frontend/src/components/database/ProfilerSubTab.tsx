@@ -2,6 +2,7 @@
 // @Description: Sub-tab component managing InnoDB table health profiler, space overhead metrics, and OPTIMIZE TABLE execution controls.
 
 import React from 'react';
+import { SearchFilterBar } from '../common/SearchFilterBar';
 
 export interface TableMetric {
   name: string;
@@ -125,33 +126,30 @@ export const ProfilerSubTab: React.FC<ProfilerSubTabProps> = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 flex-wrap">
-                <input
-                  type="text"
-                  placeholder="Search table by name..."
-                  value={profilerSearch}
-                  onChange={(e) => onProfilerSearchChange(e.target.value)}
-                  className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-xs text-[var(--pm-text-primary)] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#8b5cf6]/50"
-                />
-
-                {profilerReport.tables.length > 0 && (
-                  <button
-                    type="button"
-                    disabled={isBulkOptimizing}
-                    onClick={onOptimizeAllTables}
-                    className="pm-btn pm-btn-success text-xs font-bold px-4 py-1.5 rounded-lg transition uppercase flex items-center gap-2"
-                  >
-                    {isBulkOptimizing ? (
-                      <>
-                        <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        {bulkOptimizeProgress || 'Optimizing All...'}
-                      </>
-                    ) : (
-                      '⚡ Optimize All Tables'
-                    )}
-                  </button>
-                )}
-              </div>
+              <SearchFilterBar
+                searchValue={profilerSearch}
+                onSearchChange={onProfilerSearchChange}
+                placeholder="Search table by name..."
+                extraActions={
+                  profilerReport.tables.length > 0 ? (
+                    <button
+                      type="button"
+                      disabled={isBulkOptimizing}
+                      onClick={onOptimizeAllTables}
+                      className="pm-btn pm-btn-success text-xs font-bold px-4 py-1.5 rounded-lg transition uppercase flex items-center gap-2"
+                    >
+                      {isBulkOptimizing ? (
+                        <>
+                          <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                          {bulkOptimizeProgress || 'Optimizing All...'}
+                        </>
+                      ) : (
+                        '⚡ Optimize All Tables'
+                      )}
+                    </button>
+                  ) : undefined
+                }
+              />
             </div>
 
             <div className="overflow-x-auto rounded-xl border border-[var(--pm-border-color)]">

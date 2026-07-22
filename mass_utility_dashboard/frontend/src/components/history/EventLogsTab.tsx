@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { LogTerminal } from '../common/LogTerminal';
+import { SearchFilterBar } from '../common/SearchFilterBar';
 import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
 
@@ -135,53 +136,40 @@ export const EventLogsTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Terminal Settings and Filter */}
-      <div className="flex flex-wrap gap-4 bg-pm-card border border-pm-border p-4 rounded-xl items-center justify-between shadow-md">
-        <div className="flex items-center gap-3 flex-grow max-w-md">
-          <span className="text-xs text-pm-text-secondary font-bold uppercase">Filter:</span>
-          <input
-            type="text"
-            placeholder="Search log stream line-by-line..."
-            value={searchFilter}
-            onChange={(e) => setSearchFilter(e.target.value)}
-            className="w-full bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-pm-primary/50"
-          />
-        </div>
-
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex bg-pm-input border border-pm-border p-1 rounded-lg">
-            {['ALL', 'ERROR', 'WARN', 'INFO'].map(st => (
-              <button
-                key={st}
-                onClick={() => setSeverityFilter(st)}
-                className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase transition ${
-                  severityFilter === st ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-text-secondary hover:text-pm-text'
-                }`}
-              >
-                {st}
-              </button>
-            ))}
+      <SearchFilterBar
+        searchValue={searchFilter}
+        onSearchChange={setSearchFilter}
+        placeholder="Search log stream line-by-line..."
+        filterValue={severityFilter}
+        onFilterChange={setSeverityFilter}
+        filterLabel="Severity"
+        filterOptions={[
+          { value: 'ALL', label: 'ALL SEVERITIES' },
+          { value: 'ERROR', label: 'ERROR' },
+          { value: 'WARN', label: 'WARN' },
+          { value: 'INFO', label: 'INFO' }
+        ]}
+        extraActions={
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-pm-text-secondary uppercase cursor-pointer mr-2">
+              <input
+                type="checkbox"
+                checked={autoPoll}
+                onChange={(e) => setAutoPoll(e.target.checked)}
+                className="w-4 h-4 bg-pm-input border border-pm-border rounded text-pm-primary focus:ring-0 focus:ring-offset-0"
+              />
+              Live Polling (5s)
+            </label>
+            <button
+              onClick={() => fetchLogs()}
+              disabled={loading}
+              className="pm-btn pm-btn-neutral px-3 py-1.5 text-xs font-bold"
+            >
+              🔄 Refresh
+            </button>
           </div>
-
-          <label className="flex items-center gap-2 text-xs font-bold text-pm-text-secondary uppercase cursor-pointer">
-            <input
-              type="checkbox"
-              checked={autoPoll}
-              onChange={(e) => setAutoPoll(e.target.checked)}
-              className="w-4 h-4 bg-pm-input border border-pm-border rounded text-pm-primary focus:ring-0 focus:ring-offset-0"
-            />
-            Live Polling (5s)
-          </label>
-
-          <button
-            onClick={() => fetchLogs()}
-            disabled={loading}
-            className="pm-btn pm-btn-neutral px-4 py-1.5 text-xs font-bold"
-          >
-            🔄 Refresh
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Terminal logs container */}
       <LogTerminal

@@ -3,6 +3,7 @@
 // @Calls: get_mutation_history, rollback_mutation, reapply_mutation, delete_mutation_job, clear_mutation_history
 
 import React, { useState, useEffect } from 'react';
+import { BaseModal } from '../common/BaseModal';
 import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
 
@@ -333,77 +334,69 @@ export const MutationHistoryTab: React.FC = () => {
       </div>
 
       {/* View Job Overlay Modal Drawer */}
-      {selectedJob && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-[99999]">
-          <div className="bg-pm-card text-pm-text border border-pm-border rounded-2xl p-6 shadow-2xl w-full max-w-3xl mx-4 relative max-h-[85vh] flex flex-col">
-            <div className="flex justify-between items-center border-b border-pm-border pb-3 mb-4 flex-shrink-0">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-pm-text">
-                Ledger Payload Audit Details: {selectedJob.job_id}
-              </h2>
-              <button
-                onClick={() => setSelectedJob(null)}
-                className="text-pm-text-secondary hover:text-pm-text text-lg font-bold"
-              >
-                &times;
-              </button>
+      <BaseModal
+        isOpen={Boolean(selectedJob)}
+        onClose={() => setSelectedJob(null)}
+        title={`Ledger Payload Audit Details: ${selectedJob?.job_id || ''}`}
+        icon="📋"
+        maxWidth="2xl"
+        footerActions={
+          <button
+            type="button"
+            onClick={() => setSelectedJob(null)}
+            className="bg-pm-input hover:bg-pm-border text-pm-text text-xs font-bold px-4 py-2 rounded-lg transition"
+          >
+            Close Audit View
+          </button>
+        }
+      >
+        {selectedJob && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="text-pm-text-secondary font-bold block uppercase">Date Created:</span>
+                <span className="font-mono text-gray-200">{selectedJob.date}</span>
+              </div>
+              <div>
+                <span className="text-pm-text-secondary font-bold block uppercase">State:</span>
+                <span>{getStatusBadge(selectedJob.state)}</span>
+              </div>
             </div>
 
-            <div className="space-y-4 overflow-y-auto pr-2 flex-grow">
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div>
-                  <span className="text-pm-text-secondary font-bold block uppercase">Date Created:</span>
-                  <span className="font-mono text-gray-200">{selectedJob.date}</span>
-                </div>
-                <div>
-                  <span className="text-pm-text-secondary font-bold block uppercase">State:</span>
-                  <span>{getStatusBadge(selectedJob.state)}</span>
-                </div>
+            <div>
+              <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">Actions String</span>
+              <div className="bg-black/20 border border-pm-border p-3 rounded-lg text-xs font-mono text-gray-200">
+                {selectedJob.actions}
               </div>
+            </div>
 
-              <div>
-                <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">Actions String</span>
-                <div className="bg-black/20 border border-pm-border p-3 rounded-lg text-xs font-mono text-gray-200">
-                  {selectedJob.actions}
-                </div>
-              </div>
+            <div>
+              <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">AST Query Parameters (JSON)</span>
+              <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-40">
+                {JSON.stringify(JSON.parse(selectedJob.raw_payload || '{}'), null, 2)}
+              </pre>
+            </div>
 
+            {selectedJob.revert_payload && (
               <div>
-                <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">AST Query Parameters (JSON)</span>
-                <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-40">
-                  {JSON.stringify(JSON.parse(selectedJob.raw_payload), null, 2)}
+                <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">Reversion Backups Map (JSON)</span>
+                <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-40">
+                  {JSON.stringify(JSON.parse(selectedJob.revert_payload || '{}'), null, 2)}
                 </pre>
               </div>
+            )}
 
-              {selectedJob.revert_payload && (
-                <div>
-                  <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">Reversion Backups Map (JSON)</span>
-                  <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-40">
-                    {JSON.stringify(JSON.parse(selectedJob.revert_payload), null, 2)}
-                  </pre>
-                </div>
-              )}
-
-              {selectedJob.errors && (
-                <div>
-                  <span className="text-xs font-bold text-red-400 block uppercase mb-1">Execution Errors</span>
-                  <pre className="bg-red-950/10 border border-red-900/20 p-3 rounded-lg text-xs text-red-300 overflow-x-auto">
-                    {selectedJob.errors}
-                  </pre>
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-pm-border pt-4 mt-4 flex justify-end flex-shrink-0">
-              <button
-                onClick={() => setSelectedJob(null)}
-                className="bg-pm-input hover:bg-pm-border text-pm-text text-xs font-bold px-4 py-2 rounded-lg transition"
-              >
-                Close Audit View
-              </button>
-            </div>
+            {selectedJob.errors && (
+              <div>
+                <span className="text-xs font-bold text-red-400 block uppercase mb-1">Execution Errors</span>
+                <pre className="bg-red-950/10 border border-red-900/20 p-3 rounded-lg text-xs text-red-300 overflow-x-auto">
+                  {selectedJob.errors}
+                </pre>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </BaseModal>
     </div>
   );
 };

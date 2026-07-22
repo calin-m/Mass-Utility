@@ -2,6 +2,7 @@
 // @Description: Sub-tab component managing MySQL database point-in-time restore, file upload staging, and restoration HUD logs.
 
 import React from 'react';
+import { LogTerminal } from '../common/LogTerminal';
 
 export interface BackupFile {
   basename: string;
@@ -242,12 +243,11 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-[0.65rem] text-[var(--pm-text-secondary)] uppercase tracking-wider font-bold">Execution Logs</p>
-            <pre className="bg-[var(--pm-body-bg)]/80 text-[0.7rem] text-rose-400 p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-[var(--pm-border-color)] whitespace-pre-wrap">
-              {restoreLogTerminal}
-            </pre>
-          </div>
+          <LogTerminal
+            logs={restoreLogTerminal}
+            title="Execution Logs"
+            maxHeight="150px"
+          />
         </div>
       )}
     </div>

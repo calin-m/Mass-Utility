@@ -2,6 +2,7 @@
 // @Description: Sub-tab component managing visitor log sweeper, abandoned carts purger, and image bloat cleanup.
 
 import React, { MutableRefObject } from 'react';
+import { LogTerminal } from '../common/LogTerminal';
 
 export interface SweeperStats {
   success: boolean;
@@ -261,12 +262,11 @@ export const SweeperSubTab: React.FC<SweeperSubTabProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-[0.65rem] text-[var(--pm-text-secondary)] font-bold uppercase tracking-wider">Console Output Log</p>
-            <pre className="bg-[var(--pm-body-bg)]/80 text-[0.7rem] text-emerald-400 p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-[var(--pm-border-color)] whitespace-pre-wrap">
-              {sweeperConsole}
-            </pre>
-          </div>
+          <LogTerminal
+            logs={sweeperConsole}
+            title="Console Output Log"
+            maxHeight="150px"
+          />
         </div>
       )}
     </div>
