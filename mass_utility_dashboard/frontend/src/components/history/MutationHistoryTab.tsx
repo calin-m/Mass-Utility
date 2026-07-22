@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { BaseModal } from '../common/BaseModal';
 import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
+import { reconstructSql } from '../../utils/sqlReconstructor';
 
 interface HistoryJob {
   job_id: string;
@@ -26,6 +27,13 @@ export const MutationHistoryTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedJob, setSelectedJob] = useState<HistoryJob | null>(null);
+  const [inspectTab, setInspectTab] = useState<'json' | 'sql'>('json');
+
+  const handleCopySnippet = (text: string, label: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    showToast(`Copied ${label} to clipboard!`, 'success');
+  };
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -337,65 +345,170 @@ export const MutationHistoryTab: React.FC = () => {
       <BaseModal
         isOpen={Boolean(selectedJob)}
         onClose={() => setSelectedJob(null)}
-        title={`Ledger Payload Audit Details: ${selectedJob?.job_id || ''}`}
-        icon="📋"
+        title={`🔍 Inspect Mutation Details & Baseline`}
+        subtitle={selectedJob ? `Job ID: ${selectedJob.job_id} (${selectedJob.date})` : undefined}
+        icon="🔍"
         maxWidth="2xl"
         footerActions={
           <button
             type="button"
             onClick={() => setSelectedJob(null)}
-            className="bg-pm-input hover:bg-pm-border text-pm-text text-xs font-bold px-4 py-2 rounded-lg transition"
+            className="pm-btn pm-btn-neutral px-4 py-2 text-xs font-bold"
           >
             Close Audit View
           </button>
         }
       >
-        {selectedJob && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div>
-                <span className="text-pm-text-secondary font-bold block uppercase">Date Created:</span>
-                <span className="font-mono text-gray-200">{selectedJob.date}</span>
+        {selectedJob && (() => {
+          const formattedRawPayload = (() => {
+            try { return JSON.stringify(JSON.parse(selectedJob.raw_payload), null, 2); }
+            catch (e) { return selectedJob.raw_payload || 'No raw payload recorded.'; }
+          })();
+
+          const formattedRevertPayload = (() => {
+            try { return JSON.stringify(JSON.parse(selectedJob.revert_payload), null, 2); }
+            catch (e) { return selectedJob.revert_payload || 'No revert snapshots recorded.'; }
+          })();
+
+          const { mutationSql, revertSql } = reconstructSql(selectedJob.raw_payload, selectedJob.revert_payload);
+
+          return (
+            <div className="space-y-4">
+              {/* Top Summary Banner */}
+              <div className="bg-pm-input/30 border border-pm-border p-3.5 rounded-xl flex items-center justify-between flex-wrap gap-3 text-xs">
+                <div>
+                  <span className="text-pm-text-secondary font-bold uppercase block text-[10px]">Date Created</span>
+                  <span className="font-mono text-pm-text font-bold">{selectedJob.date}</span>
+                </div>
+                <div>
+                  <span className="text-pm-text-secondary font-bold uppercase block text-[10px]">Affected Scope</span>
+                  <span className="font-mono text-pm-text font-bold">{selectedJob.affected_count} Product(s)</span>
+                </div>
+                <div>
+                  <span className="text-pm-text-secondary font-bold uppercase block text-[10px]">Status</span>
+                  <span>{getStatusBadge(selectedJob.state)}</span>
+                </div>
               </div>
-              <div>
-                <span className="text-pm-text-secondary font-bold block uppercase">State:</span>
-                <span>{getStatusBadge(selectedJob.state)}</span>
+
+              {/* Sub-Tabs Toggle */}
+              <div className="flex bg-pm-input border border-pm-border p-1 rounded-xl gap-1">
+                <button
+                  type="button"
+                  onClick={() => setInspectTab('json')}
+                  className={`flex-1 py-1.5 px-3 text-xs font-bold uppercase rounded-lg transition-all ${
+                    inspectTab === 'json' ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-text-secondary hover:text-pm-text'
+                  }`}
+                >
+                  📋 JSON Payloads
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInspectTab('sql')}
+                  className={`flex-1 py-1.5 px-3 text-xs font-bold uppercase rounded-lg transition-all ${
+                    inspectTab === 'sql' ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-text-secondary hover:text-pm-text'
+                  }`}
+                >
+                  🌐 SQL Code Preview
+                </button>
               </div>
+
+              {/* Actions Summary */}
+              <div>
+                <span className="text-[10px] font-bold text-pm-text-secondary uppercase block mb-1">Actions String</span>
+                <div className="bg-black/20 border border-pm-border p-2.5 rounded-lg text-xs font-mono text-pm-text">
+                  {selectedJob.actions}
+                </div>
+              </div>
+
+              {/* Tab 1: JSON Payloads */}
+              {inspectTab === 'json' && (
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-bold text-pm-text-secondary uppercase">⚡ Mutation Action Rules &amp; Scope (AST Payload)</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopySnippet(formattedRawPayload, 'AST Payload JSON')}
+                        className="text-xs text-pm-text-secondary hover:text-pm-text font-bold flex items-center gap-1"
+                      >
+                        📋 Copy Snippet
+                      </button>
+                    </div>
+                    <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-48 font-mono">
+                      {formattedRawPayload}
+                    </pre>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-bold text-pm-text-secondary uppercase">🔮 Captured Baseline Revert States (Original Database Values)</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopySnippet(formattedRevertPayload, 'Baseline Revert JSON')}
+                        className="text-xs text-pm-text-secondary hover:text-pm-text font-bold flex items-center gap-1"
+                      >
+                        📋 Copy Snippet
+                      </button>
+                    </div>
+                    <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-56 font-mono">
+                      {formattedRevertPayload}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: SQL Code Preview */}
+              {inspectTab === 'sql' && (
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-bold text-amber-400 uppercase flex items-center gap-1">
+                        <span>⚡</span> Executed Mutation SQL Statements
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopySnippet(mutationSql, 'Mutation SQL')}
+                        className="text-xs text-pm-text-secondary hover:text-pm-text font-bold flex items-center gap-1"
+                      >
+                        📋 Copy SQL
+                      </button>
+                    </div>
+                    <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-amber-500/20 p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-48 font-mono">
+                      {mutationSql}
+                    </pre>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-bold text-rose-400 uppercase flex items-center gap-1">
+                        <span>🔮</span> Projected Rollback Reversion SQL Statements
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopySnippet(revertSql, 'Rollback SQL')}
+                        className="text-xs text-pm-text-secondary hover:text-pm-text font-bold flex items-center gap-1"
+                      >
+                        📋 Copy SQL
+                      </button>
+                    </div>
+                    <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-rose-500/20 p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-56 font-mono">
+                      {revertSql}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {selectedJob.errors && (
+                <div>
+                  <span className="text-xs font-bold text-red-400 block uppercase mb-1">Execution Errors</span>
+                  <pre className="bg-red-950/10 border border-red-900/20 p-3 rounded-lg text-xs text-red-300 overflow-x-auto font-mono">
+                    {selectedJob.errors}
+                  </pre>
+                </div>
+              )}
             </div>
-
-            <div>
-              <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">Actions String</span>
-              <div className="bg-black/20 border border-pm-border p-3 rounded-lg text-xs font-mono text-gray-200">
-                {selectedJob.actions}
-              </div>
-            </div>
-
-            <div>
-              <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">AST Query Parameters (JSON)</span>
-              <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-40">
-                {JSON.stringify(JSON.parse(selectedJob.raw_payload || '{}'), null, 2)}
-              </pre>
-            </div>
-
-            {selectedJob.revert_payload && (
-              <div>
-                <span className="text-xs font-bold text-pm-text-secondary block uppercase mb-1">Reversion Backups Map (JSON)</span>
-                <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-40">
-                  {JSON.stringify(JSON.parse(selectedJob.revert_payload || '{}'), null, 2)}
-                </pre>
-              </div>
-            )}
-
-            {selectedJob.errors && (
-              <div>
-                <span className="text-xs font-bold text-red-400 block uppercase mb-1">Execution Errors</span>
-                <pre className="bg-red-950/10 border border-red-900/20 p-3 rounded-lg text-xs text-red-300 overflow-x-auto">
-                  {selectedJob.errors}
-                </pre>
-              </div>
-            )}
-          </div>
-        )}
+          );
+        })()}
       </BaseModal>
     </div>
   );
