@@ -2,6 +2,7 @@
 // @Description: Sub-component managing mutation rule actions (SET, ADD, MULTIPLY) and execution pre-flight controls.
 
 import React from 'react';
+import { LogTerminal } from '../common/LogTerminal';
 
 export interface MutationAction {
   id: string;
@@ -121,14 +122,14 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
         </button>
       </div>
 
-      {/* Terminal Log Output Modal / Drawer */}
+      {/* Terminal Log Output Drawer */}
       {showLogTerminal && mutationLogs && (
-        <div className="space-y-2 border-t border-[var(--pm-border-color)] pt-4">
-          <span className="text-[0.65rem] font-bold text-[var(--pm-text-secondary)] uppercase tracking-wider">Live Transaction Log Terminal</span>
-          <pre className="bg-[var(--pm-body-bg)]/90 text-emerald-400 p-4 rounded-xl font-mono text-[0.7rem] max-h-60 overflow-y-auto border border-[var(--pm-border-color)] whitespace-pre-wrap">
-            {mutationLogs}
-          </pre>
-        </div>
+        <LogTerminal
+          title="Live Transaction Log Terminal"
+          logs={mutationLogs}
+          maxHeight="240px"
+          downloadFilename="mutation_execution.log"
+        />
       )}
     </div>
   );

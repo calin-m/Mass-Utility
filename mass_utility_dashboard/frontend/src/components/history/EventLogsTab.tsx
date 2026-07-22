@@ -3,6 +3,7 @@
 // @Calls: hydrate_dashboard, clear_saas_log
 
 import React, { useState, useEffect, useRef } from 'react';
+import { LogTerminal } from '../common/LogTerminal';
 import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
 
@@ -183,29 +184,13 @@ export const EventLogsTab: React.FC = () => {
       </div>
 
       {/* Terminal logs container */}
-      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-xl flex flex-col">
-        <div className="bg-black/40 px-4 py-2 border-b border-pm-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></span>
-            <span className="text-[10px] font-bold text-pm-text-secondary uppercase font-mono">telemetry@mass-utility.sh</span>
-          </div>
-          <span className="text-[9px] text-pm-text-secondary font-mono">UTF-8 • Line Buffered</span>
-        </div>
-
-        <div className="p-4 bg-pm-terminal-bg rounded-b-xl border-x border-b border-pm-border min-h-[350px] max-h-[550px] overflow-y-auto font-mono text-xs text-slate-300 space-y-1.5 scrollbar-thin scrollbar-thumb-white/10">
-          {loading && !logs ? (
-            <div className="flex items-center justify-center h-[350px] text-pm-text-secondary gap-2">
-              <span className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></span>
-              Streaming host telemetry console...
-            </div>
-          ) : (
-            <pre className="text-emerald-400 whitespace-pre-wrap word-break-all">
-              {getFilteredLogs() || 'No telemetry matches current filter criteria.'}
-              <div ref={terminalEndRef} />
-            </pre>
-          )}
-        </div>
-      </div>
+      <LogTerminal
+        title="telemetry@mass-utility.sh"
+        logs={getFilteredLogs() || 'No telemetry matches current filter criteria.'}
+        maxHeight="550px"
+        onClearLogs={handleClearLogs}
+        downloadFilename="saas_telemetry.log"
+      />
     </div>
   );
 };
