@@ -295,23 +295,53 @@ class AdminApiController
     {
         $adminDir = dirname(dirname(__DIR__));
         $dashboardDir = dirname($adminDir) . '/mass_utility_dashboard';
-
-        // Auto-create missing backups directory
+        $dataDir = $dashboardDir . '/data';
         $backupsDir = $dashboardDir . '/backups';
+        $dbFile = $dataDir . '/pm_cloud_backups.db';
+        $htaccessFile = $dataDir . '/.htaccess';
+        $backupsHtaccess = $backupsDir . '/.htaccess';
+
+        $htaccessContent = "# Protect SQLite database and backup archives from direct HTTP downloads\n" .
+            "Options -Indexes\n\n" .
+            "<IfModule mod_authz_core.c>\n" .
+            "    Require all denied\n" .
+            "</IfModule>\n" .
+            "<IfModule !mod_authz_core.c>\n" .
+            "    Order deny,allow\n" .
+            "    Deny from all\n" .
+            "</IfModule>\n\n" .
+            "<FilesMatch \".*\">\n" .
+            "    <IfModule mod_authz_core.c>\n" .
+            "        Require all denied\n" .
+            "    </IfModule>\n" .
+            "    <IfModule !mod_authz_core.c>\n" .
+            "        Order deny,allow\n" .
+            "        Deny from all\n" .
+            "    </IfModule>\n" .
+            "</FilesMatch>\n";
+
+        // Auto-create missing directories
+        if (!is_dir($dataDir)) {
+            @mkdir($dataDir, 0755, true);
+        }
         if (!is_dir($backupsDir)) {
             @mkdir($backupsDir, 0755, true);
         }
 
-        $htaccessFile = $dashboardDir . '/data/.htaccess';
-        if (!file_exists($htaccessFile) && is_dir($dashboardDir . '/data')) {
-            @file_put_contents($htaccessFile, "Deny from all\n");
+        // Always write/repair secure .htaccess protection blocks
+        @file_put_contents($htaccessFile, $htaccessContent);
+        @file_put_contents($backupsHtaccess, $htaccessContent);
+
+        // Ensure DB file exists so chmod succeeds
+        if (!file_exists($dbFile) && is_writable($dataDir)) {
+            @touch($dbFile);
         }
 
         $targets = [
             'admin_dir' => [$adminDir, 0755],
-            'dashboard_data_dir' => [$dashboardDir . '/data', 0755],
+            'dashboard_data_dir' => [$dataDir, 0755],
             'dashboard_backups_dir' => [$backupsDir, 0755],
-            'dashboard_db_file' => [$dashboardDir . '/data/pm_cloud_backups.db', 0644],
+            'dashboard_db_file' => [$dbFile, 0644],
             'dashboard_htaccess_file' => [$htaccessFile, 0644]
         ];
 
@@ -322,6 +352,14 @@ class AdminApiController
                 $results[$key] = @chmod($path, $mode);
             } else {
                 $results[$key] = true;
+            }
+        }
+
+        // Chmod SQLite auxiliary WAL/journal files if present
+        foreach (['-wal', '-shm', '-journal'] as $ext) {
+            $auxFile = $dbFile . $ext;
+            if (file_exists($auxFile)) {
+                @chmod($auxFile, 0644);
             }
         }
 

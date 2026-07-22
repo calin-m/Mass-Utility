@@ -1592,15 +1592,42 @@ if (strpos($path, '/api/v1/') === 0) {
             $backupsDir = dirname(__DIR__) . '/backups';
             $dbFile = $dataDir . '/pm_cloud_backups.db';
             $htaccessFile = $dataDir . '/.htaccess';
+            $backupsHtaccess = $backupsDir . '/.htaccess';
 
-            // Auto-create backups directory if missing
+            $htaccessContent = "# Protect SQLite database and backup archives from direct HTTP downloads\n" .
+                "Options -Indexes\n\n" .
+                "<IfModule mod_authz_core.c>\n" .
+                "    Require all denied\n" .
+                "</IfModule>\n" .
+                "<IfModule !mod_authz_core.c>\n" .
+                "    Order deny,allow\n" .
+                "    Deny from all\n" .
+                "</IfModule>\n\n" .
+                "<FilesMatch \".*\">\n" .
+                "    <IfModule mod_authz_core.c>\n" .
+                "        Require all denied\n" .
+                "    </IfModule>\n" .
+                "    <IfModule !mod_authz_core.c>\n" .
+                "        Order deny,allow\n" .
+                "        Deny from all\n" .
+                "    </IfModule>\n" .
+                "</FilesMatch>\n";
+
+            // Auto-create directories if missing
+            if (!is_dir($dataDir)) {
+                @mkdir($dataDir, 0755, true);
+            }
             if (!is_dir($backupsDir)) {
                 @mkdir($backupsDir, 0755, true);
             }
 
-            // Generate secure data/.htaccess if missing
-            if (!file_exists($htaccessFile)) {
-                @file_put_contents($htaccessFile, "Deny from all\n");
+            // Always write/repair secure .htaccess protection blocks
+            @file_put_contents($htaccessFile, $htaccessContent);
+            @file_put_contents($backupsHtaccess, $htaccessContent);
+
+            // Ensure DB file exists so chmod succeeds
+            if (!file_exists($dbFile) && is_writable($dataDir)) {
+                @touch($dbFile);
             }
 
             $targets = [
@@ -1617,6 +1644,14 @@ if (strpos($path, '/api/v1/') === 0) {
                     $results[$key] = @chmod($path, $mode);
                 } else {
                     $results[$key] = true;
+                }
+            }
+
+            // Chmod SQLite auxiliary WAL/journal files if present
+            foreach (['-wal', '-shm', '-journal'] as $ext) {
+                $auxFile = $dbFile . $ext;
+                if (file_exists($auxFile)) {
+                    @chmod($auxFile, 0644);
                 }
             }
 
