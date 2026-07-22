@@ -696,6 +696,7 @@ export const DatabaseToolsTab: React.FC = () => {
     const imagesListCopy = [...orphanedImages];
 
     let purgeStatsStep = purgeStats;
+    let purgeGuestStep = purgeStats;
     let purgeCartsStep = purgeCarts;
     let purgeImagesStep = purgeImages;
 
@@ -717,22 +718,26 @@ export const DatabaseToolsTab: React.FC = () => {
             setSweeperProgressPercent(pct);
             setSweeperConsole(prev => prev + `\n[${new Date().toLocaleTimeString()}] [STATS] Purged ${res.deleted.toLocaleString()} connection logs.`);
             
-            if (!res.done) {
+            if (!res.done && res.deleted > 0) {
               setTimeout(runNextSweepChunk, 200);
             } else {
               purgeStatsStep = false;
               runNextSweepChunk();
             }
+          } else {
+            purgeStatsStep = false;
+            runNextSweepChunk();
           }
         } catch (err: any) {
           setSweeperConsole(prev => prev + `\n[ERROR] Stats purge failed: ${err.message}`);
-          setIsSweeperRunning(false);
+          purgeStatsStep = false;
+          runNextSweepChunk();
         }
         return;
       }
 
       // 1b. Guest Purge
-      if (statsCount > 0 && !purgeStatsStep && purgeStats) {
+      if (purgeGuestStep) {
         setSweeperProgressText('Sweeping orphaned visitor accounts...');
         try {
           const res = await FetchService.post('sweeper_sweep_guests', { chunk_size: chunkSize });
@@ -742,17 +747,20 @@ export const DatabaseToolsTab: React.FC = () => {
             setSweeperProgressPercent(pct);
             setSweeperConsole(prev => prev + `\n[${new Date().toLocaleTimeString()}] [STATS] Purged ${res.deleted.toLocaleString()} guest records.`);
             
-            if (!res.done) {
+            if (!res.done && res.deleted > 0) {
               setTimeout(runNextSweepChunk, 200);
             } else {
-              // Mark complete
-              setOrphanedImages([]);
+              purgeGuestStep = false;
               runNextSweepChunk();
             }
+          } else {
+            purgeGuestStep = false;
+            runNextSweepChunk();
           }
         } catch (err: any) {
           setSweeperConsole(prev => prev + `\n[ERROR] Guest sweep failed: ${err.message}`);
-          setIsSweeperRunning(false);
+          purgeGuestStep = false;
+          runNextSweepChunk();
         }
         return;
       }
@@ -768,16 +776,20 @@ export const DatabaseToolsTab: React.FC = () => {
             setSweeperProgressPercent(pct);
             setSweeperConsole(prev => prev + `\n[${new Date().toLocaleTimeString()}] [CARTS] Purged ${res.deleted.toLocaleString()} expired carts.`);
             
-            if (!res.done) {
+            if (!res.done && res.deleted > 0) {
               setTimeout(runNextSweepChunk, 200);
             } else {
               purgeCartsStep = false;
               runNextSweepChunk();
             }
+          } else {
+            purgeCartsStep = false;
+            runNextSweepChunk();
           }
         } catch (err: any) {
           setSweeperConsole(prev => prev + `\n[ERROR] Carts purge failed: ${err.message}`);
-          setIsSweeperRunning(false);
+          purgeCartsStep = false;
+          runNextSweepChunk();
         }
         return;
       }
@@ -1617,7 +1629,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   type="button"
                   onClick={handleSweeperScan}
                   disabled={isScanningSweeper}
-                  className="pm-btn px-4 py-2 rounded-lg text-xs font-bold transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
+                  className="pm-btn pm-btn-purple px-4 py-2 rounded-lg text-xs font-bold transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
                 >
                   {isScanningSweeper ? 'Scanning...' : '🔍 Pre-Flight Scan'}
                 </button>
