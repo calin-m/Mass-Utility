@@ -104,8 +104,14 @@ function getBridgeToken(\MassUtility\SaaS\Service\TenantSettingsRepository $sett
 
 $bridgeToken = getBridgeToken($settingsRepo, dirname(__DIR__));
 
-// Initialize session for authentication
+// Initialize session for authentication with hardened cookie flags
 if (session_status() === PHP_SESSION_NONE) {
+    @session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
 }
 
@@ -151,6 +157,11 @@ if (isset($_GET['ott']) && !empty($bridgeToken)) {
 // Intercept direct download requests at top-level index.php before any HTML page rendering
 $topAction = $_GET['mu_action'] ?? $_GET['action'] ?? '';
 if (in_array($topAction, ['download_backup', 'download_from_drive', 'download_file_backup', 'download_file_backup_log'], true)) {
+    if (empty($_SESSION['employee_id'])) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Unauthorized access. Active authenticated session required.']);
+        exit;
+    }
     $file = $_GET['file'] ?? '';
     $cleanFile = basename((string)$file);
     if (!empty($cleanFile) && !headers_sent()) {
