@@ -1183,7 +1183,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             {b.sql_download_url && (
                               <a
                                 href={b.sql_download_url}
-                                className="pm-btn pm-btn-sm text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
+                                className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1 rounded-md"
                                 title="Download SQL Dump"
                               >
                                 <span>⬇️</span> SQL
@@ -1193,7 +1193,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             {b.log_filename && b.log_download_url && (
                               <a
                                 href={b.log_download_url}
-                                className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
+                                className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 rounded-md"
                                 title="Download Telemetry Log"
                               >
                                 <span>📄</span> Log
@@ -1202,7 +1202,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleCheckCompareDrift(b.basename)}
-                              className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
+                              className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] px-2.5 py-1 rounded-md"
                             >
                               <span>🔍</span> Diff
                             </button>
@@ -1211,14 +1211,14 @@ export const DatabaseToolsTab: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteBackup(b.basename)}
-                                  className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
+                                  className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
                                 >
                                   <span>🗑️</span> Delete
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleTogglePinBackup(b.basename)}
-                                  className={`pm-btn pm-btn-sm text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90 ${
+                                  className={`pm-btn pm-btn-sm text-[0.7rem] px-2.5 py-1 rounded-md ${
                                     isPinned ? 'pm-btn-success' : 'pm-btn-neutral'
                                   }`}
                                 >
