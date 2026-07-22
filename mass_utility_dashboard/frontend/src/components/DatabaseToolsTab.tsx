@@ -1354,30 +1354,30 @@ export const DatabaseToolsTab: React.FC = () => {
               )}
 
               {isLoadingRowDiff ? (
-                <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] p-4 rounded-xl text-center text-[var(--pm-text-secondary)] font-mono">
+                <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl text-center text-pm-text-secondary font-mono">
                   ⌛ Loading row difference telemetry...
                 </div>
               ) : tableRowDiff && (
-                <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] p-4 rounded-xl space-y-3">
-                  <div className="flex justify-between items-center font-bold text-[var(--pm-text-primary)] border-b border-[var(--pm-border-color)] pb-2">
+                <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl space-y-3">
+                  <div className="flex justify-between items-center font-bold text-pm-text border-b border-pm-border pb-2">
                     <span>Table Row Modifications: {tableRowDiff.table}</span>
                     <div className="flex gap-3 text-[0.7rem]">
-                      <span className="text-emerald-600 dark:text-emerald-400">+{tableRowDiff.summary.added} Added</span>
-                      <span className="text-red-600 dark:text-red-400">-{tableRowDiff.summary.deleted} Deleted</span>
-                      <span className="text-amber-600 dark:text-amber-400">~{tableRowDiff.summary.modified} Modified</span>
+                      <span className="text-emerald-500">+{tableRowDiff.summary.added} Added</span>
+                      <span className="text-red-500">-{tableRowDiff.summary.deleted} Deleted</span>
+                      <span className="text-amber-500">~{tableRowDiff.summary.modified} Modified</span>
                     </div>
                   </div>
 
                   <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2">
                     {/* Modified Rows */}
                     {tableRowDiff.modified_rows?.map((r: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-[var(--pm-card-bg)] border-amber-500/30 border border-l-4 rounded-r-lg space-y-2">
-                        <span className="font-mono text-[var(--pm-text-primary)] font-bold block">PK Index: {r.pk}</span>
+                      <div key={idx} className="p-3 bg-pm-card border-amber-500/30 border border-l-4 rounded-r-lg space-y-2">
+                        <span className="font-mono text-pm-text font-bold block">PK Index: {r.pk}</span>
                         {Object.keys(r.changes).map(col => (
-                          <div key={col} className="bg-[var(--pm-body-bg)] p-2 rounded text-[0.7rem] leading-relaxed border border-[var(--pm-border-color)]">
-                            <span className="text-[var(--pm-text-secondary)] font-mono">{col}: </span>
-                            <span className="text-red-600 dark:text-red-400 line-through mr-2 font-mono">{String(r.changes[col].backup || 'NULL')}</span>
-                            <span className="text-emerald-600 dark:text-emerald-400 font-mono">{String(r.changes[col].live || 'NULL')}</span>
+                          <div key={col} className="bg-pm-input/50 p-2 rounded text-[0.7rem] leading-relaxed border border-pm-border">
+                            <span className="text-pm-text-secondary font-mono">{col}: </span>
+                            <span className="text-red-500 line-through mr-2 font-mono">{String(r.changes[col].backup || 'NULL')}</span>
+                            <span className="text-emerald-500 font-mono">{String(r.changes[col].live || 'NULL')}</span>
                           </div>
                         ))}
                       </div>
@@ -1385,12 +1385,12 @@ export const DatabaseToolsTab: React.FC = () => {
 
                     {/* Added Rows */}
                     {tableRowDiff.added_rows?.map((r: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-[var(--pm-card-bg)] border-emerald-500/30 border border-l-4 rounded-r-lg">
-                        <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold block mb-2">Added Row Data</span>
+                      <div key={idx} className="p-3 bg-pm-card border-emerald-500/30 border border-l-4 rounded-r-lg">
+                        <span className="font-mono text-emerald-500 font-bold block mb-2">Added Row Data</span>
                         {Object.keys(r).map(col => (
-                          <div key={col} className="text-[0.7rem] text-[var(--pm-text-secondary)]">
-                            <span className="text-[var(--pm-text-secondary)]/60">{col}: </span>
-                            <span className="font-mono text-[var(--pm-text-primary)]">{String(r[col] || 'NULL')}</span>
+                          <div key={col} className="text-[0.7rem] text-pm-text-secondary">
+                            <span className="text-pm-text-secondary/60">{col}: </span>
+                            <span className="font-mono text-pm-text">{String(r[col] || 'NULL')}</span>
                           </div>
                         ))}
                       </div>
@@ -1398,10 +1398,10 @@ export const DatabaseToolsTab: React.FC = () => {
 
                     {/* Deleted Rows */}
                     {tableRowDiff.deleted_rows?.map((r: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-[var(--pm-card-bg)] border-red-500/30 border border-l-4 rounded-r-lg">
-                        <span className="font-mono text-red-600 dark:text-red-400 font-bold block mb-2">Deleted Row Data</span>
+                      <div key={idx} className="p-3 bg-pm-card border-red-500/30 border border-l-4 rounded-r-lg">
+                        <span className="font-mono text-red-500 font-bold block mb-2">Deleted Row Data</span>
                         {Object.keys(r).map(col => (
-                          <div key={col} className="text-[0.7rem] line-through text-[var(--pm-text-secondary)]/50">
+                          <div key={col} className="text-[0.7rem] line-through text-pm-text-secondary/50">
                             <span>{col}: </span>
                             <span className="font-mono">{String(r[col] || 'NULL')}</span>
                           </div>
@@ -1414,8 +1414,8 @@ export const DatabaseToolsTab: React.FC = () => {
 
               {/* Database Tables Content Integrity Table */}
               <div className="space-y-2">
-                <span className="font-bold text-[var(--pm-text-secondary)] uppercase tracking-wider block">Database Tables Content Integrity</span>
-                <div className="max-h-[220px] overflow-y-auto bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] rounded-lg p-3 space-y-2">
+                <span className="font-bold text-pm-text-secondary uppercase tracking-wider block text-xs">Database Tables Content Integrity</span>
+                <div className="max-h-[220px] overflow-y-auto bg-pm-input/30 border border-pm-border rounded-lg p-3 space-y-2">
                   {driftModalData.checksum_status &&
                     Object.keys(driftModalData.checksum_status).map(tbl => {
                       const c = driftModalData.checksum_status[tbl];
@@ -1423,15 +1423,15 @@ export const DatabaseToolsTab: React.FC = () => {
                       const isVolatile = c.volatile === true;
 
                       return (
-                        <div key={tbl} className="flex justify-between items-center py-2 border-b border-[var(--pm-border-color)] last:border-b-0">
+                        <div key={tbl} className="flex justify-between items-center py-2 border-b border-pm-border last:border-b-0">
                           <div>
-                            <span className="font-mono font-semibold text-[var(--pm-text-primary)] block">{tbl}</span>
-                            <span className="text-[0.65rem] text-[var(--pm-text-secondary)]">
+                            <span className="font-mono font-semibold text-pm-text block">{tbl}</span>
+                            <span className="text-[0.65rem] text-pm-text-secondary">
                               Rows: {c.backup_rows} ➔ {c.active_rows}
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="font-mono text-[0.7rem] text-[var(--pm-text-secondary)]">
+                            <span className="font-mono text-[0.7rem] text-pm-text-secondary">
                               {c.backup ? c.backup : 'N/A'} ➔ {c.active}
                             </span>
                             <span className={`pm-status-pill ${

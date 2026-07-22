@@ -265,27 +265,25 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                                 type="button"
                                 disabled={pushingCloudFile === b.basename}
                                 onClick={() => handleCloudPush(b.basename)}
-                                className="pm-btn pm-btn-sm pm-btn-purple text-[0.75rem] px-2.5 py-1 rounded-md"
+                                className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1"
                               >
                                 {pushingCloudFile === b.basename ? 'Uploading...' : '☁️ Push to Cloud'}
                               </button>
                             )}
                             <button
                               type="button"
-                              onClick={() => handleDelete(b.basename)}
-                              className="pm-btn pm-btn-sm pm-btn-danger text-[0.75rem] px-2.5 py-1 rounded-md"
+                              disabled={pinningFile === b.basename}
+                              onClick={() => handleTogglePin(b.basename)}
+                              className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
                             >
-                              🗑️ Delete
+                              {pinningFile === b.basename ? '⏳' : b.is_pinned ? '📌 Unpin' : '📌 Pin'}
                             </button>
                             <button
                               type="button"
-                              disabled={pinningFile === b.basename}
-                              onClick={() => handleTogglePin(b.basename)}
-                              className={`pm-btn pm-btn-sm text-[0.75rem] px-2.5 py-1 rounded-md ${
-                                b.is_pinned ? 'pm-btn-success' : 'pm-btn-neutral'
-                              }`}
+                              onClick={() => handleDelete(b.basename)}
+                              className="pm-btn pm-btn-sm pm-btn-danger-outline text-[0.7rem] px-2.5 py-1"
                             >
-                              {pinningFile === b.basename ? '⏳' : b.is_pinned ? '📌 Unpin' : '📌 Pin'}
+                              🗑️ Delete
                             </button>
                           </>
                         ) : (
@@ -293,7 +291,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                             type="button"
                             disabled={restoringFile === b.basename}
                             onClick={() => handleCloudRestore(b.basename)}
-                            className="pm-btn pm-btn-sm pm-btn-primary text-[0.75rem] px-2.5 py-1 rounded-md"
+                            className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1"
                           >
                             {restoringFile === b.basename ? 'Downloading...' : '☁️ Pull & Restore'}
                           </button>

@@ -331,7 +331,7 @@ export const MutationHistoryTab: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleDeleteJob(job)}
-                          className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 font-semibold"
+                          className="pm-btn pm-btn-sm pm-btn-danger-outline text-[0.7rem] px-2.5 py-1 font-semibold"
                           title="Delete Ledger entry"
                         >
                           🗑️ Delete
