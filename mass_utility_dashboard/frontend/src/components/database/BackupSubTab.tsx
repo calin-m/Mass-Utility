@@ -5,6 +5,7 @@ import React from 'react';
 import { ProgressHUD } from '../common/ProgressHUD';
 import { SectionHeader } from '../common/SectionHeader';
 import { PresetLoadoutBar } from '../common/PresetLoadoutBar';
+import { StatusBadge } from '../common/StatusBadge';
 
 export interface BackupRecord {
   basename: string;
@@ -243,17 +244,11 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                         </div>
                         <div className="flex gap-2 mt-1.5 flex-wrap">
                           {isCloud ? (
-                            <span className="pm-status-pill bg-pm-purple/10 text-pm-purple border border-pm-purple/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
-                              ☁️ Cloud Only
-                            </span>
+                            <StatusBadge variant="cloud" label="☁️ Cloud Only" />
                           ) : b.is_uploaded ? (
-                            <span className="pm-status-pill bg-pm-purple/10 text-pm-purple border border-pm-purple/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
-                              📁 Uploaded
-                            </span>
+                            <StatusBadge variant="cloud" label="📁 Uploaded" />
                           ) : (
-                            <span className="pm-status-pill bg-pm-success/10 text-pm-success border border-pm-success/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
-                              💾 Local
-                            </span>
+                            <StatusBadge variant="local" label="💾 Local" />
                           )}
                           {b.duration && (
                             <span className="text-[0.65rem] text-[var(--pm-text-secondary)]">
@@ -270,7 +265,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                       {b.sql_download_url && (
                         <a
                           href={resolveDownloadUrl(b.sql_download_url)}
-                          className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1 rounded-md"
+                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
                           title="Download SQL Dump"
                         >
                           <span>⬇️</span> SQL
@@ -279,7 +274,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                       {b.log_filename && b.log_download_url && (
                         <a
                           href={resolveDownloadUrl(b.log_download_url)}
-                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 rounded-md"
+                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
                           title="Download Telemetry Log"
                         >
                           <span>📄</span> Log
@@ -288,7 +283,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                       <button
                         type="button"
                         onClick={() => onCheckCompareDrift(b.basename)}
-                        className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] px-2.5 py-1 rounded-md"
+                        className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
                       >
                         <span>🔍</span> Diff
                       </button>
@@ -297,18 +292,16 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                           <button
                             type="button"
                             onClick={() => onDeleteBackup(b.basename)}
-                            className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
+                            className="pm-btn pm-btn-sm pm-btn-danger-outline text-[0.7rem] px-2.5 py-1"
                           >
                             <span>🗑️</span> Delete
                           </button>
                           <button
                             type="button"
                             onClick={() => onTogglePinBackup(b.basename)}
-                            className={`pm-btn pm-btn-sm text-[0.7rem] px-2.5 py-1 rounded-md ${
-                              isPinned ? 'pm-btn-success' : 'pm-btn-neutral'
-                            }`}
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
                           >
-                            <span>📌</span> {isPinned ? 'Unpin' : 'Pin'}
+                            {isPinned ? '📌 Unpin' : '📌 Pin'}
                           </button>
                         </>
                       )}

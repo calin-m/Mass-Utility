@@ -234,7 +234,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                             type="button"
                             disabled={verifyingFile === b.basename}
                             onClick={() => handleVerify(b.basename)}
-                            className="pm-btn pm-btn-sm pm-btn-success text-[0.75rem] px-2.5 py-1 rounded-md"
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
                           >
                             {verifyingFile === b.basename ? 'Verifying...' : '🛡️ Verify'}
                           </button>
@@ -243,7 +243,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                         {b.archive_download_url && (
                           <a
                             href={resolveDownloadUrl(b.archive_download_url)}
-                            className="pm-btn pm-btn-sm pm-btn-primary text-[0.75rem] px-2.5 py-1 rounded-md inline-flex items-center"
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 inline-flex items-center"
                           >
                             ⬇️ Download
                           </a>
@@ -252,7 +252,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                         {b.has_log && b.log_download_url && (
                           <a
                             href={resolveDownloadUrl(b.log_download_url)}
-                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.75rem] px-2.5 py-1 rounded-md inline-flex items-center"
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 inline-flex items-center"
                           >
                             📄 Log
                           </a>
