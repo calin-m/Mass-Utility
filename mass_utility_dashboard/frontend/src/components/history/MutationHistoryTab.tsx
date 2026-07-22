@@ -3,8 +3,8 @@
 // @Calls: get_mutation_history, rollback_mutation, reapply_mutation, delete_mutation_job, clear_mutation_history
 
 import React, { useState, useEffect } from 'react';
-import { FetchService } from '../utils/FetchService';
-import { useModal } from '../utils/overlay';
+import { FetchService } from '../../utils/FetchService';
+import { useModal } from '../../utils/overlay';
 
 interface HistoryJob {
   job_id: string;

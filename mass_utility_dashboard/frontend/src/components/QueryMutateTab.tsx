@@ -5,6 +5,9 @@
 import React, { useState, useEffect } from 'react';
 import { FetchService } from '../utils/FetchService';
 import { useModal } from '../utils/overlay';
+import { QueryPresetManager } from './query/QueryPresetManager';
+import { QueryResultsGrid } from './query/QueryResultsGrid';
+import { MutationRulesEditor } from './query/MutationRulesEditor';
 
 interface Rule {
   id: string;
@@ -746,113 +749,7 @@ export const QueryMutateTab: React.FC = () => {
     );
   };
 
-  // Rendering Helper: Single Mutation action row
-  const renderMutationRuleRow = (rule: MutationAction) => {
-    const showOptions = rule.field === 'active' || rule.field === 'id_manufacturer';
-    const selectOptions: { value: string; label: string }[] = [];
 
-    if (rule.field === 'active') {
-      selectOptions.push({ value: '1', label: 'Active' }, { value: '0', label: 'Inactive' });
-    } else if (rule.field === 'id_manufacturer' && manufacturersList.length > 0) {
-      manufacturersList.forEach((m: any) => selectOptions.push({ value: String(m.id), label: `[${m.id}] ${m.name}` }));
-    }
-
-    const isDropdownMode = showOptions && !rule.forceManualMode;
-
-    const handleFieldChange = (field: string) => {
-      const type = field === 'price' ? 'SET' : 'SET';
-      setMutationRules(prev =>
-        prev.map(r => (r.id === rule.id ? { ...r, field, type, value: '', forceManualMode: false } : r))
-      );
-    };
-
-    const handleUpdate = (updates: Partial<MutationAction>) => {
-      setMutationRules(prev => prev.map(r => (r.id === rule.id ? { ...r, ...updates } : r)));
-    };
-
-    return (
-      <div key={rule.id} className="flex gap-2 items-center flex-wrap bg-white/[0.01] border border-pm-border p-3 rounded-xl">
-        <select
-          value={rule.field}
-          onChange={(e) => handleFieldChange(e.target.value)}
-          className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none"
-        >
-          <option value="price">Product: Base Price</option>
-          <option value="active">Product: Active Status</option>
-          <option value="reference">Product: Reference / SKU</option>
-          <option value="id_manufacturer">Product: Manufacturer ID</option>
-          <option value="discount_percent">Discount: Percentage Reduction (%)</option>
-          <option value="discount_amount">Discount: Flat Amount Reduction</option>
-        </select>
-
-        {rule.field === 'price' ? (
-          <select
-            value={rule.type}
-            onChange={(e) => handleUpdate({ type: e.target.value as any })}
-            className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none"
-          >
-            <option value="SET">SET to</option>
-            <option value="ADD">ADD (+)</option>
-            <option value="MULTIPLY">MULTIPLY (*)</option>
-          </select>
-        ) : (
-          <span className="text-xs text-pm-text-secondary bg-white/5 border border-pm-border rounded-lg px-2 py-1.5">SET TO</span>
-        )}
-
-        <span className="flex items-center gap-1.5 min-w-[200px] flex-grow">
-          {isDropdownMode ? (
-            <>
-              <select
-                value={rule.value}
-                onChange={(e) => handleUpdate({ value: e.target.value })}
-                className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none w-full"
-              >
-                <option value="">- Select value -</option>
-                {selectOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => handleUpdate({ forceManualMode: true })}
-                className="text-xs text-pm-text-secondary hover:bg-white/[0.05] p-1 rounded-lg"
-              >
-                ✏️
-              </button>
-            </>
-          ) : (
-            <>
-              <input
-                type={rule.field === 'price' || rule.field.startsWith('discount') ? 'number' : 'text'}
-                step="0.01"
-                value={rule.value}
-                onChange={(e) => handleUpdate({ value: e.target.value })}
-                placeholder="Enter value..."
-                className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-purple/50 flex-grow"
-              />
-              {showOptions && (
-                <button
-                  type="button"
-                  onClick={() => handleUpdate({ forceManualMode: false })}
-                  className="text-xs text-pm-text-secondary hover:bg-white/[0.05] p-1 rounded-lg"
-                >
-                  📜
-                </button>
-              )}
-            </>
-          )}
-        </span>
-
-        <button
-          type="button"
-          onClick={() => setMutationRules(prev => prev.filter(r => r.id !== rule.id))}
-          className="pm-btn pm-btn-danger text-xs p-1.5 rounded-lg"
-        >
-          🗑️
-        </button>
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-6">
@@ -866,35 +763,17 @@ export const QueryMutateTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Master Preset selector */}
-        <div className="flex items-center gap-2 bg-pm-input border border-pm-border p-2 rounded-xl text-xs">
-          <span className="font-bold text-pm-text-secondary">Combo Presets:</span>
-          <select
-            value={selectedMasterPreset}
-            onChange={(e) => handleLoadMasterPreset(e.target.value)}
-            className="bg-black/20 border border-pm-border rounded px-2 py-1 text-xs text-pm-text focus:outline-none"
-          >
-            <option value="">- Custom Template -</option>
-            {presets.master?.map((p: any) => (
-              <option key={p.id_preset} value={p.id_preset}>{p.name}</option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={() => handleSavePreset('master')}
-            className="pm-btn pm-btn-success text-xs font-bold px-2.5 py-1.5 rounded-lg transition"
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDeletePreset('master', selectedMasterPreset)}
-            disabled={!selectedMasterPreset}
-            className="pm-btn pm-btn-danger text-xs font-bold px-2.5 py-1.5 rounded-lg transition disabled:opacity-30"
-          >
-            Delete
-          </button>
-        </div>
+      <QueryPresetManager
+        presets={presets}
+        selectedMasterPreset={selectedMasterPreset}
+        selectedQueryPreset={selectedQueryPreset}
+        selectedMutatePreset={selectedMutatePreset}
+        onSelectMasterPreset={handleLoadMasterPreset}
+        onSelectQueryPreset={handleLoadQueryPreset}
+        onSelectMutatePreset={handleLoadMutatePreset}
+        onSavePreset={handleSavePreset}
+        onDeletePreset={handleDeletePreset}
+      />
       </div>
 
       {/* Step 1 Card: Target Products Filter */}
@@ -983,130 +862,41 @@ export const QueryMutateTab: React.FC = () => {
         </div>
       )}
 
+      {/* Query Preview Results & Compiled SQL */}
+      <QueryResultsGrid
+        previewCount={previewCount}
+        previewSql={previewSql}
+        previewSamples={previewSamples}
+        liveExplanation={liveExplanation}
+        showStep2={showStep2}
+        onProceedToStep2={() => setShowStep2(true)}
+      />
+
       {/* Step 2 Card: Configure & Execute Mutations */}
       {showStep2 && (
-        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4 border-l-4 border-l-red-500 animate-fade-in">
-          {/* AST Safety Banner */}
-          <div className={`p-3 rounded-lg border text-xs flex items-center justify-between font-mono ${
-            previewCount === 0 
-              ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' 
-              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-          }`}>
-            <span className="flex items-center gap-2 font-bold">
-              {previewCount === 0 ? '⚠️ NOTICE:' : '🛡️ AST SAFETY SHIELD VERIFIED:'}
-            </span>
-            <span>
-              {previewCount === 0 
-                ? 'Target scope matches 0 products. Execution will yield no mutations.' 
-                : `Target scope strictly bound to ${previewCount} products. Parameterized AST WHERE criteria enforced.`}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-              <h3 className="text-sm font-bold text-red-400 uppercase">Step 2: Configure &amp; Execute Mutations (Safety Shield Active)</h3>
-            </div>
-            
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-pm-text-secondary">Rules Preset:</span>
-              <select
-                value={selectedMutatePreset}
-                onChange={(e) => handleLoadMutatePreset(e.target.value)}
-                className="bg-pm-input border border-pm-border text-xs text-pm-text rounded px-2 py-1"
-              >
-                <option value="">- Custom Rules -</option>
-                {presets.mutate?.map((p: any) => (
-                  <option key={p.id_preset} value={p.id_preset}>{p.name}</option>
-                ))}
-              </select>
-              <button type="button" onClick={() => handleSavePreset('mutate')} className="pm-btn pm-btn-neutral px-2 py-1 rounded text-xs">Save</button>
-              <button type="button" onClick={() => handleDeletePreset('mutate', selectedMutatePreset)} disabled={!selectedMutatePreset} className="pm-btn pm-btn-danger px-2 py-1 rounded text-xs disabled:opacity-30">Delete</button>
-            </div>
-          </div>
-
-          <p className="text-xs text-pm-text-secondary leading-relaxed">
-            Configure mutations to apply onto the target scope of <strong>{previewCount} products</strong>.
-            Mutations are executed inside transactions. Concurrent rows lock constraints apply, and the Buffer Packet Shield manages chunk throttling automatically.
-          </p>
-
-          {/* Action Rules Builder */}
-          <div className="space-y-3">
-            {mutationRules.map(rule => renderMutationRuleRow(rule))}
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              disabled={isExecuting}
-              onClick={() => setMutationRules(prev => [...prev, { id: `m-${Math.random()}`, field: 'price', type: 'SET', value: '' }])}
-              className="pm-btn pm-btn-neutral text-xs font-bold px-4 py-2 rounded-lg transition"
-            >
-              ➕ Add Mutation Action
-            </button>
-            <button
-              type="button"
-              disabled={isExecuting || mutationRules.length === 0}
-              onClick={handleExecuteMutations}
-              className="pm-btn pm-btn-danger text-white text-xs font-bold px-5 py-2.5 rounded-lg transition uppercase tracking-wide disabled:opacity-40 flex items-center gap-2"
-            >
-              {isExecuting ? (
-                <>
-                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Mutating... (Offset: {executingOffset})
-                </>
-              ) : (
-                '⚡ Run Atomic Execution'
-              )}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Mutation Execution Terminal Log */}
-      {showLogTerminal && (
-        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4 animate-fade-in">
-          <div className="flex justify-between items-center border-b border-pm-border pb-3">
-            <div className="flex items-center gap-2 font-bold text-xs uppercase text-emerald-400">
-              <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
-              Mutation Execution Log Terminal
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const blob = new Blob([mutationLogs], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'mutation_execution.log';
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }}
-                className="pm-btn pm-btn-neutral text-[10px] text-pm-text-secondary font-bold px-2 py-1 rounded transition"
-              >
-                📥 Save Log
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    await FetchService.post('clear_saas_log');
-                    setMutationLogs('No mutation logs compiled yet.');
-                  } catch (e) {}
-                }}
-                className="pm-btn pm-btn-danger text-[10px] font-bold px-2 py-1 rounded transition"
-              >
-                🗑️ Clear
-              </button>
-            </div>
-          </div>
-          <pre className="pm-log-terminal text-xs text-emerald-400 bg-[var(--pm-terminal-bg,#05070f)] p-4 rounded-xl border border-pm-border overflow-y-auto max-h-[300px] font-mono leading-relaxed select-all">
-            {mutationLogs || 'No logs compiled yet.'}
-          </pre>
-        </div>
+        <MutationRulesEditor
+          mutationRules={mutationRules}
+          isExecuting={isExecuting}
+          executingOffset={executingOffset}
+          mutationLogs={mutationLogs}
+          showLogTerminal={showLogTerminal}
+          onAddMutationRule={() =>
+            setMutationRules((prev) => [
+              ...prev,
+              { id: `m-${Math.random()}`, field: 'price', type: 'SET', value: '' },
+            ])
+          }
+          onRemoveMutationRule={(id) =>
+            setMutationRules((prev) => prev.filter((r) => r.id !== id))
+          }
+          onUpdateMutationRule={(id, updates) =>
+            setMutationRules((prev) =>
+              prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
+            )
+          }
+          onExecuteMutations={handleExecuteMutations}
+          onToggleLogTerminal={() => setShowLogTerminal((prev) => !prev)}
+        />
       )}
     </div>
   );

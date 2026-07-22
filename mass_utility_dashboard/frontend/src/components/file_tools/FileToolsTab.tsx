@@ -4,10 +4,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { FolderSelector, FolderEntry } from './FolderSelector';
-import { BackupProgress } from './BackupProgress';
+import { BackupProgress } from '../governor/BackupProgress';
 import { BackupsGrid, BackupEntry } from './BackupsGrid';
-import { FetchService } from '../utils/FetchService';
-import { useModal } from '../utils/overlay';
+import { FetchService } from '../../utils/FetchService';
+import { useModal } from '../../utils/overlay';
 
 export const FileToolsTab: React.FC = () => {
   const { showAlert, showConfirm } = useModal();

@@ -2,7 +2,7 @@
 // @Description: Renders the Safety Governor & Audits dashboard, displaying host LVE specs, diagnostics, and php.ini limits.
 
 import { useState, useEffect } from 'react';
-import { FetchService } from '../utils/FetchService';
+import { FetchService } from '../../utils/FetchService';
 
 interface ChecklistItem {
   status: string;

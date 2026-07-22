@@ -3,8 +3,8 @@
 // @Calls: hydrate_dashboard, clear_saas_log
 
 import React, { useState, useEffect, useRef } from 'react';
-import { FetchService } from '../utils/FetchService';
-import { useModal } from '../utils/overlay';
+import { FetchService } from '../../utils/FetchService';
+import { useModal } from '../../utils/overlay';
 
 export const EventLogsTab: React.FC = () => {
   const { showAlert, showConfirm, showToast } = useModal();

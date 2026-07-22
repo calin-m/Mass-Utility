@@ -3,8 +3,8 @@
 // @Calls: save_settings, get_auth_status, disconnect_google_drive
 
 import React, { useState, useEffect } from 'react';
-import { FetchService } from '../utils/FetchService';
-import { useModal } from '../utils/overlay';
+import { FetchService } from '../../utils/FetchService';
+import { useModal } from '../../utils/overlay';
 
 interface SettingsGeneralProps {
   settings: Record<string, any>;

@@ -2,8 +2,9 @@
 // @Description: Renders the table grid list of historical file backups, facilitating archive downloads, cryptographic verification, pin/unpin toggles, and purges.
 
 import React, { useState } from 'react';
-import { FetchService } from '../utils/FetchService';
-import { useModal } from '../utils/overlay';
+import { FetchService } from '../../utils/FetchService';
+import { useModal } from '../../utils/overlay';
+import { StatusBadge } from '../common/StatusBadge';
 
 export interface BackupEntry {
   basename: string;
@@ -187,26 +188,14 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                 const isUploaded = b.is_uploaded;
 
                 let rowBorderClass = '';
-                let badge = (
-                  <span className="text-[0.65rem] font-bold text-[#10b981] bg-[#10b981]/10 px-2 py-0.5 rounded border border-[#10b981]/20">
-                    💾 Local
-                  </span>
-                );
+                let badge = <StatusBadge variant="local" label="Local" />;
 
                 if (isCloudOnly) {
                   rowBorderClass = 'border-l-4 border-l-[#a855f7] bg-[#a855f7]/[0.01]';
-                  badge = (
-                    <span className="text-[0.65rem] font-bold text-[#c084fc] bg-[#a855f7]/10 px-2 py-0.5 rounded border border-[#a855f7]/20">
-                      ☁️ Cloud Only
-                    </span>
-                  );
+                  badge = <StatusBadge variant="cloud" label="Cloud Only" />;
                 } else if (isUploaded) {
                   rowBorderClass = 'border-l-4 border-l-[#a855f7] bg-[#a855f7]/[0.01]';
-                  badge = (
-                    <span className="text-[0.65rem] font-bold text-[#c084fc] bg-[#a855f7]/10 px-2 py-0.5 rounded border border-[#a855f7]/20">
-                      📁 Uploaded
-                    </span>
-                  );
+                  badge = <StatusBadge variant="cloud" label="Uploaded" />;
                 }
 
                 return (

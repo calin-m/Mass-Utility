@@ -6,8 +6,8 @@ import React, { useState, useEffect } from 'react';
 import { SettingsGeneral } from './SettingsGeneral';
 import { SettingsInfo } from './SettingsInfo';
 import { SettingsSecurity } from './SettingsSecurity';
-import { FetchService } from '../utils/FetchService';
-import { useModal } from '../utils/overlay';
+import { FetchService } from '../../utils/FetchService';
+import { useModal } from '../../utils/overlay';
 
 export const SettingsTab: React.FC = () => {
   const { showAlert, showToast } = useModal();

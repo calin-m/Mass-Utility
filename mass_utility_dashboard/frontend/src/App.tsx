@@ -3,13 +3,13 @@
 // @Calls: logout
 
 import { useState, useEffect } from 'react';
-import { SettingsTab } from './components/SettingsTab';
-import { FileToolsTab } from './components/FileToolsTab';
-import { GovernorTab } from './components/GovernorTab';
+import { SettingsTab } from './components/settings/SettingsTab';
+import { FileToolsTab } from './components/file_tools/FileToolsTab';
+import { GovernorTab } from './components/governor/GovernorTab';
 import { DatabaseToolsTab } from './components/DatabaseToolsTab';
 import { QueryMutateTab } from './components/QueryMutateTab';
-import { MutationHistoryTab } from './components/MutationHistoryTab';
-import { EventLogsTab } from './components/EventLogsTab';
+import { MutationHistoryTab } from './components/history/MutationHistoryTab';
+import { EventLogsTab } from './components/history/EventLogsTab';
 import { ModalProvider, useModal } from './utils/overlay';
 import { FetchService } from './utils/FetchService';
 

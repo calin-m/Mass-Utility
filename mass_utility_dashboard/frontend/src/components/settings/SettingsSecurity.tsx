@@ -3,8 +3,8 @@
 // @Calls: get_diagnostics, fix_diagnostics_permissions
 
 import React, { useState } from 'react';
-import { FetchService } from '../utils/FetchService';
-import { useModal } from '../utils/overlay';
+import { FetchService } from '../../utils/FetchService';
+import { useModal } from '../../utils/overlay';
 
 interface DiagnosticPath {
   path: string;

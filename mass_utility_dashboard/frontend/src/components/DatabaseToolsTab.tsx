@@ -3,6 +3,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { FetchService } from '../utils/FetchService';
+import { BackupSubTab } from './database/BackupSubTab';
+import { RestoreSubTab } from './database/RestoreSubTab';
+import { ProfilerSubTab } from './database/ProfilerSubTab';
+import { SweeperSubTab } from './database/SweeperSubTab';
 
 type SubTabType = 'backup' | 'restore' | 'profiler' | 'sweeper';
 type DrawerType = 'added' | 'deleted' | 'modified' | 'volatile' | null;
@@ -1267,525 +1271,95 @@ export const DatabaseToolsTab: React.FC = () => {
           </div>
         )}
 
-        {/* SUBTAB 2: RESTORE / IMPORT */}
+        {activeSubTab === 'backup' && (
+          <BackupSubTab
+            categorizedTables={categorizedTables}
+            selectedTables={selectedTables}
+            expandedDomains={expandedDomains}
+            backupPresets={backupPresets}
+            selectedPreset={selectedPreset}
+            isBackupRunning={isBackupRunning}
+            backupProgressPercent={backupProgressPercent}
+            backupProgressText={backupProgressText}
+            onStartBackup={handleStartBackup}
+            onCancelBackup={handleCancelBackup}
+            onLoadPreset={handleLoadPreset}
+            onSavePreset={handleSavePreset}
+            onDeletePreset={handleDeletePreset}
+            onSelectAll={handleSelectAll}
+            onDomainSelect={handleDomainSelect}
+            onTableToggle={handleTableToggle}
+            onToggleDomainExpanded={(domain) =>
+              setExpandedDomains((prev) => ({ ...prev, [domain]: !prev[domain] }))
+            }
+          />
+        )}
+
         {activeSubTab === 'restore' && (
-          <div className="space-y-6">
-            <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex items-center gap-3 border-b border-pm-border pb-3">
-                <span className="w-2.5 h-2.5 bg-pm-danger rounded-full"></span>
-                <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Database Restore &amp; Import Manager</h3>
-              </div>
-              <p className="text-xs text-pm-text-secondary leading-relaxed">
-                Restore tables in chunked loops to completely bypass php execution limits. The store will automatically be switched to Maintenance Mode during restore execution.
-              </p>
-            </div>
-
-            {showShopLiveAlert && (
-              <div className="bg-pm-warning/10 border border-pm-warning/25 rounded-xl p-5 flex justify-between items-center flex-wrap gap-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-xl">⚠️</span>
-                  <div>
-                    <h4 className="text-xs font-bold text-pm-text uppercase">Store kept in Maintenance Mode</h4>
-                    <p className="text-xs text-pm-text-secondary mt-1">Review the restored catalog details first before setting the shop live.</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleTakeStoreLive}
-                  className="pm-btn pm-btn-success text-xs font-bold px-4 py-2 rounded-lg transition uppercase hover:-translate-y-[1px] active:translate-y-0"
-                >
-                  ⚡ Take Store Live Now
-                </button>
-              </div>
-            )}
-
-            {/* Drag Drop File Zone */}
-            <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-              <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">📤 Upload External SQL File</h3>
-
-              <div
-                onDragOver={handleDragOver}
-                onDrop={handleFileDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-pm-border hover:border-pm-primary/40 rounded-xl p-8 text-center cursor-pointer transition bg-pm-input/30 space-y-3"
-              >
-                <div className="text-3xl">📁</div>
-                <p className="text-xs text-pm-text-secondary">
-                  {selectedUploadFile ? `Selected: ${selectedUploadFile.name}` : 'Click or drag external SQL/GZ file here...'}
-                </p>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  accept=".sql,.gz"
-                  onChange={handleBrowseFile}
-                  className="hidden"
-                />
-              </div>
-
-              {selectedUploadFile && (
-                <div className="flex gap-3 justify-end">
-                  <button
-                    type="button"
-                    onClick={handleCancelUpload}
-                    className="pm-btn pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleUploadStageFile}
-                    disabled={isUploading}
-                    className="pm-btn pm-btn-purple px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
-                  >
-                    {isUploading ? `Uploading (${uploadPercent}%)` : 'Stage Upload'}
-                  </button>
-                </div>
-              )}
-
-              {isUploading && (
-                <div className="w-full h-1.5 bg-black/35 rounded-full overflow-hidden border border-pm-border">
-                  <div
-                    className="h-full bg-[#8b5cf6] transition-all duration-300"
-                    style={{ width: `${uploadPercent}%` }}
-                  ></div>
-                </div>
-              )}
-            </div>
-
-            {/* Select Local Backups list */}
-            <div className="pm-panel-v2 space-y-4">
-              <div className="pm-panel-header-v2 border-b-0 pb-0">
-                <h3 className="text-sm font-bold tracking-wide uppercase">Select Backup to Restore</h3>
-              </div>
-              <div className="pm-table-container-v2">
-                <table className="pm-table-v2">
-                  <thead>
-                    <tr>
-                      <th className="p-4">Backup File</th>
-                      <th className="p-4">Size</th>
-                      <th className="p-4">Timestamp</th>
-                      <th className="p-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {backups.map(b => {
-                      const isLocal = b.is_local !== false;
-
-                      return (
-                        <tr key={b.basename}>
-                          <td className="p-4 font-mono font-semibold">{b.basename}</td>
-                          <td className="p-4 font-mono">{formatSqlSize(b.sql_size)}</td>
-                          <td className="p-4">{formatDate(b.date)}</td>
-                          <td className="p-4 text-right space-x-2">
-                            {isLocal ? (
-                              <button
-                                type="button"
-                                onClick={() => handleStartRestore(b.basename)}
-                                className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
-                              >
-                                <span>⚡</span> Restore
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => handleStartRestore(b.basename)}
-                                className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] px-2.5 py-1 rounded-md"
-                              >
-                                <span>☁️</span> Restore
-                              </button>
-                            )}
-                            {isLocal && (
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteBackup(b.basename)}
-                                className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
-                              >
-                                <span>🗑️</span> Delete
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Restoration HUD */}
-            {isRestoreRunning && (
-              <div className="bg-pm-card border border-pm-danger/20 rounded-xl p-6 shadow-xl space-y-4">
-                <div className="flex justify-between items-center border-b border-pm-border pb-3">
-                  <h3 className="text-sm font-bold tracking-wide text-pm-danger uppercase">Database Restore Active</h3>
-                  <span className="bg-pm-danger/10 text-pm-danger text-[0.65rem] font-bold px-2 py-0.5 rounded uppercase">
-                    Running
-                  </span>
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between text-pm-text-secondary">
-                    <span>{restoreProgressText}</span>
-                    <span>{restoreProgressPercent}%</span>
-                  </div>
-                  <div className="w-full h-2.5 bg-pm-input/80 rounded-full overflow-hidden border border-pm-border">
-                    <div
-                      className="h-full bg-gradient-to-r from-pm-danger to-pm-warning transition-all duration-300"
-                      style={{ width: `${restoreProgressPercent}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
-                  <div className="p-3 bg-pm-input/50 border border-pm-border rounded-lg">
-                    <span className="text-pm-text-secondary block mb-1">Statements Executed</span>
-                    <span className="text-pm-text font-mono">{restoreStatsExecuted}</span>
-                  </div>
-                  <div className="p-3 bg-pm-input/50 border border-pm-border rounded-lg">
-                    <span className="text-pm-text-secondary block mb-1">Current Action</span>
-                    <span className="text-pm-danger uppercase">{restoreStatsAction}</span>
-                  </div>
-                  <div className="p-3 bg-pm-input/50 border border-pm-border rounded-lg">
-                    <span className="text-pm-text-secondary block mb-1">Shop State</span>
-                    <span className="text-pm-warning uppercase">{restoreStatsShop}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-[0.65rem] text-pm-text-secondary uppercase tracking-wider font-bold">Execution Logs</p>
-                  <pre className="bg-pm-input/80 text-[0.7rem] text-pm-danger p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-pm-border whitespace-pre-wrap">
-                    {restoreLogTerminal}
-                  </pre>
-                </div>
-              </div>
-            )}
-          </div>
+          <RestoreSubTab
+            backups={backups}
+            showShopLiveAlert={showShopLiveAlert}
+            selectedUploadFile={selectedUploadFile}
+            isUploading={isUploading}
+            uploadPercent={uploadPercent}
+            isRestoreRunning={isRestoreRunning}
+            restoreProgressPercent={restoreProgressPercent}
+            restoreProgressText={restoreProgressText}
+            restoreStatsExecuted={restoreStatsExecuted}
+            restoreStatsAction={restoreStatsAction}
+            restoreStatsShop={restoreStatsShop}
+            restoreLogTerminal={restoreLogTerminal}
+            fileInputRef={fileInputRef}
+            onTakeStoreLive={handleTakeStoreLive}
+            onDragOver={handleDragOver}
+            onFileDrop={handleFileDrop}
+            onBrowseFile={handleBrowseFile}
+            onCancelUpload={handleCancelUpload}
+            onUploadStageFile={handleUploadStageFile}
+            onStartRestore={handleStartRestore}
+            onDeleteBackup={handleDeleteBackup}
+            formatSqlSize={formatSqlSize}
+            formatDate={formatDate}
+          />
         )}
 
-        {/* SUBTAB 3: DB PROFILER & OPTIMIZE */}
         {activeSubTab === 'profiler' && (
-          <div className="space-y-6">
-            <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex justify-between items-center border-b border-pm-border pb-3 flex-wrap gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 bg-pm-success rounded-full animate-pulse"></span>
-                  <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Automated Database Profiler &amp; Space Optimizer</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleFetchProfilerReport}
-                  disabled={isProfiling}
-                  className="pm-btn pm-btn-success text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
-                >
-                  {isProfiling ? 'Analyzing...' : 'Refresh Profile'}
-                </button>
-              </div>
-              <p className="text-xs text-pm-text-secondary leading-relaxed">
-                Scans all tables in real-time to compute index fragmentation and disk overhead which slows down transactions.
-              </p>
-            </div>
-
-            {isProfiling && !profilerReport && (
-              <div className="bg-pm-card border border-pm-border rounded-xl p-8 shadow-xl text-center space-y-3">
-                <div className="w-8 h-8 border-2 border-pm-success border-t-transparent rounded-full animate-spin mx-auto"></div>
-                <p className="text-xs text-pm-text-secondary font-bold uppercase tracking-wider">Analyzing database index fragmentation and disk overhead...</p>
-              </div>
-            )}
-
-            {profilerReport && (
-              <>
-                {/* Zero Fragmentation Success Banner */}
-                {profilerReport.tables.length === 0 && (
-                  <div className="bg-pm-success/10 border border-pm-success/25 rounded-xl p-5 flex items-center gap-4">
-                    <span className="text-2xl">🎉</span>
-                    <div>
-                      <h4 className="text-xs font-bold text-pm-text uppercase">No Fragmentation Detected</h4>
-                      <p className="text-xs text-pm-text-secondary mt-0.5">All PrestaShop core tables are fully optimized! Health grade: <strong className="text-pm-success">{profilerReport.grade}</strong></p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Health Cards scores */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg text-center flex flex-col justify-center items-center">
-                    <span className="text-[0.65rem] font-bold text-pm-text-secondary uppercase tracking-widest block mb-2">Health Grade</span>
-                    <div className="text-4xl font-black text-pm-success font-sans leading-none">{profilerReport.grade}</div>
-                    <span className="text-[0.65rem] text-pm-text-secondary mt-2">{profilerReport.grade_label}</span>
-                  </div>
-
-                  <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg flex flex-col justify-between">
-                    <div>
-                      <span className="text-[0.65rem] font-bold text-pm-text-secondary uppercase tracking-widest block mb-2">Overallocated Space</span>
-                      <div className="text-2xl font-bold text-pm-text font-mono">{profilerReport.total_free_pretty}</div>
-                    </div>
-                    <span className="text-[0.65rem] text-pm-text-secondary mt-2">Can be reclaimed immediately</span>
-                  </div>
-
-                  <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-lg flex flex-col justify-between">
-                    <div>
-                      <span className="text-[0.65rem] font-bold text-pm-text-secondary uppercase tracking-widest block mb-2">Average Fragmentation</span>
-                      <div className="text-2xl font-bold text-pm-text font-mono">{profilerReport.fragmentation_ratio_avg}</div>
-                    </div>
-                    <span className="text-[0.65rem] text-pm-text-secondary mt-2">{profilerReport.tables_count} monitored tables</span>
-                  </div>
-                </div>
-
-                {/* Table fragmentation grid */}
-                <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-                  <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-3">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Table Fragmentation details</h3>
-                      <span className="text-[10px] bg-pm-input border border-pm-border text-pm-text-secondary px-2 py-0.5 rounded-full font-mono">
-                        {profilerReport.tables.length} Fragmented
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <input
-                        type="text"
-                        placeholder="Search table by name..."
-                        value={profilerSearch}
-                        onChange={(e) => setProfilerSearch(e.target.value)}
-                        className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-primary/50"
-                      />
-
-                      {profilerReport.tables.length > 0 && (
-                        <button
-                          type="button"
-                          disabled={isBulkOptimizing}
-                          onClick={handleOptimizeAllTables}
-                          className="pm-btn pm-btn-success text-xs font-bold px-4 py-1.5 rounded-lg transition uppercase flex items-center gap-2"
-                        >
-                          {isBulkOptimizing ? (
-                            <>
-                              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                              {bulkOptimizeProgress || 'Optimizing All...'}
-                            </>
-                          ) : (
-                            '⚡ Optimize All Tables'
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="overflow-x-auto rounded-xl border border-pm-border">
-                    <table className="w-full text-xs text-left">
-                      <thead className="bg-pm-input/50 text-pm-text-secondary uppercase font-bold border-b border-pm-border">
-                        <tr>
-                          <th className="p-4">Table Name</th>
-                          <th className="p-4">Engine</th>
-                          <th className="p-4">Rows</th>
-                          <th className="p-4">Size</th>
-                          <th className="p-4">Overhead</th>
-                          <th className="p-4">Frag %</th>
-                          <th className="p-4 text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-pm-border">
-                        {profilerReport.tables
-                          .filter(t => !profilerSearch || t.name.toLowerCase().includes(profilerSearch.toLowerCase()))
-                          .map(t => (
-                            <tr key={t.name} className="hover:bg-pm-input/30 transition">
-                              <td className="p-4 font-mono font-semibold text-pm-text">{t.name}</td>
-                              <td className="p-4 text-pm-text-secondary">{t.engine}</td>
-                              <td className="p-4 text-pm-text-secondary">{t.rows.toLocaleString()}</td>
-                              <td className="p-4 text-pm-text-secondary">{t.size_pretty}</td>
-                              <td className="p-4 text-pm-text-secondary">{t.overhead_pretty}</td>
-                              <td className="p-4 font-semibold text-pm-text">{t.fragmentation_ratio}</td>
-                              <td className="p-4 text-right">
-                                <button
-                                  type="button"
-                                  disabled={isBulkOptimizing}
-                                  onClick={() => handleOptimizeTable(t.name)}
-                                  className="pm-btn pm-btn-success text-[0.7rem] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-30"
-                                >
-                                  ⚡ Optimize
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          <ProfilerSubTab
+            profilerReport={profilerReport}
+            isProfiling={isProfiling}
+            profilerSearch={profilerSearch}
+            isBulkOptimizing={isBulkOptimizing}
+            bulkOptimizeProgress={bulkOptimizeProgress}
+            onFetchProfilerReport={handleFetchProfilerReport}
+            onProfilerSearchChange={setProfilerSearch}
+            onOptimizeAllTables={handleOptimizeAllTables}
+            onOptimizeTable={handleOptimizeTable}
+          />
         )}
 
-        {/* SUBTAB 4: DATA SWEEPER */}
         {activeSubTab === 'sweeper' && (
-          <div className="space-y-6">
-            <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex justify-between items-center border-b border-pm-border pb-3 flex-wrap gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 bg-pm-primary rounded-full animate-pulse"></span>
-                  <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Database Cleanup Sweeper</h3>
-                </div>
-              </div>
-
-              <div className="bg-pm-input/30 border border-pm-border rounded-xl p-4 flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-3 text-xs">
-                  <span className="text-pm-text-secondary uppercase font-bold">Retention Bounds:</span>
-                  <select
-                    value={retentionDays}
-                    onChange={(e) => setRetentionDays(e.target.value)}
-                    className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none"
-                  >
-                    <option value="30">Older than 30 Days (Recommended)</option>
-                    <option value="90">Older than 90 Days</option>
-                    <option value="180">Older than 180 Days</option>
-                  </select>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleSweeperScan}
-                  disabled={isScanningSweeper}
-                  className="pm-btn pm-btn-purple px-4 py-2 rounded-lg text-xs font-bold transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
-                >
-                  {isScanningSweeper ? 'Scanning...' : '🔍 Pre-Flight Scan'}
-                </button>
-              </div>
-            </div>
-
-            {sweeperStats && (
-              <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-5">
-                <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase">Reclaimable Bloat Summary</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-                  {/* Visitor Log Bloat */}
-                  <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl space-y-2">
-                    <h4 className="font-bold text-pm-text text-xs uppercase flex items-center gap-2">
-                      <span>📉</span> visitor logs
-                    </h4>
-                    <div className="space-y-1">
-                      <div className="flex justify-between"><span className="text-pm-text-secondary">Connections:</span><span className="font-semibold text-pm-text">{sweeperStats.stats.connections.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span className="text-pm-text-secondary">Page views:</span><span className="font-semibold text-pm-text">{sweeperStats.stats.connections_page.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span className="text-pm-text-secondary">Guest records:</span><span className="font-semibold text-pm-text">{sweeperStats.stats.guests.toLocaleString()}</span></div>
-                      <hr className="border-pm-border my-1" />
-                      <div className="flex justify-between font-bold"><span className="text-pm-text-secondary">Total stats:</span><span className="text-pm-primary">{sweeperStats.stats.total.toLocaleString()}</span></div>
-                    </div>
-                  </div>
-
-                  {/* Cart Bloat */}
-                  <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl space-y-2">
-                    <h4 className="font-bold text-pm-text text-xs uppercase flex items-center gap-2">
-                      <span>🛒</span> Abandoned Carts
-                    </h4>
-                    <div className="space-y-1">
-                      <div className="flex justify-between"><span className="text-pm-text-secondary">Carts log:</span><span className="font-semibold text-pm-text">{sweeperStats.carts.carts.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span className="text-pm-text-secondary">Carts products:</span><span className="font-semibold text-pm-text">{sweeperStats.carts.cart_products.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span className="text-pm-text-secondary">Applied rules:</span><span className="font-semibold text-pm-text">{sweeperStats.carts.cart_rules.toLocaleString()}</span></div>
-                      <hr className="border-pm-border my-1" />
-                      <div className="flex justify-between font-bold"><span className="text-pm-text-secondary">Total Carts:</span><span className="text-pm-primary">{sweeperStats.carts.total.toLocaleString()}</span></div>
-                    </div>
-                  </div>
-
-                  {/* Image Bloat */}
-                  <div className="bg-pm-input/30 border border-pm-border p-4 rounded-xl space-y-2">
-                    <h4 className="font-bold text-pm-text text-xs uppercase flex items-center gap-2">
-                      <span>🖼️</span> Orphaned Images
-                    </h4>
-                    <div className="space-y-1">
-                      <div className="flex justify-between"><span className="text-pm-text-secondary">Scanned files:</span><span className="font-semibold text-pm-text">{orphanedImagesTotalCount.toLocaleString()}</span></div>
-                      <div className="flex justify-between"><span className="text-pm-text-secondary">Orphans found:</span><span className="font-semibold text-pm-text">{orphanedImages.length.toLocaleString()}</span></div>
-                      <hr className="border-pm-border my-1" />
-                      <div className="flex justify-between font-bold"><span className="text-pm-text-secondary">Reclaimable:</span><span className="text-pm-primary">{orphanedImagesSizePretty}</span></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sweep Purge Actions */}
-                <div className="bg-pm-danger/5 border border-pm-danger/20 p-5 rounded-xl space-y-4">
-                  <div className="flex justify-between items-center flex-wrap gap-4">
-                    <div>
-                      <h4 className="text-xs font-bold text-pm-text uppercase">Execute Clean Sweep Operations</h4>
-                      <p className="text-[0.65rem] text-pm-text-secondary mt-1">Chunked deletes of 5,000 rows prevent server timeout limits.</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleExecuteSweeper}
-                      disabled={isSweeperRunning}
-                      className="pm-btn pm-btn-danger text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
-                    >
-                      💥 Execute Sweeper
-                    </button>
-                  </div>
-
-                  <div className="flex gap-4 text-xs flex-wrap">
-                    <label className="flex items-center gap-2 cursor-pointer text-pm-text-secondary">
-                      <input
-                        type="checkbox"
-                        checked={purgeStats}
-                        onChange={(e) => setPurgeStats(e.target.checked)}
-                        className="rounded bg-pm-input border-pm-border text-pm-danger"
-                      />
-                      visitor statistics ({sweeperStats.stats.total.toLocaleString()} rows)
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer text-pm-text-secondary">
-                      <input
-                        type="checkbox"
-                        checked={purgeCarts}
-                        onChange={(e) => setPurgeCarts(e.target.checked)}
-                        className="rounded bg-pm-input border-pm-border text-pm-danger"
-                      />
-                      Abandoned Carts ({sweeperStats.carts.total.toLocaleString()} rows)
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer text-pm-text-secondary">
-                      <input
-                        type="checkbox"
-                        checked={purgeImages}
-                        onChange={(e) => setPurgeImages(e.target.checked)}
-                        className="rounded bg-pm-input border-pm-border text-pm-danger"
-                      />
-                      Orphaned Images ({orphanedImages.length.toLocaleString()} files)
-                    </label>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Sweeper Active Progress card */}
-            {isSweeperRunning && (
-              <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-                <div className="flex justify-between items-center border-b border-pm-border pb-3">
-                  <h3 className="text-sm font-bold tracking-wide text-pm-text uppercase flex items-center gap-2">
-                    <span>🧹</span> database clean sweep in progress
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sweeperAbortedRef.current = true;
-                    }}
-                    className="pm-btn pm-btn-danger text-xs font-bold px-3.5 py-1.5 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
-                  >
-                    🛑 Abort Operation
-                  </button>
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between text-pm-text-secondary">
-                    <span>{sweeperProgressText}</span>
-                    <span>{sweeperProgressPercent}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-pm-input/80 rounded-full overflow-hidden border border-pm-border">
-                    <div
-                      className="h-full bg-pm-danger transition-all duration-300"
-                      style={{ width: `${sweeperProgressPercent}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-[0.65rem] text-pm-text-secondary font-bold uppercase tracking-wider">Console Output Log</p>
-                  <pre className="bg-pm-input/80 text-[0.7rem] text-pm-success p-4 rounded-lg font-mono max-h-[150px] overflow-y-auto border border-pm-border whitespace-pre-wrap">
-                    {sweeperConsole}
-                  </pre>
-                </div>
-              </div>
-            )}
-          </div>
+          <SweeperSubTab
+            retentionDays={retentionDays}
+            sweeperStats={sweeperStats}
+            orphanedImages={orphanedImages}
+            orphanedImagesTotalCount={orphanedImagesTotalCount}
+            orphanedImagesSizePretty={orphanedImagesSizePretty}
+            isScanningSweeper={isScanningSweeper}
+            purgeStats={purgeStats}
+            purgeCarts={purgeCarts}
+            purgeImages={purgeImages}
+            isSweeperRunning={isSweeperRunning}
+            sweeperProgressPercent={sweeperProgressPercent}
+            sweeperProgressText={sweeperProgressText}
+            sweeperConsole={sweeperConsole}
+            sweeperAbortedRef={sweeperAbortedRef}
+            onRetentionDaysChange={setRetentionDays}
+            onSweeperScan={handleSweeperScan}
+            onExecuteSweeper={handleExecuteSweeper}
+            onPurgeStatsChange={setPurgeStats}
+            onPurgeCartsChange={setPurgeCarts}
+            onPurgeImagesChange={setPurgeImages}
+          />
         )}
       </div>
 
