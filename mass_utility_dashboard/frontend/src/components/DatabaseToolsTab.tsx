@@ -343,9 +343,7 @@ export const DatabaseToolsTab: React.FC = () => {
     );
   };
 
-  const toggleDomainCollapse = (domain: string) => {
-    setExpandedDomains(prev => ({ ...prev, [domain]: !prev[domain] }));
-  };
+
 
   // AJAX Backup execution trigger
   const handleStartBackup = () => {
@@ -992,286 +990,6 @@ export const DatabaseToolsTab: React.FC = () => {
       <div className="transition-all duration-300">
         {/* SUBTAB 1: GENERATE BACKUP */}
         {activeSubTab === 'backup' && (
-          <div className="space-y-6">
-            <div className="pm-panel-v2 space-y-4">
-              <div className="pm-panel-header-v2 border-b-0 pb-0">
-                <div className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></span>
-                  <h3 className="text-sm font-bold tracking-wide uppercase">Pre-Flight Database Catalog Exporter</h3>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleStartBackup}
-                    disabled={isBackupRunning}
-                    className="pm-btn bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
-                  >
-                    📥 Generate Backup &amp; Log Archive
-                  </button>
-                </div>
-              </div>
-
-              {isBackupRunning && (
-                <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] rounded-xl p-4 space-y-3">
-                  <div className="flex justify-between text-xs text-[var(--pm-text-secondary)]">
-                    <span>{backupProgressText}</span>
-                    <span>{backupProgressPercent}%</span>
-                  </div>
-                  <div className="w-full h-2.5 bg-black/35 rounded-full overflow-hidden border border-[var(--pm-border-color)]">
-                    <div
-                      className="h-full bg-[#8b5cf6] transition-all duration-300"
-                      style={{ width: `${backupProgressPercent}%` }}
-                    ></div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCancelBackup}
-                    className="pm-btn pm-btn-danger text-[0.65rem] px-3 py-1 rounded-md transition uppercase font-bold cursor-pointer"
-                  >
-                    🛑 Stop Backup
-                  </button>
-                </div>
-              )}
-
-              {/* Table Selection Customizer */}
-              <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-3 border-b border-[var(--pm-border-color)] pb-3 flex-wrap justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-[var(--pm-text-secondary)] uppercase tracking-wider">Preset Loadout:</span>
-                    <select
-                      value={selectedPreset}
-                      onChange={(e) => handleLoadPreset(e.target.value)}
-                      className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] text-xs text-[var(--pm-text-primary)] rounded-md px-2.5 py-1.5 focus:outline-none cursor-pointer shadow-sm hover:bg-[var(--pm-body-bg)] transition-all duration-200"
-                    >
-                      <option value="">-- None / Load Template --</option>
-                      {backupPresets.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={handleSavePreset}
-                      className="pm-btn pm-btn-success text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase cursor-pointer"
-                    >
-                      Save Preset
-                    </button>
-                    {selectedPreset && (
-                      <button
-                        type="button"
-                        onClick={handleDeletePreset}
-                        className="pm-btn pm-btn-danger text-[0.65rem] font-bold px-3 py-1 rounded-md transition uppercase cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-
-                  <label className="flex items-center gap-2 text-xs font-bold text-[#8b5cf6] cursor-pointer">
-                    <input
-                      type="checkbox"
-                      onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="rounded bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
-                    />
-                    Select All Tables (Full Backup)
-                  </label>
-                </div>
-
-                {/* Grid domain categories */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {Object.keys(categorizedTables).map(domain => {
-                    const tables = categorizedTables[domain] || [];
-                    const selectedInDomain = tables.filter(t => selectedTables.includes(t));
-                    const isAllSelected = selectedInDomain.length === tables.length && tables.length > 0;
-                    const isSomeSelected = selectedInDomain.length > 0 && !isAllSelected;
-                    const isExpanded = expandedDomains[domain] || false;
-
-                    return (
-                      <div key={domain} className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] rounded-xl p-4 flex flex-col justify-between space-y-3">
-                        <div>
-                          <label className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider cursor-pointer text-[var(--pm-text-primary)]">
-                            <input
-                              type="checkbox"
-                              checked={isAllSelected}
-                              ref={el => {
-                                if (el) el.indeterminate = isSomeSelected;
-                              }}
-                              onChange={(e) => handleDomainSelect(domain, e.target.checked)}
-                              className="rounded bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
-                            />
-                            {domain.replace('_', ' ')}
-                          </label>
-                          <p className="text-[0.65rem] text-[var(--pm-text-secondary)] mt-1">{tables.length} tables mapped</p>
-                        </div>
-
-                        <div>
-                          {isExpanded && (
-                            <div className="border-l-2 border-[var(--pm-border-color)] pl-3 py-2 space-y-1.5 max-h-[150px] overflow-y-auto mb-2 text-xs">
-                              {tables.map(tbl => (
-                                <label key={tbl} className="flex items-center gap-2 cursor-pointer text-[var(--pm-text-secondary)] font-mono text-[0.7rem] overflow-wrap-anywhere">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedTables.includes(tbl)}
-                                    onChange={() => handleTableToggle(tbl)}
-                                    className="rounded bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
-                                  />
-                                  {tbl}
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => toggleDomainCollapse(domain)}
-                            className="text-[0.65rem] text-[#8b5cf6] font-bold uppercase transition cursor-pointer hover:underline"
-                          >
-                            {isExpanded ? 'Hide Tables ▲' : 'Show Tables ▼'}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Backups List Grid */}
-            <div className="pm-panel-v2 space-y-4">
-              <div className="pm-panel-header-v2 pb-3 flex-wrap gap-4 border-b-0">
-                <h3 className="text-sm font-bold tracking-wide uppercase flex items-center gap-2">
-                  <span>📁</span> Historical Backups Repository
-                </h3>
-                <button
-                  type="button"
-                  onClick={handleClearBackupHistory}
-                  className="pm-btn pm-btn-danger text-xs px-3 py-1.5 rounded-lg transition uppercase tracking-wider cursor-pointer"
-                >
-                  🗑️ Clear Backups
-                </button>
-              </div>
-
-              <div className="pm-table-container-v2">
-                <table className="pm-table-v2">
-                  <thead>
-                    <tr>
-                      <th className="p-4">Backup File Name</th>
-                      <th className="p-4">SQL Size</th>
-                      <th className="p-4">Log Size</th>
-                      <th className="p-4">Date Compiled</th>
-                      <th className="p-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {backups.map(b => {
-                      const isLocal = b.is_local !== false;
-                      const isCloud = b.is_cloud === true;
-                      const isPinned = b.is_pinned === true;
-
-                      return (
-                        <tr key={b.basename}>
-                          <td className="p-4 font-mono font-semibold">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span>{b.basename}</span>
-                                <span
-                                  className="cursor-pointer opacity-60 hover:opacity-100"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(b.basename);
-                                    showAlert('Copied', 'Filename copied!', 'success');
-                                  }}
-                                  title="Copy filename"
-                                >
-                                  📋
-                                </span>
-                              </div>
-                              <div className="flex gap-2 mt-1.5 flex-wrap">
-                                {isCloud ? (
-                                  <span className="pm-status-pill bg-pm-purple/10 text-pm-purple border border-pm-purple/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
-                                    ☁️ Cloud Only
-                                  </span>
-                                ) : b.is_uploaded ? (
-                                  <span className="pm-status-pill bg-pm-purple/10 text-pm-purple border border-pm-purple/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
-                                    📁 Uploaded
-                                  </span>
-                                ) : (
-                                  <span className="pm-status-pill bg-pm-success/10 text-pm-success border border-pm-success/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
-                                    💾 Local
-                                  </span>
-                                )}
-                                {b.duration && (
-                                  <span className="text-[0.65rem] text-[var(--pm-text-secondary)]">
-                                    Completed in: {b.duration}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4 font-mono">{formatSqlSize(b.sql_size)}</td>
-                          <td className="p-4 font-mono">{formatLogSize(b.log_size)}</td>
-                          <td className="p-4">{formatDate(b.date)}</td>
-                          <td className="p-4 text-right space-x-2">
-                            {/* SQL download link */}
-                            {b.sql_download_url && (
-                              <a
-                                href={resolveDownloadUrl(b.sql_download_url)}
-                                className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1 rounded-md"
-                                title="Download SQL Dump"
-                              >
-                                <span>⬇️</span> SQL
-                              </a>
-                            )}
-                            {/* Log download link */}
-                            {b.log_filename && b.log_download_url && (
-                              <a
-                                href={resolveDownloadUrl(b.log_download_url)}
-                                className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 rounded-md"
-                                title="Download Telemetry Log"
-                              >
-                                <span>📄</span> Log
-                              </a>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => handleCheckCompareDrift(b.basename)}
-                              className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] px-2.5 py-1 rounded-md"
-                            >
-                              <span>🔍</span> Diff
-                            </button>
-                            {isLocal && (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteBackup(b.basename)}
-                                  className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
-                                >
-                                  <span>🗑️</span> Delete
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleTogglePinBackup(b.basename)}
-                                  className={`pm-btn pm-btn-sm text-[0.7rem] px-2.5 py-1 rounded-md ${
-                                    isPinned ? 'pm-btn-success' : 'pm-btn-neutral'
-                                  }`}
-                                >
-                                  <span>📌</span> {isPinned ? 'Unpin' : 'Pin'}
-                                </button>
-                              </>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                    {backups.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="p-8 text-center text-pm-text-secondary">No database archives compiled.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeSubTab === 'backup' && (
           <BackupSubTab
             categorizedTables={categorizedTables}
             selectedTables={selectedTables}
@@ -1281,6 +999,7 @@ export const DatabaseToolsTab: React.FC = () => {
             isBackupRunning={isBackupRunning}
             backupProgressPercent={backupProgressPercent}
             backupProgressText={backupProgressText}
+            backups={backups}
             onStartBackup={handleStartBackup}
             onCancelBackup={handleCancelBackup}
             onLoadPreset={handleLoadPreset}
@@ -1292,6 +1011,15 @@ export const DatabaseToolsTab: React.FC = () => {
             onToggleDomainExpanded={(domain) =>
               setExpandedDomains((prev) => ({ ...prev, [domain]: !prev[domain] }))
             }
+            onClearBackupHistory={handleClearBackupHistory}
+            onCheckCompareDrift={handleCheckCompareDrift}
+            onDeleteBackup={handleDeleteBackup}
+            onTogglePinBackup={handleTogglePinBackup}
+            resolveDownloadUrl={resolveDownloadUrl}
+            formatSqlSize={formatSqlSize}
+            formatLogSize={formatLogSize}
+            formatDate={formatDate}
+            showAlert={showAlert}
           />
         )}
 

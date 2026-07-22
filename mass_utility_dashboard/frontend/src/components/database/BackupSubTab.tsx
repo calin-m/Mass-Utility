@@ -1,7 +1,22 @@
 // @Arch[UI_Components]
-// @Description: Sub-tab component managing MySQL table dump creation, presets, and domain table filtering.
+// @Description: Sub-tab component managing MySQL table dump creation, presets, domain table filtering, and historical backups grid.
 
 import React from 'react';
+
+export interface BackupRecord {
+  basename: string;
+  sql_size: any;
+  log_size: any;
+  date: any;
+  is_local?: boolean;
+  is_cloud?: boolean;
+  is_pinned?: boolean;
+  is_uploaded?: boolean;
+  duration?: string;
+  sql_download_url?: string;
+  log_filename?: string;
+  log_download_url?: string;
+}
 
 interface BackupSubTabProps {
   categorizedTables: Record<string, string[]>;
@@ -12,6 +27,7 @@ interface BackupSubTabProps {
   isBackupRunning: boolean;
   backupProgressPercent: number;
   backupProgressText: string;
+  backups: BackupRecord[];
   onStartBackup: () => void;
   onCancelBackup: () => void;
   onLoadPreset: (presetName: string) => void;
@@ -21,6 +37,15 @@ interface BackupSubTabProps {
   onDomainSelect: (domain: string, checked: boolean) => void;
   onTableToggle: (tableName: string) => void;
   onToggleDomainExpanded: (domain: string) => void;
+  onClearBackupHistory: () => void;
+  onCheckCompareDrift: (basename: string) => void;
+  onDeleteBackup: (basename: string) => void;
+  onTogglePinBackup: (basename: string) => void;
+  resolveDownloadUrl: (url: string) => string;
+  formatSqlSize: (size: any) => string;
+  formatLogSize: (size: any) => string;
+  formatDate: (dateVal: any) => string;
+  showAlert: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
 export const BackupSubTab: React.FC<BackupSubTabProps> = ({
@@ -32,6 +57,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
   isBackupRunning,
   backupProgressPercent,
   backupProgressText,
+  backups,
   onStartBackup,
   onCancelBackup,
   onLoadPreset,
@@ -41,9 +67,19 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
   onDomainSelect,
   onTableToggle,
   onToggleDomainExpanded,
+  onClearBackupHistory,
+  onCheckCompareDrift,
+  onDeleteBackup,
+  onTogglePinBackup,
+  resolveDownloadUrl,
+  formatSqlSize,
+  formatLogSize,
+  formatDate,
+  showAlert,
 }) => {
   return (
     <div className="space-y-6">
+      {/* Card 1: Pre-Flight Database Catalog Exporter */}
       <div className="pm-panel-v2 space-y-4">
         <div className="pm-panel-header-v2 border-b-0 pb-0">
           <div className="flex items-center gap-3">
@@ -189,6 +225,142 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Card 2: Historical Backups Repository (Positioned after Pre-Flight Catalog Exporter) */}
+      <div className="pm-panel-v2 space-y-4">
+        <div className="pm-panel-header-v2 pb-3 flex-wrap gap-4 border-b-0 flex justify-between items-center">
+          <h3 className="text-sm font-bold tracking-wide uppercase flex items-center gap-2">
+            <span>📁</span> Historical Backups Repository
+          </h3>
+          <button
+            type="button"
+            onClick={onClearBackupHistory}
+            className="pm-btn pm-btn-danger text-xs px-3 py-1.5 rounded-lg transition uppercase tracking-wider cursor-pointer"
+          >
+            🗑️ Clear Backups
+          </button>
+        </div>
+
+        <div className="pm-table-container-v2">
+          <table className="pm-table-v2">
+            <thead>
+              <tr>
+                <th className="p-4">Backup File Name</th>
+                <th className="p-4">SQL Size</th>
+                <th className="p-4">Log Size</th>
+                <th className="p-4">Date Compiled</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {backups.map((b) => {
+                const isLocal = b.is_local !== false;
+                const isCloud = b.is_cloud === true;
+                const isPinned = b.is_pinned === true;
+
+                return (
+                  <tr key={b.basename}>
+                    <td className="p-4 font-mono font-semibold">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span>{b.basename}</span>
+                          <span
+                            className="cursor-pointer opacity-60 hover:opacity-100"
+                            onClick={() => {
+                              navigator.clipboard.writeText(b.basename);
+                              showAlert('Copied', 'Filename copied!', 'success');
+                            }}
+                            title="Copy filename"
+                          >
+                            📋
+                          </span>
+                        </div>
+                        <div className="flex gap-2 mt-1.5 flex-wrap">
+                          {isCloud ? (
+                            <span className="pm-status-pill bg-pm-purple/10 text-pm-purple border border-pm-purple/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
+                              ☁️ Cloud Only
+                            </span>
+                          ) : b.is_uploaded ? (
+                            <span className="pm-status-pill bg-pm-purple/10 text-pm-purple border border-pm-purple/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
+                              📁 Uploaded
+                            </span>
+                          ) : (
+                            <span className="pm-status-pill bg-pm-success/10 text-pm-success border border-pm-success/20 px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase">
+                              💾 Local
+                            </span>
+                          )}
+                          {b.duration && (
+                            <span className="text-[0.65rem] text-[var(--pm-text-secondary)]">
+                              Completed in: {b.duration}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 font-mono">{formatSqlSize(b.sql_size)}</td>
+                    <td className="p-4 font-mono">{formatLogSize(b.log_size)}</td>
+                    <td className="p-4">{formatDate(b.date)}</td>
+                    <td className="p-4 text-right space-x-2">
+                      {b.sql_download_url && (
+                        <a
+                          href={resolveDownloadUrl(b.sql_download_url)}
+                          className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1 rounded-md"
+                          title="Download SQL Dump"
+                        >
+                          <span>⬇️</span> SQL
+                        </a>
+                      )}
+                      {b.log_filename && b.log_download_url && (
+                        <a
+                          href={resolveDownloadUrl(b.log_download_url)}
+                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 rounded-md"
+                          title="Download Telemetry Log"
+                        >
+                          <span>📄</span> Log
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => onCheckCompareDrift(b.basename)}
+                        className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] px-2.5 py-1 rounded-md"
+                      >
+                        <span>🔍</span> Diff
+                      </button>
+                      {isLocal && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => onDeleteBackup(b.basename)}
+                            className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
+                          >
+                            <span>🗑️</span> Delete
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onTogglePinBackup(b.basename)}
+                            className={`pm-btn pm-btn-sm text-[0.7rem] px-2.5 py-1 rounded-md ${
+                              isPinned ? 'pm-btn-success' : 'pm-btn-neutral'
+                            }`}
+                          >
+                            <span>📌</span> {isPinned ? 'Unpin' : 'Pin'}
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+              {backups.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-pm-text-secondary">
+                    No database archives compiled.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
