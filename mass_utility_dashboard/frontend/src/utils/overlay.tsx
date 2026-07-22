@@ -216,7 +216,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 {state.type !== 'alert' && (
                   <button
                     onClick={closeModal}
-                    className="pm-btn px-4 py-2 text-xs font-bold bg-pm-input hover:bg-pm-border text-pm-text rounded-lg transition"
+                    className="pm-btn pm-btn-neutral px-4 py-2 text-xs font-bold"
                   >
                     Cancel
                   </button>

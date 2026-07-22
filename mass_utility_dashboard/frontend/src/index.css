@@ -215,7 +215,6 @@ body {
   transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
   box-sizing: border-box;
   text-decoration: none !important;
-  color: #ffffff !important;
 }
 
 .pm-btn:disabled {
@@ -251,12 +250,12 @@ body {
 }
 
 .pm-btn-neutral {
-  background-color: var(--pm-neutral, #475569) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: var(--pm-input-bg, #1e293b) !important;
+  color: var(--pm-text-primary, #f8fafc) !important;
+  border: 1px solid var(--pm-border-color, #334155) !important;
 }
 .pm-btn-neutral:hover:not(:disabled) {
-  background-color: #334155 !important;
+  opacity: 0.85 !important;
 }
 
 .pm-btn-purple {
