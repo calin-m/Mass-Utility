@@ -2149,6 +2149,28 @@ if (strpos($path, '/api/v1/') === 0) {
             echo json_encode($res);
             exit;
         }
+
+        if ($action === 'toggle_pin_backup') {
+            $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+            $res = $client->request('toggle_pin_backup', 'POST', $payload);
+            if (isset($res['backups']) && is_array($res['backups'])) {
+                $adminModulesUrl = $res['admin_modules_url'] ?? '#';
+                $res['backups'] = mergeCloudBackups($res['backups'], $pdo, $adminModulesUrl, 'database');
+            }
+            echo json_encode($res);
+            exit;
+        }
+
+        if ($action === 'toggle_pin_file_backup') {
+            $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+            $res = $client->request('toggle_pin_file_backup', 'POST', $payload);
+            if (isset($res['backups']) && is_array($res['backups'])) {
+                $adminModulesUrl = $res['admin_modules_url'] ?? '#';
+                $res['backups'] = mergeCloudBackups($res['backups'], $pdo, $adminModulesUrl, 'file');
+            }
+            echo json_encode($res);
+            exit;
+        }
         
         if ($action === 'import-legacy-state') {
             $payload = json_decode(file_get_contents('php://input'), true);

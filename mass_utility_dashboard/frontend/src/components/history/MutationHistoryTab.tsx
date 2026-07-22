@@ -287,10 +287,11 @@ export const MutationHistoryTab: React.FC = () => {
                       {getStatusBadge(job.state)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="inline-flex gap-1">
+                      <div className="inline-flex gap-1.5 items-center">
                         <button
+                          type="button"
                           onClick={() => setSelectedJob(job)}
-                          className="pm-btn pm-btn-sm bg-pm-input hover:bg-pm-border text-pm-text font-bold px-2 py-1 rounded text-[10px] uppercase focus:outline-none"
+                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 font-semibold"
                           title="View Payload details"
                         >
                           👁️ View
@@ -298,8 +299,9 @@ export const MutationHistoryTab: React.FC = () => {
                         
                         {job.has_revert && job.state !== 'ROLLED_BACK' && (
                           <button
+                            type="button"
                             onClick={() => handleRollback(job)}
-                            className="pm-btn pm-btn-sm bg-red-600 hover:bg-red-500 text-white font-bold px-2 py-1 rounded text-[10px] uppercase animate-pulse shadow focus:outline-none"
+                            className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1 font-semibold"
                             title="Rollback Changes"
                           >
                             🔄 Revert
@@ -308,8 +310,9 @@ export const MutationHistoryTab: React.FC = () => {
 
                         {job.state === 'ROLLED_BACK' && (
                           <button
+                            type="button"
                             onClick={() => handleReapply(job)}
-                            className="pm-btn pm-btn-sm bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2 py-1 rounded text-[10px] uppercase shadow focus:outline-none"
+                            className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1 font-semibold"
                             title="Re-apply changes"
                           >
                             🔄 Reapply
@@ -317,16 +320,18 @@ export const MutationHistoryTab: React.FC = () => {
                         )}
 
                         <button
+                          type="button"
                           onClick={() => handleDownloadGzip(job.job_id)}
-                          className="pm-btn pm-btn-sm bg-blue-600 hover:bg-blue-500 text-white font-bold px-2 py-1 rounded text-[10px] uppercase shadow focus:outline-none"
+                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 font-semibold"
                           title="Download Backup Gzip"
                         >
                           📥 Download
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => handleDeleteJob(job)}
-                          className="pm-btn pm-btn-sm bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 font-bold px-2 py-1 rounded text-[10px] focus:outline-none"
+                          className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 font-semibold"
                           title="Delete Ledger entry"
                         >
                           🗑️ Delete
