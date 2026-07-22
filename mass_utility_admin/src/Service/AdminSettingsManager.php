@@ -12,8 +12,20 @@ class AdminSettingsManager
 
     public function getDbConnection(): \PDO
     {
+        $dbDir = dirname($this->dbPath);
+        if (!is_dir($dbDir)) {
+            @mkdir($dbDir, 0755, true);
+        }
+        @chmod($dbDir, 0755);
+        if (file_exists($this->dbPath)) {
+            @chmod($this->dbPath, 0666);
+        }
         $pdo = new \PDO('sqlite:' . $this->dbPath);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(\PDO::ATTR_TIMEOUT, 5);
+        try {
+            $pdo->exec('PRAGMA busy_timeout = 5000;'); // nosec
+        } catch (\Throwable $t) {}
         return $pdo;
     }
 

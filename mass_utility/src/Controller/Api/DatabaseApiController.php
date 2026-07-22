@@ -38,23 +38,59 @@ class DatabaseApiController extends AbstractApiController
 
     protected function downloadBackup(): void
     {
-        $file = Tools::getValue('file');
-        // Safe filename check to prevent directory traversal
-        if (preg_match('/^(catalog_backup_\d{8}_\d{6})\.(sql\.gz|log)$/', $file, $matches)) {
-            $folderName = $matches[1];
-            $filePath = _PS_MODULE_DIR_ . 'mass_utility/backups/' . $folderName . '/' . $file;
-            if (file_exists($filePath)) {
-                @clearstatcache(true, $filePath);
-                $this->logger->log("User downloaded backup file: " . $file, 'INFO');
-                header('Content-Description: File Transfer');
-                header('Content-Type: application/octet-stream');
-                header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
-                header('Expires: 0');
-                header('Cache-Control: must-revalidate');
-                header('Pragma: public');
-                header('Content-Length: ' . (string)filesize($filePath));
-                readfile($filePath);
-                exit;
+        $file = trim((string)Tools::getValue('file'));
+        $cleanFile = basename($file);
+        if (!empty($cleanFile)) {
+            $folderName = preg_replace('/(\.sql|\.sql\.gz|\.log)$/i', '', $cleanFile);
+
+            $baseDirs = [];
+            if (defined('_PS_MODULE_DIR_')) {
+                $mDir = rtrim(_PS_MODULE_DIR_, '/\\');
+                $baseDirs[] = str_ends_with($mDir, 'mass_utility') ? $mDir . '/backups/' : $mDir . '/mass_utility/backups/';
+            }
+            if (defined('_PS_ROOT_DIR_')) {
+                $rDir = rtrim(_PS_ROOT_DIR_, '/\\');
+                $baseDirs[] = $rDir . '/modules/mass_utility/backups/';
+                $baseDirs[] = $rDir . '/mass_utility/backups/';
+            }
+            $baseDirs[] = dirname(__DIR__, 3) . '/backups/';
+            $baseDirs[] = dirname(__DIR__, 4) . '/modules/mass_utility/backups/';
+
+            foreach ($baseDirs as $bDir) {
+                if (!is_dir($bDir)) continue;
+
+                $candidatePaths = [
+                    $bDir . $folderName . '/' . $cleanFile,
+                    $bDir . $folderName . '/' . $folderName . '.sql.gz',
+                    $bDir . $folderName . '/' . $folderName . '.sql',
+                    $bDir . $folderName . '/' . $folderName . '.log',
+                    $bDir . 'import_tmp/' . $cleanFile,
+                    $bDir . 'import_tmp/' . $folderName . '.sql.gz',
+                    $bDir . $cleanFile,
+                    $bDir . $folderName . '.sql.gz'
+                ];
+
+                foreach ($candidatePaths as $filePath) {
+                    if (file_exists($filePath) && is_file($filePath)) {
+                        @clearstatcache(true, $filePath);
+                        $this->logger->log("User downloaded backup file: " . basename($filePath), 'INFO');
+                        @ini_set('zlib.output_compression', 'Off');
+                        @ini_set('output_buffering', 'Off');
+                        @set_time_limit(300);
+                        while (ob_get_level()) {
+                            @ob_end_clean();
+                        }
+                        header('Content-Description: File Transfer');
+                        header('Content-Type: application/octet-stream');
+                        header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
+                        header('Expires: 0');
+                        header('Cache-Control: must-revalidate');
+                        header('Pragma: public');
+                        header('Content-Length: ' . (string)filesize($filePath));
+                        readfile($filePath);
+                        exit;
+                    }
+                }
             }
         }
         $this->logger->log("Failed download attempt for backup: " . $file, 'WARNING');
@@ -369,20 +405,36 @@ class DatabaseApiController extends AbstractApiController
             $sqlDownloadUrl = '#';
             $logDownloadUrl = '#';
             
+            $buildUrl = function(?string $baseUrl, string $act, string $file, string $type = ''): string {
+                if (!empty($baseUrl) && (strpos($baseUrl, 'controller=AdminModules') !== false || strpos($baseUrl, 'index.php') !== false)) {
+                    $sep = (strpos($baseUrl, '?') !== false) ? '&' : '?';
+                    $u = $baseUrl . $sep . 'configure=mass_utility&mu_action=' . urlencode($act) . '&file=' . urlencode($file);
+                    if (!empty($type)) {
+                        $u .= '&type=' . urlencode($type);
+                    }
+                    return $u;
+                }
+                $u = 'index.php?mu_action=' . urlencode($act) . '&file=' . urlencode($file);
+                if (!empty($type)) {
+                    $u .= '&type=' . urlencode($type);
+                }
+                return $u;
+            };
+
             if ($isLocal && $isCloud) {
                 if ($defaultDownload === 'cloud') {
-                    $sqlDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_from_drive&file=' . urlencode($b['basename']) . '&type=database&filename=' . urlencode($b['sql_filename']);
-                    $logDownloadUrl = $b['log_filename'] ? $adminModulesUrl . '&configure=mass_utility&action=download_from_drive&file=' . urlencode($b['basename']) . '&type=database&filename=' . urlencode($b['log_filename']) : '#';
+                    $sqlDownloadUrl = $buildUrl($adminModulesUrl, 'download_from_drive', $b['basename'], 'database');
+                    $logDownloadUrl = $b['log_filename'] ? $buildUrl($adminModulesUrl, 'download_from_drive', $b['basename'], 'database') : '#';
                 } else {
-                    $sqlDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_backup&file=' . urlencode($b['sql_filename']);
-                    $logDownloadUrl = $b['log_filename'] ? $adminModulesUrl . '&configure=mass_utility&action=download_backup&file=' . urlencode($b['log_filename']) : '#';
+                    $sqlDownloadUrl = $buildUrl($adminModulesUrl, 'download_backup', $b['sql_filename']);
+                    $logDownloadUrl = $b['log_filename'] ? $buildUrl($adminModulesUrl, 'download_backup', $b['log_filename']) : '#';
                 }
             } elseif ($isCloud) {
-                $sqlDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_from_drive&file=' . urlencode($b['basename']) . '&type=database&filename=' . urlencode($b['sql_filename']);
-                $logDownloadUrl = $b['log_filename'] ? $adminModulesUrl . '&configure=mass_utility&action=download_from_drive&file=' . urlencode($b['basename']) . '&type=database&filename=' . urlencode($b['log_filename']) : '#';
+                $sqlDownloadUrl = $buildUrl($adminModulesUrl, 'download_from_drive', $b['basename'], 'database');
+                $logDownloadUrl = $b['log_filename'] ? $buildUrl($adminModulesUrl, 'download_from_drive', $b['basename'], 'database') : '#';
             } elseif ($isLocal) {
-                $sqlDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_backup&file=' . urlencode($b['sql_filename']);
-                $logDownloadUrl = $b['log_filename'] ? $adminModulesUrl . '&configure=mass_utility&action=download_backup&file=' . urlencode($b['log_filename']) : '#';
+                $sqlDownloadUrl = $buildUrl($adminModulesUrl, 'download_backup', $b['sql_filename']);
+                $logDownloadUrl = $b['log_filename'] ? $buildUrl($adminModulesUrl, 'download_backup', $b['log_filename']) : '#';
             }
 
             $formattedBackups[] = [

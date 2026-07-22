@@ -33,6 +33,7 @@ class TableBackupManager
                 throw new Exception('Failed to create core backup directory at: ' . $this->backupDir);
             }
         }
+        @chmod($this->backupDir, 0755);
 
         // Ensure import and manifest temp directories exist
         $importTmp = $this->backupDir . 'import_tmp/';
@@ -41,12 +42,15 @@ class TableBackupManager
                 throw new Exception('Failed to create import temp directory at: ' . $importTmp);
             }
         }
+        @chmod($importTmp, 0755);
+
         $manifestTmp = $this->backupDir . 'manifest_tmp/';
         if (!is_dir($manifestTmp)) {
             if (!mkdir($manifestTmp, 0755, true) && !is_dir($manifestTmp)) {
                 throw new Exception('Failed to create manifest temp directory at: ' . $manifestTmp);
             }
         }
+        @chmod($manifestTmp, 0755);
         $this->targetTables = $this->getDefaultTargetTables();
     }
 
@@ -210,6 +214,7 @@ class TableBackupManager
                 throw new Exception('Failed to create individual backup directory at: ' . $individualBackupDir);
             }
         }
+        @chmod($individualBackupDir, 0755);
         
         $backupFilename = $baseName . '.sql.gz';
         $logFilename = $baseName . '.log';
@@ -351,6 +356,7 @@ class TableBackupManager
             fwrite($gz, "SET FOREIGN_KEY_CHECKS=1;\n");
             fclose($gz);
             $gz = null;
+            @chmod($backupPath, 0644);
 
             // C. Verify Backup Integrity
             if (!file_exists($backupPath) || filesize($backupPath) <= 0) {

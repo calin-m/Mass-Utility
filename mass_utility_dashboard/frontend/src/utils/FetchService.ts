@@ -44,8 +44,8 @@ let mockBackupJob = { progress: 0, status: 'idle' };
 
 export class FetchService {
   static async post(action: string, payload: any = {}): Promise<any> {
-    // Detect Vite local development server
-    const isLocalDev = window.location.port === '5173' || window.location.hostname === 'localhost';
+    // Detect Vite local development server HMR
+    const isLocalDev = window.location.port === '5173';
 
     if (isLocalDev) {
       return this.handleMockRequest(action, payload);
@@ -87,7 +87,14 @@ export class FetchService {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     }
 
-    const data = await res.json();
+    const text = await res.text();
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      throw new Error(`Server returned HTML instead of JSON: ${text.slice(0, 80)}...`);
+    }
+
     if (!data.success) {
       throw new Error(data.error || 'Request failed.');
     }

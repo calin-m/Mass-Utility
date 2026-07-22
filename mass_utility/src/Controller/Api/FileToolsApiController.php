@@ -35,48 +35,111 @@ class FileToolsApiController extends AbstractApiController
 
     protected function downloadFileBackup(): void
     {
-        $file = trim(Tools::getValue('file'));
-        // Safe filename check: must be a zip, tar, or tar.gz, no slashes allowed
-        if (preg_match('/^[a-zA-Z0-9_\-]+\.(zip|tar|tar\.gz)$/', $file)) {
-            $baseName = preg_replace('/\.tar$/', '', $file);
-            $filePath = _PS_MODULE_DIR_ . 'mass_utility/backups/files/' . $baseName . '/' . $file;
-            if (file_exists($filePath)) {
-                @clearstatcache(true, $filePath);
-                $this->logger->log("User downloaded file archive: " . $file, 'INFO');
-                header('Content-Description: File Transfer');
-                header('Content-Type: application/octet-stream');
-                header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
-                header('Expires: 0');
-                header('Cache-Control: must-revalidate');
-                header('Pragma: public');
-                header('Content-Length: ' . filesize($filePath));
-                readfile($filePath);
-                exit;
+        $file = trim((string)Tools::getValue('file'));
+        $cleanFile = basename($file);
+        if (!empty($cleanFile)) {
+            $baseName = preg_replace('/(\.zip|\.tar\.gz|\.tar|\.log)$/i', '', $cleanFile);
+
+            $baseDirs = [];
+            if (defined('_PS_MODULE_DIR_')) {
+                $mDir = rtrim(_PS_MODULE_DIR_, '/\\');
+                $baseDirs[] = str_ends_with($mDir, 'mass_utility') ? $mDir . '/backups/' : $mDir . '/mass_utility/backups/';
+            }
+            if (defined('_PS_ROOT_DIR_')) {
+                $rDir = rtrim(_PS_ROOT_DIR_, '/\\');
+                $baseDirs[] = $rDir . '/modules/mass_utility/backups/';
+                $baseDirs[] = $rDir . '/mass_utility/backups/';
+            }
+            $baseDirs[] = dirname(__DIR__, 3) . '/backups/';
+            $baseDirs[] = dirname(__DIR__, 4) . '/modules/mass_utility/backups/';
+
+            foreach ($baseDirs as $bDir) {
+                if (!is_dir($bDir)) continue;
+
+                $candidatePaths = [
+                    $bDir . 'files/' . $baseName . '/' . $cleanFile,
+                    $bDir . 'files/' . $baseName . '/' . $baseName . '.zip',
+                    $bDir . 'files/' . $baseName . '/' . $baseName . '.tar.gz',
+                    $bDir . 'files/' . $baseName . '/' . $baseName . '.tar',
+                    $bDir . 'files/' . $cleanFile
+                ];
+                foreach ($candidatePaths as $filePath) {
+                    if (file_exists($filePath) && is_file($filePath)) {
+                        @clearstatcache(true, $filePath);
+                        $this->logger->log("User downloaded file archive: " . basename($filePath), 'INFO');
+                        @ini_set('zlib.output_compression', 'Off');
+                        @ini_set('output_buffering', 'Off');
+                        @set_time_limit(300);
+                        while (ob_get_level()) {
+                            @ob_end_clean();
+                        }
+                        header('Content-Description: File Transfer');
+                        header('Content-Type: application/octet-stream');
+                        header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
+                        header('Expires: 0');
+                        header('Cache-Control: must-revalidate');
+                        header('Pragma: public');
+                        header('Content-Length: ' . (string)filesize($filePath));
+                        readfile($filePath);
+                        exit;
+                    }
+                }
             }
         }
+        header('HTTP/1.1 404 Not Found');
         die('Access Denied or File Not Found');
     }
 
     protected function downloadFileBackupLog(): void
     {
-        $file = trim(Tools::getValue('file'));
-        if (preg_match('/^[a-zA-Z0-9_\-]+\.(zip|tar|tar\.gz)$/', $file)) {
-            $baseName = preg_replace('/\.tar$/', '', $file);
-            $filePath = _PS_MODULE_DIR_ . 'mass_utility/backups/files/' . $baseName . '/' . $file . '.log';
-            if (file_exists($filePath)) {
-                @clearstatcache(true, $filePath);
-                $this->logger->log("User downloaded file backup log: " . $file . ".log", 'INFO');
-                header('Content-Description: File Transfer');
-                header('Content-Type: text/plain');
-                header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
-                header('Expires: 0');
-                header('Cache-Control: must-revalidate');
-                header('Pragma: public');
-                header('Content-Length: ' . filesize($filePath));
-                readfile($filePath);
-                exit;
+        $file = trim((string)Tools::getValue('file'));
+        $cleanFile = basename($file);
+        if (!empty($cleanFile)) {
+            $baseName = preg_replace('/(\.zip|\.tar\.gz|\.tar|\.log)$/i', '', $cleanFile);
+            $logFileName = str_ends_with($cleanFile, '.log') ? $cleanFile : $cleanFile . '.log';
+
+            $baseDirs = [];
+            if (defined('_PS_MODULE_DIR_')) {
+                $mDir = rtrim(_PS_MODULE_DIR_, '/\\');
+                $baseDirs[] = str_ends_with($mDir, 'mass_utility') ? $mDir . '/backups/' : $mDir . '/mass_utility/backups/';
+            }
+            if (defined('_PS_ROOT_DIR_')) {
+                $rDir = rtrim(_PS_ROOT_DIR_, '/\\');
+                $baseDirs[] = $rDir . '/modules/mass_utility/backups/';
+                $baseDirs[] = $rDir . '/mass_utility/backups/';
+            }
+            $baseDirs[] = dirname(__DIR__, 3) . '/backups/';
+            $baseDirs[] = dirname(__DIR__, 4) . '/modules/mass_utility/backups/';
+
+            foreach ($baseDirs as $bDir) {
+                if (!is_dir($bDir)) continue;
+
+                $candidatePaths = [
+                    $bDir . 'files/' . $baseName . '/' . $baseName . '.log',
+                    $bDir . 'files/' . $baseName . '/' . $logFileName,
+                    $bDir . 'files/' . $logFileName
+                ];
+                foreach ($candidatePaths as $filePath) {
+                    if (file_exists($filePath) && is_file($filePath)) {
+                        @clearstatcache(true, $filePath);
+                        $this->logger->log("User downloaded file backup log: " . basename($filePath), 'INFO');
+                        while (ob_get_level()) {
+                            @ob_end_clean();
+                        }
+                        header('Content-Description: File Transfer');
+                        header('Content-Type: text/plain');
+                        header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
+                        header('Expires: 0');
+                        header('Cache-Control: must-revalidate');
+                        header('Pragma: public');
+                        header('Content-Length: ' . (string)filesize($filePath));
+                        readfile($filePath);
+                        exit;
+                    }
+                }
             }
         }
+        header('HTTP/1.1 404 Not Found');
         die('Access Denied or Log Not Found');
     }
 
@@ -390,20 +453,36 @@ class FileToolsApiController extends AbstractApiController
             $logDownloadUrl = '#';
             $logName = preg_replace('/\.tar$/', '', $b['basename']) . '.tar.log';
             
+            $buildUrl = function(?string $baseUrl, string $act, string $file, string $type = ''): string {
+                if (!empty($baseUrl) && (strpos($baseUrl, 'controller=AdminModules') !== false || strpos($baseUrl, 'index.php') !== false)) {
+                    $sep = (strpos($baseUrl, '?') !== false) ? '&' : '?';
+                    $u = $baseUrl . $sep . 'configure=mass_utility&mu_action=' . urlencode($act) . '&file=' . urlencode($file);
+                    if (!empty($type)) {
+                        $u .= '&type=' . urlencode($type);
+                    }
+                    return $u;
+                }
+                $u = 'index.php?mu_action=' . urlencode($act) . '&file=' . urlencode($file);
+                if (!empty($type)) {
+                    $u .= '&type=' . urlencode($type);
+                }
+                return $u;
+            };
+
             if ($isLocal && $isCloud) {
                 if ($defaultDownload === 'cloud') {
-                    $archiveDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_from_drive&file=' . urlencode($b['basename']) . '&type=file&filename=' . urlencode($b['basename']);
-                    $logDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_from_drive&file=' . urlencode($b['basename']) . '&type=file&filename=' . urlencode($logName);
+                    $archiveDownloadUrl = $buildUrl($adminModulesUrl, 'download_from_drive', $b['basename'], 'file');
+                    $logDownloadUrl = $buildUrl($adminModulesUrl, 'download_from_drive', $logName, 'file');
                 } else {
-                    $archiveDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_file_backup&file=' . urlencode($b['basename']);
-                    $logDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_file_backup_log&file=' . urlencode($b['basename']);
+                    $archiveDownloadUrl = $buildUrl($adminModulesUrl, 'download_file_backup', $b['basename']);
+                    $logDownloadUrl = $buildUrl($adminModulesUrl, 'download_file_backup_log', $b['basename']);
                 }
             } elseif ($isCloud) {
-                $archiveDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_from_drive&file=' . urlencode($b['basename']) . '&type=file&filename=' . urlencode($b['basename']);
-                $logDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_from_drive&file=' . urlencode($b['basename']) . '&type=file&filename=' . urlencode($logName);
+                $archiveDownloadUrl = $buildUrl($adminModulesUrl, 'download_from_drive', $b['basename'], 'file');
+                $logDownloadUrl = $buildUrl($adminModulesUrl, 'download_from_drive', $logName, 'file');
             } elseif ($isLocal) {
-                $archiveDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_file_backup&file=' . urlencode($b['basename']);
-                $logDownloadUrl = $adminModulesUrl . '&configure=mass_utility&action=download_file_backup_log&file=' . urlencode($b['basename']);
+                $archiveDownloadUrl = $buildUrl($adminModulesUrl, 'download_file_backup', $b['basename']);
+                $logDownloadUrl = $buildUrl($adminModulesUrl, 'download_file_backup_log', $b['basename']);
             }
 
             $b['archive_download_url'] = $archiveDownloadUrl;

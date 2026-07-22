@@ -26,6 +26,19 @@ interface BackupsGridProps {
   onClearAll: () => void;
 }
 
+const resolveDownloadUrl = (url?: string): string => {
+  if (!url || url.startsWith('#')) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  
+  const isV2Path = window.location.pathname.includes('/v2/') || window.location.pathname.endsWith('/v2');
+  const prefix = isV2Path ? '../' : './';
+  
+  if (url.startsWith('api/v1/') || url.startsWith('index.php') || url.startsWith('api.php')) {
+    return prefix + url;
+  }
+  return isV2Path && !url.startsWith('/') && !url.startsWith('../') ? prefix + url : url;
+};
+
 export const BackupsGrid: React.FC<BackupsGridProps> = ({
   backups,
   onRefresh,
@@ -240,7 +253,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                         
                         {b.archive_download_url && (
                           <a
-                            href={b.archive_download_url}
+                            href={resolveDownloadUrl(b.archive_download_url)}
                             className="pm-btn pm-btn-sm pm-btn-primary text-[0.75rem] px-2.5 py-1 rounded-md inline-flex items-center"
                           >
                             ⬇️ Download
@@ -249,7 +262,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
 
                         {b.has_log && b.log_download_url && (
                           <a
-                            href={b.log_download_url}
+                            href={resolveDownloadUrl(b.log_download_url)}
                             className="pm-btn pm-btn-sm pm-btn-neutral text-[0.75rem] px-2.5 py-1 rounded-md inline-flex items-center"
                           >
                             📄 Log

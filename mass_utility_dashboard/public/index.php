@@ -148,6 +148,90 @@ if (isset($_GET['ott']) && !empty($bridgeToken)) {
     }
 }
 
+// Intercept direct download requests at top-level index.php before any HTML page rendering
+$topAction = $_GET['mu_action'] ?? $_GET['action'] ?? '';
+if (in_array($topAction, ['download_backup', 'download_from_drive', 'download_file_backup', 'download_file_backup_log'], true)) {
+    $file = $_GET['file'] ?? '';
+    $cleanFile = basename((string)$file);
+    if (!empty($cleanFile) && !headers_sent()) {
+        @ini_set('zlib.output_compression', 'Off');
+        @ini_set('output_buffering', 'Off');
+        @set_time_limit(300);
+        while (ob_get_level()) {
+            @ob_end_clean();
+        }
+
+        // Direct local filesystem read optimization
+        $scriptDocRoot = !empty($_SERVER['SCRIPT_FILENAME']) ? dirname($_SERVER['SCRIPT_FILENAME'], 3) : '';
+        $baseDirs = array_filter([
+            dirname(__DIR__, 2) . '/mass_utility/backups/',
+            dirname(__DIR__, 3) . '/modules/mass_utility/backups/',
+            !empty($scriptDocRoot) ? $scriptDocRoot . '/modules/mass_utility/backups/' : '',
+            '/home/mpscelkr/public_html/modules/mass_utility/backups/'
+        ]);
+
+        $folderName = preg_replace('/(\.sql|\.sql\.gz|\.zip|\.tar|\.tar\.gz|\.log)$/i', '', $cleanFile);
+        $localPath = null;
+
+        if ($topAction === 'download_file_backup' || $topAction === 'download_file_backup_log') {
+            $subFolder = ($topAction === 'download_file_backup_log') ? 'files/logs/' : 'files/';
+            foreach ($baseDirs as $bDir) {
+                $checkP = $bDir . $subFolder . $cleanFile;
+                if (file_exists($checkP)) {
+                    $localPath = $checkP;
+                    break;
+                }
+            }
+        } else {
+            foreach ($baseDirs as $bDir) {
+                $candidatePaths = [
+                    $bDir . $cleanFile,
+                    $bDir . $folderName . '/' . $cleanFile,
+                    $bDir . $folderName . '/' . $folderName . '.sql.gz',
+                    $bDir . $folderName . '/' . $folderName . '.log'
+                ];
+                foreach ($candidatePaths as $cP) {
+                    if (file_exists($cP)) {
+                        $localPath = $cP;
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        if ($localPath && file_exists($localPath)) {
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . basename($localPath) . '"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . (string)filesize($localPath));
+            readfile($localPath);
+            exit;
+        }
+
+        // Bridge fallback if local file not found directly on disk
+        $bridgeUrl = $settingsRepo->get('PM_BRIDGE_URL') ?? '';
+        if (!empty($bridgeUrl)) {
+            $client = new \MassUtility\SaaS\Service\HttpClient($bridgeUrl, $bridgeToken);
+            try {
+                $response = $client->request($topAction, ['file' => $cleanFile]);
+                if (is_array($response) && !empty($response['content'])) {
+                    header('Content-Description: File Transfer');
+                    header('Content-Type: application/octet-stream');
+                    header('Content-Disposition: attachment; filename="' . ($response['filename'] ?? $cleanFile) . '"');
+                    header('Expires: 0');
+                    header('Cache-Control: must-revalidate');
+                    header('Pragma: public');
+                    echo base64_decode($response['content']);
+                    exit;
+                }
+            } catch (\Throwable $e) {}
+        }
+    }
+}
+
 // Phase 423.C: Browser Gateway for Centralized OAuth Broker Callback
 if (isset($_GET['route']) && $_GET['route'] === 'oauth_callback') {
     $code = $_GET['code'] ?? '';
@@ -235,11 +319,11 @@ function mergeCloudBackups(array $localBackups, \PDO $pdo, string $adminModulesU
         
         // Point download URLs to dashboard proxy
         if ($type === 'database') {
-            $localB['sql_download_url'] = 'index.php?action=download_backup&file=' . urlencode($localB['sql_filename'] ?? '');
-            $localB['log_download_url'] = !empty($localB['log_filename']) ? 'index.php?action=download_backup&file=' . urlencode($localB['log_filename']) : '#';
+            $localB['sql_download_url'] = 'index.php?mu_action=download_backup&file=' . urlencode($localB['sql_filename'] ?? '');
+            $localB['log_download_url'] = !empty($localB['log_filename']) ? 'index.php?mu_action=download_backup&file=' . urlencode($localB['log_filename']) : '#';
         } else {
-            $localB['archive_download_url'] = 'index.php?action=download_file_backup&file=' . urlencode($localB['basename'] ?? '');
-            $localB['log_download_url'] = !empty($localB['basename']) ? 'index.php?action=download_file_backup_log&file=' . urlencode($localB['basename']) : '#';
+            $localB['archive_download_url'] = 'index.php?mu_action=download_file_backup&file=' . urlencode($localB['basename'] ?? '');
+            $localB['log_download_url'] = !empty($localB['basename']) ? 'index.php?mu_action=download_file_backup_log&file=' . urlencode($localB['basename']) : '#';
         }
         
         $merged[] = $localB;
@@ -861,8 +945,10 @@ if ($path === '/api/ping') {
 }
 
 if (strpos($path, '/api/v1/') === 0) {
-    header('Content-Type: application/json');
     $action = substr($path, 8); // Extract action name
+    if (!in_array($action, ['download_backup', 'download_from_drive', 'download_file_backup', 'download_file_backup_log'], true)) {
+        header('Content-Type: application/json');
+    }
 
     // CSRF Check for session-authenticated browser requests
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_SERVER['HTTP_X_BRIDGE_TOKEN'])) {
@@ -892,9 +978,15 @@ if (strpos($path, '/api/v1/') === 0) {
     try {
         $pdo = $sqliteManager->getConnection();
 
-        if (in_array($action, ['download_backup', 'download_from_drive', 'download_file_backup', 'download_file_backup_log'], true)) {
+        $downloadAction = !empty($action) && in_array($action, ['download_backup', 'download_from_drive', 'download_file_backup', 'download_file_backup_log'], true)
+            ? $action
+            : ($_GET['mu_action'] ?? $_GET['action'] ?? '');
+
+        if (in_array($downloadAction, ['download_backup', 'download_from_drive', 'download_file_backup', 'download_file_backup_log'], true)) {
+            $action = $downloadAction;
             $file = $_GET['file'] ?? '';
-            if (empty($file)) {
+            $cleanFile = basename((string)$file);
+            if (empty($cleanFile)) {
                 die('Missing file parameter');
             }
 
@@ -902,8 +994,68 @@ if (strpos($path, '/api/v1/') === 0) {
                 die('Headers already sent, cannot download');
             }
 
+            @ini_set('zlib.output_compression', 'Off');
+            @ini_set('output_buffering', 'Off');
+            @set_time_limit(300);
             while (ob_get_level()) {
-                ob_end_clean();
+                @ob_end_clean();
+            }
+
+            // Direct local filesystem read optimization (bypasses loopback HTTP overhead if local)
+            $scriptDocRoot = !empty($_SERVER['SCRIPT_FILENAME']) ? dirname($_SERVER['SCRIPT_FILENAME'], 3) : '';
+            $baseDirs = array_filter([
+                !empty($scriptDocRoot) ? $scriptDocRoot . '/modules/mass_utility/backups/' : '',
+                !empty($scriptDocRoot) ? $scriptDocRoot . '/mass_utility/backups/' : '',
+                dirname(__DIR__, 2) . '/mass_utility/backups/',
+                dirname(__DIR__, 2) . '/modules/mass_utility/backups/',
+                dirname(__DIR__, 3) . '/modules/mass_utility/backups/',
+                dirname(__DIR__, 1) . '/backups/'
+            ]);
+            $localPath = null;
+
+            foreach ($baseDirs as $bDir) {
+                if (!is_dir($bDir)) continue;
+
+                if ($action === 'download_backup') {
+                    $folderName = preg_replace('/(\.sql|\.sql\.gz|\.log)$/i', '', $cleanFile);
+                    $candidates = [
+                        $bDir . $folderName . '/' . $cleanFile,
+                        $bDir . 'import_tmp/' . $cleanFile,
+                        $bDir . $cleanFile
+                    ];
+                    foreach ($candidates as $cand) {
+                        if (file_exists($cand) && is_file($cand)) {
+                            $localPath = $cand;
+                            break 2;
+                        }
+                    }
+                } elseif ($action === 'download_file_backup' || $action === 'download_file_backup_log') {
+                    $baseName = preg_replace('/(\.zip|\.tar\.gz|\.tar|\.log)$/i', '', $cleanFile);
+                    $logFileName = str_ends_with($cleanFile, '.log') ? $cleanFile : $cleanFile . '.log';
+                    $candidates = [
+                        $bDir . 'files/' . $baseName . '/' . $cleanFile,
+                        $bDir . 'files/' . $baseName . '/' . $logFileName,
+                        $bDir . 'files/' . $cleanFile
+                    ];
+                    foreach ($candidates as $cand) {
+                        if (file_exists($cand) && is_file($cand)) {
+                            $localPath = $cand;
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            if ($localPath && file_exists($localPath)) {
+                header('Content-Description: File Transfer');
+                header('Content-Type: application/octet-stream');
+                header('Content-Disposition: attachment; filename="' . basename($localPath) . '"');
+                header('Expires: 0');
+                header('Cache-Control: must-revalidate');
+                header('Pragma: public');
+                header('Content-Length: ' . (string)filesize($localPath));
+                readfile($localPath);
+                exit;
             }
 
             header_remove('Content-Type');
@@ -929,6 +1081,43 @@ if (strpos($path, '/api/v1/') === 0) {
             }
 
             unset($queryParams['action']);
+
+            // Attempt in-process PrestaShop bootstrap before resorting to HTTP loopback cURL
+            $psConfigCandidates = array_filter([
+                !empty($scriptDocRoot) ? $scriptDocRoot . '/config/config.inc.php' : '',
+                dirname(__DIR__, 2) . '/config/config.inc.php',
+                dirname(__DIR__, 3) . '/config/config.inc.php'
+            ]);
+            foreach ($psConfigCandidates as $psConfig) {
+                if (file_exists($psConfig)) {
+                    require_once $psConfig;
+                    $modDir = _PS_MODULE_DIR_ . 'mass_utility/';
+                    if (file_exists($modDir . 'mass_utility.php')) {
+                        require_once $modDir . 'src/Service/BridgeLogger.php';
+                        require_once $modDir . 'src/Service/TableBackupManager.php';
+                        require_once $modDir . 'src/Service/FileBackupEngine.php';
+                        require_once $modDir . 'src/Service/DatabaseProfilerEngine.php';
+                        require_once $modDir . 'src/Controller/Api/AbstractApiController.php';
+                        require_once $modDir . 'src/Controller/Api/DatabaseApiController.php';
+                        require_once $modDir . 'src/Controller/Api/FileToolsApiController.php';
+
+                        $logger = new \MassUtility\Service\BridgeLogger();
+                        if ($action === 'download_backup') {
+                            $backupManager = new \MassUtility\Service\TableBackupManager($logger);
+                            $profilerEngine = new \MassUtility\Service\DatabaseProfilerEngine($logger);
+                            $api = new \MassUtility\Controller\Api\DatabaseApiController($logger, $backupManager, $profilerEngine);
+                            $api->execute('download_backup');
+                            exit;
+                        } elseif ($action === 'download_file_backup' || $action === 'download_file_backup_log') {
+                            $fileEngine = new \MassUtility\Service\FileBackupEngine($logger, _PS_MODULE_DIR_ . 'mass_utility/backups/files/');
+                            $api = new \MassUtility\Controller\Api\FileToolsApiController($logger, $fileEngine);
+                            $api->execute($action);
+                            exit;
+                        }
+                    }
+                    break;
+                }
+            }
 
             $resolvedBridgeUrl = rtrim((string)$bridgeUrl, '/');
             if (strpos($resolvedBridgeUrl, 'http://') !== 0 && strpos($resolvedBridgeUrl, 'https://') !== 0) {
@@ -1429,6 +1618,14 @@ if (strpos($path, '/api/v1/') === 0) {
                 } else {
                     $results[$key] = true;
                 }
+            }
+
+            // Trigger remote module backup permission repair via API
+            try {
+                $client->request('fix_bridge_permissions', 'GET');
+                $results['bridge_module'] = true;
+            } catch (\Throwable $e) {
+                $results['bridge_module'] = false;
             }
 
             echo json_encode(['success' => true, 'results' => $results]);

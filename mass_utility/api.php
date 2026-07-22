@@ -138,6 +138,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 4. Dispatch API Actions
 $action = $_GET['action'] ?? '';
 
+if ($action === 'fix_bridge_permissions') {
+    header('Content-Type: application/json');
+    $moduleDir = __DIR__;
+    $backupsDir = $moduleDir . '/backups';
+    $apiFile = $moduleDir . '/api.php';
+    $htaccessFile = $moduleDir . '/.htaccess';
+
+    if (!is_dir($backupsDir)) {
+        @mkdir($backupsDir, 0755, true);
+    }
+    if (!file_exists($htaccessFile)) {
+        $htaccessContent = "<Files *>\n    Order Deny,Allow\n    Deny from all\n</Files>\n<Files \"api.php\">\n    Order Allow,Deny\n    Allow from all\n</Files>\n";
+        @file_put_contents($htaccessFile, $htaccessContent);
+    }
+
+    $targets = [
+        $moduleDir => 0755,
+        $backupsDir => 0755,
+        $apiFile => 0644,
+        $htaccessFile => 0644
+    ];
+    foreach ($targets as $path => $mode) {
+        if (file_exists($path)) {
+            @chmod($path, $mode);
+        }
+    }
+
+    $recursiveChmod = function(string $dir) use (&$recursiveChmod) {
+        if (!is_dir($dir)) return;
+        @chmod($dir, 0755);
+        $items = @scandir($dir);
+        if (is_array($items)) {
+            foreach ($items as $item) {
+                if ($item === '.' || $item === '..') continue;
+                $fullPath = $dir . '/' . $item;
+                if (is_dir($fullPath)) {
+                    $recursiveChmod($fullPath);
+                } elseif (file_exists($fullPath)) {
+                    @chmod($fullPath, 0644);
+                }
+            }
+        }
+    };
+    $recursiveChmod($backupsDir);
+
+    echo json_encode(['success' => true, 'message' => 'Module backup permissions recursively repaired to 0755 (dirs) and 0644 (files).']);
+    exit;
+}
+
 if ($action === 'ping') {
     header('Content-Type: application/json');
     

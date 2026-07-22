@@ -84,6 +84,34 @@ class Mass_Utility extends Module
      */
     public function getContent(): string
     {
+        // Intercept download requests from PrestaShop Back-Office
+        if (class_exists('\Tools')) {
+            $muAction = \Tools::getValue('mu_action') ?: \Tools::getValue('action');
+            if (in_array($muAction, ['download_backup', 'download_file_backup', 'download_file_backup_log'], true)) {
+                $action = $muAction;
+                require_once __DIR__ . '/src/Service/BridgeLogger.php';
+                require_once __DIR__ . '/src/Service/TableBackupManager.php';
+                require_once __DIR__ . '/src/Service/FileBackupEngine.php';
+                require_once __DIR__ . '/src/Service/DatabaseProfilerEngine.php';
+                require_once __DIR__ . '/src/Controller/Api/AbstractApiController.php';
+                require_once __DIR__ . '/src/Controller/Api/DatabaseApiController.php';
+                require_once __DIR__ . '/src/Controller/Api/FileToolsApiController.php';
+
+                $logger = new \MassUtility\Service\BridgeLogger();
+                if ($action === 'download_backup') {
+                    $backupManager = new \MassUtility\Service\TableBackupManager($logger);
+                    $profilerEngine = new \MassUtility\Service\DatabaseProfilerEngine($logger);
+                    $api = new \MassUtility\Controller\Api\DatabaseApiController($logger, $backupManager, $profilerEngine);
+                    $api->execute('download_backup');
+                } else {
+                    $fileEngine = new \MassUtility\Service\FileBackupEngine($logger, _PS_MODULE_DIR_ . 'mass_utility/backups/files/');
+                    $api = new \MassUtility\Controller\Api\FileToolsApiController($logger, $fileEngine);
+                    $api->execute($action);
+                }
+                exit;
+            }
+        }
+
         // Handle OAuth callback first
         if (class_exists('\Tools') && \Tools::getValue('action') === 'google_oauth_callback') {
             $code = \Tools::getValue('code');
@@ -197,6 +225,25 @@ class Mass_Utility extends Module
                     @chmod($path, $mode);
                 }
             }
+
+            // Recursive subfolder & file permission repair for backups
+            $recursiveChmod = function(string $dir) use (&$recursiveChmod) {
+                if (!is_dir($dir)) return;
+                @chmod($dir, 0755);
+                $items = @scandir($dir);
+                if (is_array($items)) {
+                    foreach ($items as $item) {
+                        if ($item === '.' || $item === '..') continue;
+                        $fullPath = $dir . '/' . $item;
+                        if (is_dir($fullPath)) {
+                            $recursiveChmod($fullPath);
+                        } elseif (file_exists($fullPath)) {
+                            @chmod($fullPath, 0644);
+                        }
+                    }
+                }
+            };
+            $recursiveChmod($backupsDir);
 
             $redirectUrl = $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&perms_fixed=1';
             \Tools::redirectAdmin($redirectUrl);

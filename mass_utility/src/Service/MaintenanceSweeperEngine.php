@@ -181,10 +181,10 @@ class MaintenanceSweeperEngine
                 WHERE c.`date_add` < ' . $intervalSql;
             $connectionsSourceCount = (int)$db->getValue($sqlConnectionsSource);
 
-            // 2. Guests (which will be orphaned after connections are deleted)
+            // 2. Guests (which are currently unreferenced in connections and cart)
             $sqlGuests = 'SELECT COUNT(DISTINCT g.`id_guest`) FROM `' . _DB_PREFIX_ . 'guest` g
-                LEFT JOIN `' . _DB_PREFIX_ . 'connections` c ON (c.`id_guest` = g.`id_guest` AND c.`date_add` >= ' . $intervalSql . ')
-                LEFT JOIN `' . _DB_PREFIX_ . 'cart` ca ON (ca.`id_guest` = g.`id_guest` AND ca.`date_upd` >= ' . $intervalSql . ')
+                LEFT JOIN `' . _DB_PREFIX_ . 'connections` c ON (c.`id_guest` = g.`id_guest`)
+                LEFT JOIN `' . _DB_PREFIX_ . 'cart` ca ON (ca.`id_guest` = g.`id_guest`)
                 WHERE c.`id_connections` IS NULL AND ca.`id_cart` IS NULL';
             $guestsCount = (int)$db->getValue($sqlGuests);
 

@@ -31,6 +31,7 @@ class FileBackupEngine
                 throw new Exception("Could not create backup directory: " . $this->backupDir);
             }
         }
+        @chmod($this->backupDir, 0755);
     }
 
     /**
@@ -46,6 +47,7 @@ class FileBackupEngine
                 throw new Exception("Could not create backup directory: " . $individualBackupDir);
             }
         }
+        @chmod($individualBackupDir, 0755);
 
         $stateFile = $individualBackupDir . $jobId . '_state.json';
         $tarFile = $individualBackupDir . $jobId . '.tar';

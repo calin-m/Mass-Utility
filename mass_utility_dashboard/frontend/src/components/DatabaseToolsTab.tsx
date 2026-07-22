@@ -23,6 +23,19 @@ interface BackupFile {
   log_download_url?: string;
 }
 
+const resolveDownloadUrl = (url?: string): string => {
+  if (!url || url.startsWith('#')) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  
+  const isV2Path = window.location.pathname.includes('/v2/') || window.location.pathname.endsWith('/v2');
+  const prefix = isV2Path ? '../' : './';
+  
+  if (url.startsWith('api/v1/') || url.startsWith('index.php') || url.startsWith('api.php')) {
+    return prefix + url;
+  }
+  return isV2Path && !url.startsWith('/') && !url.startsWith('../') ? prefix + url : url;
+};
+
 interface TableMetric {
   name: string;
   engine: string;
@@ -1194,7 +1207,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             {/* SQL download link */}
                             {b.sql_download_url && (
                               <a
-                                href={b.sql_download_url}
+                                href={resolveDownloadUrl(b.sql_download_url)}
                                 className="pm-btn pm-btn-sm pm-btn-primary text-[0.7rem] px-2.5 py-1 rounded-md"
                                 title="Download SQL Dump"
                               >
@@ -1204,7 +1217,7 @@ export const DatabaseToolsTab: React.FC = () => {
                             {/* Log download link */}
                             {b.log_filename && b.log_download_url && (
                               <a
-                                href={b.log_download_url}
+                                href={resolveDownloadUrl(b.log_download_url)}
                                 className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 rounded-md"
                                 title="Download Telemetry Log"
                               >
@@ -1322,7 +1335,7 @@ export const DatabaseToolsTab: React.FC = () => {
                     type="button"
                     onClick={handleUploadStageFile}
                     disabled={isUploading}
-                    className="pm-btn px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0"
+                    className="pm-btn pm-btn-purple px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
                   >
                     {isUploading ? `Uploading (${uploadPercent}%)` : 'Stage Upload'}
                   </button>
@@ -1368,7 +1381,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleStartRestore(b.basename)}
-                                className="pm-btn pm-btn-danger text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
+                                className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
                               >
                                 <span>⚡</span> Restore
                               </button>
@@ -1376,7 +1389,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleStartRestore(b.basename)}
-                                className="pm-btn pm-btn-purple text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
+                                className="pm-btn pm-btn-sm pm-btn-purple text-[0.7rem] px-2.5 py-1 rounded-md"
                               >
                                 <span>☁️</span> Restore
                               </button>
@@ -1385,7 +1398,7 @@ export const DatabaseToolsTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleDeleteBackup(b.basename)}
-                                className="pm-btn pm-btn-neutral text-[0.7rem] inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] hover:opacity-90"
+                                className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
                               >
                                 <span>🗑️</span> Delete
                               </button>

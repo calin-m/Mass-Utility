@@ -12,12 +12,20 @@ $dbDir = dirname($dbPath);
 if (!is_dir($dbDir)) {
     @mkdir($dbDir, 0755, true);
 }
+@chmod($dbDir, 0755);
+if (file_exists($dbPath)) {
+    @chmod($dbPath, 0666);
+}
 
 $hasAdmin = false;
-try {
-    if (file_exists($dbPath) && filesize($dbPath) > 0) {
+if (file_exists($dbPath) && filesize($dbPath) > 0) {
+    try {
         $pdo = new PDO('sqlite:' . $dbPath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_TIMEOUT, 5);
+        try {
+            $pdo->exec('PRAGMA busy_timeout = 5000;'); // nosec
+        } catch (\Throwable $t) {}
 
         // Ensure pm_package_tiers table exists and is seeded (Self-healing repair)
         try {
@@ -32,7 +40,7 @@ try {
             );
 
             $stmtTiersCount = $pdo->query("SELECT COUNT(*) FROM pm_package_tiers");
-            if ($stmtTiersCount->fetchColumn() == 0) {
+            if ($stmtTiersCount && $stmtTiersCount->fetchColumn() == 0) {
                 $defaultTiers = [
                     'basic' => [
                         'backup_destinations' => ['local'],
@@ -60,7 +68,7 @@ try {
                     ]
                 ];
                 
-                $insertTier = $pdo->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
+                $insertTier = $pdo->prepare("INSERT OR IGNORE INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
                 foreach ($defaultTiers as $name => $caps) {
                     $insertTier->execute([$name, json_encode($caps)]);
                 }
@@ -69,17 +77,18 @@ try {
             // Silence write permission locks so read-only admin checks still succeed
         }
 
-        // Simple sanity check on tables
-        $stmt = $pdo->query("SELECT COUNT(*) FROM pm_admins");
-        $hasAdmin = ((int)$stmt->fetchColumn() > 0);
+        // Sanity check on pm_admins table
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM pm_admins");
+            $hasAdmin = ($stmt && (int)$stmt->fetchColumn() > 0);
+        } catch (\Exception $tblEx) {
+            // Table pm_admins does not exist yet (fresh install state) -> show setup wizard
+            $hasAdmin = false;
+        }
+    } catch (\Exception $e) {
+        // If file is locked, allow setup or retry gracefully
+        $hasAdmin = false;
     }
-} catch (\Exception $e) {
-    // If the database file actually exists but we failed to query it, this is a database lock/error, NOT a clean install state!
-    if (file_exists($dbPath) && filesize($dbPath) > 0) {
-        header('HTTP/1.1 500 Internal Server Error');
-        die("Database temporary lock or connection error. Please refresh the page.");
-    }
-    $hasAdmin = false;
 }
 
 $action = $_GET['action'] ?? '';
@@ -176,7 +185,7 @@ if (!$hasAdmin) {
                 ]
             ];
             
-            $insertTier = $pdo->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
+            $insertTier = $pdo->prepare("INSERT OR IGNORE INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
             foreach ($defaultTiers as $name => $caps) {
                 $insertTier->execute([$name, json_encode($caps)]);
             }
