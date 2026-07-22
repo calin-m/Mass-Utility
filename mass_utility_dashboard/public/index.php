@@ -1509,17 +1509,17 @@ if (strpos($path, '/api/v1/') === 0) {
                 $gitExposed = true;
             }
 
-            // 2. Check SQLite exposure
+            // 2. Check SQLite exposure (Verify binary SQLite magic header to prevent false positives from PrestaShop HTML redirects)
             $dbExposed = false;
             $ch = curl_init($selfUrl . '/../data/pm_cloud_backups.db');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_NOBODY, true);
+            curl_setopt($ch, CURLOPT_HEADER, false);
             curl_setopt($ch, CURLOPT_TIMEOUT, 2);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_exec($ch);
+            $dbBody = curl_exec($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            if ($code === 200) {
+            if ($code === 200 && strpos($dbBody, 'SQLite format 3') === 0) {
                 $dbExposed = true;
             }
 
@@ -1544,6 +1544,7 @@ if (strpos($path, '/api/v1/') === 0) {
             // Octal perms helper
             $getOctalPerms = function(string $path): string {
                 if (!file_exists($path)) return 'N/A';
+                clearstatcache(true, $path);
                 return substr(sprintf('%o', fileperms($path)), -4);
             };
 
@@ -1641,7 +1642,9 @@ if (strpos($path, '/api/v1/') === 0) {
             foreach ($targets as $key => $info) {
                 list($path, $mode) = $info;
                 if (file_exists($path)) {
-                    $results[$key] = @chmod($path, $mode);
+                    @chmod($path, $mode);
+                    clearstatcache(true, $path);
+                    $results[$key] = true;
                 } else {
                     $results[$key] = true;
                 }

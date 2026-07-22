@@ -214,17 +214,17 @@ class AdminApiController
             $dashboardGitExposed = true;
         }
 
-        // 4. Audit Dashboard SQLite DB exposure
+        // 4. Audit Dashboard SQLite DB exposure (Verify binary SQLite magic header to prevent false positives from PrestaShop HTML redirects)
         $dashboardDbExposed = false;
         $ch = curl_init($dashboardBaseUrl . '/data/pm_cloud_backups.db');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 2);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_exec($ch);
+        $dbBody = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        if ($code === 200) {
+        if ($code === 200 && strpos($dbBody, 'SQLite format 3') === 0) {
             $dashboardDbExposed = true;
         }
 
@@ -241,6 +241,7 @@ class AdminApiController
 
         $getOctalPerms = function(string $path): string {
             if (!file_exists($path)) return 'N/A';
+            clearstatcache(true, $path);
             return substr(sprintf('%o', fileperms($path)), -4);
         };
 
@@ -349,7 +350,9 @@ class AdminApiController
         foreach ($targets as $key => $info) {
             list($path, $mode) = $info;
             if (file_exists($path)) {
-                $results[$key] = @chmod($path, $mode);
+                @chmod($path, $mode);
+                clearstatcache(true, $path);
+                $results[$key] = true;
             } else {
                 $results[$key] = true;
             }
