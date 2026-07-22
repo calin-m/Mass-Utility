@@ -49,22 +49,22 @@ export const BaseModal: React.FC<BaseModalProps> = ({
       onClick={onClose}
     >
       <div
-        className={`w-full ${maxWidthClasses} bg-pm-card-bg border border-pm-border rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scaleUp`}
+        className={`w-full ${maxWidthClasses} bg-pm-card border border-pm-border rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scaleUp`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 border-b border-pm-border/60 bg-pm-bg/40">
+        <div className="flex items-center justify-between p-4 border-b border-pm-border/60 bg-pm-input/30">
           <div className="flex items-center gap-3">
             {icon && <span className="text-xl">{icon}</span>}
             <div>
-              <h3 className="text-base font-bold text-pm-text-primary">{title}</h3>
+              <h3 className="text-base font-bold text-pm-text">{title}</h3>
               {subtitle && <p className="text-xs text-pm-text-secondary mt-0.5">{subtitle}</p>}
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-pm-text-secondary hover:text-pm-text-primary hover:bg-pm-border/30 rounded-md transition-colors text-lg leading-none"
+            className="p-1 text-pm-text-secondary hover:text-pm-text hover:bg-pm-border/30 rounded-md transition-colors text-lg leading-none"
             title="Close (ESC)"
           >
             ✕
@@ -72,13 +72,13 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 overflow-y-auto flex-1 text-sm text-pm-text-primary">
+        <div className="p-5 overflow-y-auto flex-1 text-sm text-pm-text">
           {children}
         </div>
 
         {/* Optional Footer Actions */}
         {footerActions && (
-          <div className="flex items-center justify-end gap-2 p-3 border-t border-pm-border/60 bg-pm-bg/40">
+          <div className="flex items-center justify-end gap-2 p-3 border-t border-pm-border/60 bg-pm-input/30">
             {footerActions}
           </div>
         )}

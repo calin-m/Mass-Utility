@@ -415,7 +415,7 @@ export const MutationHistoryTab: React.FC = () => {
               {/* Actions Summary */}
               <div>
                 <span className="text-[10px] font-bold text-pm-text-secondary uppercase block mb-1">Actions String</span>
-                <div className="bg-black/20 border border-pm-border p-2.5 rounded-lg text-xs font-mono text-pm-text">
+                <div className="bg-pm-input/50 border border-pm-border p-2.5 rounded-lg text-xs font-mono text-pm-text">
                   {selectedJob.actions}
                 </div>
               </div>
@@ -434,7 +434,7 @@ export const MutationHistoryTab: React.FC = () => {
                         📋 Copy Snippet
                       </button>
                     </div>
-                    <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-48 font-mono">
+                    <pre className="bg-pm-input/40 border border-pm-border p-3 rounded-lg text-xs text-pm-primary overflow-x-auto select-all max-h-48 font-mono">
                       {formattedRawPayload}
                     </pre>
                   </div>
@@ -450,7 +450,7 @@ export const MutationHistoryTab: React.FC = () => {
                         📋 Copy Snippet
                       </button>
                     </div>
-                    <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-pm-border p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-56 font-mono">
+                    <pre className="bg-pm-input/40 border border-pm-border p-3 rounded-lg text-xs text-pm-success overflow-x-auto select-all max-h-56 font-mono">
                       {formattedRevertPayload}
                     </pre>
                   </div>
@@ -462,7 +462,7 @@ export const MutationHistoryTab: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-bold text-amber-400 uppercase flex items-center gap-1">
+                      <span className="text-xs font-bold text-pm-primary uppercase flex items-center gap-1">
                         <span>⚡</span> Executed Mutation SQL Statements
                       </span>
                       <button
@@ -473,14 +473,14 @@ export const MutationHistoryTab: React.FC = () => {
                         📋 Copy SQL
                       </button>
                     </div>
-                    <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-amber-500/20 p-3 rounded-lg text-xs text-blue-400 overflow-x-auto select-all max-h-48 font-mono">
+                    <pre className="bg-pm-input/40 border border-pm-border p-3 rounded-lg text-xs text-pm-primary overflow-x-auto select-all max-h-48 font-mono">
                       {mutationSql}
                     </pre>
                   </div>
 
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-bold text-rose-400 uppercase flex items-center gap-1">
+                      <span className="text-xs font-bold text-pm-success uppercase flex items-center gap-1">
                         <span>🔮</span> Projected Rollback Reversion SQL Statements
                       </span>
                       <button
@@ -491,7 +491,7 @@ export const MutationHistoryTab: React.FC = () => {
                         📋 Copy SQL
                       </button>
                     </div>
-                    <pre className="bg-[var(--pm-terminal-bg,#05070f)] border border-rose-500/20 p-3 rounded-lg text-xs text-emerald-400 overflow-x-auto select-all max-h-56 font-mono">
+                    <pre className="bg-pm-input/40 border border-pm-border p-3 rounded-lg text-xs text-pm-success overflow-x-auto select-all max-h-56 font-mono">
                       {revertSql}
                     </pre>
                   </div>
