@@ -74,17 +74,8 @@ export const GovernorTab = () => {
     };
   }, []);
 
-  if (isLoading || !data) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <div className="w-8 h-8 border-4 border-pm-primary border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs uppercase tracking-widest text-pm-text-secondary">Loading Host Governor Telemetry...</p>
-      </div>
-    );
-  }
-
-  const isSafe = data.checklist?.overall && data.probe_status === 'PASSED';
-  const loadStateColor = 
+  const isSafe = data ? (data.checklist?.overall && data.probe_status === 'PASSED') : true;
+  const loadStateColor = !data ? 'text-pm-text-secondary' :
     data.load_state === 'CRITICAL' ? 'text-red-500' :
     data.load_state === 'HIGH' ? 'text-amber-500' :
     data.load_state === 'MEDIUM' ? 'text-blue-500' : 'text-emerald-500';
@@ -109,14 +100,18 @@ export const GovernorTab = () => {
           <span className="bg-pm-primary/10 border border-transparent text-pm-primary text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">
             ☁️ CloudLinux LVE
           </span>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold ${
-            isSafe
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-              : 'bg-red-500/10 border-red-500/20 text-red-400'
-          }`}>
-            <span className={`w-2 h-2 rounded-full ${isSafe ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`}></span>
-            {isSafe ? 'SAFE TO OPERATE' : 'SHIELD ACTIVE'}
-          </div>
+          {isLoading || !data ? (
+            <div className="w-32 h-7 rounded-lg bg-pm-input/50 border border-pm-border animate-pulse"></div>
+          ) : (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold ${
+              isSafe
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                : 'bg-red-500/10 border-red-500/20 text-red-400'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${isSafe ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`}></span>
+              {isSafe ? 'SAFE TO OPERATE' : 'SHIELD ACTIVE'}
+            </div>
+          )}
         </div>
       </div>
 
@@ -135,14 +130,14 @@ export const GovernorTab = () => {
                 <span>🔒</span> Database Locks
               </span>
               <span className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-md ${
-                data.checklist?.db_locks?.status === 'PASS'
+                data?.checklist?.db_locks?.status === 'PASS'
                   ? 'bg-emerald-500/15 text-emerald-400'
                   : 'bg-amber-500/15 text-amber-400'
               }`}>
-                {data.checklist?.db_locks?.status || 'UNKNOWN'}
+                {data?.checklist?.db_locks?.status || 'CHECKING'}
               </span>
             </div>
-            <p className="text-xs text-pm-text-secondary">{data.checklist?.db_locks?.message || 'No info'}</p>
+            <p className="text-xs text-pm-text-secondary">{data?.checklist?.db_locks?.message || 'Auditing database locks...'}</p>
           </div>
 
           {/* Disk Space */}
@@ -152,14 +147,14 @@ export const GovernorTab = () => {
                 <span>💾</span> Staging Disk Space
               </span>
               <span className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-md ${
-                data.checklist?.disk_space?.status === 'PASS'
+                data?.checklist?.disk_space?.status === 'PASS'
                   ? 'bg-emerald-500/15 text-emerald-400'
                   : 'bg-red-500/15 text-red-400'
               }`}>
-                {data.checklist?.disk_space?.status || 'UNKNOWN'}
+                {data?.checklist?.disk_space?.status || 'CHECKING'}
               </span>
             </div>
-            <p className="text-xs text-pm-text-secondary">{data.checklist?.disk_space?.message || 'No info'}</p>
+            <p className="text-xs text-pm-text-secondary">{data?.checklist?.disk_space?.message || 'Auditing disk space...'}</p>
           </div>
 
           {/* Memory */}
@@ -169,14 +164,14 @@ export const GovernorTab = () => {
                 <span>🧠</span> PHP Runtime Memory
               </span>
               <span className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-md ${
-                data.checklist?.memory?.status === 'PASS'
+                data?.checklist?.memory?.status === 'PASS'
                   ? 'bg-emerald-500/15 text-emerald-400'
                   : 'bg-red-500/15 text-red-400'
               }`}>
-                {data.checklist?.memory?.status || 'UNKNOWN'}
+                {data?.checklist?.memory?.status || 'CHECKING'}
               </span>
             </div>
-            <p className="text-xs text-pm-text-secondary">{data.checklist?.memory?.message || 'No info'}</p>
+            <p className="text-xs text-pm-text-secondary">{data?.checklist?.memory?.message || 'Auditing memory allocation...'}</p>
           </div>
 
           {/* File Permissions */}
@@ -186,14 +181,14 @@ export const GovernorTab = () => {
                 <span>🛡️</span> Staging File Permissions
               </span>
               <span className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-md ${
-                data.checklist?.file_permissions?.status === 'PASS'
+                data?.checklist?.file_permissions?.status === 'PASS'
                   ? 'bg-emerald-500/15 text-emerald-400'
                   : 'bg-red-500/15 text-red-400'
               }`}>
-                {data.checklist?.file_permissions?.status || 'UNKNOWN'}
+                {data?.checklist?.file_permissions?.status || 'CHECKING'}
               </span>
             </div>
-            <p className="text-xs text-pm-text-secondary">{data.checklist?.file_permissions?.message || 'No info'}</p>
+            <p className="text-xs text-pm-text-secondary">{data?.checklist?.file_permissions?.message || 'Auditing permissions...'}</p>
           </div>
         </div>
       </div>
@@ -209,27 +204,27 @@ export const GovernorTab = () => {
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Cgroup Load State</span>
-              <span className={`font-bold ${loadStateColor}`}>{data.load_state}</span>
+              <span className={`font-bold ${loadStateColor}`}>{data?.load_state || 'OPERATIONAL'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Cgroup Calculated CPU</span>
-              <span className="font-bold text-pm-text">{data.cpu_load}</span>
+              <span className="font-bold text-pm-text">{data?.cpu_load || 'Measuring...'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Dynamic Chunk Batch</span>
-              <span className="font-bold text-pm-text">{data.chunk_size} rows/batch</span>
+              <span className="font-bold text-pm-text">{data ? `${data.chunk_size} rows/batch` : 'Calculating...'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Micro-sleep Delay</span>
-              <span className="font-bold text-pm-text">{data.sleep_delay} ms</span>
+              <span className="font-bold text-pm-text">{data ? `${data.sleep_delay} ms` : 'Calculating...'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Active Memory Footprint</span>
-              <span className="font-bold text-pm-text">{data.memory_usage}</span>
+              <span className="font-bold text-pm-text">{data?.memory_usage || 'Measuring...'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Probe Latency</span>
-              <span className="font-bold text-pm-text">{data.probe_latency}</span>
+              <span className="font-bold text-pm-text">{data?.probe_latency || 'Measuring...'}</span>
             </div>
           </div>
         </div>
@@ -244,30 +239,30 @@ export const GovernorTab = () => {
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Allocated CPU Speed</span>
-              <span className="font-bold text-pm-text">{data.cpu_speed || 'N/A'}</span>
+              <span className="font-bold text-pm-text">{data?.cpu_speed || 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Virtual Core Limit</span>
-              <span className="font-bold text-pm-text">{data.cores ? `${data.cores} Cores` : 'N/A'}</span>
+              <span className="font-bold text-pm-text">{data?.cores ? `${data.cores} Cores` : 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Max DB Connections</span>
-              <span className="font-bold text-pm-text">{data.db_max_connections || 'N/A'}</span>
+              <span className="font-bold text-pm-text">{data?.db_max_connections || 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Memory Safety Floor</span>
               <span className="font-bold text-pm-text">
-                {data.memory_floor ? `${(data.memory_floor / 1024 / 1024).toFixed(0)} MB` : 'N/A'}
+                {data?.memory_floor ? `${(data.memory_floor / 1024 / 1024).toFixed(0)} MB` : 'N/A'}
               </span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">PHP Version</span>
-              <span className="font-bold text-pm-text">{data.php_version || 'N/A'}</span>
+              <span className="font-bold text-pm-text">{data?.php_version || 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">OPcache Status</span>
-              <span className={`font-bold ${data.opcache_active ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {data.opcache_enabled || 'Disabled'}
+              <span className={`font-bold ${data?.opcache_active ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {data?.opcache_enabled || 'Disabled'}
               </span>
             </div>
           </div>
@@ -288,7 +283,7 @@ export const GovernorTab = () => {
           <span className="text-xs text-pm-text-secondary">{expandedIni ? 'Hide Details ▲' : 'Inspect Limits ▼'}</span>
         </button>
 
-        {expandedIni && data.ini && (
+        {expandedIni && data?.ini && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-5 border-t border-pm-border transition-all duration-300">
             <div className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-2.5">
               <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider flex items-center gap-2">
