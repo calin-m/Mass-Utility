@@ -41,36 +41,10 @@ body {
   --pm-terminal-bg: #05070f;
 }
 
-/* Proximity spotlight cursor-tracking glow styles */
+/* Proximity spotlight background fill styles */
 .pm-tab-label, .pm-sub-tab-btn, .pm-theme-btn {
   position: relative;
   z-index: 1;
-}
-
-.pm-tab-label::before, .pm-sub-tab-btn::before, .pm-theme-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 8px;
-  padding: 1px;
-  background: radial-gradient(
-    circle 60px at var(--mouse-x, -100px) var(--mouse-y, -100px),
-    #8b5cf6,
-    #a855f7,
-    transparent 100%
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.pm-tab-label:hover::before, .pm-sub-tab-btn:hover::before, .pm-theme-btn:hover::before {
-  opacity: 0.65;
 }
 
 .pm-tab-label::after, .pm-sub-tab-btn::after, .pm-theme-btn::after {

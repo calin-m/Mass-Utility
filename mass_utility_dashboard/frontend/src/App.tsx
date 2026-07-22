@@ -150,13 +150,12 @@ function AppContent() {
             Enterprise-grade database &amp; file management
           </p>
         </div>
-
         {/* Right Side Headers controls */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={handleLogout}
-            className="bg-pm-danger/10 hover:bg-pm-danger/20 border border-pm-danger/20 text-pm-danger px-3.5 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 hover:-translate-y-[1px] active:translate-y-0"
+            className="bg-pm-danger/10 hover:bg-pm-danger/20 border border-transparent text-pm-danger px-3.5 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 focus:outline-none"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
@@ -172,10 +171,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('governor')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'governor'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
             }`}
           >
             🛡️ Safety Governor
@@ -183,10 +182,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('database')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'database'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
             }`}
           >
             🗄️ Database Tools
@@ -194,10 +193,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('files')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'files'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
             }`}
           >
             📂 File Backups
@@ -205,10 +204,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('query')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'query'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
             }`}
           >
             ⚡ Query &amp; Mutate
@@ -216,10 +215,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('history')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'history'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
             }`}
           >
             🕒 Mutation History
@@ -227,10 +226,10 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('logs')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'logs'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
             }`}
           >
             📜 Event Logs
@@ -241,19 +240,19 @@ function AppContent() {
           <button
             type="button"
             onClick={() => setActiveTab('settings')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border focus:outline-none ${
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'settings'
                 ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/30 shadow-md shadow-pm-primary/5'
-                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-pm-border/30 hover:border-pm-border shadow-sm'
+                : 'bg-pm-input/30 text-pm-text-secondary hover:text-pm-text border-transparent hover:bg-pm-input/60 shadow-sm'
             }`}
           >
             ⚙️ Settings
           </button>
- 
+
           <button
             type="button"
             onClick={() => setDarkMode(!darkMode)}
-            className="pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 border bg-pm-input border-pm-border text-pm-text hover:bg-pm-input/80 shadow-sm focus:outline-none"
+            className="pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 border bg-pm-input border-transparent text-pm-text hover:bg-pm-input/80 shadow-sm focus:outline-none"
             title="Toggle Light/Dark Theme"
           >
             {darkMode ? '☀️ Light' : '🌙 Dark'}

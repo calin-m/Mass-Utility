@@ -57,7 +57,7 @@ export const SettingsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('general')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'general'
               ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
@@ -68,7 +68,7 @@ export const SettingsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('info')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'info'
               ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'
@@ -79,7 +79,7 @@ export const SettingsTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('security')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 uppercase tracking-wider border ${
+          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
             activeSubTab === 'security'
               ? 'bg-pm-primary/10 text-pm-primary border-pm-primary/20 shadow-sm'
               : 'text-pm-text-secondary hover:text-pm-text border-transparent'

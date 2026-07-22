@@ -106,7 +106,7 @@ export const GovernorTab = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="bg-pm-primary/10 border border-pm-primary/20 text-pm-primary text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">
+          <span className="bg-pm-primary/10 border border-transparent text-pm-primary text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">
             ☁️ CloudLinux LVE
           </span>
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold ${
