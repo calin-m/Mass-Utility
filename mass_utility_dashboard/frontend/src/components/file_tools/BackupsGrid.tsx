@@ -52,7 +52,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
   const [pushingCloudFile, setPushingCloudFile] = useState<string | null>(null);
 
   const handleCloudPush = async (name: string) => {
-    showConfirm('Push to Google Drive', `Upload local backup <strong>${name}</strong> to Google Drive offsite storage?`, 'UPLOAD', async () => {
+    showConfirm('Push to Google Drive', `Upload local backup <strong>${name}</strong> to Google Drive offsite storage?`, null, async () => {
       setPushingCloudFile(name);
       try {
         const data = await FetchService.post('upload_gdrive', { file: name });
@@ -88,11 +88,11 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
   };
 
   const handleDelete = async (name: string) => {
-    showConfirm('Delete Backup', `Are you sure you want to permanently delete the backup archive <strong>${name}</strong>?`, 'DELETE', async () => {
+    showConfirm('Delete Backup', `Are you sure you want to permanently delete the backup archive <strong>${name}</strong>?`, null, async () => {
       try {
         const data = await FetchService.post('delete_file_backup', { file: name });
         onRefresh(data.backups || []);
-        showAlert('Backup Deleted', 'The backup file has been deleted from host filesystem.', 'info');
+        showToast('Backup archive deleted successfully!', 'success');
       } catch (err: any) {
         showAlert('Delete Failed', err.message || 'Could not delete backup.', 'error');
       }

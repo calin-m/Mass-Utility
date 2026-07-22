@@ -440,7 +440,7 @@ export const QueryMutateTab: React.FC = () => {
 
   const handleDeletePreset = (type: 'query' | 'mutate' | 'master', selectVal: string) => {
     if (!selectVal) return;
-    showConfirm('Delete Preset', 'Are you sure you want to permanently delete this preset? This cannot be undone.', 'DELETE', async () => {
+    showConfirm('Delete Preset', 'Are you sure you want to permanently delete this preset? This cannot be undone.', null, async () => {
       try {
         const data = await FetchService.post('delete_preset', { id_preset: selectVal });
         if (data.success) {

@@ -20,7 +20,7 @@ interface HistoryJob {
 }
 
 export const MutationHistoryTab: React.FC = () => {
-  const { showAlert, showConfirm } = useModal();
+  const { showAlert, showConfirm, showToast } = useModal();
   const [history, setHistory] = useState<HistoryJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,7 +59,7 @@ export const MutationHistoryTab: React.FC = () => {
         try {
           const data = await FetchService.post('rollback_mutation', { job_id: job.job_id });
           if (data.success) {
-            showAlert('Rollback Completed', 'All affected rows rolled back successfully.', 'success');
+            showToast('All affected rows rolled back successfully.', 'success');
             fetchHistory();
           }
         } catch (err: any) {
@@ -78,7 +78,7 @@ export const MutationHistoryTab: React.FC = () => {
         try {
           const data = await FetchService.post('reapply_mutation', { job_id: job.job_id });
           if (data.success) {
-            showAlert('Re-apply Completed', 'Mutation rules re-applied successfully.', 'success');
+            showToast('Mutation rules re-applied successfully.', 'success');
             fetchHistory();
           }
         } catch (err: any) {
@@ -92,12 +92,12 @@ export const MutationHistoryTab: React.FC = () => {
     showConfirm(
       'Permanently Delete Ledger Entry',
       `Are you sure you want to permanently erase the ledger transaction for <strong>${job.job_id}</strong>?<br><br><strong>Warning:</strong> This does not undo any database modifications, but deletes the reversion metadata from the disk.`,
-      'DELETE',
+      null,
       async () => {
         try {
           const data = await FetchService.post('delete_mutation_job', { job_id: job.job_id });
           if (data.success) {
-            showAlert('Ledger Erazed', 'Historical ledger entry permanently deleted.', 'info');
+            showToast('Historical ledger entry deleted successfully.', 'success');
             fetchHistory();
           }
         } catch (err: any) {
@@ -116,7 +116,7 @@ export const MutationHistoryTab: React.FC = () => {
         try {
           const data = await FetchService.post('clear_mutation_history');
           if (data.success) {
-            showAlert('Ledger Cleared', 'All mutation history was erased successfully.', 'info');
+            showToast('All mutation history erased successfully.', 'success');
             fetchHistory();
           }
         } catch (err: any) {

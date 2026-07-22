@@ -228,7 +228,16 @@ export const DatabaseToolsTab: React.FC = () => {
     if (targetWin.showPremiumAlert) {
       targetWin.showPremiumAlert(title, message, type);
     } else {
-      window.alert(`${title}\n\n${message}`);
+      console.warn(`[ALERT ${type.toUpperCase()}] ${title}: ${message}`);
+    }
+  };
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const targetWin = getGlobalWin();
+    if (targetWin.showToast) {
+      targetWin.showToast(message, type);
+    } else {
+      console.log(`[TOAST ${type.toUpperCase()}] ${message}`);
     }
   };
 
@@ -896,7 +905,7 @@ export const DatabaseToolsTab: React.FC = () => {
       try {
         const res = await FetchService.post('delete_backup', { file: backupName });
         if (res && res.success) {
-          showAlert('Deleted', 'Backup deleted.', 'success');
+          showToast('Backup archive deleted successfully!', 'success');
           fetchBackups();
         }
       } catch (e) {}

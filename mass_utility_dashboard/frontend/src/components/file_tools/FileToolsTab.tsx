@@ -10,7 +10,7 @@ import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
 
 export const FileToolsTab: React.FC = () => {
-  const { showAlert, showConfirm } = useModal();
+  const { showAlert, showConfirm, showToast } = useModal();
   const [profile, setProfile] = useState<string>('custom');
   const [folders, setFolders] = useState<FolderEntry[]>([]);
   const [backups, setBackups] = useState<BackupEntry[]>([]);
@@ -81,7 +81,7 @@ export const FileToolsTab: React.FC = () => {
   const handleStartBackup = async () => {
     const confirmMsg = `You are about to initiate a file system archive sequence targeting the selected files and directories.<br><br>If the chosen profile contains many files, this can temporarily spike CPU utilization and IOPS on your server.`;
     
-    showConfirm('Initiate Files Backup', confirmMsg, 'BACKUP', async () => {
+    showConfirm('Initiate Files Backup', confirmMsg, null, async () => {
       setIsGenerating(true);
       setIsCancelling(false);
       setProgressPercent(0);
@@ -121,7 +121,7 @@ export const FileToolsTab: React.FC = () => {
       try {
         const data = await FetchService.post('clear_file_backups');
         setBackups(data.backups || []);
-        showAlert('Archives Cleared', 'All backup archives deleted successfully.', 'info');
+        showToast('All backup archives cleared successfully.', 'success');
       } catch (err: any) {
         showAlert('Clear Failed', 'Failed to clear backups repository: ' + err.message, 'error');
       }

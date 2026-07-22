@@ -16,7 +16,7 @@ import { FetchService } from './utils/FetchService';
 type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'logs' | 'settings';
 
 function AppContent() {
-  const { showConfirm } = useModal();
+  const { showConfirm, showToast } = useModal();
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     // Preserve tab on reload
     try {
@@ -124,7 +124,8 @@ function AppContent() {
   }, []);
 
   const handleLogout = () => {
-    showConfirm('Confirm Logout', 'Are you sure you want to log out from the administrative utility dashboard?', 'LOGOUT', () => {
+    showConfirm('Confirm Logout', 'Are you sure you want to log out from the administrative utility dashboard?', null, () => {
+      showToast('Logging out...', 'info');
       const config = (window as any).PM_CONFIG || {};
       const basePath = config.basePath || '';
       const cleanBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
