@@ -101,66 +101,70 @@
 
             <!-- Tab Pane 3: Package Tiers -->
             <div id="pm-tab-tiers" class="pm-tab-pane">
-                <div class="pm-grid-2 pm-mb-6">
-                    <!-- Create/Edit Tier Form -->
-                    <div class="pm-card">
-                        <h3>📦 Manage Package Tier Capabilities</h3>
-                        <form id="pm-tier-form" style="margin-top: 1rem;">
-                            <div class="pm-mb-4">
+                <!-- Create/Edit Tier Form -->
+                <div class="pm-card pm-mb-6">
+                    <h3>📦 Manage Package Tier Capabilities</h3>
+                    <form id="pm-tier-form" style="margin-top: 1rem;">
+                        <div class="pm-grid-2 pm-mb-4">
+                            <div>
                                 <label class="pm-label">Package Name (Lowercase identifier)</label>
                                 <input type="text" id="pm-tier-name" class="pm-input" style="width: 100%;" placeholder="e.g. enterprise" required>
                             </div>
-                            <div class="pm-mb-4">
-                                <label class="pm-label" style="font-weight: 700; margin-bottom: 0.5rem; display: block;">Feature Capabilities Toggles</label>
-                                <div style="display: flex; flex-direction: column; gap: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); padding: 1rem; border-radius: 8px;">
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
-                                        <input type="checkbox" id="pm-cap-visual-execute" style="width: 1.1rem; height: 1.1rem;">
-                                        <span>Enable Visual AST Write Execution</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
-                                        <input type="checkbox" id="pm-cap-gdrive" style="width: 1.1rem; height: 1.1rem;">
-                                        <span>Enable Google Drive Offsite Cloud Redundancy</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
-                                        <input type="checkbox" id="pm-cap-automation" style="width: 1.1rem; height: 1.1rem;">
-                                        <span>Enable Scheduled Background Backups (CLI Crons)</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
-                                        <input type="checkbox" id="pm-cap-sweeper" style="width: 1.1rem; height: 1.1rem;">
-                                        <span>Enable Active Bulk Data & Image Sweeper Execution</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
-                                        <input type="checkbox" id="pm-cap-autopilot" style="width: 1.1rem; height: 1.1rem;">
-                                        <span>Enable safety Auto-Pilot Performance Tuning</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="pm-mb-4">
+                            <div>
                                 <label class="pm-label">Rollback History Retention Limit</label>
                                 <input type="number" id="pm-cap-rollback-limit" class="pm-input" style="width: 100%;" min="0" placeholder="0 for none, 999 for unlimited" required>
-                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.25rem;">Specify the maximum number of undo rollback logs allowed to be kept on the client's SQLite database.</p>
+                                <p style="font-size: 0.75rem; color: var(--pm-text-secondary); margin-top: 0.25rem;">Specify the maximum undo rollback logs allowed on the client's SQLite database.</p>
                             </div>
-                            <button type="submit" class="pm-btn pm-btn-primary" style="width: 100%;">Save Package Tier</button>
-                        </form>
-                    </div>
-
-                    <!-- Tiers Registry List -->
-                    <div class="pm-card">
-                        <h3>📋 Defined Subscription Tiers</h3>
-                        <div class="pm-table-container" style="margin-top: 1rem;">
-                            <table class="pm-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Capabilities / Configuration</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pm-tiers-list">
-                                    <!-- Populated dynamically via JS -->
-                                </tbody>
-                            </table>
                         </div>
+
+                        <div class="pm-mb-4">
+                            <label class="pm-label" style="font-weight: 700; margin-bottom: 0.5rem; display: block;">Feature Capabilities Toggles</label>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--pm-border-color); padding: 1rem; border-radius: 8px;">
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
+                                    <input type="checkbox" id="pm-cap-visual-execute" style="width: 1.1rem; height: 1.1rem;">
+                                    <span>⚡ Enable Visual AST Write Execution</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
+                                    <input type="checkbox" id="pm-cap-gdrive" style="width: 1.1rem; height: 1.1rem;">
+                                    <span>☁️ Enable Google Drive Cloud Sync</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
+                                    <input type="checkbox" id="pm-cap-automation" style="width: 1.1rem; height: 1.1rem;">
+                                    <span>⏱️ Enable Scheduled Backups (Crons)</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
+                                    <input type="checkbox" id="pm-cap-sweeper" style="width: 1.1rem; height: 1.1rem;">
+                                    <span>🧹 Enable Bulk Data & Image Sweeper</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: var(--pm-text-primary);">
+                                    <input type="checkbox" id="pm-cap-autopilot" style="width: 1.1rem; height: 1.1rem;">
+                                    <span>🛡️ Enable Safety Auto-Pilot Tuning</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button type="submit" class="pm-btn pm-btn-primary" style="padding: 0.6rem 2rem;">Save Package Tier</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tiers Registry List -->
+                <div class="pm-card">
+                    <h3>📋 Defined Subscription Tiers</h3>
+                    <div class="pm-table-container" style="margin-top: 1rem;">
+                        <table class="pm-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 160px;">Tier Name</th>
+                                    <th>Capabilities / Features Unlocked</th>
+                                    <th style="width: 140px; text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pm-tiers-list">
+                                <!-- Populated dynamically via JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

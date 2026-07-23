@@ -180,6 +180,28 @@ select.pm-input {
     box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
 }
 
+.pm-btn-danger-outline {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--pm-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.pm-btn-danger-outline:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #ffffff;
+}
+
+.badge-cap {
+    background-color: rgba(139, 92, 246, 0.12);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
 .pm-btn-sm {
     padding: 0.4rem 0.8rem;
     font-size: 0.85rem;

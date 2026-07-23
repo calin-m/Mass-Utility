@@ -323,21 +323,43 @@ function renderTiers(tiers) {
         } catch(e) {}
         
         const tr = document.createElement('tr');
-        const capabilitiesStr = `
-            Visual Execute: <strong>${caps.query_visual_execute ? 'YES' : 'NO'}</strong> | 
-            Destinations: <strong>${(caps.backup_destinations || []).join(', ')}</strong> | 
-            Auto Crons: <strong>${caps.backup_automation ? 'YES' : 'NO'}</strong> | 
-            Safety Auto-Pilot: <strong>${caps.governor_autopilot ? 'YES' : 'NO'}</strong> | 
-            Sweeper Exec: <strong>${caps.sweeper_execution ? 'YES' : 'NO'}</strong> | 
-            Rollbacks: <strong>${caps.rollback_history_limit}</strong>
-        `;
+        
+        let badgesHtml = '';
+        if (caps.query_visual_execute) {
+            badgesHtml += '<span class="pm-badge badge-cap">⚡ Visual AST</span> ';
+        }
+        if (caps.backup_destinations && caps.backup_destinations.includes('gdrive')) {
+            badgesHtml += '<span class="pm-badge badge-cap">☁️ Google Drive</span> ';
+        }
+        if (caps.backup_automation) {
+            badgesHtml += '<span class="pm-badge badge-cap">⏱️ Auto Crons</span> ';
+        }
+        if (caps.sweeper_execution) {
+            badgesHtml += '<span class="pm-badge badge-cap">🧹 Bulk Sweeper</span> ';
+        }
+        if (caps.governor_autopilot) {
+            badgesHtml += '<span class="pm-badge badge-cap">🛡️ Auto-Pilot</span> ';
+        }
+        
+        const limit = caps.rollback_history_limit ?? 0;
+        if (limit > 0) {
+            badgesHtml += `<span class="pm-badge badge-basic">↺ ${limit} Rollbacks</span> `;
+        } else {
+            badgesHtml += '<span class="pm-badge badge-basic">↺ 0 Rollbacks</span> ';
+        }
+        
+        if (!badgesHtml) {
+            badgesHtml = '<span class="pm-badge badge-expired">No Features Unlocked</span>';
+        }
         
         tr.innerHTML = /* nosec */ `
             <td style="font-weight: bold; color: var(--pm-primary);">${escapeHtml(t.name.toUpperCase())}</td>
-            <td style="font-size: 0.85rem; color: var(--pm-text-secondary); line-height: 1.4;">${capabilitiesStr}</td>
-            <td>
-                <button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="loadTierToForm('${escapeHtml(t.name)}', '${escapeHtml(t.capabilities)}')">✏️ Edit</button>
-                <button class="pm-btn pm-btn-sm pm-btn-danger" style="margin-left: 0.5rem;" onclick="deleteTier(${t.id})">🗑️ Delete</button>
+            <td><div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">${badgesHtml}</div></td>
+            <td style="text-align: right;">
+                <div style="display: inline-flex; gap: 0.4rem; justify-content: flex-end;">
+                    <button class="pm-btn pm-btn-sm pm-btn-neutral" onclick="loadTierToForm('${escapeHtml(t.name)}', '${escapeHtml(t.capabilities)}')">✏️ Edit</button>
+                    <button class="pm-btn pm-btn-sm pm-btn-danger-outline" onclick="deleteTier(${t.id})">🗑️ Delete</button>
+                </div>
             </td>
         `;
         list.appendChild(tr);
