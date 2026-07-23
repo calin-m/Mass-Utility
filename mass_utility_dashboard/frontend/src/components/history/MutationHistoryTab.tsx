@@ -216,7 +216,7 @@ export const MutationHistoryTab: React.FC = () => {
             placeholder="Search by Job ID or Actions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-black/20 border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-[#8b5cf6]/50"
+            className="w-full bg-black/20 border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-pm-primary/50"
           />
         </div>
 

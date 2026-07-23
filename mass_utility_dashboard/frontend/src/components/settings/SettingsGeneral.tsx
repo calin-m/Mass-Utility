@@ -378,52 +378,52 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                   disabled={!isHistoryEnabled}
                   value={backupMaxCount}
                   onChange={e => setBackupMaxCount(e.target.value)}
-                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 disabled:opacity-50"
                   min="0"
                 />
-                <p className="text-[0.7rem] text-gray-500 mt-1">Set to 0 for infinite backups (never delete).</p>
+                <p className="text-[0.7rem] text-pm-text-secondary mt-1">Set to 0 for infinite backups (never delete).</p>
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1.5">Max Local Age (Days)</label>
+                <label className="text-xs font-semibold text-pm-text-secondary block mb-1.5">Max Local Age (Days)</label>
                 <input
                   type="number"
                   disabled={!isHistoryEnabled}
                   value={backupMaxDays}
                   onChange={e => setBackupMaxDays(e.target.value)}
-                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 disabled:opacity-50"
                   min="0"
                 />
-                <p className="text-[0.7rem] text-gray-500 mt-1">Set to 0 to keep backups regardless of age.</p>
+                <p className="text-[0.7rem] text-pm-text-secondary mt-1">Set to 0 to keep backups regardless of age.</p>
               </div>
             </div>
           </div>
 
-          <div className="p-5 border border-pm-border rounded-xl bg-black/10">
-            <h4 className="text-sm font-bold text-[#f59e0b] mb-4 flex items-center gap-2">☁️ Cloud Retention (Google Drive)</h4>
+          <div className="p-5 border border-amber-500/20 rounded-xl bg-amber-500/5 dark:bg-amber-500/10">
+            <h4 className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-4 flex items-center gap-2">☁️ Cloud Retention (Google Drive)</h4>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1.5">Max Cloud Backups to Keep</label>
+                <label className="text-xs font-semibold text-pm-text-secondary block mb-1.5">Max Cloud Backups to Keep</label>
                 <input
                   type="number"
                   disabled={!isHistoryEnabled || !gdriveState.authenticated}
                   value={backupCloudMaxCount}
                   onChange={e => setBackupCloudMaxCount(e.target.value)}
-                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 disabled:opacity-50"
                   min="0"
                 />
-                <p className="text-[0.7rem] text-gray-500 mt-1">Set to 0 for infinite cloud backups.</p>
+                <p className="text-[0.7rem] text-pm-text-secondary mt-1">Set to 0 for infinite cloud backups.</p>
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1.5">Max Cloud Age (Days)</label>
+                <label className="text-xs font-semibold text-pm-text-secondary block mb-1.5">Max Cloud Age (Days)</label>
                 <input
                   type="number"
                   disabled={!isHistoryEnabled || !gdriveState.authenticated}
                   value={backupCloudMaxDays}
                   onChange={e => setBackupCloudMaxDays(e.target.value)}
-                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+                  className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 disabled:opacity-50"
                   min="0"
                 />
-                <p className="text-[0.7rem] text-gray-500 mt-1">Set to 0 to ignore cloud backup age limits.</p>
+                <p className="text-[0.7rem] text-pm-text-secondary mt-1">Set to 0 to ignore cloud backup age limits.</p>
               </div>
             </div>
           </div>
@@ -432,22 +432,22 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         {/* General Backup Configs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-pm-border mb-6">
           <div>
-            <label className="text-xs font-semibold text-white block mb-1.5">Default Download Source</label>
+            <label className="text-xs font-semibold text-pm-text block mb-1.5">Default Download Source</label>
             <select
               value={gdriveDefaultDownload}
               onChange={e => setGdriveDefaultDownload(e.target.value)}
-              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50"
             >
               <option value="cloud">Cloud (Google Drive)</option>
               <option value="local">Local Filesystem</option>
             </select>
           </div>
           <div>
-            <label className="text-xs font-semibold text-white block mb-1.5">Delete local copy after successful Cloud Sync</label>
+            <label className="text-xs font-semibold text-pm-text block mb-1.5">Delete local copy after successful Cloud Sync</label>
             <select
               value={cleanupBackups}
               onChange={e => setCleanupBackups(e.target.value)}
-              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50"
             >
               <option value="1">Yes (Delete local file immediately on successful upload)</option>
               <option value="0">No (Retain local copies, manage via Local Retention)</option>
@@ -458,12 +458,12 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         {/* Cron options */}
         <div className="pt-6 border-t border-pm-border space-y-4">
           <div>
-            <label className="text-xs font-semibold text-white block mb-1.5">Backup Frequency Throttle</label>
+            <label className="text-xs font-semibold text-pm-text block mb-1.5">Backup Frequency Throttle</label>
             <select
               disabled={!backupCronAuto}
               value={backupFrequency}
               onChange={e => setBackupFrequency(e.target.value)}
-              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-[#8b5cf6]/50 disabled:opacity-50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 disabled:opacity-50"
             >
               <option value="0">No Throttling (Always execute backup when triggered)</option>
               <option value="3600">Hourly (Minimum 1 hour between backups)</option>

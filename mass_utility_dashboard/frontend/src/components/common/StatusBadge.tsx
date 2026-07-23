@@ -12,20 +12,20 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ variant, label, classN
   const getBadgeStyle = () => {
     switch (variant) {
       case 'local':
-        return 'bg-blue-500/10 text-blue-400 border border-blue-500/10';
+        return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/10';
       case 'cloud':
-        return 'bg-purple-500/10 text-purple-400 border border-purple-500/10';
+        return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/10';
       case 'pinned':
-        return 'bg-amber-500/10 text-amber-400 border border-amber-500/10';
+        return 'bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/10';
       case 'success':
-        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/10';
+        return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/10';
       case 'danger':
-        return 'bg-rose-500/10 text-rose-400 border border-rose-500/10';
+        return 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/10';
       case 'warning':
-        return 'bg-amber-500/10 text-amber-400 border border-amber-500/10';
+        return 'bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/10';
       case 'info':
       default:
-        return 'bg-slate-500/10 text-slate-400 border border-slate-500/10';
+        return 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/10';
     }
   };
 
