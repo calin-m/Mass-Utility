@@ -1,6 +1,6 @@
 import React from 'react';
 
-export interface ActionItem {
+export interface ToolbarActionItem {
   key: string;
   label: string;
   icon?: string;
@@ -11,7 +11,7 @@ export interface ActionItem {
 }
 
 export interface TableActionToolbarProps {
-  actions: ActionItem[];
+  actions: ToolbarActionItem[];
   size?: 'sm' | 'md';
 }
 
@@ -21,7 +21,7 @@ export const TableActionToolbar: React.FC<TableActionToolbarProps> = ({
 }) => {
   const sizeClasses = size === 'sm' ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm';
 
-  const getVariantClasses = (variant?: ActionItem['variant']) => {
+  const getVariantClasses = (variant?: ToolbarActionItem['variant']) => {
     switch (variant) {
       case 'danger':
         return 'bg-pm-danger/10 text-pm-danger hover:bg-pm-danger/20 border-pm-danger/20';
