@@ -294,8 +294,8 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
           />
         )}
 
-        <div className="pm-table-container-v2 border border-pm-border bg-pm-card rounded-xl shadow-xl max-h-[500px] overflow-y-auto relative">
-          <table className="pm-table-v2 w-full text-left border-collapse">
+        <div className="border border-pm-border rounded-xl overflow-hidden bg-pm-input/30 max-h-[500px] overflow-y-auto relative">
+          <table className="w-full text-left border-collapse text-xs">
             <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm">
               <tr className="border-b border-pm-border text-[0.7rem] text-pm-text-secondary uppercase tracking-wider font-bold">
                 <th
