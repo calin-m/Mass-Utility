@@ -42,14 +42,33 @@ body {
   --pm-text-secondary: #94a3b8;
   --pm-primary: #a78bfa;
   --pm-success: #10b981;
+  --pm-scrollbar-thumb: #cbd5e1;
+}
+
+:root.dark, :root .dark, .dark {
+  color-scheme: dark;
+  --pm-body-bg: #09090e;
+  --pm-card-bg: #12121a;
+  --pm-border-color: #262638;
+  --pm-text-primary: #e2e8f0;
+  --pm-text-secondary: #94a3b8;
+  --pm-primary: #a78bfa;
+  --pm-success: #10b981;
   --pm-warning: #f59e0b;
   --pm-danger: #ef4444;
   --pm-purple: #a78bfa;
   --pm-input-bg: #171725;
   --pm-terminal-bg: #05070f;
+  --pm-scrollbar-thumb: #3a3a54;
 }
 
-/* Custom Theme Scrollbars for Modals & Code Boxes */
+/* Cross-Browser Firefox Standard Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pm-scrollbar-thumb, #3a3a54) transparent;
+}
+
+/* Custom WebKit Theme Scrollbars for Modals, Tables & Code Boxes */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -58,11 +77,31 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--pm-border-color, #cbd5e1);
-  border-radius: 4px;
+  background: var(--pm-scrollbar-thumb, #3a3a54);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--pm-text-secondary, #64748b);
+  background: var(--pm-text-secondary, #94a3b8);
+}
+
+/* Custom Scrollbar Utility Class (.pm-scrollbar) */
+.pm-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pm-scrollbar-thumb, #3a3a54) transparent;
+}
+.pm-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.pm-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.pm-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--pm-scrollbar-thumb, #3a3a54);
+  border-radius: 9999px;
+}
+.pm-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--pm-text-secondary, #94a3b8);
 }
 
 /* Proximity spotlight background fill & 1px dynamic border tracing glow */
