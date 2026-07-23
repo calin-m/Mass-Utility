@@ -243,13 +243,13 @@ export const MutationHistoryTab: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-pm-border bg-black/10 text-[10px] text-pm-text-secondary uppercase tracking-wider">
-                <th className="px-6 py-4 font-bold">Execution Date</th>
-                <th className="px-6 py-4 font-bold">Job ID</th>
-                <th className="px-6 py-4 font-bold">Targeted Mutation Actions</th>
-                <th className="px-6 py-4 font-bold text-center">Affected Rows</th>
-                <th className="px-6 py-4 font-bold text-center">Status</th>
-                <th className="px-6 py-4 font-bold text-center">Actions</th>
+              <tr className="border-b border-pm-border bg-pm-input/20 text-[0.7rem] text-pm-text-secondary uppercase tracking-wider font-bold">
+                <th className="px-6 py-3.5">Execution Date</th>
+                <th className="px-6 py-3.5">Job ID</th>
+                <th className="px-6 py-3.5">Targeted Mutation Actions</th>
+                <th className="px-6 py-3.5 text-center">Affected Rows</th>
+                <th className="px-6 py-3.5 text-center">Status</th>
+                <th className="px-6 py-3.5 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
@@ -273,22 +273,22 @@ export const MutationHistoryTab: React.FC = () => {
               ) : (
                 filteredHistory.map(job => (
                   <tr key={job.job_id} className="hover:bg-white/[0.01] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-pm-text-secondary font-mono text-[11px]">
+                    <td className="px-6 py-3.5 whitespace-nowrap text-pm-text-secondary font-mono text-[11px]">
                       {job.date}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-mono text-pm-text text-[11px] font-bold">
+                    <td className="px-6 py-3.5 whitespace-nowrap font-mono text-pm-text text-[11px] font-bold">
                       {job.job_id}
                     </td>
-                    <td className="px-6 py-4 max-w-xs truncate font-medium text-pm-text-secondary">
+                    <td className="px-6 py-3.5 max-w-xs truncate font-medium text-pm-text-secondary font-mono text-[11px]">
                       {job.actions}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center font-bold text-pm-text font-mono">
+                    <td className="px-6 py-3.5 whitespace-nowrap text-center font-bold text-pm-text font-mono">
                       {job.affected_count}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-6 py-3.5 whitespace-nowrap text-center">
                       {getStatusBadge(job.state)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-6 py-3.5 whitespace-nowrap text-center">
                       <div className="inline-flex gap-1.5 items-center">
                         <button
                           type="button"

@@ -208,31 +208,31 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
           }
         />
 
-        <div className="pm-table-container-v2">
-          <table className="pm-table-v2">
+        <div className="pm-table-container-v2 border border-pm-border bg-pm-card rounded-xl shadow-xl overflow-hidden">
+          <table className="pm-table-v2 w-full text-left border-collapse">
             <thead>
-              <tr>
-                <th className="p-4">Backup File Name</th>
-                <th className="p-4">SQL Size</th>
-                <th className="p-4">Log Size</th>
-                <th className="p-4">Date Compiled</th>
-                <th className="p-4 text-right">Actions</th>
+              <tr className="border-b border-pm-border bg-pm-input/20 text-[0.7rem] text-pm-text-secondary uppercase tracking-wider font-bold">
+                <th className="px-6 py-3.5">Backup File Name</th>
+                <th className="px-6 py-3.5">SQL Size</th>
+                <th className="px-6 py-3.5">Log Size</th>
+                <th className="px-6 py-3.5">Date Compiled</th>
+                <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
               {backups.map((b) => {
                 const isLocal = b.is_local !== false;
                 const isCloud = b.is_cloud === true;
                 const isPinned = b.is_pinned === true;
 
                 return (
-                  <tr key={b.basename}>
-                    <td className="p-4 font-mono font-semibold">
+                  <tr key={b.basename} className="hover:bg-white/[0.01] transition-colors">
+                    <td className="px-6 py-3.5 font-mono text-[11px]">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span>{b.basename}</span>
+                          <span className="font-bold text-pm-text select-all">{b.basename}</span>
                           <span
-                            className="cursor-pointer opacity-60 hover:opacity-100"
+                            className="cursor-pointer opacity-60 hover:opacity-100 transition"
                             onClick={() => {
                               navigator.clipboard.writeText(b.basename);
                               showAlert('Copied', 'Filename copied!', 'success');
@@ -242,7 +242,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                             📋
                           </span>
                         </div>
-                        <div className="flex gap-2 mt-1.5 flex-wrap">
+                        <div className="flex gap-2 mt-1 flex-wrap">
                           {isCloud ? (
                             <StatusBadge variant="cloud" label="☁️ Cloud Only" />
                           ) : b.is_uploaded ? (
@@ -251,60 +251,62 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                             <StatusBadge variant="local" label="💾 Local" />
                           )}
                           {b.duration && (
-                            <span className="text-[0.65rem] text-[var(--pm-text-secondary)]">
+                            <span className="text-[0.65rem] text-pm-text-secondary">
                               Completed in: {b.duration}
                             </span>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 font-mono">{formatSqlSize(b.sql_size)}</td>
-                    <td className="p-4 font-mono">{formatLogSize(b.log_size)}</td>
-                    <td className="p-4">{formatDate(b.date)}</td>
-                    <td className="p-4 text-right space-x-2">
-                      {b.sql_download_url && (
-                        <a
-                          href={resolveDownloadUrl(b.sql_download_url)}
-                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
-                          title="Download SQL Dump"
-                        >
-                          <span>⬇️</span> SQL
-                        </a>
-                      )}
-                      {b.log_filename && b.log_download_url && (
-                        <a
-                          href={resolveDownloadUrl(b.log_download_url)}
-                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
-                          title="Download Telemetry Log"
-                        >
-                          <span>📄</span> Log
-                        </a>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => onCheckCompareDrift(b.basename)}
-                        className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
-                      >
-                        <span>🔍</span> Diff
-                      </button>
-                      {isLocal && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => onDeleteBackup(b.basename)}
-                            className="pm-btn pm-btn-sm pm-btn-danger-outline text-[0.7rem] px-2.5 py-1"
+                    <td className="px-6 py-3.5 font-mono text-[11px]">{formatSqlSize(b.sql_size)}</td>
+                    <td className="px-6 py-3.5 font-mono text-[11px]">{formatLogSize(b.log_size)}</td>
+                    <td className="px-6 py-3.5 font-mono text-[11px]">{formatDate(b.date)}</td>
+                    <td className="px-6 py-3.5 text-right">
+                      <div className="inline-flex gap-1.5 items-center justify-end flex-wrap">
+                        {b.sql_download_url && (
+                          <a
+                            href={resolveDownloadUrl(b.sql_download_url)}
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 font-semibold"
+                            title="Download SQL Dump"
                           >
-                            <span>🗑️</span> Delete
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onTogglePinBackup(b.basename)}
-                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1"
+                            <span>⬇️</span> SQL
+                          </a>
+                        )}
+                        {b.log_filename && b.log_download_url && (
+                          <a
+                            href={resolveDownloadUrl(b.log_download_url)}
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 font-semibold"
+                            title="Download Telemetry Log"
                           >
-                            {isPinned ? '📌 Unpin' : '📌 Pin'}
-                          </button>
-                        </>
-                      )}
+                            <span>📄</span> Log
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => onCheckCompareDrift(b.basename)}
+                          className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 font-semibold"
+                        >
+                          <span>🔍</span> Diff
+                        </button>
+                        {isLocal && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => onDeleteBackup(b.basename)}
+                              className="pm-btn pm-btn-sm pm-btn-danger-outline text-[0.7rem] px-2.5 py-1 font-semibold"
+                            >
+                              <span>🗑️</span> Delete
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onTogglePinBackup(b.basename)}
+                              className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 font-semibold"
+                            >
+                              {isPinned ? '📌 Unpin' : '📌 Pin'}
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

@@ -164,17 +164,17 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       <div className="border border-pm-border rounded-xl overflow-hidden bg-black/10 overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-pm-border bg-white/[0.02] text-pm-text-secondary font-bold uppercase tracking-wider text-[0.7rem]">
-              <th className="px-5 py-4">Archive Name</th>
-              <th className="px-5 py-4">Archive Size</th>
-              <th className="px-5 py-4">Timestamp Created</th>
-              <th className="px-5 py-4 text-right">Actions</th>
+            <tr className="border-b border-pm-border bg-pm-input/20 text-pm-text-secondary font-bold uppercase tracking-wider text-[0.7rem]">
+              <th className="px-6 py-3.5">Archive Name</th>
+              <th className="px-6 py-3.5">Archive Size</th>
+              <th className="px-6 py-3.5">Timestamp Created</th>
+              <th className="px-6 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
           {backups.length === 0 ? (
             <tbody>
               <tr>
-                <td colSpan={4} className="px-5 py-12 text-center text-pm-text-secondary">
+                <td colSpan={4} className="px-6 py-12 text-center text-pm-text-secondary">
                   <div className="text-2xl animate-pulse mb-2">⏳</div>
                   <strong className="text-sm text-pm-text-secondary block mb-1">No File Backups Found</strong>
                   <span>Historical file system backups repository is currently empty.</span>
@@ -182,7 +182,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
               </tr>
             </tbody>
           ) : (
-            <tbody className="divide-y divide-pm-border">
+            <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
               {backups.map((b, idx) => {
                 const isCloudOnly = !b.is_local && b.is_cloud;
                 const isUploaded = b.is_uploaded;
@@ -199,8 +199,8 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                 }
 
                 return (
-                  <tr key={idx} className={`hover:bg-white/[0.01] transition ${rowBorderClass}`}>
-                    <td className="px-5 py-4 space-y-1">
+                  <tr key={idx} className={`hover:bg-white/[0.01] transition-colors ${rowBorderClass}`}>
+                    <td className="px-6 py-3.5 space-y-1 font-mono text-[11px]">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono font-bold text-pm-text select-all">{b.basename}</span>
                         <button
@@ -221,14 +221,14 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                         )}
                       </div>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-6 py-3.5 font-mono text-[11px]">
                       <span className="text-xs font-semibold text-[#8b5cf6] bg-[#8b5cf6]/10 px-2.5 py-1 rounded">
                         {b.size}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-pm-text-secondary font-mono">{formatDate(b.timestamp)}</td>
-                    <td className="px-5 py-4 text-right">
-                      <div className="inline-flex gap-2 flex-wrap justify-end">
+                    <td className="px-6 py-3.5 text-pm-text-secondary font-mono text-[11px]">{formatDate(b.timestamp)}</td>
+                    <td className="px-6 py-3.5 text-right">
+                      <div className="inline-flex gap-1.5 flex-wrap justify-end">
                         {b.hash && (
                           <button
                             type="button"
