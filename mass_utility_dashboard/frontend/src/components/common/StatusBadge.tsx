@@ -25,7 +25,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ variant, label, classN
         return 'bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/10';
       case 'info':
       default:
-        return 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/10';
+        return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/10';
     }
   };
 

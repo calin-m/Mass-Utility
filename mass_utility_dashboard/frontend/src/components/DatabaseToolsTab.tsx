@@ -1225,7 +1225,7 @@ export const DatabaseToolsTab: React.FC = () => {
                   <div className="text-2xl font-bold font-sans text-amber-600 dark:text-amber-400">
                     {getVolatileCount(driftModalData.checksum_status)}
                   </div>
-                  {getVolatileCount(driftModalData.checksum_status) > 0 && <span className="text-[0.65rem] text-amber-600 dark:text-amber-500 mt-1 block font-semibold">Click to view list</span>}
+                  {getVolatileCount(driftModalData.checksum_status) > 0 && <span className="text-[0.65rem] text-amber-600 dark:text-amber-400 mt-1 block font-semibold">Click to view list</span>}
                 </div>
               </div>
 
