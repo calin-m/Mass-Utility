@@ -97,8 +97,10 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                     disabled
                       ? checked
                         ? 'bg-pm-primary/10 border-pm-primary/30 text-pm-text'
-                        : 'bg-[var(--pm-body-bg)]/60 border-pm-border/30 text-pm-text-secondary/80'
-                      : 'bg-pm-card border-pm-border/60 hover:bg-pm-input/40 hover:border-pm-primary/40 cursor-pointer shadow-sm'
+                        : 'bg-[var(--pm-body-bg)]/60 border-pm-border/20 text-pm-text-secondary/70'
+                      : checked
+                        ? 'bg-pm-primary/[0.04] border-pm-primary/35 hover:bg-pm-primary/[0.08] hover:border-pm-primary/50 cursor-pointer shadow-sm shadow-pm-primary/5'
+                        : 'bg-pm-card border-pm-border/40 hover:bg-pm-input/40 hover:border-pm-primary/40 cursor-pointer shadow-sm'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
