@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { BaseModal } from '../common/BaseModal';
+import { SectionHeader } from '../common/SectionHeader';
 import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
 import { reconstructSql } from '../../utils/sqlReconstructor';
@@ -221,27 +222,25 @@ export const MutationHistoryTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-4 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg">⏳</div>
-          <div>
-            <h2 className="text-md font-bold tracking-wide text-pm-text uppercase">Mutation History Ledger</h2>
-            <p className="text-xs text-pm-text-secondary mt-0.5">Track, audit, roll back, or reapply visual AST mutations dynamically</p>
-          </div>
-        </div>
-
-        <button
-          onClick={handleClearAllHistory}
-          disabled={history.length === 0}
-          className="bg-red-950/20 border border-red-900/30 hover:bg-red-900/10 text-red-400 text-xs font-bold px-4 py-2 rounded-lg transition disabled:opacity-30 uppercase"
-        >
-          🗑️ Clear Ledger
-        </button>
-      </div>
+      {/* Section Header */}
+      <SectionHeader
+        title="Mutation History Ledger"
+        subtitle="Track, audit, roll back, or reapply visual AST mutations dynamically"
+        icon="⏳"
+        extraActions={
+          <button
+            type="button"
+            onClick={handleClearAllHistory}
+            disabled={history.length === 0}
+            className="pm-btn pm-btn-danger-outline text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-30 uppercase"
+          >
+            🗑️ Clear Ledger
+          </button>
+        }
+      />
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-wrap gap-4 bg-pm-card border border-pm-border p-4 rounded-xl items-center justify-between shadow-md">
+      <div className="flex flex-wrap gap-4 bg-pm-card border border-pm-border p-4 rounded-xl items-center justify-between pm-card-elevation">
         <div className="flex items-center gap-3 flex-grow max-w-md">
           <span className="text-xs text-pm-text-secondary font-bold uppercase">Search:</span>
           <input
@@ -249,19 +248,22 @@ export const MutationHistoryTab: React.FC = () => {
             placeholder="Search by Job ID or Actions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-pm-input/30 border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-pm-primary/50"
+            className="w-full bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-pm-purple/50"
           />
         </div>
 
         <div className="flex items-center gap-3">
           <span className="text-xs text-pm-text-secondary font-bold uppercase">Status Filter:</span>
-          <div className="flex bg-pm-input/30 border border-pm-border p-1 rounded-lg">
+          <div className="flex bg-pm-input border border-pm-border p-1 rounded-xl gap-1">
             {['ALL', 'SUCCESS', 'ROLLED_BACK', 'FAILED'].map(st => (
               <button
                 key={st}
+                type="button"
                 onClick={() => setStatusFilter(st)}
-                className={`text-[10px] font-bold px-3 py-1.5 rounded-md uppercase transition ${
-                  statusFilter === st ? 'bg-white/10 text-pm-text' : 'text-pm-text-secondary hover:text-gray-200'
+                className={`text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase transition-all ${
+                  statusFilter === st
+                    ? 'bg-pm-purple/20 text-pm-purple border border-pm-purple/30 shadow-sm'
+                    : 'text-pm-text-secondary hover:text-pm-text hover:bg-white/[0.04]'
                 }`}
               >
                 {st.replace('_', ' ')}
@@ -461,7 +463,9 @@ export const MutationHistoryTab: React.FC = () => {
                   type="button"
                   onClick={() => setInspectTab('json')}
                   className={`flex-1 py-1.5 px-3 text-xs font-bold uppercase rounded-lg transition-all ${
-                    inspectTab === 'json' ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-text-secondary hover:text-pm-text'
+                    inspectTab === 'json'
+                      ? 'bg-pm-purple/20 text-pm-purple border border-pm-purple/30 shadow-sm'
+                      : 'text-pm-text-secondary hover:text-pm-text hover:bg-white/[0.04]'
                   }`}
                 >
                   📋 JSON Payloads
@@ -470,7 +474,9 @@ export const MutationHistoryTab: React.FC = () => {
                   type="button"
                   onClick={() => setInspectTab('sql')}
                   className={`flex-1 py-1.5 px-3 text-xs font-bold uppercase rounded-lg transition-all ${
-                    inspectTab === 'sql' ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-text-secondary hover:text-pm-text'
+                    inspectTab === 'sql'
+                      ? 'bg-pm-purple/20 text-pm-purple border border-pm-purple/30 shadow-sm'
+                      : 'text-pm-text-secondary hover:text-pm-text hover:bg-white/[0.04]'
                   }`}
                 >
                   🌐 SQL Code Preview
@@ -494,7 +500,7 @@ export const MutationHistoryTab: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleCopySnippet(formattedRawPayload, 'AST Payload JSON')}
-                        className="text-xs text-pm-text-secondary hover:text-pm-text font-bold flex items-center gap-1"
+                        className="pm-btn pm-btn-neutral text-[0.7rem] px-2 py-0.5 font-bold rounded-md flex items-center gap-1.5"
                       >
                         📋 Copy Snippet
                       </button>
@@ -510,7 +516,7 @@ export const MutationHistoryTab: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleCopySnippet(formattedRevertPayload, 'Baseline Revert JSON')}
-                        className="text-xs text-pm-text-secondary hover:text-pm-text font-bold flex items-center gap-1"
+                        className="pm-btn pm-btn-neutral text-[0.7rem] px-2 py-0.5 font-bold rounded-md flex items-center gap-1.5"
                       >
                         📋 Copy Snippet
                       </button>
@@ -533,7 +539,7 @@ export const MutationHistoryTab: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleCopySnippet(mutationSql, 'Mutation SQL')}
-                        className="text-xs text-pm-text-secondary hover:text-pm-text font-bold flex items-center gap-1"
+                        className="pm-btn pm-btn-neutral text-[0.7rem] px-2 py-0.5 font-bold rounded-md flex items-center gap-1.5"
                       >
                         📋 Copy SQL
                       </button>
@@ -551,7 +557,7 @@ export const MutationHistoryTab: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleCopySnippet(revertSql, 'Rollback SQL')}
-                        className="text-xs text-pm-text-secondary hover:text-pm-text font-bold flex items-center gap-1"
+                        className="pm-btn pm-btn-neutral text-[0.7rem] px-2 py-0.5 font-bold rounded-md flex items-center gap-1.5"
                       >
                         📋 Copy SQL
                       </button>

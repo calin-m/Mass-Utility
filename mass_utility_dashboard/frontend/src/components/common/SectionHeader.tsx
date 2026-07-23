@@ -9,6 +9,7 @@ interface SectionHeaderProps {
   title: string;
   subtitle?: string;
   actionSlot?: React.ReactNode;
+  extraActions?: React.ReactNode;
   borderBottom?: boolean;
 }
 
@@ -18,8 +19,11 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   subtitle,
   actionSlot,
+  extraActions,
   borderBottom = false,
 }) => {
+  const actions = actionSlot || extraActions;
+
   return (
     <div className={`flex justify-between items-center flex-wrap gap-4 ${borderBottom ? 'border-b border-[var(--pm-border-color)] pb-3' : ''}`}>
       <div className="flex items-center gap-3">
@@ -34,7 +38,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
         </div>
       </div>
 
-      {actionSlot && <div className="flex items-center gap-2">{actionSlot}</div>}
+      {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   );
 };
