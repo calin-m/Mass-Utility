@@ -2,6 +2,7 @@
 // @Description: Sub-component rendering preview result samples, SQL code inspection, and AST sentence explanation.
 
 import React from 'react';
+import { LogTerminal } from '../common/LogTerminal';
 
 interface QueryResultsGridProps {
   previewCount: number | null;
@@ -44,14 +45,14 @@ export const QueryResultsGrid: React.FC<QueryResultsGridProps> = ({
         )}
       </div>
 
-      {/* Compiled SQL Query string */}
+      {/* Compiled SQL Query string using LogTerminal primitive */}
       {previewSql && (
-        <div className="space-y-2">
-          <span className="text-[0.65rem] font-bold text-[var(--pm-text-secondary)] uppercase tracking-wider">Compiled Prepared SQL Query</span>
-          <pre className="bg-[var(--pm-body-bg)]/80 text-[0.7rem] text-purple-700 dark:text-purple-400 p-4 rounded-xl font-mono border border-[var(--pm-border-color)] overflow-x-auto whitespace-pre-wrap">
-            {previewSql}
-          </pre>
-        </div>
+        <LogTerminal
+          title="Compiled Prepared SQL Query"
+          logs={previewSql}
+          maxHeight="200px"
+          showControls={false}
+        />
       )}
 
       {/* Live explanation */}
