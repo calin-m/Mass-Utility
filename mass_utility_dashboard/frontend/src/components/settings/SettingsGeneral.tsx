@@ -292,20 +292,20 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               <li className="flex items-center gap-2.5">
                 <span className="w-1.5 h-1.5 bg-pm-success rounded-full"></span> Local Backups (Manual)
               </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.query_visual_execute ? 'text-pm-text-secondary/40' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.query_visual_execute ? 'bg-pm-success' : 'bg-pm-text-secondary/40'}`}></span>
+              <li className={`flex items-center gap-2.5 ${!capabilities.query_visual_execute ? 'text-pm-text-secondary/75' : ''}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.query_visual_execute ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
                 Visual Query Builder (AST Editor) {!capabilities.query_visual_execute && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
               </li>
-              <li className={`flex items-center gap-2.5 ${!isCloudEnabled ? 'text-pm-text-secondary/40' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isCloudEnabled ? 'bg-pm-success' : 'bg-pm-text-secondary/40'}`}></span>
+              <li className={`flex items-center gap-2.5 ${!isCloudEnabled ? 'text-pm-text-secondary/75' : ''}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isCloudEnabled ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
                 Offsite Cloud Backup (Google Drive) {!isCloudEnabled && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
               </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.backup_automation ? 'text-pm-text-secondary/40' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.backup_automation ? 'bg-pm-success' : 'bg-pm-text-secondary/40'}`}></span>
+              <li className={`flex items-center gap-2.5 ${!capabilities.backup_automation ? 'text-pm-text-secondary/75' : ''}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.backup_automation ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
                 Scheduled Backups (Cron CLI) {!capabilities.backup_automation && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
               </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.governor_autopilot ? 'text-pm-text-secondary/40' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.governor_autopilot ? 'bg-pm-success' : 'bg-pm-text-secondary/40'}`}></span>
+              <li className={`flex items-center gap-2.5 ${!capabilities.governor_autopilot ? 'text-pm-text-secondary/75' : ''}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.governor_autopilot ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
                 Safety Auto-Pilot Tuning {!capabilities.governor_autopilot && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
               </li>
             </ul>
