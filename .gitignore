@@ -5,6 +5,9 @@
 !/mass_utility/
 !/mass_utility_dashboard/
 !/mass_utility_admin/
+!/.bench/scripts/
+!/.bench/sandbox/prestashop_stubs.php
+!/.bench/sandbox/prestashop_schema.sql
 
 # Whitelist allowed files
 !/.cpanel.yml
