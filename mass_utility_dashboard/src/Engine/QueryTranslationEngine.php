@@ -299,6 +299,6 @@ class QueryTranslationEngine
 }
 
 // Backward compatibility alias for Dashboard namespace
-if (!class_exists(\MassUtility\Dashboard\Engine\QueryTranslationEngine::class)) {
-    class_alias(QueryTranslationEngine::class, \MassUtility\Dashboard\Engine\QueryTranslationEngine::class);
+if (!class_exists('MassUtility\Dashboard\Engine\QueryTranslationEngine', false)) {
+    class_alias(QueryTranslationEngine::class, 'MassUtility\Dashboard\Engine\QueryTranslationEngine');
 }
