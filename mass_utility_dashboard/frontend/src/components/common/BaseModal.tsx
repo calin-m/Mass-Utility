@@ -53,7 +53,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 border-b border-pm-border/60 bg-pm-input/30">
+        <div className="flex items-center justify-between p-4 border-b border-pm-border bg-pm-input/30">
           <div className="flex items-center gap-3">
             {icon && <span className="text-xl">{icon}</span>}
             <div>
@@ -71,14 +71,14 @@ export const BaseModal: React.FC<BaseModalProps> = ({
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-5 overflow-y-auto flex-1 text-sm text-pm-text">
+        {/* Modal Body (Scrollable) */}
+        <div className="p-5 overflow-y-auto flex-1 space-y-4">
           {children}
         </div>
 
-        {/* Optional Footer Actions */}
+        {/* Modal Footer */}
         {footerActions && (
-          <div className="flex items-center justify-end gap-2 p-3 border-t border-pm-border/60 bg-pm-input/30">
+          <div className="flex items-center justify-end gap-2 p-3 border-t border-pm-border bg-pm-input/30">
             {footerActions}
           </div>
         )}

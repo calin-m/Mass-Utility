@@ -1536,22 +1536,22 @@ export const DatabaseToolsTab: React.FC = () => {
 
                             {/* Row Count */}
                             <div className="col-span-3 text-center font-mono text-[0.7rem] text-pm-text-secondary">
-                              <span className="bg-pm-input px-1.5 py-0.5 rounded border border-pm-border/40">
+                              <span className="bg-pm-input/60 px-1.5 py-0.5 rounded">
                                 {c.backup_rows?.toLocaleString() ?? 0}
                               </span>
                               <span className="mx-1 text-pm-text-secondary/50">➔</span>
-                              <span className="bg-pm-input px-1.5 py-0.5 rounded border border-pm-border/40">
+                              <span className="bg-pm-input/60 px-1.5 py-0.5 rounded">
                                 {c.active_rows?.toLocaleString() ?? 0}
                               </span>
                             </div>
 
                             {/* Checksum Hash Comparison */}
                             <div className="col-span-3 text-center font-mono text-[0.65rem] text-pm-text-secondary">
-                              <span className="bg-pm-input/80 px-1.5 py-0.5 rounded border border-pm-border/40" title={c.backup || 'N/A'}>
+                              <span className="bg-pm-input/60 px-1.5 py-0.5 rounded" title={c.backup || 'N/A'}>
                                 {formatHash(c.backup)}
                               </span>
                               <span className="mx-1 text-pm-text-secondary/50">➔</span>
-                              <span className="bg-pm-input/80 px-1.5 py-0.5 rounded border border-pm-border/40" title={c.active || 'N/A'}>
+                              <span className="bg-pm-input/60 px-1.5 py-0.5 rounded" title={c.active || 'N/A'}>
                                 {formatHash(c.active)}
                               </span>
                             </div>
