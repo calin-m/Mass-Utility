@@ -11,6 +11,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+@layer base {
+  .dark *, .dark ::before, .dark ::after {
+    border-color: var(--pm-border-color, #262638);
+  }
+}
+
 :root {
   color-scheme: light;
   --pm-body-bg: #f8fafc;
