@@ -3,6 +3,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { SearchFilterBar } from '../common/SearchFilterBar';
+import { SectionHeader } from '../common/SectionHeader';
 
 export interface TableMetric {
   name: string;
@@ -101,20 +102,21 @@ export const ProfilerSubTab: React.FC<ProfilerSubTabProps> = ({
   return (
     <div className="space-y-6">
       <div className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] rounded-xl p-6 shadow-xl space-y-4">
-        <div className="flex justify-between items-center border-b border-[var(--pm-border-color)] pb-3 flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-            <h3 className="text-sm font-bold tracking-wide text-[var(--pm-text-primary)] uppercase">Automated Database Profiler &amp; Space Optimizer</h3>
-          </div>
-          <button
-            type="button"
-            onClick={onFetchProfilerReport}
-            disabled={isProfiling}
-            className="pm-btn pm-btn-success text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0"
-          >
-            {isProfiling ? 'Analyzing...' : 'Refresh Profile'}
-          </button>
-        </div>
+        <SectionHeader
+          dotColor="bg-emerald-500"
+          title="Automated Database Profiler & Space Optimizer"
+          borderBottom
+          actionSlot={
+            <button
+              type="button"
+              onClick={onFetchProfilerReport}
+              disabled={isProfiling}
+              className="pm-btn pm-btn-success text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
+            >
+              {isProfiling ? 'Analyzing...' : 'Refresh Profile'}
+            </button>
+          }
+        />
         <p className="text-xs text-[var(--pm-text-secondary)] leading-relaxed">
           Scans all tables in real-time to compute index fragmentation and disk overhead which slows down transactions.
         </p>

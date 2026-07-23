@@ -4,6 +4,7 @@
 import React, { useState, useMemo } from 'react';
 import { LogTerminal } from '../common/LogTerminal';
 import { SearchFilterBar } from '../common/SearchFilterBar';
+import { SectionHeader } from '../common/SectionHeader';
 
 export interface BackupFile {
   basename: string;
@@ -187,12 +188,10 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
 
       {/* Select Local Backups list */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-        <div className="flex justify-between items-center flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <span className="w-3 h-3 bg-pm-primary rounded-full shadow-lg shadow-pm-primary/50"></span>
-            <h3 className="text-sm font-bold tracking-wide uppercase text-pm-text">Select Backup to Restore</h3>
-          </div>
-        </div>
+        <SectionHeader
+          dotColor="bg-pm-primary"
+          title="Select Backup to Restore"
+        />
 
         {backups.length > 0 && (
           <SearchFilterBar

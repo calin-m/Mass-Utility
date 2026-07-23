@@ -3,6 +3,7 @@
 // @Calls: start_file_backup, cancel_job, poll_job_progress, clear_file_backups, get_directory_tree, save_exclusions
 
 import React, { useState, useEffect, useRef } from 'react';
+import { SectionHeader } from '../common/SectionHeader';
 import { FolderSelector, FolderEntry } from './FolderSelector';
 import { BackupProgress } from '../governor/BackupProgress';
 import { BackupsGrid, BackupEntry } from './BackupsGrid';
@@ -242,20 +243,20 @@ export const FileToolsTab: React.FC = () => {
     <div className="space-y-6">
       {/* File Backup Control Panel */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
-        <div className="flex justify-between items-center flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <span className="w-3 h-3 bg-pm-warning rounded-full shadow-lg shadow-pm-warning/50"></span>
-            <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">File Backup System</h3>
-          </div>
-          <button
-            type="button"
-            disabled={isGenerating}
-            onClick={handleStartBackup}
-            className="bg-pm-primary hover:opacity-90 disabled:bg-pm-input disabled:text-pm-text-secondary text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase"
-          >
-            {isGenerating ? '⚙️ Processing...' : '📥 Generate Site Backup'}
-          </button>
-        </div>
+        <SectionHeader
+          dotColor="bg-pm-warning"
+          title="File Backup System"
+          actionSlot={
+            <button
+              type="button"
+              disabled={isGenerating}
+              onClick={handleStartBackup}
+              className="bg-pm-primary hover:opacity-90 disabled:bg-pm-input disabled:text-pm-text-secondary text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all uppercase cursor-pointer"
+            >
+              {isGenerating ? '⚙️ Processing...' : '📥 Generate Site Backup'}
+            </button>
+          }
+        />
 
         {/* Profile Select */}
         <div className="flex items-center gap-4 border-t border-pm-border pt-4 flex-wrap">
