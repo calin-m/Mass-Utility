@@ -222,6 +222,10 @@ function escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+const ICON_EYE = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+const ICON_EYE_OFF = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+const ICON_COPY = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
 function maskLicenseKey(key) {
     if (!key) return '';
     const parts = key.split('-');
@@ -242,12 +246,12 @@ window.toggleKeyMask = function(id, fullKey) {
     if (isMasked) {
         span.textContent = fullKey;
         span.setAttribute('data-masked', 'false');
-        btn.textContent = '🙈';
+        btn.innerHTML = ICON_EYE_OFF; // nosec
         btn.title = 'Hide Key';
     } else {
         span.textContent = maskLicenseKey(fullKey);
         span.setAttribute('data-masked', 'true');
-        btn.textContent = '👁️';
+        btn.innerHTML = ICON_EYE; // nosec
         btn.title = 'Reveal Key';
     }
 };
@@ -290,8 +294,8 @@ function renderLicenses(licenses) {
                     <span id="pm-key-val-${l.id}" data-masked="true" style="font-family: monospace; font-weight: bold; color: var(--pm-warning);">
                         ${escapeHtml(keyMasked)}
                     </span>
-                    <button type="button" id="pm-key-btn-${l.id}" class="pm-btn-icon" title="Reveal Key" onclick="toggleKeyMask(${l.id}, '${escapeHtml(keyRaw)}')">👁️</button>
-                    <button type="button" class="pm-btn-icon" title="Copy License Key" onclick="copyLicenseKey('${escapeHtml(keyRaw)}')">📋</button>
+                    <button type="button" id="pm-key-btn-${l.id}" class="pm-btn-icon" title="Reveal Key" onclick="toggleKeyMask(${l.id}, '${escapeHtml(keyRaw)}')">${ICON_EYE}</button>
+                    <button type="button" class="pm-btn-icon" title="Copy License Key" onclick="copyLicenseKey('${escapeHtml(keyRaw)}')">${ICON_COPY}</button>
                 </div>
             </td>
             <td>${urlSafe}</td>

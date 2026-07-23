@@ -188,18 +188,22 @@ select.pm-input {
 .pm-btn-icon {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--pm-border-color);
-    color: var(--pm-text-primary);
-    padding: 0.25rem 0.45rem;
+    color: var(--pm-text-secondary);
+    padding: 0.3rem 0.45rem;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.8rem;
     line-height: 1;
-    transition: background-color 0.2s, border-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .pm-btn-icon:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.25);
+    color: var(--pm-text-primary);
 }
 
 .pm-logout-btn {
