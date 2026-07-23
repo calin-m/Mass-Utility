@@ -311,8 +311,10 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
               })}
               {backups.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-pm-text-secondary">
-                    No database archives compiled.
+                  <td colSpan={5} className="p-12 text-center text-pm-text-secondary">
+                    <div className="text-2xl mb-2">🗄️</div>
+                    <div className="font-bold text-pm-text text-sm">No Database Backups Found</div>
+                    <span className="text-xs">Historical database dumps repository is currently empty.</span>
                   </td>
                 </tr>
               )}

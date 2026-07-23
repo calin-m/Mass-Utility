@@ -264,8 +264,10 @@ export const MutationHistoryTab: React.FC = () => {
                 </tr>
               ) : filteredHistory.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-pm-text-secondary italic">
-                    No matching ledger entries found.
+                  <td colSpan={6} className="px-6 py-12 text-center text-pm-text-secondary">
+                    <div className="text-2xl mb-2">📜</div>
+                    <div className="font-bold text-pm-text text-sm">No Ledger Entries Found</div>
+                    <span className="text-xs">No mutation history transactions recorded in database.</span>
                   </td>
                 </tr>
               ) : (

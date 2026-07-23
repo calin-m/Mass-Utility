@@ -78,18 +78,6 @@ export const EventLogsTab: React.FC = () => {
     );
   };
 
-  const handleDownloadLogFile = () => {
-    const blob = new Blob([logs], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `saas_telemetry_${new Date().toISOString().slice(0,10)}.log`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   // Filter logs line-by-line on frontend for high-speed searching
   const getFilteredLogs = () => {
     let filtered = logs;
@@ -118,21 +106,6 @@ export const EventLogsTab: React.FC = () => {
             <h2 className="text-md font-bold tracking-wide text-pm-text uppercase">System Event Logs</h2>
             <p className="text-xs text-pm-text-secondary mt-0.5">Real-time telemetry stream, diagnostic warnings, and audit logging</p>
           </div>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={handleDownloadLogFile}
-            className="pm-btn pm-btn-neutral px-4 py-2 text-xs font-bold uppercase"
-          >
-            📥 Download Log File
-          </button>
-          <button
-            onClick={handleClearLogs}
-            className="pm-btn pm-btn-danger px-4 py-2 text-xs font-bold uppercase"
-          >
-            🗑️ Clear Telemetry
-          </button>
         </div>
       </div>
 
@@ -173,7 +146,7 @@ export const EventLogsTab: React.FC = () => {
 
       {/* Terminal logs container */}
       <LogTerminal
-        title="telemetry@mass-utility.sh"
+        title="Live Log Stream Console"
         logs={getFilteredLogs() || 'No telemetry matches current filter criteria.'}
         maxHeight="550px"
         onClearLogs={handleClearLogs}

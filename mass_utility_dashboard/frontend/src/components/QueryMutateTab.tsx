@@ -56,7 +56,7 @@ export const QueryMutateTab: React.FC = () => {
     groups: []
   });
 
-  const [liveExplanation, setLiveExplanation] = useState('');
+  const [liveExplanation, setLiveExplanation] = useState<React.ReactNode>('');
   const [lastCompiledAst, setLastCompiledAst] = useState<any>(null);
 
   // Preview State
@@ -77,9 +77,13 @@ export const QueryMutateTab: React.FC = () => {
 
   // Recalculate Live Sentence whenever query tree changes
   useEffect(() => {
-    const text = translateGroup(queryTree);
-    if (text) {
-      setLiveExplanation(`This matches products where: ${text}`);
+    const node = translateGroup(queryTree);
+    if (node) {
+      setLiveExplanation(
+        <span>
+          This matches products where: {node}
+        </span>
+      );
     } else {
       setLiveExplanation('No active rules configured.');
     }
@@ -88,14 +92,14 @@ export const QueryMutateTab: React.FC = () => {
     setShowStep2(false);
   }, [queryTree]);
 
-  // Recursively compile group sentence
-  const translateGroup = (group: Group): string => {
+  // Recursively compile group sentence into React JSX Nodes
+  const translateGroup = (group: Group): React.ReactNode => {
     const rules = group.rules || [];
     const subGroups = group.groups || [];
 
-    if (rules.length === 0 && subGroups.length === 0) return '';
+    if (rules.length === 0 && subGroups.length === 0) return null;
 
-    const ruleTexts = rules.map(rule => {
+    const ruleNodes: React.ReactNode[] = rules.map((rule, idx) => {
       const fieldLabels: Record<string, string> = {
         'product.active': 'Active Status',
         'product.reference': 'Reference / SKU',
@@ -132,33 +136,42 @@ export const QueryMutateTab: React.FC = () => {
         valText = rule.value ? `[${rule.value}]` : '...';
       }
 
-      return `<strong>${fieldLabel}</strong> ${opLabel} <strong>"${valText || '...'}"</strong>`;
+      return (
+        <span key={`r-${rule.id || idx}`}>
+          <strong className="font-bold text-pm-text">{fieldLabel}</strong> {opLabel}{' '}
+          <strong className="font-bold text-pm-text">"{valText || '...'}"</strong>
+        </span>
+      );
     });
 
-    const subGroupTexts = subGroups
-      .map(sg => {
+    const subGroupNodes: React.ReactNode[] = subGroups
+      .map((sg, idx) => {
         const sub = translateGroup(sg);
-        return sub ? `(${sub})` : '';
+        return sub ? <span key={`sg-${sg.id || idx}`}>({sub})</span> : null;
       })
-      .filter(t => t !== '');
+      .filter(Boolean);
 
-    const allParts = [...ruleTexts, ...subGroupTexts];
-    if (allParts.length === 0) return '';
+    const allParts = [...ruleNodes, ...subGroupNodes];
+    if (allParts.length === 0) return null;
 
-    switch (group.logical_operator) {
-      case 'AND':
-        return allParts.join(' <span class="text-blue-400 font-bold">AND</span> ');
-      case 'OR':
-        return allParts.join(' <span class="text-amber-500 font-bold">OR</span> ');
-      case 'NAND':
-        return `<strong>NOT ALL</strong> of the following are true: [ ${allParts.join(', ')} ]`;
-      case 'NOR':
-        return `<strong>NONE</strong> of the following are true: [ ${allParts.join(', ')} ]`;
-      case 'XOR':
-        return `<strong>EXACTLY ONE</strong> of the following is true: [ ${allParts.join(', ')} ]`;
-      default:
-        return allParts.join(` ${group.logical_operator} `);
-    }
+    const op = group.logical_operator;
+    const isAnd = op === 'AND';
+    const isOr = op === 'OR';
+
+    return (
+      <span>
+        {allParts.map((part, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && (
+              <span className={`font-bold px-1 ${isAnd ? 'text-blue-400' : isOr ? 'text-amber-500' : 'text-purple-400'}`}>
+                {` ${op} `}
+              </span>
+            )}
+            {part}
+          </React.Fragment>
+        ))}
+      </span>
+    );
   };
 
   // Compile Query Preview
@@ -806,9 +819,12 @@ export const QueryMutateTab: React.FC = () => {
         </p>
 
         {/* Live Translation Sentences Panel */}
-        <div className="bg-blue-500/5 border border-blue-500/10 p-3.5 rounded-xl text-xs text-pm-text-secondary">
-          🗣️ <strong>Query Live Translation:</strong>{' '}
-          <span className="italic text-pm-text-secondary" dangerouslySetInnerHTML={{ __html: liveExplanation }} />
+        <div className="bg-blue-500/5 border border-blue-500/10 p-3.5 rounded-xl text-xs text-pm-text-secondary flex items-center gap-1.5">
+          <span>🗣️</span>
+          <div>
+            <strong className="font-bold text-pm-text mr-1">Query Live Translation:</strong>
+            <span className="italic text-pm-text-secondary">{liveExplanation}</span>
+          </div>
         </div>
 
         {/* Visual Builder Root */}

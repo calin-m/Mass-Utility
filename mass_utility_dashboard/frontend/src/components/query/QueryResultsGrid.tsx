@@ -7,7 +7,7 @@ interface QueryResultsGridProps {
   previewCount: number | null;
   previewSql: string;
   previewSamples: string;
-  liveExplanation: string;
+  liveExplanation?: React.ReactNode;
   showStep2: boolean;
   onProceedToStep2: () => void;
 }
@@ -56,9 +56,10 @@ export const QueryResultsGrid: React.FC<QueryResultsGridProps> = ({
 
       {/* Live explanation */}
       {liveExplanation && (
-        <p className="text-xs text-[var(--pm-text-secondary)] bg-[var(--pm-body-bg)]/50 p-3 rounded-lg border border-[var(--pm-border-color)] italic">
-          💡 {liveExplanation}
-        </p>
+        <div className="text-xs text-[var(--pm-text-secondary)] bg-[var(--pm-body-bg)]/50 p-3 rounded-lg border border-[var(--pm-border-color)] italic flex items-center gap-1.5">
+          <span>💡</span>
+          <div>{liveExplanation}</div>
+        </div>
       )}
 
       {/* Sample matching preview products list */}
