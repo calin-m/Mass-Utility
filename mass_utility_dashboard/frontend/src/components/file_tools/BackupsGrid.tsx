@@ -147,21 +147,21 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
     <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <span className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-lg shadow-[#8b5cf6]/50"></span>
+          <span className="w-3 h-3 bg-pm-primary rounded-full shadow-lg shadow-pm-primary/50"></span>
           <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">Historical Backups Repository</h3>
         </div>
         {backups.length > 0 && (
           <button
             type="button"
             onClick={onClearAll}
-            className="bg-[#ef4444]/10 hover:bg-[#ef4444]/20 border border-[#ef4444]/20 text-[#ef4444] text-xs font-bold px-4 py-2 rounded-lg transition-all uppercase"
+            className="pm-btn pm-btn-sm pm-btn-danger-outline uppercase"
           >
             🗑️ Clear Backups
           </button>
         )}
       </div>
 
-      <div className="border border-pm-border rounded-xl overflow-hidden bg-black/10 overflow-x-auto">
+      <div className="border border-pm-border rounded-xl overflow-hidden bg-pm-input/30 overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-pm-border bg-pm-input/20 text-pm-text-secondary font-bold uppercase tracking-wider text-[0.7rem]">
@@ -191,15 +191,15 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                 let badge = <StatusBadge variant="local" label="Local" />;
 
                 if (isCloudOnly) {
-                  rowBorderClass = 'border-l-4 border-l-[#a855f7] bg-[#a855f7]/[0.01]';
+                  rowBorderClass = 'border-l-4 border-l-pm-primary bg-pm-primary/[0.02]';
                   badge = <StatusBadge variant="cloud" label="Cloud Only" />;
                 } else if (isUploaded) {
-                  rowBorderClass = 'border-l-4 border-l-[#a855f7] bg-[#a855f7]/[0.01]';
+                  rowBorderClass = 'border-l-4 border-l-pm-primary bg-pm-primary/[0.02]';
                   badge = <StatusBadge variant="cloud" label="Uploaded" />;
                 }
 
                 return (
-                  <tr key={idx} className={`hover:bg-white/[0.01] transition-colors ${rowBorderClass}`}>
+                  <tr key={idx} className={`hover:bg-pm-input/20 transition-colors ${rowBorderClass}`}>
                     <td className="px-6 py-3.5 space-y-1 font-mono text-[11px]">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono font-bold text-pm-text select-all">{b.basename}</span>
@@ -222,7 +222,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-3.5 font-mono text-[11px]">
-                      <span className="text-xs font-semibold text-[#8b5cf6] bg-[#8b5cf6]/10 px-2.5 py-1 rounded">
+                      <span className="text-xs font-semibold text-purple-700 dark:text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded">
                         {b.size}
                       </span>
                     </td>
