@@ -185,6 +185,23 @@ select.pm-input {
     font-size: 0.85rem;
 }
 
+.pm-btn-icon {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--pm-border-color);
+    color: var(--pm-text-primary);
+    padding: 0.25rem 0.45rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    line-height: 1;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.pm-btn-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
 .pm-logout-btn {
     background: linear-gradient(135deg, var(--pm-danger) 0%, #b91c1c 100%);
     color: #fff;

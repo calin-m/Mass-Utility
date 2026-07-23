@@ -222,6 +222,45 @@ function escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+function maskLicenseKey(key) {
+    if (!key) return '';
+    const parts = key.split('-');
+    if (parts.length >= 4) {
+        return `${parts[0]}-${parts[1]}-••••-••••-••••`;
+    }
+    if (key.length > 9) {
+        return key.slice(0, 8) + '-••••-••••-••••';
+    }
+    return key;
+}
+
+window.toggleKeyMask = function(id, fullKey) {
+    const span = document.getElementById(`pm-key-val-${id}`);
+    const btn = document.getElementById(`pm-key-btn-${id}`);
+    if (!span || !btn) return;
+    const isMasked = span.getAttribute('data-masked') === 'true';
+    if (isMasked) {
+        span.textContent = fullKey;
+        span.setAttribute('data-masked', 'false');
+        btn.textContent = '🙈';
+        btn.title = 'Hide Key';
+    } else {
+        span.textContent = maskLicenseKey(fullKey);
+        span.setAttribute('data-masked', 'true');
+        btn.textContent = '👁️';
+        btn.title = 'Reveal Key';
+    }
+};
+
+window.copyLicenseKey = function(fullKey) {
+    if (!fullKey) return;
+    navigator.clipboard.writeText(fullKey).then(() => {
+        alert('📋 License Key copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy license key:', err);
+    });
+};
+
 function renderLicenses(licenses) {
     const list = document.getElementById('pm-licenses-list');
     if (!list) return;
@@ -233,6 +272,8 @@ function renderLicenses(licenses) {
         const expiryVal = l.expires_at || '';
         const domainVal = l.store_url || '';
         const tierVal = l.package_tier || 'basic';
+        const keyRaw = l.license_key || '';
+        const keyMasked = maskLicenseKey(keyRaw);
         
         let toggleButton = '';
         if (l.status === 'active') {
@@ -244,7 +285,15 @@ function renderLicenses(licenses) {
         tr.innerHTML = /* nosec */ `
             <td>${l.id}</td>
             <td>${emailSafe}</td>
-            <td style="font-family: monospace; font-weight: bold; color: var(--pm-warning);">${escapeHtml(l.license_key)}</td>
+            <td>
+                <div style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <span id="pm-key-val-${l.id}" data-masked="true" style="font-family: monospace; font-weight: bold; color: var(--pm-warning);">
+                        ${escapeHtml(keyMasked)}
+                    </span>
+                    <button type="button" id="pm-key-btn-${l.id}" class="pm-btn-icon" title="Reveal Key" onclick="toggleKeyMask(${l.id}, '${escapeHtml(keyRaw)}')">👁️</button>
+                    <button type="button" class="pm-btn-icon" title="Copy License Key" onclick="copyLicenseKey('${escapeHtml(keyRaw)}')">📋</button>
+                </div>
+            </td>
             <td>${urlSafe}</td>
             <td><strong>${escapeHtml(tierVal.toUpperCase())}</strong></td>
             <td><span class="pm-badge badge-${escapeHtml(l.status)}">${escapeHtml(l.status)}</span></td>
