@@ -21,6 +21,8 @@
 !/.orchestra/.conductor/tools/cli_commit.py
 !/.orchestra/.conductor/tools/cli_test_suite.py
 !/.orchestra/.conductor/tools/workspace_inspector.py
+!/.orchestra/README.md
+!/.orchestra/.conductor/docs/templates/
 
 # Ignore build and runtime junk inside whitelisted folders
 **/__pycache__/
