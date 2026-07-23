@@ -63,9 +63,10 @@ body {
 .pm-tab-label, .pm-sub-tab-btn, .pm-theme-btn {
   position: relative;
   z-index: 1;
+  transition: transform 0.15s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
-/* Layer 1: 1px Thin Border Tracing Glow */
+/* Layer 1: 1:1 Thin Border Tracing Glow (Continuous Proximity Detection) */
 .pm-tab-label::before, .pm-sub-tab-btn::before, .pm-theme-btn::before {
   content: '';
   position: absolute;
@@ -73,7 +74,7 @@ body {
   border-radius: 8px;
   padding: 1px;
   background: radial-gradient(
-    circle 70px at var(--mouse-x, -100px) var(--mouse-y, -100px),
+    circle 60px at var(--mouse-x, -100px) var(--mouse-y, -100px),
     var(--pm-primary, #7c3aed),
     var(--pm-purple, #a78bfa),
     transparent 100%
@@ -82,8 +83,7 @@ body {
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  opacity: 1;
   z-index: 1;
   pointer-events: none;
 }
@@ -95,19 +95,28 @@ body {
   inset: 0;
   border-radius: 8px;
   background: radial-gradient(
-    circle 85px at var(--mouse-x, -100px) var(--mouse-y, -100px),
-    rgba(139, 92, 246, 0.12),
+    circle 80px at var(--mouse-x, -100px) var(--mouse-y, -100px),
+    rgba(139, 92, 246, 0.10),
     transparent 100%
   );
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease, transform 0.15s ease;
   z-index: -1;
   pointer-events: none;
 }
 
-.pm-tab-label:hover::before, .pm-sub-tab-btn:hover::before, .pm-theme-btn:hover::before,
 .pm-tab-label:hover::after, .pm-sub-tab-btn:hover::after, .pm-theme-btn:hover::after {
   opacity: 1;
+}
+
+/* Subtle Tactile Compression & Chromatic Click Press Response */
+.pm-tab-label:active, .pm-sub-tab-btn:active, .pm-theme-btn:active {
+  transform: scale(0.98);
+}
+
+.pm-tab-label:active::after, .pm-sub-tab-btn:active::after, .pm-theme-btn:active::after {
+  opacity: 1;
+  transform: scale(1.02);
 }
 
 /* PrestaShop Admin-like Panel Layouts */
