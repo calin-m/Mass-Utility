@@ -16,6 +16,11 @@
 !/.gitignore
 !/.ai_pipeline.json
 !/.orchestra/.conductor/tools/install_framework.py
+!/.orchestra/.conductor/tools/cli_api_contract_guard.py
+!/.orchestra/.conductor/tools/cli_architecture_linter.py
+!/.orchestra/.conductor/tools/cli_commit.py
+!/.orchestra/.conductor/tools/cli_test_suite.py
+!/.orchestra/.conductor/tools/workspace_inspector.py
 
 # Ignore build and runtime junk inside whitelisted folders
 **/__pycache__/
