@@ -39,18 +39,21 @@ interface BackupSubTabProps {
   onSavePreset: () => void;
   onDeletePreset: () => void;
   onSelectAll: (checked: boolean) => void;
-  onToggleDomainExpand: (domainName: string) => void;
-  onToggleDomainCheck: (domainName: string, checked: boolean) => void;
-  onToggleTableCheck: (tableName: string, checked: boolean) => void;
+  onDomainSelect: (domain: string, checked: boolean) => void;
+  onTableToggle: (tableName: string) => void;
+  onToggleDomainExpanded: (domain: string) => void;
   onClearBackupHistory: () => void;
-  onTogglePinBackup: (fileBasename: string) => void;
-  onDeleteBackup: (fileBasename: string) => void;
-  onCloudPushBackup: (fileBasename: string) => void;
-  showAlert: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
-  showConfirm: (title: string, message: string, confirmText: string | null, onConfirm: () => void) => void;
+  onCheckCompareDrift: (basename: string) => void;
+  onDeleteBackup: (basename: string) => void;
+  onTogglePinBackup: (basename: string) => void;
+  resolveDownloadUrl?: (url?: string) => string;
+  formatSqlSize?: (size: any) => string;
+  formatLogSize?: (size: any) => string;
+  formatDate?: (dateVal: any) => string;
+  showAlert: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const resolveDownloadUrl = (url?: string): string => {
+const resolveDownloadUrlFallback = (url?: string): string => {
   if (!url || url.startsWith('#')) return '#';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   
@@ -79,15 +82,15 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
   onSavePreset,
   onDeletePreset,
   onSelectAll,
-  onToggleDomainExpand,
-  onToggleDomainCheck,
-  onToggleTableCheck,
+  onDomainSelect,
+  onTableToggle,
+  onToggleDomainExpanded,
   onClearBackupHistory,
-  onTogglePinBackup,
+  onCheckCompareDrift,
   onDeleteBackup,
-  onCloudPushBackup,
+  onTogglePinBackup,
+  resolveDownloadUrl = resolveDownloadUrlFallback,
   showAlert,
-  showConfirm,
 }) => {
   const [dbSearchTerm, setDbSearchTerm] = useState('');
   const [dbSortKey, setDbSortKey] = useState<'basename' | 'date'>('date');
@@ -398,18 +401,10 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                   </tr>
                 );
               })}
-              {backups.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="p-12 text-center text-pm-text-secondary">
-                    <div className="text-2xl mb-2">🗄️</div>
-                    <div className="font-bold text-pm-text text-sm">No Database Backups Found</div>
-                    <span className="text-xs">Historical database dumps repository is currently empty.</span>
-                  </td>
-                </tr>
-              )}
             </tbody>
-          </table>
-        </div>
+          )}
+        </table>
+      </div>
       </div>
     </div>
   );

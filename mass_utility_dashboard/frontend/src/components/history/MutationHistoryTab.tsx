@@ -252,8 +252,8 @@ export const MutationHistoryTab: React.FC = () => {
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            {loading ? (
-              <tbody>
+            <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
+              {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-pm-text-secondary">
                     <div className="flex justify-center items-center gap-2">
@@ -271,8 +271,8 @@ export const MutationHistoryTab: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredHistory.map(job => (
-                  <tr key={job.job_id} className="hover:bg-white/[0.01] transition-colors">
+                filteredHistory.map((job) => (
+                  <tr key={job.job_id} className="even:bg-[var(--pm-body-bg)]/40 hover:bg-[var(--pm-input-bg)]/40 transition-colors">
                     <td className="px-6 py-3.5 whitespace-nowrap text-pm-text-secondary font-mono text-[11px]">
                       {job.date}
                     </td>
