@@ -12,6 +12,7 @@
 # Whitelist allowed files
 !/.cpanel.yml
 !/README.md
+!/SPEC.md
 !/.gitignore
 !/.ai_pipeline.json
 
