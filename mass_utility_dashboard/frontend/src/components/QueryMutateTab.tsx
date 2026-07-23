@@ -557,19 +557,37 @@ export const QueryMutateTab: React.FC = () => {
 
     if (rule.field === 'product.active') {
       showOptionsDropdown = true;
-      selectOptions.push({ value: '1', label: 'Active' }, { value: '0', label: 'Inactive' });
+      selectOptions.push({ value: '1', label: '1 — Active' }, { value: '0', label: '0 — Inactive' });
+    } else if (rule.field === 'product.on_sale') {
+      showOptionsDropdown = true;
+      selectOptions.push({ value: '1', label: '1 — On Sale' }, { value: '0', label: '0 — Not On Sale' });
+    } else if (rule.field === 'product.visibility') {
+      showOptionsDropdown = true;
+      selectOptions.push(
+        { value: 'both', label: 'Everywhere (Catalog & Search)' },
+        { value: 'catalog', label: 'Catalog Only' },
+        { value: 'search', label: 'Search Only' },
+        { value: 'none', label: 'Nowhere (Hidden)' }
+      );
+    } else if (rule.field === 'product.condition') {
+      showOptionsDropdown = true;
+      selectOptions.push(
+        { value: 'new', label: 'New' },
+        { value: 'used', label: 'Used' },
+        { value: 'refurbished', label: 'Refurbished' }
+      );
     } else if (rule.field === 'product.has_discount') {
       showOptionsDropdown = true;
-      selectOptions.push({ value: '1', label: 'Has Active Discount' }, { value: '0', label: 'No Discount' });
+      selectOptions.push({ value: '1', label: '1 — Has Active Discount' }, { value: '0', label: '0 — No Discount' });
     } else if (rule.field === 'category.id' && categoriesList.length > 0) {
       showOptionsDropdown = true;
-      categoriesList.forEach((c: any) => selectOptions.push({ value: String(c.id), label: `[${c.id}] ${c.name}` }));
+      categoriesList.forEach((c: any) => selectOptions.push({ value: String(c.id), label: `[ID: ${c.id}] ${c.name}` }));
     } else if (['manufacturer.id', 'product.id_manufacturer'].includes(rule.field) && manufacturersList.length > 0) {
       showOptionsDropdown = true;
-      manufacturersList.forEach((m: any) => selectOptions.push({ value: String(m.id), label: `[${m.id}] ${m.name}` }));
+      manufacturersList.forEach((m: any) => selectOptions.push({ value: String(m.id), label: `[ID: ${m.id}] ${m.name}` }));
     } else if (rule.field === 'employee.id_profile' && profilesList.length > 0) {
       showOptionsDropdown = true;
-      profilesList.forEach((p: any) => selectOptions.push({ value: String(p.id), label: `[${p.id}] ${p.name}` }));
+      profilesList.forEach((p: any) => selectOptions.push({ value: String(p.id), label: `[ID: ${p.id}] ${p.name}` }));
     }
 
     const isListOp = rule.operator === 'IN' || rule.operator === 'NOT_IN';
@@ -585,18 +603,37 @@ export const QueryMutateTab: React.FC = () => {
           }}
           className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-pm-purple/50"
         >
-          <option value="product.active">Product: Active Status</option>
-          <option value="product.reference">Product: Reference / SKU</option>
-          <option value="product.price">Product: Base Price</option>
-          <option value="product.final_price">Product: Discounted Price</option>
-          <option value="product.has_discount">Product: Has Active Discount</option>
-          <option value="product.name">Product: Name</option>
-          <option value="category.id">Category: ID</option>
-          <option value="manufacturer.id">Manufacturer: ID</option>
-          <option value="product.id_manufacturer">Product: Manufacturer ID</option>
-          <option value="employee.id_profile">Employee: Profile (User Type)</option>
-          <option value="discount.reduction_percent">Discount: Reduction %</option>
-          <option value="discount.reduction_amount">Discount: Flat Reduction</option>
+          <optgroup label="Status & Catalog Visibility">
+            <option value="product.active">Product: Active Status</option>
+            <option value="product.on_sale">Product: On Sale Flag</option>
+            <option value="product.visibility">Product: Catalog Visibility</option>
+            <option value="product.condition">Product: Condition</option>
+          </optgroup>
+          <optgroup label="Pricing & Discounts">
+            <option value="product.price">Product: Base Price</option>
+            <option value="product.final_price">Product: Final Discounted Price</option>
+            <option value="product.wholesale_price">Product: Wholesale / Cost Price</option>
+            <option value="product.has_discount">Product: Has Active Discount</option>
+            <option value="discount.reduction_percent">Discount: Reduction %</option>
+            <option value="discount.reduction_amount">Discount: Flat Reduction Amount</option>
+            <option value="product.ecotax">Product: Ecotax Amount</option>
+          </optgroup>
+          <optgroup label="Stock & Quantities">
+            <option value="product.quantity">Product: Stock Quantity</option>
+            <option value="product.weight">Product: Weight (kg)</option>
+          </optgroup>
+          <optgroup label="Categories & Associations">
+            <option value="category.id">Category: Category ID</option>
+            <option value="manufacturer.id">Manufacturer: Manufacturer ID</option>
+            <option value="employee.id_profile">Employee: Profile (User Scope)</option>
+          </optgroup>
+          <optgroup label="References & Barcodes">
+            <option value="product.name">Product: Name / Title</option>
+            <option value="product.reference">Product: Reference / SKU Code</option>
+            <option value="product.ean13">Product: EAN-13 Barcode</option>
+            <option value="product.upc">Product: UPC Barcode</option>
+            <option value="product.isbn">Product: ISBN Barcode</option>
+          </optgroup>
         </select>
 
         <select

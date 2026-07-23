@@ -24,9 +24,9 @@ class QueryTranslationEngine
             'join' => null
         ],
         'product.active' => [
-            'column' => 'p.active',
+            'column' => 'ps.active',
             'type' => 'int',
-            'join' => null
+            'join' => 'product_shop'
         ],
         'product.reference' => [
             'column' => 'p.reference',
@@ -52,6 +52,56 @@ class QueryTranslationEngine
             'column' => 'ps.price',
             'type' => 'float',
             'join' => 'product_shop'
+        ],
+        'product.wholesale_price' => [
+            'column' => 'ps.wholesale_price',
+            'type' => 'float',
+            'join' => 'product_shop'
+        ],
+        'product.quantity' => [
+            'column' => 'sa.quantity',
+            'type' => 'int',
+            'join' => 'stock_available'
+        ],
+        'product.on_sale' => [
+            'column' => 'ps.on_sale',
+            'type' => 'int',
+            'join' => 'product_shop'
+        ],
+        'product.visibility' => [
+            'column' => 'ps.visibility',
+            'type' => 'string',
+            'join' => 'product_shop'
+        ],
+        'product.condition' => [
+            'column' => 'p.condition',
+            'type' => 'string',
+            'join' => null
+        ],
+        'product.ecotax' => [
+            'column' => 'ps.ecotax',
+            'type' => 'float',
+            'join' => 'product_shop'
+        ],
+        'product.weight' => [
+            'column' => 'p.weight',
+            'type' => 'float',
+            'join' => null
+        ],
+        'product.ean13' => [
+            'column' => 'p.ean13',
+            'type' => 'string',
+            'join' => null
+        ],
+        'product.upc' => [
+            'column' => 'p.upc',
+            'type' => 'string',
+            'join' => null
+        ],
+        'product.isbn' => [
+            'column' => 'p.isbn',
+            'type' => 'string',
+            'join' => null
         ],
         'product.final_price' => [
             'column' => "IF(sp.id_specific_price IS NOT NULL, IF(sp.reduction_type = 'percentage', ps.price * (1 - sp.reduction), ps.price - sp.reduction), ps.price)",
@@ -79,8 +129,6 @@ class QueryTranslationEngine
             'join' => 'specific_price'
         ],
         'employee.id_profile' => [
-            // Agnostic whitelist mapping. Allows UI visual builders to preview/query 'User Type' 
-            // without breaking SQL execution. Customize this to a product column (e.g. p.id_employee) if needed.
             'column' => '1',
             'type' => 'int',
             'join' => null
@@ -113,6 +161,9 @@ class QueryTranslationEngine
         // Selectively compile extra joins based on AST filters
         if (isset($joins['category_product'])) {
             $sql .= ' LEFT JOIN `' . $this->dbPrefix . 'category_product` cp ON (p.id_product = cp.id_product)';
+        }
+        if (isset($joins['stock_available'])) {
+            $sql .= ' LEFT JOIN `' . $this->dbPrefix . 'stock_available` sa ON (p.id_product = sa.id_product AND sa.id_product_attribute = 0 AND sa.id_shop = ' . (int)$idShop . ')';
         }
         if (isset($joins['specific_price'])) {
             $sql .= ' LEFT JOIN `' . $this->dbPrefix . 'specific_price` sp ON (p.id_product = sp.id_product AND (sp.from = "0000-00-00 00:00:00" OR sp.from <= NOW()) AND (sp.to = "0000-00-00 00:00:00" OR sp.to >= NOW()))';
@@ -179,91 +230,72 @@ class QueryTranslationEngine
             return '';
         }
 
-        switch ($operator) {
-            case 'NAND':
-                return 'NOT (' . implode(' AND ', $parts) . ')';
-            case 'NOR':
-                return 'NOT (' . implode(' OR ', $parts) . ')';
-            case 'XOR':
-                return implode(' XOR ', $parts);
-            case 'AND':
-            case 'OR':
-            default:
-                return implode(' ' . $operator . ' ', $parts);
+        if ($operator === 'AND') {
+            return implode(' AND ', $parts);
+        } elseif ($operator === 'OR') {
+            return implode(' OR ', $parts);
+        } elseif ($operator === 'NAND') {
+            return 'NOT (' . implode(' AND ', $parts) . ')';
+        } elseif ($operator === 'NOR') {
+            return 'NOT (' . implode(' OR ', $parts) . ')';
+        } elseif ($operator === 'XOR') {
+            return '(' . implode(' XOR ', $parts) . ')';
         }
+
+        return '';
     }
 
     private function compileRule(array $rule, array &$joins): string
     {
-        $field = $rule['field'] ?? '';
-        if (!isset($this->whitelist[$field])) {
-            throw new Exception('Access Denied: Un-whitelisted attribute string detected: ' . $field);
+        $fieldKey = $rule['field'] ?? '';
+        if (!isset($this->whitelist[$fieldKey])) {
+            throw new Exception('Invalid or unauthorized AST field: ' . $fieldKey);
         }
 
-        $mapping = $this->whitelist[$field];
-        $column = $mapping['column'];
-        $type = $mapping['type'];
-        $joinKey = $mapping['join'];
-        if ($joinKey !== null) {
-            $joins[$joinKey] = true;
+        $def = $this->whitelist[$fieldKey];
+        if ($def['join']) {
+            $joins[$def['join']] = true;
         }
 
-        $opMap = [
-            'EQUAL' => '=',
-            'NOT_EQUAL' => '!=',
-            'GREATER_THAN' => '>',
-            'LESS_THAN' => '<',
-            'GREATER_EQUAL' => '>=',
-            'LESS_EQUAL' => '<=',
-            'LIKE' => 'LIKE',
-            'IN' => 'IN',
-            'NOT_IN' => 'NOT IN'
-        ];
+        $column = $def['column'];
+        $type = $def['type'];
+        $operator = strtoupper($rule['operator'] ?? 'EQUAL');
+        $rawValue = $rule['value'] ?? '';
 
-        $ruleOp = strtoupper($rule['operator'] ?? '');
-        if (!isset($opMap[$ruleOp])) {
-            throw new Exception('Invalid query operator: ' . $ruleOp);
+        switch ($operator) {
+            case 'EQUAL':
+                return $column . ' = ' . $this->formatVal($rawValue, $type);
+            case 'NOT_EQUAL':
+                return $column . ' != ' . $this->formatVal($rawValue, $type);
+            case 'GREATER_THAN':
+                return $column . ' > ' . $this->formatVal($rawValue, $type);
+            case 'LESS_THAN':
+                return $column . ' < ' . $this->formatVal($rawValue, $type);
+            case 'LIKE':
+                $escaped = SaaSSQLEscaper::escapeString((string)$rawValue);
+                return $column . " LIKE '%" . $escaped . "%'";
+            case 'IN':
+            case 'NOT_IN':
+                $items = is_array($rawValue) ? $rawValue : explode(',', (string)$rawValue);
+                $formattedItems = array_map(fn($v) => $this->formatVal(trim((string)$v), $type), $items);
+                $inList = implode(', ', array_filter($formattedItems, fn($v) => $v !== ''));
+                if ($inList === '') {
+                    return '1 = 0';
+                }
+                $sqlOp = $operator === 'IN' ? 'IN' : 'NOT IN';
+                return $column . ' ' . $sqlOp . ' (' . $inList . ')';
+            default:
+                throw new Exception('Invalid AST operator: ' . $operator);
         }
-        $sqlOp = $opMap[$ruleOp];
-        $rawVal = $rule['value'] ?? null;
-
-        if ($sqlOp === 'IN' || $sqlOp === 'NOT IN') {
-            if (!is_array($rawVal)) {
-                throw new Exception('Operator IN/NOT_IN expects array value.');
-            }
-            $sanitized = [];
-            foreach ($rawVal as $val) {
-                $sanitized[] = $this->sanitizeAndEscape($val, $type);
-            }
-            if (empty($sanitized)) {
-                return ($sqlOp === 'IN') ? '0' : '1';
-            }
-            return $column . ' ' . $sqlOp . ' (' . implode(', ', $sanitized) . ')';
-        }
-
-        if (is_array($rawVal)) {
-            throw new Exception('Scalar operator expects scalar value.');
-        }
-
-        if ($sqlOp === 'LIKE') {
-            $escaped = '%' . str_replace(['%', '_'], ['\\%', '\\_'], SaaSSQLEscaper::escape((string)$rawVal)) . '%';
-            return $column . ' LIKE \'' . $escaped . '\'';
-        }
-
-        $escapedValue = $this->sanitizeAndEscape($rawVal, $type);
-        return $column . ' ' . $sqlOp . ' ' . $escapedValue;
     }
 
-    private function sanitizeAndEscape($value, string $type): string
+    private function formatVal($val, string $type): string
     {
-        switch ($type) {
-            case 'int':
-                return (string)(int)$value;
-            case 'float':
-                return (string)(float)$value;
-            case 'string':
-            default:
-                return '\'' . SaaSSQLEscaper::escape((string)$value) . '\'';
+        if ($type === 'int') {
+            return (string)(int)$val;
+        } elseif ($type === 'float') {
+            return (string)(float)$val;
         }
+        return "'" . SaaSSQLEscaper::escapeString((string)$val) . "'";
     }
 }
