@@ -49,7 +49,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
       onClick={onClose}
     >
       <div
-        className={`w-full ${maxWidthClasses} bg-pm-card border border-pm-border rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scaleUp`}
+        className={`w-full ${maxWidthClasses} bg-pm-card border border-pm-border rounded-xl pm-modal-elevation overflow-hidden flex flex-col max-h-[90vh] animate-scaleUp`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
