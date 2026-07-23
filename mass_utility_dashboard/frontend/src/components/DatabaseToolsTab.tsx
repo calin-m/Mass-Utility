@@ -131,6 +131,7 @@ export const DatabaseToolsTab: React.FC = () => {
 
   // 5. Drift Diff Modal state
   const [driftModalData, setDriftModalData] = useState<any | null>(null);
+  const [auditTableFilter, setAuditTableFilter] = useState<'all' | 'modified' | 'volatile' | 'identical'>('all');
   const [activeDrawer, setActiveDrawer] = useState<DrawerType>(null);
   const [tableRowDiff, setTableRowDiff] = useState<any | null>(null);
   const [isLoadingRowDiff, setIsLoadingRowDiff] = useState(false);
@@ -1412,38 +1413,193 @@ export const DatabaseToolsTab: React.FC = () => {
                 </div>
               )}
 
-              {/* Database Tables Content Integrity Table */}
-              <div className="space-y-2">
-                <span className="font-bold text-pm-text-secondary uppercase tracking-wider block text-xs">Database Tables Content Integrity</span>
-                <div className="max-h-[220px] overflow-y-auto bg-pm-input/30 border border-pm-border rounded-lg p-3 space-y-2">
-                  {driftModalData.checksum_status &&
-                    Object.keys(driftModalData.checksum_status).map(tbl => {
-                      const c = driftModalData.checksum_status[tbl];
-                      const isMatch = c.match === true;
-                      const isVolatile = c.volatile === true;
+              {/* Database Tables Content Integrity Section */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center flex-wrap gap-2">
+                  <span className="font-bold text-pm-text-secondary uppercase tracking-wider block text-xs">
+                    Database Tables Content Integrity
+                  </span>
+                  
+                  {/* Status Filter Bar */}
+                  {driftModalData.checksum_status && (() => {
+                    const statusObj = driftModalData.checksum_status;
+                    const allKeys = Object.keys(statusObj);
+                    const modifiedKeys = allKeys.filter(k => statusObj[k].match === false && !statusObj[k].volatile);
+                    const volatileKeys = allKeys.filter(k => statusObj[k].match === false && statusObj[k].volatile);
+                    const identicalKeys = allKeys.filter(k => statusObj[k].match === true);
 
-                      return (
-                        <div key={tbl} className="flex justify-between items-center py-2 border-b border-pm-border last:border-b-0">
-                          <div>
-                            <span className="font-mono font-semibold text-pm-text block">{tbl}</span>
-                            <span className="text-[0.65rem] text-pm-text-secondary">
-                              Rows: {c.backup_rows} ➔ {c.active_rows}
-                            </span>
+                    return (
+                      <div className="flex gap-1.5 bg-pm-input/50 p-1 rounded-xl border border-pm-border text-[0.65rem] font-bold">
+                        <button
+                          type="button"
+                          onClick={() => setAuditTableFilter('all')}
+                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer ${
+                            auditTableFilter === 'all'
+                              ? 'bg-pm-card text-pm-text border border-pm-border shadow-sm'
+                              : 'text-pm-text-secondary hover:text-pm-text'
+                          }`}
+                        >
+                          All ({allKeys.length})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAuditTableFilter('modified')}
+                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 ${
+                            auditTableFilter === 'modified'
+                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-sm'
+                              : 'text-rose-400/70 hover:text-rose-400'
+                          }`}
+                        >
+                          <span>▲ Modified</span>
+                          <span className="bg-rose-500/20 px-1.5 py-0.2 rounded-full">{modifiedKeys.length}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAuditTableFilter('volatile')}
+                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 ${
+                            auditTableFilter === 'volatile'
+                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-sm'
+                              : 'text-amber-400/70 hover:text-amber-400'
+                          }`}
+                        >
+                          <span>⚡ Volatile</span>
+                          <span className="bg-amber-500/20 px-1.5 py-0.2 rounded-full">{volatileKeys.length}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAuditTableFilter('identical')}
+                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 ${
+                            auditTableFilter === 'identical'
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
+                              : 'text-emerald-400/70 hover:text-emerald-400'
+                          }`}
+                        >
+                          <span>● Identical</span>
+                          <span className="bg-emerald-500/20 px-1.5 py-0.2 rounded-full">{identicalKeys.length}</span>
+                        </button>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Sticky Table Header & Rows Grid Container */}
+                <div className="border border-pm-border rounded-xl bg-pm-input/20 overflow-hidden shadow-inner">
+                  {/* Table Header Row */}
+                  <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-pm-card/80 border-b border-pm-border text-[0.65rem] font-bold font-mono text-pm-text-secondary uppercase tracking-wider">
+                    <div className="col-span-4">Table Name</div>
+                    <div className="col-span-3 text-center">Row Count (Backup ➔ Active)</div>
+                    <div className="col-span-3 text-center">MD5 Checksum Drift</div>
+                    <div className="col-span-2 text-right">Integrity Status</div>
+                  </div>
+
+                  {/* Table Body Scroll Area */}
+                  <div className="max-h-[240px] overflow-y-auto divide-y divide-pm-border/60">
+                    {driftModalData.checksum_status && (() => {
+                      const statusObj = driftModalData.checksum_status;
+                      const filteredKeys = Object.keys(statusObj).filter(tbl => {
+                        const c = statusObj[tbl];
+                        const isMatch = c.match === true;
+                        const isVolatile = c.volatile === true;
+                        const isModified = !isMatch && !isVolatile;
+
+                        if (auditTableFilter === 'modified') return isModified;
+                        if (auditTableFilter === 'volatile') return isVolatile;
+                        if (auditTableFilter === 'identical') return isMatch;
+                        return true;
+                      });
+
+                      if (filteredKeys.length === 0) {
+                        return (
+                          <div className="p-6 text-center text-pm-text-secondary text-xs font-mono">
+                            No tables match the selected status filter ({auditTableFilter.toUpperCase()}).
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-mono text-[0.7rem] text-pm-text-secondary">
-                              {c.backup ? c.backup : 'N/A'} ➔ {c.active}
-                            </span>
-                            <span className={`pm-status-pill ${
-                              isMatch ? 'success' :
-                              isVolatile ? 'warning' : 'danger'
-                            }`}>
-                              {isMatch ? 'IDENTICAL' : isVolatile ? 'VOLATILE' : 'MODIFIED'}
-                            </span>
+                        );
+                      }
+
+                      return filteredKeys.map(tbl => {
+                        const c = statusObj[tbl];
+                        const isMatch = c.match === true;
+                        const isVolatile = c.volatile === true;
+                        const isModified = !isMatch && !isVolatile;
+
+                        const formatHash = (h: string) => {
+                          if (!h || h === 'N/A') return 'N/A';
+                          return h.length > 10 ? `${h.substring(0, 4)}...${h.substring(h.length - 4)}` : h;
+                        };
+
+                        return (
+                          <div key={tbl} className="grid grid-cols-12 gap-2 px-4 py-2.5 items-center hover:bg-pm-card/40 transition-colors text-xs">
+                            {/* Table Name */}
+                            <div className="col-span-4 font-mono font-semibold text-pm-text truncate" title={tbl}>
+                              {tbl}
+                            </div>
+
+                            {/* Row Count */}
+                            <div className="col-span-3 text-center font-mono text-[0.7rem] text-pm-text-secondary">
+                              <span className="bg-pm-input px-1.5 py-0.5 rounded border border-pm-border/40">
+                                {c.backup_rows?.toLocaleString() ?? 0}
+                              </span>
+                              <span className="mx-1 text-pm-text-secondary/50">➔</span>
+                              <span className="bg-pm-input px-1.5 py-0.5 rounded border border-pm-border/40">
+                                {c.active_rows?.toLocaleString() ?? 0}
+                              </span>
+                            </div>
+
+                            {/* Checksum Hash Comparison */}
+                            <div className="col-span-3 text-center font-mono text-[0.65rem] text-pm-text-secondary">
+                              <span className="bg-pm-input/80 px-1.5 py-0.5 rounded border border-pm-border/40" title={c.backup || 'N/A'}>
+                                {formatHash(c.backup)}
+                              </span>
+                              <span className="mx-1 text-pm-text-secondary/50">➔</span>
+                              <span className="bg-pm-input/80 px-1.5 py-0.5 rounded border border-pm-border/40" title={c.active || 'N/A'}>
+                                {formatHash(c.active)}
+                              </span>
+                            </div>
+
+                            {/* Integrity Status Pill & Action */}
+                            <div className="col-span-2 flex items-center justify-end gap-2">
+                              {isModified && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleInspectRowDiff(tbl)}
+                                  className="text-[0.65rem] text-indigo-400 hover:text-indigo-300 hover:underline font-bold cursor-pointer transition-colors"
+                                >
+                                  Diff
+                                </button>
+                              )}
+
+                              <span
+                                className={`px-2 py-0.5 rounded-full font-mono text-[0.65rem] font-bold border tracking-wider flex items-center gap-1 shadow-sm ${
+                                  isMatch
+                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-emerald-500/5'
+                                    : isVolatile
+                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-amber-500/5'
+                                    : 'bg-rose-500/10 text-rose-400 border-rose-500/30 shadow-rose-500/5'
+                                }`}
+                              >
+                                {isMatch ? (
+                                  <>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+                                    <span>IDENTICAL</span>
+                                  </>
+                                ) : isVolatile ? (
+                                  <>
+                                    <span className="text-[0.7rem]">⚡</span>
+                                    <span>VOLATILE</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="text-[0.7rem]">▲</span>
+                                    <span>MODIFIED</span>
+                                  </>
+                                )}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
+                  </div>
                 </div>
               </div>
 
