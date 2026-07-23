@@ -209,9 +209,7 @@ class QueryTranslationEngine
             return '';
         }
 
-        if ($operator === 'AND') {
-            return implode(' AND ', $parts);
-        } elseif ($operator === 'OR') {
+        if ($operator === 'OR') {
             return implode(' OR ', $parts);
         } elseif ($operator === 'NAND') {
             return 'NOT (' . implode(' AND ', $parts) . ')';
@@ -221,7 +219,7 @@ class QueryTranslationEngine
             return '(' . implode(' XOR ', $parts) . ')';
         }
 
-        return '';
+        return implode(' AND ', $parts);
     }
 
     private function compileRule(array $rule, array &$joins): string

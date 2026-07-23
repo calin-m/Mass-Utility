@@ -8,7 +8,6 @@ if (!defined('_PS_VERSION_')) {
 }
 
 use Exception;
-use MassUtility\Service\SaaSSQLEscaper;
 
 /**
  * The compiler engine responsible for translating JSON AST queries from the frontend into raw PrestaShop SQL.
@@ -230,9 +229,7 @@ class QueryTranslationEngine
             return '';
         }
 
-        if ($operator === 'AND') {
-            return implode(' AND ', $parts);
-        } elseif ($operator === 'OR') {
+        if ($operator === 'OR') {
             return implode(' OR ', $parts);
         } elseif ($operator === 'NAND') {
             return 'NOT (' . implode(' AND ', $parts) . ')';
@@ -242,7 +239,7 @@ class QueryTranslationEngine
             return '(' . implode(' XOR ', $parts) . ')';
         }
 
-        return '';
+        return implode(' AND ', $parts);
     }
 
     private function compileRule(array $rule, array &$joins): string
@@ -272,7 +269,7 @@ class QueryTranslationEngine
             case 'LESS_THAN':
                 return $column . ' < ' . $this->formatVal($rawValue, $type);
             case 'LIKE':
-                $escaped = SaaSSQLEscaper::escapeString((string)$rawValue);
+                $escaped = addslashes((string)$rawValue);
                 return $column . " LIKE '%" . $escaped . "%'";
             case 'IN':
             case 'NOT_IN':
@@ -296,6 +293,6 @@ class QueryTranslationEngine
         } elseif ($type === 'float') {
             return (string)(float)$val;
         }
-        return "'" . SaaSSQLEscaper::escapeString((string)$val) . "'";
+        return "'" . addslashes((string)$val) . "'";
     }
 }
