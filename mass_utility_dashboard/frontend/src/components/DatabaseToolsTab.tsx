@@ -1435,7 +1435,7 @@ export const DatabaseToolsTab: React.FC = () => {
                           onClick={() => setAuditTableFilter('all')}
                           className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer ${
                             auditTableFilter === 'all'
-                              ? 'bg-pm-card text-pm-text border border-pm-border shadow-sm'
+                              ? 'bg-pm-card text-pm-text border border-pm-border shadow-sm font-bold'
                               : 'text-pm-text-secondary hover:text-pm-text'
                           }`}
                         >
@@ -1444,38 +1444,38 @@ export const DatabaseToolsTab: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setAuditTableFilter('modified')}
-                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 ${
+                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 font-bold ${
                             auditTableFilter === 'modified'
-                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-sm'
-                              : 'text-rose-400/70 hover:text-rose-400'
+                              ? 'bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/40 shadow-sm'
+                              : 'text-rose-700/80 dark:text-rose-400/80 hover:text-rose-800 dark:hover:text-rose-300'
                           }`}
                         >
                           <span>▲ Modified</span>
-                          <span className="bg-rose-500/20 px-1.5 py-0.2 rounded-full">{modifiedKeys.length}</span>
+                          <span className="bg-rose-500/10 dark:bg-rose-500/20 px-1.5 py-0.2 rounded-full">{modifiedKeys.length}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setAuditTableFilter('volatile')}
-                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 ${
+                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 font-bold ${
                             auditTableFilter === 'volatile'
-                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-sm'
-                              : 'text-amber-400/70 hover:text-amber-400'
+                              ? 'bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-500/40 shadow-sm'
+                              : 'text-amber-800/80 dark:text-amber-400/80 hover:text-amber-900 dark:hover:text-amber-300'
                           }`}
                         >
                           <span>⚡ Volatile</span>
-                          <span className="bg-amber-500/20 px-1.5 py-0.2 rounded-full">{volatileKeys.length}</span>
+                          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-1.5 py-0.2 rounded-full">{volatileKeys.length}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setAuditTableFilter('identical')}
-                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 ${
+                          className={`px-2.5 py-1 rounded-lg transition uppercase cursor-pointer flex items-center gap-1 font-bold ${
                             auditTableFilter === 'identical'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
-                              : 'text-emerald-400/70 hover:text-emerald-400'
+                              ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40 shadow-sm'
+                              : 'text-emerald-700/80 dark:text-emerald-400/80 hover:text-emerald-800 dark:hover:text-emerald-300'
                           }`}
                         >
                           <span>● Identical</span>
-                          <span className="bg-emerald-500/20 px-1.5 py-0.2 rounded-full">{identicalKeys.length}</span>
+                          <span className="bg-emerald-500/10 dark:bg-emerald-500/20 px-1.5 py-0.2 rounded-full">{identicalKeys.length}</span>
                         </button>
                       </div>
                     );
