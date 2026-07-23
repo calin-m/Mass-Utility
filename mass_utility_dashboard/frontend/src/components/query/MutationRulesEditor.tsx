@@ -1,5 +1,5 @@
 // @Arch[UI_Components]
-// @Description: Sub-component managing mutation rule actions (SET, ADD, MULTIPLY) and execution pre-flight controls.
+// @Description: Sub-component managing mutation rule actions (SET, ADD, MULTIPLY) and execution pre-flight controls with full option dropdown lists and manual toggle support.
 
 import React from 'react';
 import { LogTerminal } from '../common/LogTerminal';
@@ -14,6 +14,8 @@ export interface MutationAction {
 
 interface MutationRulesEditorProps {
   mutationRules: MutationAction[];
+  categoriesList?: Array<{ id: string | number; name: string }>;
+  manufacturersList?: Array<{ id: string | number; name: string }>;
   isExecuting: boolean;
   executingOffset: number | null;
   mutationLogs: string;
@@ -27,6 +29,8 @@ interface MutationRulesEditorProps {
 
 export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
   mutationRules,
+  categoriesList = [],
+  manufacturersList = [],
   isExecuting,
   executingOffset,
   mutationLogs,
@@ -38,7 +42,7 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
   onToggleLogTerminal,
 }) => {
   return (
-    <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-6 border-l-4 border-l-rose-500">
+    <div className="bg-pm-card border border-pm-border rounded-xl p-6 pm-card-elevation space-y-6 border-l-4 border-l-rose-500">
       <div className="flex justify-between items-center border-b border-pm-border pb-3 flex-wrap gap-4">
         <div>
           <span className="text-[0.65rem] font-bold text-rose-500 uppercase tracking-widest block mb-1">Step 2 Batch Action Configurator</span>
@@ -58,35 +62,108 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
       <div className="space-y-3">
         {mutationRules.map((rule) => {
           const isBoolean = rule.field === 'active' || rule.field === 'on_sale';
+          const isVisibility = rule.field === 'visibility';
+          const isCondition = rule.field === 'condition';
+          const isCategory = rule.field === 'id_category_default';
+          const isManufacturer = rule.field === 'id_manufacturer';
+
+          let selectOptions: Array<{ value: string; label: string }> = [];
+          if (isBoolean) {
+            selectOptions = [
+              { value: '1', label: '1 — Enabled / Active' },
+              { value: '0', label: '0 — Disabled / Inactive' },
+            ];
+          } else if (isVisibility) {
+            selectOptions = [
+              { value: 'both', label: 'Everywhere (Catalog & Search)' },
+              { value: 'catalog', label: 'Catalog Only' },
+              { value: 'search', label: 'Search Only' },
+              { value: 'none', label: 'Nowhere (Hidden)' },
+            ];
+          } else if (isCondition) {
+            selectOptions = [
+              { value: 'new', label: 'New' },
+              { value: 'used', label: 'Used' },
+              { value: 'refurbished', label: 'Refurbished' },
+            ];
+          } else if (isCategory) {
+            selectOptions = categoriesList.map((c) => ({
+              value: String(c.id),
+              label: `[ID: ${c.id}] ${c.name}`,
+            }));
+          } else if (isManufacturer) {
+            selectOptions = manufacturersList.map((m) => ({
+              value: String(m.id),
+              label: `[ID: ${m.id}] ${m.name}`,
+            }));
+          }
+
+          const hasDropdown = selectOptions.length > 0;
+          const isDropdownMode = hasDropdown && !rule.forceManualMode;
+          const isFixedTypeOnly = isBoolean || isVisibility || isCondition;
+
           return (
             <div key={rule.id} className="flex items-center gap-3 flex-wrap bg-pm-input/30 border border-pm-border p-3.5 rounded-xl">
+              {/* Target Mutation Field Selection */}
               <select
                 value={rule.field}
                 onChange={(e) => {
                   const newField = e.target.value;
                   const isNewBool = newField === 'active' || newField === 'on_sale';
+                  const isNewVis = newField === 'visibility';
+                  const isNewCond = newField === 'condition';
+
+                  let defaultValue = '';
+                  if (isNewBool) defaultValue = '1';
+                  else if (isNewVis) defaultValue = 'both';
+                  else if (isNewCond) defaultValue = 'new';
+
                   onUpdateMutationRule(rule.id, {
                     field: newField,
-                    value: isNewBool ? '1' : '',
-                    type: isNewBool ? 'SET' : rule.type,
+                    value: defaultValue,
+                    type: isNewBool || isNewVis || isNewCond ? 'SET' : rule.type,
+                    forceManualMode: false,
                   });
                 }}
                 className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-primary/50"
               >
-                <option value="price">Product Base Price</option>
-                <option value="wholesale_price">Wholesale / Cost Price</option>
-                <option value="active">Active Status (1 / 0)</option>
-                <option value="on_sale">On Sale Flag (1 / 0)</option>
-                <option value="quantity">Available Quantity / Stock</option>
-                <option value="id_manufacturer">Manufacturer ID</option>
-                <option value="ecotax">Ecotax Amount</option>
-                <option value="weight">Product Weight (kg)</option>
+                <optgroup label="Pricing & Stock Metrics">
+                  <option value="price">Product Base Price</option>
+                  <option value="wholesale_price">Wholesale / Cost Price</option>
+                  <option value="ecotax">Ecotax Amount</option>
+                  <option value="weight">Product Weight (kg)</option>
+                  <option value="quantity">Available Quantity / Stock</option>
+                  <option value="minimal_quantity">Minimum Quantity For Sale</option>
+                </optgroup>
+                <optgroup label="Status & Catalog Associations">
+                  <option value="active">Active Status (1 / 0)</option>
+                  <option value="on_sale">On Sale Flag (1 / 0)</option>
+                  <option value="visibility">Catalog Visibility</option>
+                  <option value="condition">Product Condition</option>
+                  <option value="id_category_default">Default Category</option>
+                  <option value="id_manufacturer">Manufacturer</option>
+                  <option value="id_tax_rules_group">Tax Rule Group ID</option>
+                </optgroup>
+                <optgroup label="References & Identifiers">
+                  <option value="reference">Reference / SKU Code</option>
+                  <option value="supplier_reference">Supplier Reference</option>
+                  <option value="ean13">EAN-13 Barcode</option>
+                  <option value="upc">UPC Barcode</option>
+                  <option value="isbn">ISBN Barcode</option>
+                  <option value="location">Warehouse Location</option>
+                </optgroup>
+                <optgroup label="Text & SEO Metadata">
+                  <option value="name">Product Name</option>
+                  <option value="meta_title">SEO Meta Title</option>
+                  <option value="meta_description">SEO Meta Description</option>
+                </optgroup>
               </select>
 
+              {/* Mutation Math Type (SET, ADD, MULTIPLY) */}
               <select
                 value={rule.type}
                 onChange={(e) => onUpdateMutationRule(rule.id, { type: e.target.value as any })}
-                disabled={isBoolean}
+                disabled={isFixedTypeOnly}
                 className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-primary/50 disabled:opacity-50"
               >
                 <option value="SET">Set Fixed Value (=)</option>
@@ -94,30 +171,65 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
                 <option value="MULTIPLY">Multiply By Factor (*)</option>
               </select>
 
-              {isBoolean ? (
-                <select
-                  value={rule.value}
-                  onChange={(e) => onUpdateMutationRule(rule.id, { value: e.target.value })}
-                  className="flex-grow min-w-[200px] bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-primary/50 font-bold"
-                >
-                  <option value="1">1 — Enabled / Active</option>
-                  <option value="0">0 — Disabled / Inactive</option>
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  placeholder="Value (e.g., 29.99, 1.10 for +10%)..."
-                  value={rule.value}
-                  onChange={(e) => onUpdateMutationRule(rule.id, { value: e.target.value })}
-                  className="flex-grow min-w-[200px] bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-primary/50"
-                />
-              )}
+              {/* Value Control Input / Dropdown + Manual Toggle */}
+              <div className="flex items-center gap-2 flex-grow min-w-[220px]">
+                {isDropdownMode ? (
+                  <>
+                    <select
+                      value={rule.value}
+                      onChange={(e) => onUpdateMutationRule(rule.id, { value: e.target.value })}
+                      className="bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-primary/50 flex-grow font-medium"
+                    >
+                      <option value="">- Select Target Value -</option>
+                      {selectOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    {!isFixedTypeOnly && (
+                      <button
+                        type="button"
+                        title="Switch to manual text input"
+                        onClick={() => onUpdateMutationRule(rule.id, { forceManualMode: true })}
+                        className="pm-btn pm-btn-neutral text-[0.7rem] font-bold px-2 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer shrink-0"
+                      >
+                        📝 Manual
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      placeholder={
+                        isCategory || isManufacturer || rule.field === 'id_tax_rules_group'
+                          ? 'Enter numeric ID (e.g. 5)...'
+                          : 'Value (e.g., 29.99, 1.10 for +10%)...'
+                      }
+                      value={rule.value}
+                      onChange={(e) => onUpdateMutationRule(rule.id, { value: e.target.value })}
+                      className="flex-grow bg-pm-input border border-pm-border text-xs text-pm-text rounded-lg px-3 py-1.5 focus:outline-none focus:border-pm-primary/50"
+                    />
+                    {hasDropdown && !isFixedTypeOnly && (
+                      <button
+                        type="button"
+                        title="Switch to selection dropdown list"
+                        onClick={() => onUpdateMutationRule(rule.id, { forceManualMode: false })}
+                        className="pm-btn pm-btn-neutral text-[0.7rem] font-bold px-2 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer shrink-0"
+                      >
+                        📋 Dropdown
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
 
               {mutationRules.length > 1 && (
                 <button
                   type="button"
                   onClick={() => onRemoveMutationRule(rule.id)}
-                  className="pm-btn pm-btn-danger text-xs px-2.5 py-1.5 rounded-lg"
+                  className="pm-btn pm-btn-danger text-xs px-2.5 py-1.5 rounded-lg cursor-pointer"
                 >
                   🗑️
                 </button>
@@ -143,7 +255,7 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
           type="button"
           onClick={onExecuteMutations}
           disabled={isExecuting}
-          className="pm-btn pm-btn-danger text-xs font-bold px-6 py-3 rounded-xl transition uppercase tracking-wider shadow-xl hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-50 cursor-pointer ml-auto"
+          className="pm-btn pm-btn-danger text-xs font-bold px-6 py-3 rounded-xl transition uppercase tracking-wider pm-btn-elevation hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-50 cursor-pointer ml-auto"
         >
           {isExecuting ? `Executing Chunk (Offset: ${executingOffset})...` : '🚀 Trigger Atomic Mutation Loop'}
         </button>

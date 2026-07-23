@@ -639,7 +639,7 @@ export const QueryMutateTab: React.FC = () => {
                   const updated = handleUpdateRule(rule.id, { forceManualMode: true }, queryTree);
                   setQueryTree(updated);
                 }}
-                className="text-xs hover:bg-white/[0.05] border border-pm-border px-2 py-1 rounded-lg text-pm-text-secondary flex items-center gap-1 focus:outline-none"
+                className="pm-btn pm-btn-neutral text-[0.7rem] font-bold px-2 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer shrink-0"
               >
                 📝 Manual
               </button>
@@ -664,7 +664,7 @@ export const QueryMutateTab: React.FC = () => {
                     const updated = handleUpdateRule(rule.id, { forceManualMode: false }, queryTree);
                     setQueryTree(updated);
                   }}
-                  className="text-xs hover:bg-white/[0.05] border border-pm-border px-2 py-1 rounded-lg text-pm-text-secondary flex items-center gap-1 focus:outline-none"
+                  className="pm-btn pm-btn-neutral text-[0.7rem] font-bold px-2 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer shrink-0"
                 >
                   📋 Dropdown
                 </button>
@@ -892,6 +892,8 @@ export const QueryMutateTab: React.FC = () => {
       {showStep2 && (
         <MutationRulesEditor
           mutationRules={mutationRules}
+          categoriesList={categoriesList}
+          manufacturersList={manufacturersList}
           isExecuting={isExecuting}
           executingOffset={executingOffset}
           mutationLogs={mutationLogs}
