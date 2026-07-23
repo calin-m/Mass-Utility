@@ -104,29 +104,29 @@ body {
   background: var(--pm-text-secondary, #94a3b8);
 }
 
-/* 🌟 3-Tier Shadow Elevation UX System */
+/* 🌟 Refined Subtle Shadow Elevation UX System */
 
-/* Tier 1: Page Cards & Panels (Ambient Dark Elevation + Hover Glow) */
+/* Tier 1: Page Cards & Panels (Ultra-Subtle Ambient Elevation) */
 .pm-card-elevation {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-  transition: box-shadow 0.3s ease, border-color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.25s ease, border-color 0.2s ease;
 }
 .pm-card-elevation:hover {
-  box-shadow: 0 8px 25px rgba(167, 139, 250, 0.1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
 }
 
-/* Tier 2: Interactive Controls & Buttons (Tactile Micro-Shadow Glow) */
+/* Tier 2: Interactive Controls & Buttons (Micro-Tactile Depth) */
 .pm-btn-elevation {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   transition: box-shadow 0.2s ease, transform 0.15s ease;
 }
 .pm-btn-elevation:hover {
-  box-shadow: 0 4px 14px rgba(167, 139, 250, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
-/* Tier 3: Floating Modals & Overlays (Deep High-Z Elevation) */
+/* Tier 3: Floating Modals & Overlays (Refined Soft Z-Elevation) */
 .pm-modal-elevation {
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.5);
 }
 
 /* Proximity spotlight background fill & 1px dynamic border tracing glow */
