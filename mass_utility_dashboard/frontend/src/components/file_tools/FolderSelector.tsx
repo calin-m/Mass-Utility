@@ -109,7 +109,7 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                       checked={checked}
                       disabled={disabled}
                       onChange={e => onToggleFolder(item.path, e.target.checked)}
-                      className={`w-4 h-4 rounded border-pm-border text-pm-primary focus:ring-0 focus:ring-offset-0 accent-pm-primary shrink-0 ${
+                      className={`w-4 h-4 rounded bg-pm-input/80 border border-pm-border/60 text-pm-primary focus:ring-0 focus:ring-offset-0 accent-pm-primary shrink-0 ${
                         disabled ? 'cursor-not-allowed' : 'cursor-pointer'
                       }`}
                     />
