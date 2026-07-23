@@ -73,7 +73,7 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
       </p>
 
       {!isCustom && (
-        <div className="bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 p-4 rounded-xl text-xs leading-relaxed flex items-center gap-3">
+        <div className="bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 p-4 rounded-xl text-xs font-medium leading-relaxed flex items-center gap-3 shadow-sm">
           <span className="text-lg shrink-0">⚠️</span>
           <span>
             <strong>Profile Active:</strong> Manual selections are disabled. The active profile automatically determines which folders are included (grayed out). Switch to <em>Custom / Load Profile</em> to customize folders.
@@ -96,8 +96,8 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                   className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 gap-3 ${
                     disabled
                       ? checked
-                        ? 'bg-pm-primary/5 border-pm-primary/20 opacity-80 cursor-not-allowed'
-                        : 'bg-[var(--pm-body-bg)]/40 border-pm-border/30 opacity-60 cursor-not-allowed'
+                        ? 'bg-pm-primary/10 border-pm-primary/30 text-pm-text'
+                        : 'bg-[var(--pm-body-bg)]/60 border-pm-border/30 text-pm-text-secondary/80'
                       : 'bg-pm-card border-pm-border/60 hover:bg-pm-input/40 hover:border-pm-primary/40 cursor-pointer shadow-sm'
                   }`}
                 >
@@ -107,17 +107,30 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                       checked={checked}
                       disabled={disabled}
                       onChange={e => onToggleFolder(item.path, e.target.checked)}
-                      className="w-4 h-4 rounded border-pm-border text-pm-primary focus:ring-0 focus:ring-offset-0 cursor-pointer accent-pm-primary shrink-0"
+                      className={`w-4 h-4 rounded border-pm-border text-pm-primary focus:ring-0 focus:ring-offset-0 accent-pm-primary shrink-0 ${
+                        disabled ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
+                      }`}
                     />
                     <span className="text-md shrink-0">📁</span>
-                    <span className="text-xs font-semibold text-pm-text truncate flex-1" title={item.name}>{item.name}</span>
+                    <span
+                      className={`text-xs font-semibold truncate flex-1 ${disabled && !checked ? 'text-pm-text-secondary' : 'text-pm-text'}`}
+                      title={item.name}
+                    >
+                      {item.name}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[0.65rem] text-pm-text-secondary bg-[var(--pm-body-bg)]/80 border border-pm-border/40 px-2 py-0.5 rounded-md font-mono">
+                    <span className="text-[0.65rem] text-pm-text-secondary bg-pm-input/60 border border-pm-border/40 px-2 py-0.5 rounded-md font-mono">
                       {item.file_count} files
                     </span>
-                    <span className="text-[0.65rem] font-bold text-pm-primary bg-pm-primary/10 border border-pm-primary/20 px-2 py-0.5 rounded-md font-mono">
+                    <span
+                      className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-md font-mono ${
+                        disabled && !checked
+                          ? 'bg-pm-input/50 text-pm-text-secondary/80 border border-pm-border/30'
+                          : 'bg-pm-primary/10 border border-pm-primary/20 text-pm-primary'
+                      }`}
+                    >
                       {item.size_formatted}
                     </span>
                   </div>
