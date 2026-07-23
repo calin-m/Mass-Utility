@@ -93,16 +93,29 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
   showAlert,
 }) => {
   const [dbSearchTerm, setDbSearchTerm] = useState('');
-  const [dbSortKey, setDbSortKey] = useState<'basename' | 'date'>('date');
+  const [dbSortKey, setDbSortKey] = useState<'basename' | 'sql_size' | 'log_size' | 'date'>('date');
   const [dbSortDir, setDbSortDir] = useState<'asc' | 'desc'>('desc');
 
-  const handleDbSort = (key: 'basename' | 'date') => {
+  const handleDbSort = (key: 'basename' | 'sql_size' | 'log_size' | 'date') => {
     if (dbSortKey === key) {
       setDbSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setDbSortKey(key);
       setDbSortDir('desc');
     }
+  };
+
+  const parseSizeToBytes = (sizeVal: any): number => {
+    if (typeof sizeVal === 'number') return sizeVal;
+    if (!sizeVal || typeof sizeVal !== 'string') return 0;
+    const match = sizeVal.trim().match(/^([0-9.]+)\s*([a-zA-Z]+)?$/);
+    if (!match) return 0;
+    const num = parseFloat(match[1]);
+    const unit = (match[2] || '').toUpperCase();
+    if (unit.startsWith('G')) return num * 1024 * 1024 * 1024;
+    if (unit.startsWith('M')) return num * 1024 * 1024;
+    if (unit.startsWith('K')) return num * 1024;
+    return num;
   };
 
   const filteredAndSortedDbBackups = useMemo(() => {
@@ -115,6 +128,10 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
         let res = 0;
         if (dbSortKey === 'basename') {
           res = a.basename.localeCompare(b.basename);
+        } else if (dbSortKey === 'sql_size') {
+          res = parseSizeToBytes(a.sql_size) - parseSizeToBytes(b.sql_size);
+        } else if (dbSortKey === 'log_size') {
+          res = parseSizeToBytes(a.log_size) - parseSizeToBytes(b.log_size);
         } else {
           const tA = typeof a.date === 'number' ? a.date : new Date(a.date).getTime() || 0;
           const tB = typeof b.date === 'number' ? b.date : new Date(b.date).getTime() || 0;
@@ -287,8 +304,18 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                 >
                   Backup File Name {dbSortKey === 'basename' ? (dbSortDir === 'asc' ? '▲' : '▼') : '↕'}
                 </th>
-                <th className="px-6 py-3.5">SQL Size</th>
-                <th className="px-6 py-3.5">Log Size</th>
+                <th
+                  onClick={() => handleDbSort('sql_size')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  SQL Size {dbSortKey === 'sql_size' ? (dbSortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th
+                  onClick={() => handleDbSort('log_size')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Log Size {dbSortKey === 'log_size' ? (dbSortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
                 <th
                   onClick={() => handleDbSort('date')}
                   className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"

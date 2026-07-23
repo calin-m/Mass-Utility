@@ -2,7 +2,7 @@
 // @Description: Renders the Mutation History ledger grid. Implements searching, status badges, details drawer overlays, and interactive rollback/reapply confirmation workflows.
 // @Calls: get_mutation_history, rollback_mutation, reapply_mutation, delete_mutation_job, clear_mutation_history
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BaseModal } from '../common/BaseModal';
 import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
@@ -28,6 +28,19 @@ export const MutationHistoryTab: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedJob, setSelectedJob] = useState<HistoryJob | null>(null);
   const [inspectTab, setInspectTab] = useState<'json' | 'sql'>('json');
+
+  // Column Sort state
+  const [sortKey, setSortKey] = useState<'date' | 'job_id' | 'actions' | 'affected_count' | 'state'>('date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (key: 'date' | 'job_id' | 'actions' | 'affected_count' | 'state') => {
+    if (sortKey === key) {
+      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
 
   const handleCopySnippet = (text: string, label: string) => {
     if (!text) return;
@@ -148,20 +161,40 @@ export const MutationHistoryTab: React.FC = () => {
     }
   };
 
-  // Filtered dataset
-  const filteredHistory = history.filter(job => {
-    const matchesSearch =
-      job.job_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.actions.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus =
-      statusFilter === 'ALL' ||
-      (statusFilter === 'SUCCESS' && job.state === 'SUCCESS') ||
-      (statusFilter === 'ROLLED_BACK' && job.state === 'ROLLED_BACK') ||
-      (statusFilter === 'FAILED' && job.state.toLowerCase().includes('fail'));
+  // Filtered and sorted dataset
+  const filteredAndSortedHistory = useMemo(() => {
+    return history
+      .filter(job => {
+        const matchesSearch =
+          job.job_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.actions.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        const matchesStatus =
+          statusFilter === 'ALL' ||
+          (statusFilter === 'SUCCESS' && job.state === 'SUCCESS') ||
+          (statusFilter === 'ROLLED_BACK' && job.state === 'ROLLED_BACK') ||
+          (statusFilter === 'FAILED' && job.state.toLowerCase().includes('fail'));
 
-    return matchesSearch && matchesStatus;
-  });
+        return matchesSearch && matchesStatus;
+      })
+      .sort((a, b) => {
+        let res = 0;
+        if (sortKey === 'date') {
+          const tA = new Date(a.date).getTime() || 0;
+          const tB = new Date(b.date).getTime() || 0;
+          res = tA - tB;
+        } else if (sortKey === 'job_id') {
+          res = a.job_id.localeCompare(b.job_id);
+        } else if (sortKey === 'actions') {
+          res = a.actions.localeCompare(b.actions);
+        } else if (sortKey === 'affected_count') {
+          res = (a.affected_count || 0) - (b.affected_count || 0);
+        } else if (sortKey === 'state') {
+          res = a.state.localeCompare(b.state);
+        }
+        return sortDir === 'asc' ? res : -res;
+      });
+  }, [history, searchQuery, statusFilter, sortKey, sortDir]);
 
   const getStatusBadge = (state: string) => {
     const s = state.toUpperCase();
@@ -239,16 +272,41 @@ export const MutationHistoryTab: React.FC = () => {
       </div>
 
       {/* Grid Ledger Table */}
-      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-xl max-h-[550px] overflow-y-auto relative">
+      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-xl max-h-[500px] overflow-y-auto relative">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm">
               <tr className="border-b border-pm-border text-[0.7rem] text-pm-text-secondary uppercase tracking-wider font-bold">
-                <th className="px-6 py-3.5">Execution Date</th>
-                <th className="px-6 py-3.5">Job ID</th>
-                <th className="px-6 py-3.5">Targeted Mutation Actions</th>
-                <th className="px-6 py-3.5 text-center">Affected Rows</th>
-                <th className="px-6 py-3.5 text-center">Status</th>
+                <th
+                  onClick={() => handleSort('date')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Execution Date {sortKey === 'date' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th
+                  onClick={() => handleSort('job_id')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Job ID {sortKey === 'job_id' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th
+                  onClick={() => handleSort('actions')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Targeted Mutation Actions {sortKey === 'actions' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th
+                  onClick={() => handleSort('affected_count')}
+                  className="px-6 py-3.5 text-center cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Affected Rows {sortKey === 'affected_count' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th
+                  onClick={() => handleSort('state')}
+                  className="px-6 py-3.5 text-center cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Status {sortKey === 'state' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
@@ -262,7 +320,7 @@ export const MutationHistoryTab: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ) : filteredHistory.length === 0 ? (
+              ) : filteredAndSortedHistory.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-pm-text-secondary">
                     <div className="text-2xl mb-2">📜</div>
@@ -271,7 +329,7 @@ export const MutationHistoryTab: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredHistory.map((job) => (
+                filteredAndSortedHistory.map((job) => (
                   <tr key={job.job_id} className="even:bg-[var(--pm-body-bg)]/40 hover:bg-[var(--pm-input-bg)]/40 transition-colors">
                     <td className="px-6 py-3.5 whitespace-nowrap text-pm-text-secondary font-mono text-[11px]">
                       {job.date}

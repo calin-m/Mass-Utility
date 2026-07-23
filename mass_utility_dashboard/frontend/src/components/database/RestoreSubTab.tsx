@@ -1,8 +1,9 @@
 // @Arch[UI_Components]
 // @Description: Sub-tab component managing MySQL database point-in-time restore, file upload staging, and restoration HUD logs.
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { LogTerminal } from '../common/LogTerminal';
+import { SearchFilterBar } from '../common/SearchFilterBar';
 
 export interface BackupFile {
   basename: string;
@@ -71,6 +72,35 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
   formatSqlSize,
   formatDate,
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortKey, setSortKey] = useState<'basename' | 'sql_size' | 'date'>('date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (key: 'basename' | 'sql_size' | 'date') => {
+    if (sortKey === key) {
+      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
+
+  const filteredAndSortedBackups = useMemo(() => {
+    return backups
+      .filter(b => b.basename.toLowerCase().includes(searchTerm.toLowerCase()))
+      .sort((a, b) => {
+        let res = 0;
+        if (sortKey === 'basename') {
+          res = a.basename.localeCompare(b.basename);
+        } else if (sortKey === 'sql_size') {
+          res = (a.sql_size || 0) - (b.sql_size || 0);
+        } else {
+          res = (a.date || 0) - (b.date || 0);
+        }
+        return sortDir === 'asc' ? res : -res;
+      });
+  }, [backups, searchTerm, sortKey, sortDir]);
+
   return (
     <div className="space-y-6">
       <div className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] rounded-xl p-6 shadow-xl space-y-4">
@@ -156,51 +186,93 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
       </div>
 
       {/* Select Local Backups list */}
-      <div className="pm-panel-v2 space-y-4">
-        <div className="pm-panel-header-v2 border-b-0 pb-0">
-          <h3 className="text-sm font-bold tracking-wide uppercase">Select Backup to Restore</h3>
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <span className="w-3 h-3 bg-pm-primary rounded-full shadow-lg shadow-pm-primary/50"></span>
+            <h3 className="text-sm font-bold tracking-wide uppercase text-pm-text">Select Backup to Restore</h3>
+          </div>
         </div>
-        <div className="pm-table-container-v2">
-          <table className="pm-table-v2">
-            <thead>
-              <tr>
-                <th className="p-4">Backup File</th>
-                <th className="p-4">Size</th>
-                <th className="p-4">Timestamp</th>
-                <th className="p-4 text-right">Actions</th>
+
+        {backups.length > 0 && (
+          <SearchFilterBar
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            placeholder="Search restore backups by file name..."
+          />
+        )}
+
+        <div className="border border-pm-border rounded-xl overflow-hidden bg-pm-input/30 max-h-[500px] overflow-y-auto relative">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm">
+              <tr className="border-b border-pm-border text-pm-text-secondary font-bold uppercase tracking-wider text-[0.7rem]">
+                <th
+                  onClick={() => handleSort('basename')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Backup File {sortKey === 'basename' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th
+                  onClick={() => handleSort('sql_size')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Size {sortKey === 'sql_size' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th
+                  onClick={() => handleSort('date')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Timestamp {sortKey === 'date' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {backups.map((b) => {
-                const isLocal = b.is_local !== false;
+            {filteredAndSortedBackups.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={4} className="px-6 py-12 text-center text-pm-text-secondary">
+                    <div className="text-2xl animate-pulse mb-2">⏳</div>
+                    <strong className="text-sm text-pm-text-secondary block mb-1">No Matching Backups Found</strong>
+                    <span>Try adjusting your search filter or upload a new SQL archive.</span>
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
+              <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
+                {filteredAndSortedBackups.map((b) => {
+                  const isLocal = b.is_local !== false;
 
-                return (
-                  <tr key={b.basename}>
-                    <td className="p-4 font-mono font-semibold">{b.basename}</td>
-                    <td className="p-4 font-mono">{formatSqlSize(b.sql_size)}</td>
-                    <td className="p-4">{formatDate(b.date)}</td>
-                    <td className="p-4 text-right space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => onStartRestore(b.basename)}
-                        className={`pm-btn pm-btn-sm ${isLocal ? 'pm-btn-danger' : 'bg-pm-primary text-white hover:bg-opacity-90'} text-[0.7rem] px-2.5 py-1 rounded-md`}
-                      >
-                        <span>{isLocal ? '⚡' : '☁️'}</span> Restore
-                      </button>
-                      {isLocal && (
+                  return (
+                    <tr
+                      key={b.basename}
+                      className="even:bg-[var(--pm-body-bg)]/40 hover:bg-[var(--pm-input-bg)]/40 transition-colors"
+                    >
+                      <td className="px-6 py-3.5 font-mono font-semibold text-pm-text">{b.basename}</td>
+                      <td className="px-6 py-3.5 font-mono">{formatSqlSize(b.sql_size)}</td>
+                      <td className="px-6 py-3.5">{formatDate(b.date)}</td>
+                      <td className="px-6 py-3.5 text-right space-x-2">
                         <button
                           type="button"
-                          onClick={() => onDeleteBackup(b.basename)}
-                          className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
+                          onClick={() => onStartRestore(b.basename)}
+                          className={`pm-btn pm-btn-sm ${isLocal ? 'pm-btn-danger' : 'bg-pm-primary text-white hover:bg-opacity-90'} text-[0.7rem] px-2.5 py-1 rounded-md`}
                         >
-                          <span>🗑️</span> Delete
+                          <span>{isLocal ? '⚡' : '☁️'}</span> Restore
                         </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
+                        {isLocal && (
+                          <button
+                            type="button"
+                            onClick={() => onDeleteBackup(b.basename)}
+                            className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
+                          >
+                            <span>🗑️</span> Delete
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            )}
           </table>
         </div>
       </div>

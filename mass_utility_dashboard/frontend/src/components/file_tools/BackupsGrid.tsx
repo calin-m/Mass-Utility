@@ -54,16 +54,28 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
 
   // Data Grid Controls: Search & Column Sort State
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortKey, setSortKey] = useState<'basename' | 'timestamp'>('timestamp');
+  const [sortKey, setSortKey] = useState<'basename' | 'size' | 'timestamp'>('timestamp');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  const handleSort = (key: 'basename' | 'timestamp') => {
+  const handleSort = (key: 'basename' | 'size' | 'timestamp') => {
     if (sortKey === key) {
       setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortKey(key);
       setSortDir('desc');
     }
+  };
+
+  const parseSizeToBytes = (sizeStr?: string): number => {
+    if (!sizeStr) return 0;
+    const match = sizeStr.trim().match(/^([0-9.]+)\s*([a-zA-Z]+)?$/);
+    if (!match) return 0;
+    const num = parseFloat(match[1]);
+    const unit = (match[2] || '').toUpperCase();
+    if (unit.startsWith('G')) return num * 1024 * 1024 * 1024;
+    if (unit.startsWith('M')) return num * 1024 * 1024;
+    if (unit.startsWith('K')) return num * 1024;
+    return num;
   };
 
   const filteredAndSortedBackups = useMemo(() => {
@@ -77,6 +89,8 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
         let res = 0;
         if (sortKey === 'basename') {
           res = a.basename.localeCompare(b.basename);
+        } else if (sortKey === 'size') {
+          res = parseSizeToBytes(a.size) - parseSizeToBytes(b.size);
         } else {
           res = a.timestamp - b.timestamp;
         }
@@ -213,7 +227,12 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
               >
                 Archive Name {sortKey === 'basename' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
               </th>
-              <th className="px-6 py-3.5">Archive Size</th>
+              <th
+                onClick={() => handleSort('size')}
+                className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+              >
+                Archive Size {sortKey === 'size' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+              </th>
               <th
                 onClick={() => handleSort('timestamp')}
                 className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"

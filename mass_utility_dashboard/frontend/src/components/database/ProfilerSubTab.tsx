@@ -1,7 +1,7 @@
 // @Arch[UI_Components]
 // @Description: Sub-tab component managing InnoDB table health profiler, space overhead metrics, and OPTIMIZE TABLE execution controls.
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { SearchFilterBar } from '../common/SearchFilterBar';
 
 export interface TableMetric {
@@ -46,6 +46,58 @@ export const ProfilerSubTab: React.FC<ProfilerSubTabProps> = ({
   onOptimizeAllTables,
   onOptimizeTable,
 }) => {
+  const [sortKey, setSortKey] = useState<'name' | 'engine' | 'rows' | 'size' | 'overhead_bytes' | 'frag'>('overhead_bytes');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (key: 'name' | 'engine' | 'rows' | 'size' | 'overhead_bytes' | 'frag') => {
+    if (sortKey === key) {
+      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
+
+  const parseSizeToBytes = (sizeStr?: string): number => {
+    if (!sizeStr) return 0;
+    const match = sizeStr.trim().match(/^([0-9.]+)\s*([a-zA-Z]+)?$/);
+    if (!match) return 0;
+    const num = parseFloat(match[1]);
+    const unit = (match[2] || '').toUpperCase();
+    if (unit.startsWith('G')) return num * 1024 * 1024 * 1024;
+    if (unit.startsWith('M')) return num * 1024 * 1024;
+    if (unit.startsWith('K')) return num * 1024;
+    return num;
+  };
+
+  const parseFragToRatio = (fragStr?: string): number => {
+    if (!fragStr) return 0;
+    return parseFloat(fragStr.replace('%', '')) || 0;
+  };
+
+  const filteredAndSortedTables = useMemo(() => {
+    if (!profilerReport?.tables) return [];
+    return profilerReport.tables
+      .filter(t => !profilerSearch || t.name.toLowerCase().includes(profilerSearch.toLowerCase()))
+      .sort((a, b) => {
+        let res = 0;
+        if (sortKey === 'name') {
+          res = a.name.localeCompare(b.name);
+        } else if (sortKey === 'engine') {
+          res = a.engine.localeCompare(b.engine);
+        } else if (sortKey === 'rows') {
+          res = (a.rows || 0) - (b.rows || 0);
+        } else if (sortKey === 'size') {
+          res = parseSizeToBytes(a.size_pretty) - parseSizeToBytes(b.size_pretty);
+        } else if (sortKey === 'overhead_bytes') {
+          res = (a.overhead_bytes || parseSizeToBytes(a.overhead_pretty)) - (b.overhead_bytes || parseSizeToBytes(b.overhead_pretty));
+        } else if (sortKey === 'frag') {
+          res = parseFragToRatio(a.fragmentation_ratio) - parseFragToRatio(b.fragmentation_ratio);
+        }
+        return sortDir === 'asc' ? res : -res;
+      });
+  }, [profilerReport, profilerSearch, sortKey, sortDir]);
+
   return (
     <div className="space-y-6">
       <div className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] rounded-xl p-6 shadow-xl space-y-4">
@@ -152,31 +204,70 @@ export const ProfilerSubTab: React.FC<ProfilerSubTabProps> = ({
               />
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-[var(--pm-border-color)] max-h-[500px] overflow-y-auto relative">
+            <div className="border border-pm-border rounded-xl overflow-hidden bg-pm-input/30 max-h-[500px] overflow-y-auto relative">
               <table className="w-full text-xs text-left border-collapse">
-                <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm border-b border-[var(--pm-border-color)]">
-                  <tr className="text-[var(--pm-text-secondary)] uppercase font-bold text-[0.7rem]">
-                    <th className="p-4">Table Name</th>
-                    <th className="p-4">Engine</th>
-                    <th className="p-4">Rows</th>
-                    <th className="p-4">Size</th>
-                    <th className="p-4">Overhead</th>
-                    <th className="p-4">Frag %</th>
-                    <th className="p-4 text-right">Actions</th>
+                <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm border-b border-pm-border">
+                  <tr className="text-pm-text-secondary uppercase font-bold text-[0.7rem]">
+                    <th
+                      onClick={() => handleSort('name')}
+                      className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                    >
+                      Table Name {sortKey === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                    </th>
+                    <th
+                      onClick={() => handleSort('engine')}
+                      className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                    >
+                      Engine {sortKey === 'engine' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                    </th>
+                    <th
+                      onClick={() => handleSort('rows')}
+                      className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                    >
+                      Rows {sortKey === 'rows' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                    </th>
+                    <th
+                      onClick={() => handleSort('size')}
+                      className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                    >
+                      Size {sortKey === 'size' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                    </th>
+                    <th
+                      onClick={() => handleSort('overhead_bytes')}
+                      className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                    >
+                      Overhead {sortKey === 'overhead_bytes' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                    </th>
+                    <th
+                      onClick={() => handleSort('frag')}
+                      className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                    >
+                      Frag % {sortKey === 'frag' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                    </th>
+                    <th className="px-6 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--pm-border-color)]">
-                  {profilerReport.tables
-                    .filter((t) => !profilerSearch || t.name.toLowerCase().includes(profilerSearch.toLowerCase()))
-                    .map((t) => (
+                {filteredAndSortedTables.length === 0 ? (
+                  <tbody>
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-pm-text-secondary">
+                        <div className="text-2xl animate-pulse mb-2">⏳</div>
+                        <strong className="text-sm text-pm-text-secondary block mb-1">No Fragmented Tables Found</strong>
+                        <span>All database tables are operating cleanly with zero fragmentation.</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                ) : (
+                  <tbody className="divide-y divide-pm-border">
+                    {filteredAndSortedTables.map((t) => (
                       <tr key={t.name} className="even:bg-[var(--pm-body-bg)]/40 hover:bg-[var(--pm-input-bg)]/40 transition-colors">
-                        <td className="p-4 font-mono font-semibold text-[var(--pm-text-primary)]">{t.name}</td>
-                        <td className="p-4 text-[var(--pm-text-secondary)]">{t.engine}</td>
-                        <td className="p-4 text-[var(--pm-text-secondary)]">{t.rows.toLocaleString()}</td>
-                        <td className="p-4 text-[var(--pm-text-secondary)]">{t.size_pretty}</td>
-                        <td className="p-4 text-[var(--pm-text-secondary)]">{t.overhead_pretty}</td>
-                        <td className="p-4 font-semibold text-[var(--pm-text-primary)]">{t.fragmentation_ratio}</td>
-                        <td className="p-4 text-right">
+                        <td className="px-6 py-3.5 font-mono font-semibold text-pm-text">{t.name}</td>
+                        <td className="px-6 py-3.5 text-pm-text-secondary">{t.engine}</td>
+                        <td className="px-6 py-3.5 text-pm-text-secondary font-mono">{t.rows.toLocaleString()}</td>
+                        <td className="px-6 py-3.5 text-pm-text-secondary font-mono">{t.size_pretty}</td>
+                        <td className="px-6 py-3.5 text-pm-text-secondary font-mono">{t.overhead_pretty}</td>
+                        <td className="px-6 py-3.5 font-semibold text-pm-text">{t.fragmentation_ratio}</td>
+                        <td className="px-6 py-3.5 text-right">
                           <button
                             type="button"
                             disabled={isBulkOptimizing}
@@ -188,7 +279,8 @@ export const ProfilerSubTab: React.FC<ProfilerSubTabProps> = ({
                         </td>
                       </tr>
                     ))}
-                </tbody>
+                  </tbody>
+                )}
               </table>
             </div>
           </div>
