@@ -172,9 +172,10 @@ d:/Project Mass/
 │   ├── data/                       # Central SQLite database (pm_cloud_backups.db)
 │   ├── frontend/                   # V2 REACT 18 + TYPESCRIPT + VITE SPA SOURCE
 │   │   ├── src/
-│   │   │   ├── components/         # React tab components (QueryWizard, History, Backups, Governor)
+│   │   │   ├── components/         # React Tab Orchestrators & Feature Panels
+│   │   │   │   └── common/         # Atomic UI Primitives (SectionHeader, BaseModal, DataTable, LogTerminal, PresetLoadoutBar, StatusBadge, ProgressHUD)
 │   │   │   ├── utils/              # sqlReconstructor.ts, FetchService.ts
-│   │   │   └── index.css           # CSS design tokens, dark mode & 3-tier button classes
+│   │   │   └── index.css           # Design tokens, cross-browser scrollbars (.pm-scrollbar), & 3-Tier Shadow Elevation UX System
 │   │   ├── package.json            # Vite build scripts
 │   │   └── vite.config.ts          # Vite build configuration (outputs to public/v2/)
 │   ├── public/
