@@ -1499,8 +1499,8 @@ export const DatabaseToolsTab: React.FC = () => {
                       const filteredKeys = Object.keys(statusObj).filter(tbl => {
                         const c = statusObj[tbl];
                         const isMatch = c.match === true;
-                        const isVolatile = c.volatile === true;
-                        const isModified = !isMatch && !isVolatile;
+                        const isVolatile = !isMatch && c.volatile === true;
+                        const isModified = !isMatch && !c.volatile;
 
                         if (auditTableFilter === 'modified') return isModified;
                         if (auditTableFilter === 'volatile') return isVolatile;
@@ -1519,8 +1519,8 @@ export const DatabaseToolsTab: React.FC = () => {
                       return filteredKeys.map(tbl => {
                         const c = statusObj[tbl];
                         const isMatch = c.match === true;
-                        const isVolatile = c.volatile === true;
-                        const isModified = !isMatch && !isVolatile;
+                        const isVolatile = !isMatch && c.volatile === true;
+                        const isModified = !isMatch && !c.volatile;
 
                         const formatHash = (h: string) => {
                           if (!h || h === 'N/A') return 'N/A';
