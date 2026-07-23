@@ -81,41 +81,41 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
         </div>
       )}
 
-      <div className="border border-pm-border rounded-xl bg-pm-input/30 p-5 max-h-[400px] overflow-y-auto">
+      <div className="border border-pm-border/50 rounded-xl bg-pm-input/20 p-4 max-h-[420px] overflow-y-auto">
         {folders.length === 0 ? (
           <div className="flex items-center justify-center py-6 text-xs text-pm-text-secondary">
             ⏳ Scanning filesystem and calculating directory sizes...
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
             {folders.map((item, idx) => {
               const { checked, disabled } = getFolderSelectionState(item);
               return (
                 <label
                   key={idx}
-                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 gap-3 ${
+                  className={`flex items-center justify-between px-3.5 py-3 rounded-xl border transition-all duration-200 gap-3 ${
                     disabled
                       ? checked
-                        ? 'bg-pm-primary/10 border-pm-primary/30 text-pm-text'
-                        : 'bg-[var(--pm-body-bg)]/60 border-pm-border/20 text-pm-text-secondary/70'
+                        ? 'bg-pm-primary/10 border-pm-primary/25 text-pm-text opacity-90'
+                        : 'bg-[var(--pm-body-bg)]/40 border-pm-border/20 text-pm-text-secondary/70 opacity-60'
                       : checked
-                        ? 'bg-pm-primary/[0.04] border-pm-primary/35 hover:bg-pm-primary/[0.08] hover:border-pm-primary/50 cursor-pointer shadow-sm shadow-pm-primary/5'
-                        : 'bg-pm-card border-pm-border/40 hover:bg-pm-input/40 hover:border-pm-primary/40 cursor-pointer shadow-sm'
+                        ? 'bg-pm-primary/[0.06] border-pm-primary/30 hover:bg-pm-primary/10 hover:border-pm-primary/45 cursor-pointer shadow-sm'
+                        : 'bg-pm-card/60 border-pm-border/30 hover:bg-pm-input/40 hover:border-pm-primary/30 cursor-pointer shadow-sm'
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <input
                       type="checkbox"
                       checked={checked}
                       disabled={disabled}
                       onChange={e => onToggleFolder(item.path, e.target.checked)}
-                      className={`w-4 h-4 rounded border-pm-border text-pm-primary focus:ring-0 focus:ring-offset-0 accent-pm-primary shrink-0 ${
-                        disabled ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
+                      className={`w-4 h-4 rounded border-pm-border/60 text-pm-primary focus:ring-0 focus:ring-offset-0 accent-pm-primary shrink-0 ${
+                        disabled ? 'cursor-not-allowed' : 'cursor-pointer'
                       }`}
                     />
                     <span className="text-md shrink-0">📁</span>
                     <span
-                      className={`text-xs font-semibold truncate flex-1 ${disabled && !checked ? 'text-pm-text-secondary' : 'text-pm-text'}`}
+                      className={`text-xs font-medium truncate flex-1 ${disabled && !checked ? 'text-pm-text-secondary/70' : 'text-pm-text'}`}
                       title={item.name}
                     >
                       {item.name}
@@ -123,14 +123,14 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[0.65rem] text-pm-text-secondary bg-pm-input/60 border border-pm-border/40 px-2 py-0.5 rounded-md font-mono">
+                    <span className="text-[0.65rem] text-pm-text-secondary/80 bg-pm-input/50 px-2 py-0.5 rounded-lg font-mono">
                       {item.file_count} files
                     </span>
                     <span
-                      className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-md font-mono ${
-                        disabled && !checked
-                          ? 'bg-pm-input/50 text-pm-text-secondary/80 border border-pm-border/30'
-                          : 'bg-pm-primary/10 border border-pm-primary/20 text-pm-primary'
+                      className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-lg font-mono ${
+                        checked
+                          ? 'bg-pm-primary/15 text-pm-primary'
+                          : 'bg-pm-input/40 text-pm-text-secondary/80'
                       }`}
                     >
                       {item.size_formatted}
