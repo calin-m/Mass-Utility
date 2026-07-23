@@ -13,6 +13,7 @@
 !/.cpanel.yml
 !/README.md
 !/.gitignore
+!/.ai_pipeline.json
 
 # Ignore build and runtime junk inside whitelisted folders
 **/__pycache__/
