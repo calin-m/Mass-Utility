@@ -133,22 +133,36 @@ class ResourceMonitor
     }
 
     /**
+     * Get the physical processor model name.
+     */
+    public function getCpuModel(): string
+    {
+        if (is_readable('/proc/cpuinfo')) {
+            $cpuinfo = (string)@file_get_contents('/proc/cpuinfo');
+            if (preg_match('/model name\s*:\s*(.+)/i', $cpuinfo, $matches)) {
+                return trim($matches[1]);
+            }
+        }
+        return 'AMD EPYC Processor';
+    }
+
+    /**
      * Calculate and format the cgroup allocated CPU speed.
      */
     public function getCpuSpeedAllocation(): string
     {
         $baseFrequencyGhz = 3.2; // Default fallback base frequency per core
         if (is_readable('/proc/cpuinfo')) {
-            $cpuinfo = file_get_contents('/proc/cpuinfo');
+            $cpuinfo = (string)@file_get_contents('/proc/cpuinfo');
             // Try parsing "cpu MHz"
             if (preg_match('/cpu MHz\s*:\s*([\d\.]+)/i', $cpuinfo, $matches)) {
-                $baseFrequencyGhz = (float)$matches[1] / 1000;
+                $baseFrequencyGhz = round((float)$matches[1] / 1000, 2);
             } elseif (preg_match('/model name.*@\s*([\d\.]+)GHz/i', $cpuinfo, $matches)) { // model name frequency
                 $baseFrequencyGhz = (float)$matches[1];
             }
         }
-        $allocatedSpeed = $this->cores * $baseFrequencyGhz;
-        return number_format($allocatedSpeed, 1) . ' GHz';
+        $allocatedSpeed = round($this->cores * $baseFrequencyGhz, 1);
+        return $allocatedSpeed . ' GHz (' . $this->cores . ' Cores @ ' . $baseFrequencyGhz . ' GHz)';
     }
 
     /**

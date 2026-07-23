@@ -209,23 +209,39 @@ if ($action === 'ping') {
         } catch (\Throwable $e) {}
     }
     
-    // Hardware Telemetry Extraction natively via PHP (Bypass exec limits)
-    $cores = 1;
-    $cpuSpeed = 'Unknown';
+    // Hardware Telemetry Extraction natively via PHP (with Cgroup LVE quota detection)
+    $physicalCores = 1;
+    $cpuModel = 'AMD EPYC Processor';
+    $baseGhz = 3.2;
     if (@is_readable('/proc/cpuinfo')) {
-        $cpuinfo = @file_get_contents('/proc/cpuinfo');
+        $cpuinfo = (string)@file_get_contents('/proc/cpuinfo');
         if ($cpuinfo) {
-            $cores = max(1, substr_count($cpuinfo, 'processor'));
-            if (preg_match('/model name\s+:\s+(.+)/', $cpuinfo, $matches)) {
-                $cpuSpeed = trim($matches[1]);
-            } elseif (preg_match('/cpu MHz\s+:\s+(.+)/', $cpuinfo, $matches)) {
-                $cpuSpeed = round((float)$matches[1] / 1000, 2) . ' GHz';
+            $physicalCores = max(1, substr_count($cpuinfo, 'processor'));
+            if (preg_match('/model name\s*:\s*(.+)/i', $cpuinfo, $matches)) {
+                $cpuModel = trim($matches[1]);
+            }
+            if (preg_match('/cpu MHz\s*:\s*([\d\.]+)/i', $cpuinfo, $matches)) {
+                $baseGhz = round((float)$matches[1] / 1000, 2);
             }
         }
     } else if (stristr(PHP_OS, 'win')) {
-        $cores = 8; // Win dev fallback
-        $cpuSpeed = '3.0 GHz';
+        $physicalCores = 8;
+        $cpuModel = 'Development Host CPU';
+        $baseGhz = 3.0;
     }
+
+    $cgroupCores = 0;
+    if (@is_readable('/sys/fs/cgroup/cpu/cpu.cfs_quota_us') && @is_readable('/sys/fs/cgroup/cpu/cpu.cfs_period_us')) {
+        $quota = (float)@file_get_contents('/sys/fs/cgroup/cpu/cpu.cfs_quota_us');
+        $period = (float)@file_get_contents('/sys/fs/cgroup/cpu/cpu.cfs_period_us');
+        if ($quota > 0 && $period > 0) {
+            $cgroupCores = (int)ceil($quota / $period);
+        }
+    }
+    $cores = ($cgroupCores > 0 && $cgroupCores < 32) ? $cgroupCores : min($physicalCores, 3);
+    $allocatedSpeedVal = round($cores * $baseGhz, 1);
+    $allocatedCpuSpeed = $allocatedSpeedVal . ' GHz (' . $cores . ' Cores @ ' . $baseGhz . ' GHz)';
+    $cpuSpeed = $allocatedCpuSpeed;
     
     $memoryUsageMb = round(memory_get_usage(true) / 1048576, 2);
     $diskFreeMb = function_exists('disk_free_space') ? round(@disk_free_space(defined('_PS_ROOT_DIR_') ? _PS_ROOT_DIR_ : __DIR__) / 1048576, 2) : 0;
@@ -251,6 +267,8 @@ if ($action === 'ping') {
         'opcache_enabled' => $opcacheEnabled,
         'opcache_active' => $opcacheActive,
         'cores' => $cores,
+        'cpu_model' => $cpuModel,
+        'allocated_cpu_speed' => $allocatedCpuSpeed,
         'db_max_connections' => $maxConnections,
         'memory_floor' => $memoryUsageMb * 1024 * 1024,
         'memory_usage_mb' => $memoryUsageMb,

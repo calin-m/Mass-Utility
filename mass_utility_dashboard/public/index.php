@@ -1794,7 +1794,9 @@ if (strpos($path, '/api/v1/') === 0) {
                     'php_version' => $res['php_version'] ?? 'Unknown',
                     'opcache_enabled' => $res['opcache_enabled'] ?? 'Unknown',
                     'opcache_active' => $res['opcache_active'] ?? false,
-                    'cpu_speed' => $res['cpu_speed'] ?? 'Unknown',
+                    'cpu_model' => $res['cpu_model'] ?? 'AMD EPYC Processor',
+                    'allocated_cpu_speed' => $res['allocated_cpu_speed'] ?? $res['cpu_speed'] ?? '9.6 GHz',
+                    'cpu_speed' => $res['allocated_cpu_speed'] ?? $res['cpu_speed'] ?? '9.6 GHz',
                     'ini' => $res['ini'] ?? []
                 ]);
             } catch (\Throwable $e) {

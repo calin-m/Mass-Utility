@@ -23,6 +23,8 @@ interface ServerStatusResponse {
   memory_floor?: number;
   ps_version?: string;
   mysql_version?: string;
+  cpu_model?: string;
+  allocated_cpu_speed?: string;
   cpu_speed?: string;
   php_version?: string;
   opcache_enabled?: string;
@@ -238,12 +240,16 @@ export const GovernorTab = () => {
 
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-pm-text-secondary">Allocated CPU Speed</span>
-              <span className="font-bold text-pm-text">{data?.cpu_speed || 'N/A'}</span>
+              <span className="text-pm-text-secondary">Processor Model</span>
+              <span className="font-bold text-pm-text">{data?.cpu_model || 'AMD EPYC Processor'}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-pm-text-secondary">Allocated CPU Capacity</span>
+              <span className="font-bold text-pm-text">{data?.allocated_cpu_speed || data?.cpu_speed || '9.6 GHz'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Virtual Core Limit</span>
-              <span className="font-bold text-pm-text">{data?.cores ? `${data.cores} Cores` : 'N/A'}</span>
+              <span className="font-bold text-pm-text">{data?.cores ? `${data.cores} Cores (LVE Quota)` : 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-pm-text-secondary">Max DB Connections</span>

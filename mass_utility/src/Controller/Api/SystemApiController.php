@@ -161,6 +161,8 @@ class SystemApiController extends AbstractApiController
                 
                 // Enhanced environmental spec values
                 'cores' => $cores,
+                'cpu_model' => $this->monitor->getCpuModel(),
+                'allocated_cpu_speed' => $cpuSpeed,
                 'db_max_connections' => $dbMaxConnections,
                 'memory_floor' => $memoryFloor,
                 'cpu_speed' => $cpuSpeed,
