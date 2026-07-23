@@ -1,10 +1,11 @@
 // @Arch[BackupsGrid]
 // @Description: Renders the table grid list of historical file backups, facilitating archive downloads, cryptographic verification, pin/unpin toggles, and purges.
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
 import { StatusBadge } from '../common/StatusBadge';
+import { SearchFilterBar } from '../common/SearchFilterBar';
 
 export interface BackupEntry {
   basename: string;
@@ -50,6 +51,38 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
   const [pinningFile, setPinningFile] = useState<string | null>(null);
   const [restoringFile, setRestoringFile] = useState<string | null>(null);
   const [pushingCloudFile, setPushingCloudFile] = useState<string | null>(null);
+
+  // Data Grid Controls: Search & Column Sort State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortKey, setSortKey] = useState<'basename' | 'timestamp'>('timestamp');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (key: 'basename' | 'timestamp') => {
+    if (sortKey === key) {
+      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
+
+  const filteredAndSortedBackups = useMemo(() => {
+    return backups
+      .filter(b => b.basename.toLowerCase().includes(searchTerm.toLowerCase()))
+      .sort((a, b) => {
+        // Pinned backups always sort to top
+        if (a.is_pinned && !b.is_pinned) return -1;
+        if (!a.is_pinned && b.is_pinned) return 1;
+
+        let res = 0;
+        if (sortKey === 'basename') {
+          res = a.basename.localeCompare(b.basename);
+        } else {
+          res = a.timestamp - b.timestamp;
+        }
+        return sortDir === 'asc' ? res : -res;
+      });
+  }, [backups, searchTerm, sortKey, sortDir]);
 
   const handleCloudPush = async (name: string) => {
     showConfirm('Push to Google Drive', `Upload local backup <strong>${name}</strong> to Google Drive offsite storage?`, null, async () => {
@@ -161,29 +194,48 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
         )}
       </div>
 
-      <div className="border border-pm-border rounded-xl overflow-hidden bg-pm-input/30 overflow-x-auto">
+      {/* Option 1 Data Grid: Search Filter Bar */}
+      {backups.length > 0 && (
+        <SearchFilterBar
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          placeholder="Search backups by archive filename..."
+        />
+      )}
+
+      <div className="border border-pm-border rounded-xl overflow-hidden bg-pm-input/30 max-h-[500px] overflow-y-auto relative">
         <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="border-b border-pm-border bg-pm-input/20 text-pm-text-secondary font-bold uppercase tracking-wider text-[0.7rem]">
-              <th className="px-6 py-3.5">Archive Name</th>
+          <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm">
+            <tr className="border-b border-pm-border text-pm-text-secondary font-bold uppercase tracking-wider text-[0.7rem]">
+              <th
+                onClick={() => handleSort('basename')}
+                className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+              >
+                Archive Name {sortKey === 'basename' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+              </th>
               <th className="px-6 py-3.5">Archive Size</th>
-              <th className="px-6 py-3.5">Timestamp Created</th>
+              <th
+                onClick={() => handleSort('timestamp')}
+                className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+              >
+                Timestamp Created {sortKey === 'timestamp' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+              </th>
               <th className="px-6 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
-          {backups.length === 0 ? (
+          {filteredAndSortedBackups.length === 0 ? (
             <tbody>
               <tr>
                 <td colSpan={4} className="px-6 py-12 text-center text-pm-text-secondary">
                   <div className="text-2xl animate-pulse mb-2">⏳</div>
-                  <strong className="text-sm text-pm-text-secondary block mb-1">No File Backups Found</strong>
-                  <span>Historical file system backups repository is currently empty.</span>
+                  <strong className="text-sm text-pm-text-secondary block mb-1">No Matching Backups Found</strong>
+                  <span>Try adjusting your search criteria or create a new backup archive.</span>
                 </td>
               </tr>
             </tbody>
           ) : (
             <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
-              {backups.map((b, idx) => {
+              {filteredAndSortedBackups.map((b, idx) => {
                 const isCloudOnly = !b.is_local && b.is_cloud;
                 const isUploaded = b.is_uploaded;
 
@@ -199,7 +251,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
                 }
 
                 return (
-                  <tr key={idx} className={`hover:bg-pm-input/20 transition-colors ${rowBorderClass}`}>
+                  <tr key={idx} className={`even:bg-[var(--pm-body-bg)]/40 hover:bg-[var(--pm-input-bg)]/40 transition-colors ${rowBorderClass}`}>
                     <td className="px-6 py-3.5 space-y-1 font-mono text-[11px]">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono font-bold text-pm-text select-all">{b.basename}</span>

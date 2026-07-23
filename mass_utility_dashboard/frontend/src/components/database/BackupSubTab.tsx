@@ -1,11 +1,12 @@
 // @Arch[UI_Components]
 // @Description: Sub-tab component managing MySQL table dump creation, presets, domain table filtering, and historical backups grid.
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { ProgressHUD } from '../common/ProgressHUD';
 import { SectionHeader } from '../common/SectionHeader';
 import { PresetLoadoutBar } from '../common/PresetLoadoutBar';
 import { StatusBadge } from '../common/StatusBadge';
+import { SearchFilterBar } from '../common/SearchFilterBar';
 
 export interface BackupRecord {
   basename: string;
@@ -38,19 +39,29 @@ interface BackupSubTabProps {
   onSavePreset: () => void;
   onDeletePreset: () => void;
   onSelectAll: (checked: boolean) => void;
-  onDomainSelect: (domain: string, checked: boolean) => void;
-  onTableToggle: (tableName: string) => void;
-  onToggleDomainExpanded: (domain: string) => void;
+  onToggleDomainExpand: (domainName: string) => void;
+  onToggleDomainCheck: (domainName: string, checked: boolean) => void;
+  onToggleTableCheck: (tableName: string, checked: boolean) => void;
   onClearBackupHistory: () => void;
-  onCheckCompareDrift: (basename: string) => void;
-  onDeleteBackup: (basename: string) => void;
-  onTogglePinBackup: (basename: string) => void;
-  resolveDownloadUrl: (url: string) => string;
-  formatSqlSize: (size: any) => string;
-  formatLogSize: (size: any) => string;
-  formatDate: (dateVal: any) => string;
-  showAlert: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
+  onTogglePinBackup: (fileBasename: string) => void;
+  onDeleteBackup: (fileBasename: string) => void;
+  onCloudPushBackup: (fileBasename: string) => void;
+  showAlert: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  showConfirm: (title: string, message: string, confirmText: string | null, onConfirm: () => void) => void;
 }
+
+const resolveDownloadUrl = (url?: string): string => {
+  if (!url || url.startsWith('#')) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  
+  const isV2Path = window.location.pathname.includes('/v2/') || window.location.pathname.endsWith('/v2');
+  const prefix = isV2Path ? '../' : './';
+  
+  if (url.startsWith('api/v1/') || url.startsWith('index.php') || url.startsWith('api.php')) {
+    return prefix + url;
+  }
+  return isV2Path && !url.startsWith('/') && !url.startsWith('../') ? prefix + url : url;
+};
 
 export const BackupSubTab: React.FC<BackupSubTabProps> = ({
   categorizedTables,
@@ -68,19 +79,66 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
   onSavePreset,
   onDeletePreset,
   onSelectAll,
-  onDomainSelect,
-  onTableToggle,
-  onToggleDomainExpanded,
+  onToggleDomainExpand,
+  onToggleDomainCheck,
+  onToggleTableCheck,
   onClearBackupHistory,
-  onCheckCompareDrift,
-  onDeleteBackup,
   onTogglePinBackup,
-  resolveDownloadUrl,
-  formatSqlSize,
-  formatLogSize,
-  formatDate,
+  onDeleteBackup,
+  onCloudPushBackup,
   showAlert,
+  showConfirm,
 }) => {
+  const [dbSearchTerm, setDbSearchTerm] = useState('');
+  const [dbSortKey, setDbSortKey] = useState<'basename' | 'date'>('date');
+  const [dbSortDir, setDbSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const handleDbSort = (key: 'basename' | 'date') => {
+    if (dbSortKey === key) {
+      setDbSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setDbSortKey(key);
+      setDbSortDir('desc');
+    }
+  };
+
+  const filteredAndSortedDbBackups = useMemo(() => {
+    return backups
+      .filter(b => b.basename.toLowerCase().includes(dbSearchTerm.toLowerCase()))
+      .sort((a, b) => {
+        if (a.is_pinned && !b.is_pinned) return -1;
+        if (!a.is_pinned && b.is_pinned) return 1;
+
+        let res = 0;
+        if (dbSortKey === 'basename') {
+          res = a.basename.localeCompare(b.basename);
+        } else {
+          const tA = typeof a.date === 'number' ? a.date : new Date(a.date).getTime() || 0;
+          const tB = typeof b.date === 'number' ? b.date : new Date(b.date).getTime() || 0;
+          res = tA - tB;
+        }
+        return dbSortDir === 'asc' ? res : -res;
+      });
+  }, [backups, dbSearchTerm, dbSortKey, dbSortDir]);
+
+  const formatDate = (dateVal: any): string => {
+    if (!dateVal) return 'N/A';
+    if (typeof dateVal === 'number') {
+      return new Date(dateVal * 1000).toLocaleString();
+    }
+    return String(dateVal);
+  };
+
+  const formatSqlSize = (sizeVal: any): string => {
+    if (!sizeVal || sizeVal === '0 B') return '0 B';
+    return String(sizeVal);
+  };
+
+  const formatLogSize = (sizeVal: any): string => {
+    if (!sizeVal || sizeVal === '0 B') return 'None';
+    return String(sizeVal);
+  };
+
   return (
     <div className="space-y-6">
       {/* Card 1: Pre-Flight Database Catalog Exporter */}
@@ -208,25 +266,54 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
           }
         />
 
-        <div className="pm-table-container-v2 border border-pm-border bg-pm-card rounded-xl shadow-xl overflow-hidden">
+        {backups.length > 0 && (
+          <SearchFilterBar
+            searchValue={dbSearchTerm}
+            onSearchChange={setDbSearchTerm}
+            placeholder="Search database backups by file name..."
+          />
+        )}
+
+        <div className="pm-table-container-v2 border border-pm-border bg-pm-card rounded-xl shadow-xl max-h-[500px] overflow-y-auto relative">
           <table className="pm-table-v2 w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-pm-border bg-pm-input/20 text-[0.7rem] text-pm-text-secondary uppercase tracking-wider font-bold">
-                <th className="px-6 py-3.5">Backup File Name</th>
+            <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm">
+              <tr className="border-b border-pm-border text-[0.7rem] text-pm-text-secondary uppercase tracking-wider font-bold">
+                <th
+                  onClick={() => handleDbSort('basename')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Backup File Name {dbSortKey === 'basename' ? (dbSortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
                 <th className="px-6 py-3.5">SQL Size</th>
                 <th className="px-6 py-3.5">Log Size</th>
-                <th className="px-6 py-3.5">Date Compiled</th>
+                <th
+                  onClick={() => handleDbSort('date')}
+                  className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
+                >
+                  Date Compiled {dbSortKey === 'date' ? (dbSortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
-              {backups.map((b) => {
-                const isLocal = b.is_local !== false;
-                const isCloud = b.is_cloud === true;
-                const isPinned = b.is_pinned === true;
+            {filteredAndSortedDbBackups.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-pm-text-secondary">
+                    <div className="text-2xl animate-pulse mb-2">⏳</div>
+                    <strong className="text-sm text-pm-text-secondary block mb-1">No Matching Database Backups Found</strong>
+                    <span>Try adjusting your search criteria or create a new database backup.</span>
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
+              <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
+                {filteredAndSortedDbBackups.map((b) => {
+                  const isLocal = b.is_local !== false;
+                  const isCloud = b.is_cloud === true;
+                  const isPinned = b.is_pinned === true;
 
-                return (
-                  <tr key={b.basename} className="hover:bg-white/[0.01] transition-colors">
+                  return (
+                    <tr key={b.basename} className="even:bg-[var(--pm-body-bg)]/40 hover:bg-[var(--pm-input-bg)]/40 transition-colors">
                     <td className="px-6 py-3.5 font-mono text-[11px]">
                       <div>
                         <div className="flex items-center gap-2">

@@ -239,21 +239,21 @@ export const MutationHistoryTab: React.FC = () => {
       </div>
 
       {/* Grid Ledger Table */}
-      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-xl max-h-[550px] overflow-y-auto relative">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-pm-border bg-pm-input/20 text-[0.7rem] text-pm-text-secondary uppercase tracking-wider font-bold">
+            <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm">
+              <tr className="border-b border-pm-border text-[0.7rem] text-pm-text-secondary uppercase tracking-wider font-bold">
                 <th className="px-6 py-3.5">Execution Date</th>
                 <th className="px-6 py-3.5">Job ID</th>
                 <th className="px-6 py-3.5">Targeted Mutation Actions</th>
                 <th className="px-6 py-3.5 text-center">Affected Rows</th>
                 <th className="px-6 py-3.5 text-center">Status</th>
-                <th className="px-6 py-3.5 text-center">Actions</th>
+                <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
-              {loading ? (
+            {loading ? (
+              <tbody>
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-pm-text-secondary">
                     <div className="flex justify-center items-center gap-2">

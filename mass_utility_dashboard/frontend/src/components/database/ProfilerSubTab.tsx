@@ -152,10 +152,10 @@ export const ProfilerSubTab: React.FC<ProfilerSubTabProps> = ({
               />
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-[var(--pm-border-color)]">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-[var(--pm-body-bg)]/50 text-[var(--pm-text-secondary)] uppercase font-bold border-b border-[var(--pm-border-color)]">
-                  <tr>
+            <div className="overflow-x-auto rounded-xl border border-[var(--pm-border-color)] max-h-[500px] overflow-y-auto relative">
+              <table className="w-full text-xs text-left border-collapse">
+                <thead className="sticky top-0 bg-[var(--pm-card-bg)]/95 backdrop-blur z-10 shadow-sm border-b border-[var(--pm-border-color)]">
+                  <tr className="text-[var(--pm-text-secondary)] uppercase font-bold text-[0.7rem]">
                     <th className="p-4">Table Name</th>
                     <th className="p-4">Engine</th>
                     <th className="p-4">Rows</th>
@@ -169,7 +169,7 @@ export const ProfilerSubTab: React.FC<ProfilerSubTabProps> = ({
                   {profilerReport.tables
                     .filter((t) => !profilerSearch || t.name.toLowerCase().includes(profilerSearch.toLowerCase()))
                     .map((t) => (
-                      <tr key={t.name} className="hover:bg-[var(--pm-body-bg)]/30 transition">
+                      <tr key={t.name} className="even:bg-[var(--pm-body-bg)]/40 hover:bg-[var(--pm-input-bg)]/40 transition-colors">
                         <td className="p-4 font-mono font-semibold text-[var(--pm-text-primary)]">{t.name}</td>
                         <td className="p-4 text-[var(--pm-text-secondary)]">{t.engine}</td>
                         <td className="p-4 text-[var(--pm-text-secondary)]">{t.rows.toLocaleString()}</td>
