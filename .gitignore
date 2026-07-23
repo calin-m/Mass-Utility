@@ -15,6 +15,7 @@
 !/SPEC.md
 !/.gitignore
 !/.ai_pipeline.json
+!/.orchestra/.conductor/tools/install_framework.py
 
 # Ignore build and runtime junk inside whitelisted folders
 **/__pycache__/
