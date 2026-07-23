@@ -59,20 +59,44 @@ body {
   background: var(--pm-text-secondary, #64748b);
 }
 
-/* Proximity spotlight background fill styles */
+/* Proximity spotlight background fill & 1px dynamic border tracing glow */
 .pm-tab-label, .pm-sub-tab-btn, .pm-theme-btn {
   position: relative;
   z-index: 1;
 }
 
+/* Layer 1: 1px Thin Border Tracing Glow */
+.pm-tab-label::before, .pm-sub-tab-btn::before, .pm-theme-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 1px;
+  background: radial-gradient(
+    circle 70px at var(--mouse-x, -100px) var(--mouse-y, -100px),
+    var(--pm-primary, #7c3aed),
+    var(--pm-purple, #a78bfa),
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Layer 2: Soft Inner Radial Bloom Glow */
 .pm-tab-label::after, .pm-sub-tab-btn::after, .pm-theme-btn::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: 8px;
   background: radial-gradient(
-    circle 80px at var(--mouse-x, -100px) var(--mouse-y, -100px),
-    rgba(139, 92, 246, 0.08),
+    circle 85px at var(--mouse-x, -100px) var(--mouse-y, -100px),
+    rgba(139, 92, 246, 0.12),
     transparent 100%
   );
   opacity: 0;
@@ -81,6 +105,7 @@ body {
   pointer-events: none;
 }
 
+.pm-tab-label:hover::before, .pm-sub-tab-btn:hover::before, .pm-theme-btn:hover::before,
 .pm-tab-label:hover::after, .pm-sub-tab-btn:hover::after, .pm-theme-btn:hover::after {
   opacity: 1;
 }
