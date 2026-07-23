@@ -690,7 +690,7 @@ export const QueryMutateTab: React.FC = () => {
   // Rendering Helper: Recursive Group Node
   const renderGroupNode = (group: Group, isRoot = false) => {
     return (
-      <div key={group.id} className={`border rounded-xl p-4 bg-black/10 transition-colors ${
+      <div key={group.id} className={`border rounded-xl p-4 bg-pm-input/30 transition-colors ${
         group.logical_operator === 'AND' ? 'border-pm-border' : 'border-amber-500/10'
       }`}>
         <div className="flex justify-between items-center gap-4 flex-wrap mb-4 pb-2 border-b border-pm-border">
@@ -790,10 +790,10 @@ export const QueryMutateTab: React.FC = () => {
       </div>
 
       {/* Step 1 Card: Target Products Filter */}
-      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4 border-l-4 border-l-[#8b5cf6]">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4 border-l-4 border-l-pm-primary">
         <div className="flex justify-between items-center flex-wrap gap-4 border-b border-pm-border pb-3">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-[#8b5cf6] rounded-full"></span>
+            <span className="w-2.5 h-2.5 bg-pm-primary rounded-full"></span>
             <h3 className="text-sm font-bold text-pm-text uppercase">Step 1: Define Target Products (Visual AST Filter)</h3>
           </div>
           
@@ -871,7 +871,7 @@ export const QueryMutateTab: React.FC = () => {
 
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-pm-text-secondary block">Sample Target Product IDs</span>
-            <div className="text-xs border border-pm-border bg-black/10 p-3 rounded-lg text-pm-text-secondary max-h-24 overflow-y-auto select-all">
+            <div className="text-xs border border-pm-border bg-pm-input/30 p-3 rounded-lg text-pm-text-secondary max-h-24 overflow-y-auto select-all">
               {previewSamples}
             </div>
           </div>

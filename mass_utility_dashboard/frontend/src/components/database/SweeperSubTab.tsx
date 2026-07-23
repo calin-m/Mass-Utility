@@ -71,7 +71,7 @@ export const SweeperSubTab: React.FC<SweeperSubTabProps> = ({
       <div className="bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] rounded-xl p-6 shadow-xl space-y-4">
         <div className="flex justify-between items-center border-b border-[var(--pm-border-color)] pb-3 flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 bg-[#8b5cf6] rounded-full animate-pulse"></span>
+            <span className="w-2.5 h-2.5 bg-pm-primary rounded-full animate-pulse"></span>
             <h3 className="text-sm font-bold tracking-wide text-[var(--pm-text-primary)] uppercase">Database Cleanup Sweeper</h3>
           </div>
         </div>
@@ -94,7 +94,7 @@ export const SweeperSubTab: React.FC<SweeperSubTabProps> = ({
             type="button"
             onClick={onSweeperScan}
             disabled={isScanningSweeper}
-            className="pm-btn bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-xs font-bold transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
+            className="pm-btn bg-pm-primary hover:opacity-90 text-white px-4 py-2 rounded-lg text-xs font-bold transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
           >
             {isScanningSweeper ? 'Scanning...' : '🔍 Pre-Flight Scan'}
           </button>
@@ -127,7 +127,7 @@ export const SweeperSubTab: React.FC<SweeperSubTabProps> = ({
                 <hr className="border-[var(--pm-border-color)] my-1" />
                 <div className="flex justify-between font-bold">
                   <span className="text-[var(--pm-text-secondary)]">Total stats:</span>
-                  <span className="text-[#8b5cf6]">{sweeperStats.stats.total.toLocaleString()}</span>
+                  <span className="text-purple-700 dark:text-purple-400">{sweeperStats.stats.total.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -153,7 +153,7 @@ export const SweeperSubTab: React.FC<SweeperSubTabProps> = ({
                 <hr className="border-[var(--pm-border-color)] my-1" />
                 <div className="flex justify-between font-bold">
                   <span className="text-[var(--pm-text-secondary)]">Total Carts:</span>
-                  <span className="text-[#8b5cf6]">{sweeperStats.carts.total.toLocaleString()}</span>
+                  <span className="text-purple-700 dark:text-purple-400">{sweeperStats.carts.total.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -175,7 +175,7 @@ export const SweeperSubTab: React.FC<SweeperSubTabProps> = ({
                 <hr className="border-[var(--pm-border-color)] my-1" />
                 <div className="flex justify-between font-bold">
                   <span className="text-[var(--pm-text-secondary)]">Reclaimable:</span>
-                  <span className="text-[#8b5cf6]">{orphanedImagesSizePretty}</span>
+                  <span className="text-purple-700 dark:text-purple-400">{orphanedImagesSizePretty}</span>
                 </div>
               </div>
             </div>

@@ -48,7 +48,7 @@ export const QueryResultsGrid: React.FC<QueryResultsGridProps> = ({
       {previewSql && (
         <div className="space-y-2">
           <span className="text-[0.65rem] font-bold text-[var(--pm-text-secondary)] uppercase tracking-wider">Compiled Prepared SQL Query</span>
-          <pre className="bg-[var(--pm-body-bg)]/80 text-[0.7rem] text-[#8b5cf6] p-4 rounded-xl font-mono border border-[var(--pm-border-color)] overflow-x-auto whitespace-pre-wrap">
+          <pre className="bg-[var(--pm-body-bg)]/80 text-[0.7rem] text-purple-700 dark:text-purple-400 p-4 rounded-xl font-mono border border-[var(--pm-border-color)] overflow-x-auto whitespace-pre-wrap">
             {previewSql}
           </pre>
         </div>

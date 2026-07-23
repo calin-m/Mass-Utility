@@ -133,7 +133,7 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
           <button
             type="button"
             onClick={onToggleLogTerminal}
-            className="text-xs text-[#8b5cf6] font-bold hover:underline cursor-pointer"
+            className="text-xs text-purple-700 dark:text-purple-400 font-bold hover:underline cursor-pointer"
           >
             {showLogTerminal ? 'Hide Execution Terminal' : 'Show Execution Terminal Logs'}
           </button>

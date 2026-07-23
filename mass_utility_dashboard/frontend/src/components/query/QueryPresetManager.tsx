@@ -51,7 +51,7 @@ export const QueryPresetManager: React.FC<QueryPresetManagerProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
         {/* Master routine selector */}
         <div className="space-y-1.5">
-          <label className="block text-[0.65rem] font-bold uppercase text-[#8b5cf6]">1. Master Routine (Query + Mutate)</label>
+          <label className="block text-[0.65rem] font-bold uppercase text-purple-700 dark:text-purple-400">1. Master Routine (Query + Mutate)</label>
           <div className="flex gap-2">
             <select
               value={selectedMasterPreset}

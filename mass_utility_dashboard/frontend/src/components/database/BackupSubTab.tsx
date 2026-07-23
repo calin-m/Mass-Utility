@@ -93,7 +93,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
               type="button"
               onClick={onStartBackup}
               disabled={isBackupRunning}
-              className="pm-btn bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
+              className="pm-btn bg-pm-primary hover:bg-opacity-90 disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition uppercase tracking-wider hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
             >
               📥 Generate Backup &amp; Log Archive
             </button>
@@ -120,11 +120,11 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
               onDeletePreset={onDeletePreset}
             />
 
-            <label className="flex items-center gap-2 text-xs font-bold text-[#8b5cf6] cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-400 cursor-pointer">
               <input
                 type="checkbox"
                 onChange={(e) => onSelectAll(e.target.checked)}
-                className="rounded bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
+                className="rounded bg-[var(--pm-card-bg)] border border-[var(--pm-border-color)] text-pm-primary focus:ring-0 focus:outline-none cursor-pointer"
               />
               Select All Tables (Full Backup)
             </label>
@@ -150,7 +150,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                           if (el) el.indeterminate = isSomeSelected;
                         }}
                         onChange={(e) => onDomainSelect(domain, e.target.checked)}
-                        className="rounded bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
+                        className="rounded bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-pm-primary focus:ring-0 focus:outline-none cursor-pointer"
                       />
                       {domain.replace('_', ' ')}
                     </label>
@@ -161,7 +161,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                     <button
                       type="button"
                       onClick={() => onToggleDomainExpanded(domain)}
-                      className="text-[0.65rem] text-[#8b5cf6] font-bold hover:underline cursor-pointer flex items-center gap-1"
+                      className="text-[0.65rem] text-pm-primary font-bold hover:underline cursor-pointer flex items-center gap-1"
                     >
                       <span>{isExpanded ? '▼ Hide Tables' : '▶ Expand Tables'}</span>
                       <span className="text-[var(--pm-text-secondary)] font-normal">
@@ -177,7 +177,7 @@ export const BackupSubTab: React.FC<BackupSubTabProps> = ({
                               type="checkbox"
                               checked={selectedTables.includes(tbl)}
                               onChange={() => onTableToggle(tbl)}
-                              className="rounded bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-[#8b5cf6] focus:ring-0 focus:outline-none cursor-pointer"
+                              className="rounded bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] text-pm-primary focus:ring-0 focus:outline-none cursor-pointer"
                             />
                             <span className="truncate">{tbl}</span>
                           </label>

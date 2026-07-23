@@ -216,13 +216,13 @@ export const MutationHistoryTab: React.FC = () => {
             placeholder="Search by Job ID or Actions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-black/20 border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-pm-primary/50"
+            className="w-full bg-pm-input/30 border border-pm-border text-xs text-pm-text rounded-lg px-3 py-2 focus:outline-none focus:border-pm-primary/50"
           />
         </div>
 
         <div className="flex items-center gap-3">
           <span className="text-xs text-pm-text-secondary font-bold uppercase">Status Filter:</span>
-          <div className="flex bg-black/20 border border-pm-border p-1 rounded-lg">
+          <div className="flex bg-pm-input/30 border border-pm-border p-1 rounded-lg">
             {['ALL', 'SUCCESS', 'ROLLED_BACK', 'FAILED'].map(st => (
               <button
                 key={st}

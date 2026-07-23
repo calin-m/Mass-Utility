@@ -110,7 +110,7 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
           onDragOver={onDragOver}
           onDrop={onFileDrop}
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-[var(--pm-border-color)] hover:border-[#8b5cf6]/40 rounded-xl p-8 text-center cursor-pointer transition bg-[var(--pm-body-bg)]/30 space-y-3"
+          className="border-2 border-dashed border-[var(--pm-border-color)] hover:border-pm-primary/40 rounded-xl p-8 text-center cursor-pointer transition bg-[var(--pm-body-bg)]/30 space-y-3"
         >
           <div className="text-3xl">📁</div>
           <p className="text-xs text-[var(--pm-text-secondary)]">
@@ -138,7 +138,7 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
               type="button"
               onClick={onUploadStageFile}
               disabled={isUploading}
-              className="pm-btn bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
+              className="pm-btn bg-pm-primary hover:bg-pm-primary-dark text-white px-4 py-2 rounded-lg text-xs font-bold transition uppercase hover:-translate-y-[1px] active:translate-y-0 cursor-pointer"
             >
               {isUploading ? `Uploading (${uploadPercent}%)` : 'Stage Upload'}
             </button>
@@ -148,7 +148,7 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
         {isUploading && (
           <div className="w-full h-1.5 bg-black/35 rounded-full overflow-hidden border border-[var(--pm-border-color)]">
             <div
-              className="h-full bg-[#8b5cf6] transition-all duration-300"
+              className="h-full bg-pm-primary transition-all duration-300"
               style={{ width: `${uploadPercent}%` }}
             ></div>
           </div>
@@ -183,7 +183,7 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
                       <button
                         type="button"
                         onClick={() => onStartRestore(b.basename)}
-                        className={`pm-btn pm-btn-sm ${isLocal ? 'pm-btn-danger' : 'bg-[#8b5cf6] text-white hover:bg-[#7c3aed]'} text-[0.7rem] px-2.5 py-1 rounded-md`}
+                        className={`pm-btn pm-btn-sm ${isLocal ? 'pm-btn-danger' : 'bg-pm-primary text-white hover:bg-opacity-90'} text-[0.7rem] px-2.5 py-1 rounded-md`}
                       >
                         <span>{isLocal ? '⚡' : '☁️'}</span> Restore
                       </button>
