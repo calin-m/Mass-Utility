@@ -93,14 +93,14 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
               return (
                 <label
                   key={idx}
-                  className={`flex items-center justify-between px-3.5 py-3 rounded-xl border transition-all duration-200 gap-3 ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all duration-200 gap-3 ${
                     disabled
                       ? checked
-                        ? 'bg-pm-primary/10 border border-pm-primary/30 text-pm-text opacity-90'
-                        : 'bg-[var(--pm-body-bg)]/60 border border-pm-border/40 text-pm-text-secondary/70 opacity-60'
+                        ? 'bg-pm-primary/10 border-pm-primary/25 text-pm-text opacity-90'
+                        : 'bg-[var(--pm-body-bg)]/50 border-pm-border/20 text-pm-text-secondary/70 opacity-60'
                       : checked
-                        ? 'bg-pm-primary/5 border border-pm-primary/35 hover:bg-pm-primary/10 hover:border-pm-primary/50 cursor-pointer shadow-sm'
-                        : 'bg-pm-card border border-pm-border hover:bg-pm-input/40 hover:border-pm-primary/40 cursor-pointer shadow-sm'
+                        ? 'bg-pm-primary/[0.05] border-pm-primary/30 hover:bg-pm-primary/10 hover:border-pm-primary/45 cursor-pointer'
+                        : 'bg-pm-card border-pm-border/30 hover:bg-pm-input/40 hover:border-pm-primary/30 cursor-pointer'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
