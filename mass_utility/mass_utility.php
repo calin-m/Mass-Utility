@@ -251,15 +251,15 @@ class Mass_Utility extends Module
 
         // Handle License Activation Submission
         $activationError = '';
-        if (class_exists('\Tools') && \Tools::isSubmit('btnSubmitActivation')) {
+        if (class_exists('\Tools') && (\Tools::isSubmit('btnSubmitActivation') || !empty($_POST['pm_license_key']))) {
             $licenseKey = trim(\Tools::getValue('pm_license_key'));
-            $licensingServer = self::LICENSING_SERVER_URL;
+            $licensingServer = $this->getLicensingServerUrl();
             
             if (empty($licenseKey)) {
                 $activationError = 'License Key is required.';
             } else {
                 $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
-                $activationUrl = rtrim($licensingServer, '/') . '/?action=activate_key';
+                $activationUrl = rtrim($licensingServer, '/') . '/index.php?action=activate_key';
                 
                 $ch = curl_init($activationUrl);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -435,6 +435,30 @@ class Mass_Utility extends Module
                 <button onclick="window.close()">Close Window</button>
             </div>';
         }
+    }
+
+    private function getLicensingServerUrl(): string
+    {
+        if (class_exists('\Configuration')) {
+            $saved = \Configuration::get('PM_LICENSING_SERVER_URL');
+            if (!empty($saved)) {
+                return rtrim($saved, '/');
+            }
+        }
+
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        if (defined('_PS_ROOT_DIR_') && is_dir(_PS_ROOT_DIR_ . '/mass_utility_admin')) {
+            $scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
+            $baseDir = rtrim(dirname($scriptDir), '/\\');
+            if ($baseDir === '.' || $baseDir === '/' || $baseDir === '\\') {
+                $baseDir = '';
+            }
+            return $protocol . $host . $baseDir . '/mass_utility_admin';
+        }
+
+        return self::LICENSING_SERVER_URL;
     }
 
     private function getSaaSUrl(): string
