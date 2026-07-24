@@ -174,13 +174,14 @@ class AdminApiController
     private function update(): void
     {
         $id = (int)($_POST['id'] ?? 0);
+        $userId = isset($_POST['user_id']) ? (int)$_POST['user_id'] : null;
         $status = $_POST['status'] ?? 'active';
-        $tier = $_POST['tier'] ?? 'basic';
+        $tier = $_POST['package_tier'] ?? $_POST['tier'] ?? 'basic';
         $storeUrl = $_POST['store_url'] ?? null;
         if (empty($storeUrl)) {
             $storeUrl = null;
         }
-        $expiry = $_POST['expiry'] ?? null;
+        $expiry = $_POST['expires_at'] ?? $_POST['expiry'] ?? null;
         if (empty($expiry)) {
             $expiry = null;
         }
@@ -191,7 +192,7 @@ class AdminApiController
         }
 
         try {
-            $success = $this->repo->updateLicense($id, $status, $tier, $expiry, $storeUrl);
+            $success = $this->repo->updateLicense($id, $status, $tier, $expiry, $storeUrl, $userId);
             echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);

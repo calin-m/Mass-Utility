@@ -52,8 +52,12 @@ class LicenseRepository
         return $key;
     }
 
-    public function updateLicense(int $id, string $status, string $tier, ?string $expiry, ?string $storeUrl = null): bool
+    public function updateLicense(int $id, string $status, string $tier, ?string $expiry, ?string $storeUrl = null, ?int $userId = null): bool
     {
+        if ($userId !== null) {
+            $stmt = $this->db->prepare("UPDATE pm_licenses SET status = ?, package_tier = ?, expires_at = ?, store_url = ?, user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            return $stmt->execute([$status, $tier, $expiry, $storeUrl, $userId, $id]);
+        }
         $stmt = $this->db->prepare("UPDATE pm_licenses SET status = ?, package_tier = ?, expires_at = ?, store_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         return $stmt->execute([$status, $tier, $expiry, $storeUrl, $id]);
     }

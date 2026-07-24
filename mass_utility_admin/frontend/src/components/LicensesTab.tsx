@@ -3,6 +3,7 @@ import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key } fr
 
 export interface License {
   id: number;
+  user_id?: number;
   user_email: string;
   license_key: string;
   store_url: string | null;
@@ -40,6 +41,15 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
   const [genExpires, setGenExpires] = useState('');
   const [genDomain, setGenDomain] = useState('');
   const [generatingKey, setGeneratingKey] = useState(false);
+
+  // Edit Modal State
+  const [editingLicense, setEditingLicense] = useState<License | null>(null);
+  const [editUserId, setEditUserId] = useState<number>(0);
+  const [editTier, setEditTier] = useState<string>('basic');
+  const [editStatus, setEditStatus] = useState<string>('active');
+  const [editDomain, setEditDomain] = useState<string>('');
+  const [editExpires, setEditExpires] = useState<string>('');
+  const [savingEdit, setSavingEdit] = useState<boolean>(false);
 
   // Key Masking State
   const [revealedKeys, setRevealedKeys] = useState<{ [id: number]: boolean }>({});
@@ -129,6 +139,43 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
       }
     } catch (err: any) {
       showAlert('❌ Request failed: ' + err.message, 'error');
+    }
+  };
+  const openEditModal = (lic: License) => {
+    setEditingLicense(lic);
+    setEditUserId(lic.user_id || 0);
+    setEditTier(lic.package_tier || 'basic');
+    setEditStatus(lic.status || 'active');
+    setEditDomain(lic.store_url || '');
+    setEditExpires(lic.expires_at || '');
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLicense) return;
+    setSavingEdit(true);
+    try {
+      const formData = new FormData();
+      formData.append('id', String(editingLicense.id));
+      formData.append('user_id', String(editUserId));
+      formData.append('package_tier', editTier);
+      formData.append('status', editStatus);
+      formData.append('store_url', editDomain);
+      formData.append('expires_at', editExpires);
+
+      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        showAlert(`License #${editingLicense.id} updated successfully!`, 'success');
+        setEditingLicense(null);
+        onRefresh();
+      } else {
+        showAlert('❌ Error: ' + (data.error || 'Failed to update license'), 'error');
+      }
+    } catch (err: any) {
+      showAlert('❌ Request failed: ' + err.message, 'error');
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -342,6 +389,13 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                       <td className="p-3 text-pm-secondary">{lic.expires_at || 'Never'}</td>
                       <td className="p-3 flex items-center gap-2">
                         <button
+                          onClick={() => openEditModal(lic)}
+                          className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                          title="Edit License & Subscription"
+                        >
+                          <Edit className="w-3.5 h-3.5" /> Edit
+                        </button>
+                        <button
                           onClick={() => handleToggleStatus(lic.id, lic.status, lic.package_tier, lic.expires_at || '', lic.store_url || '')}
                           className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
                             lic.status === 'active'
@@ -360,6 +414,120 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
           </table>
         </div>
       </div>
+
+      {/* Edit License Modal Dialog */}
+      {editingLicense && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-pm-card border border-pm-border rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-3 border-b border-pm-border">
+              <h3 className="text-base font-bold text-pm-text flex items-center gap-2">
+                <Edit className="w-5 h-5 text-pm-primary" /> Edit License & Subscription #{editingLicense.id}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditingLicense(null)}
+                className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">License Key (Read-Only)</label>
+                <input
+                  type="text"
+                  readOnly
+                  className="w-full bg-pm-input/50 border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-amber-500 cursor-not-allowed"
+                  value={editingLicense.license_key}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Assigned Client Email / Account</label>
+                <select
+                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                  value={editUserId}
+                  onChange={e => setEditUserId(Number(e.target.value))}
+                >
+                  <option value={0}>-- Unassigned License (Standalone Key) --</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.id}>
+                      👤 {u.email} {u.company_name ? `(${u.company_name})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Package Tier</label>
+                  <select
+                    className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                    value={editTier}
+                    onChange={e => setEditTier(e.target.value)}
+                  >
+                    <option value="basic">BASIC TIER</option>
+                    <option value="pro">PRO TIER</option>
+                    <option value="enterprise">ENTERPRISE TIER</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Subscription Status</label>
+                  <select
+                    className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none font-bold"
+                    value={editStatus}
+                    onChange={e => setEditStatus(e.target.value)}
+                  >
+                    <option value="active" className="text-emerald-500">ACTIVE</option>
+                    <option value="suspended" className="text-rose-500">SUSPENDED</option>
+                    <option value="expired" className="text-amber-500">EXPIRED</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Bound Store Domain / URL</label>
+                <input
+                  type="text"
+                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                  placeholder="e.g. store.myshop.com"
+                  value={editDomain}
+                  onChange={e => setEditDomain(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Expires At Date</label>
+                <input
+                  type="date"
+                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                  value={editExpires}
+                  onChange={e => setEditExpires(e.target.value)}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+                <button
+                  type="button"
+                  onClick={() => setEditingLicense(null)}
+                  className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold flex items-center gap-2"
+                >
+                  {savingEdit ? 'Saving...' : '💾 Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
