@@ -27,9 +27,15 @@ export const App: React.FC = () => {
     setTimeout(() => setToast(null), 4000);
   };
 
+  const getApiUrl = (action: string) => {
+    const path = window.location.pathname;
+    const basePath = path.endsWith('.php') ? path : `${path.replace(/\/$/, '')}/index.php`;
+    return `${basePath}?action=${action}`;
+  };
+
   const checkStatus = async () => {
     try {
-      const res = await fetch('index.php?action=api_status');
+      const res = await fetch(getApiUrl('api_status'));
       const data = await res.json();
       if (data.success) {
         setHasAdmin(data.has_admin);
@@ -49,7 +55,7 @@ export const App: React.FC = () => {
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('index.php?action=api_list');
+      const res = await fetch(getApiUrl('api_list'));
       const data = await res.json();
       if (data.success) {
         setLicenses(data.licenses || []);
@@ -66,7 +72,7 @@ export const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('index.php?action=api_logout');
+      await fetch(getApiUrl('api_logout'));
       setAuthenticated(false);
       showAlert('Logged out successfully', 'success');
     } catch (e) {}
