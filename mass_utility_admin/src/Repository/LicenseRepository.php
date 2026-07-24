@@ -85,6 +85,9 @@ class LicenseRepository
             return ['valid' => false, 'message' => 'License is registered to a different store domain.'];
         }
 
+        $isDeveloper = ($lic['package_tier'] === 'developer' || $lic['package_tier'] === 'enterprise');
+        $isPro = ($lic['package_tier'] === 'pro' || $isDeveloper);
+
         // Fetch custom tier capabilities dynamically
         $features = null;
         try {
@@ -94,28 +97,33 @@ class LicenseRepository
             if ($capsJson) {
                 $caps = json_decode($capsJson, true);
                 if (is_array($caps)) {
-                    // Map capabilities to features array
+                    // Map capabilities with graceful fallback for older missing keys
                     $features = [
-                        'PM_ENABLE_FILE_TOOLS' => 1,
-                        'PM_ENABLE_DB_TOOLS' => 1,
-                        'PM_ENABLE_QUERY_WIZARD' => 1,
-                        'PM_ENABLE_GHOST_PURGER' => 1,
-                        'PM_ENABLE_HISTORY' => 1,
-                        'PM_ENABLE_GDPR_SWEEPER' => 1,
-                        'capabilities' => $caps
+                        'PM_ENABLE_FILE_TOOLS' => isset($caps['PM_ENABLE_FILE_TOOLS']) ? (int)$caps['PM_ENABLE_FILE_TOOLS'] : 1,
+                        'PM_ENABLE_DB_TOOLS' => isset($caps['PM_ENABLE_DB_TOOLS']) ? (int)$caps['PM_ENABLE_DB_TOOLS'] : 1,
+                        'PM_ENABLE_QUERY_WIZARD' => isset($caps['query_visual_execute']) ? (int)$caps['query_visual_execute'] : ($isDeveloper ? 1 : 0),
+                        'PM_ENABLE_GHOST_PURGER' => isset($caps['PM_ENABLE_GHOST_PURGER']) ? (int)$caps['PM_ENABLE_GHOST_PURGER'] : 1,
+                        'PM_ENABLE_HISTORY' => isset($caps['PM_ENABLE_HISTORY']) ? (int)$caps['PM_ENABLE_HISTORY'] : 1,
+                        'PM_ENABLE_GDPR_SWEEPER' => isset($caps['PM_ENABLE_GDPR_SWEEPER']) ? (int)$caps['PM_ENABLE_GDPR_SWEEPER'] : 1,
+                        'capabilities' => [
+                            'backup_destinations' => $caps['backup_destinations'] ?? ($isPro ? ['local', 'gdrive'] : ['local']),
+                            'backup_automation' => $caps['backup_automation'] ?? $isPro,
+                            'rollback_history_limit' => $caps['rollback_history_limit'] ?? ($isDeveloper ? 999 : ($isPro ? 10 : 0)),
+                            'query_visual_execute' => $caps['query_visual_execute'] ?? $isPro,
+                            'governor_autopilot' => $caps['governor_autopilot'] ?? $isPro,
+                            'sweeper_execution' => $caps['sweeper_execution'] ?? $isPro
+                        ]
                     ];
                 }
             }
         } catch (\Throwable $e) {}
 
-        // Fallback default features if dynamic fetch failed
+        // Fallback default features if dynamic fetch failed entirely (e.g. table empty)
         if (!$features) {
-            $isDeveloper = ($lic['package_tier'] === 'developer');
-            $isPro = ($lic['package_tier'] === 'pro' || $isDeveloper);
             $features = [
                 'PM_ENABLE_FILE_TOOLS' => 1,
                 'PM_ENABLE_DB_TOOLS' => 1,
-                'PM_ENABLE_QUERY_WIZARD' => 1,
+                'PM_ENABLE_QUERY_WIZARD' => $isDeveloper ? 1 : 0,
                 'PM_ENABLE_GHOST_PURGER' => 1,
                 'PM_ENABLE_HISTORY' => 1,
                 'PM_ENABLE_GDPR_SWEEPER' => 1,
