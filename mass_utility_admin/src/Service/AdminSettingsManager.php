@@ -25,6 +25,12 @@ class AdminSettingsManager
         $pdo->setAttribute(\PDO::ATTR_TIMEOUT, 5);
         try {
             $pdo->exec('PRAGMA busy_timeout = 5000;'); // nosec
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_admins ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username VARCHAR(255) NOT NULL UNIQUE,
+                password_hash VARCHAR(255) NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
         } catch (\Throwable $t) {}
         return $pdo;
     }
