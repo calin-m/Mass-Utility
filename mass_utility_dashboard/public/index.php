@@ -827,110 +827,37 @@ if ($path === '/' || $path === '/index.html') {
         exit;
     }
 
-    // Serve compiled React SPA if route is v2
-    if (isset($_GET['route']) && $_GET['route'] === 'v2') {
-        $reactIndex = dirname(__DIR__) . '/public/v2/index.html';
-        if (file_exists($reactIndex)) {
-            $html = file_get_contents($reactIndex);
-            
-            $configJson = json_encode([
-                'basePath' => $basePath,
-                'csrfToken' => $_SESSION['csrf_token'] ?? '',
-                'settings' => $settingsRepo->getAll()
-            ]);
-            
-            $html = str_replace(
-                '</head>',
-                '<script>window.PM_CONFIG = ' . $configJson . ';</script></head>',
-                $html
-            );
-            
-            $html = str_replace(
-                './assets/',
-                $basePath . '/v2/assets/',
-                $html
-            );
-            
-            header('Content-Type: text/html');
-            echo $html;
-            exit;
-        }
-    }
-
-    header('Content-Type: text/html');
-    $templatePath = dirname(__DIR__) . '/views/templates/admin/configure.tpl';
-    if (file_exists($templatePath)) {
-        $html = file_get_contents($templatePath);
-        // Replace relative Smarty paths with web-accessible paths
-        $html = str_replace('../../css/', 'views/css/', $html);
-        $html = str_replace('../../js/', 'views/js/', $html);
-        // Force the browser to refresh the compiled JS bundle immediately on new deployments
-        $bundlePath = dirname(__DIR__) . '/views/js/mass_utility.bundle.js';
-        $version = file_exists($bundlePath) ? (string)filemtime($bundlePath) : (string)time();
-        $html = str_replace('mass_utility.bundle.js', 'mass_utility.bundle.js?v=' . $version, $html);
+    // Serve compiled React 18 SPA (V2) for all HTML browser requests by default
+    $reactIndex = dirname(__DIR__) . '/public/v2/index.html';
+    if (file_exists($reactIndex)) {
+        $html = file_get_contents($reactIndex);
         
-        // Dynamically compile and concatenate the tab templates into configure.tpl
-        $baseDir = dirname(__DIR__);
-        $tabs = [
-            'governor.tpl',
-            'database_tools.tpl',
-            'file_tools.tpl',
-            'query_wizard.tpl',
-            'transaction_history.tpl',
-            'logs.tpl',
-            'settings.tpl'
-        ];
-
-        $tabContent = '';
-        foreach ($tabs as $tab) {
-            $tabPath = $baseDir . '/views/templates/admin/tabs/' . $tab;
-            if (file_exists($tabPath)) {
-                $content = file_get_contents($tabPath);
-                
-                // Inject sub-templates (TX-416 Hydration fix)
-                if ($tab === 'database_tools.tpl') {
-                    $sweeperPath = $baseDir . '/views/templates/admin/tabs/data_sweeper.tpl';
-                    if (file_exists($sweeperPath)) {
-                        $content = str_replace('{$dataSweeperContent nofilter}', file_get_contents($sweeperPath), $content);
-                    }
-                }
-                
-                $tabContent .= "\n<!-- Start Tab: {$tab} -->\n" . $content . "\n<!-- End Tab: {$tab} -->\n";
-            }
-        }
-
-        // Strip smarty tags from templates to make them clean HTML
-        $tabContent = preg_replace('/\{foreach\s+[^}]+\}.*?\{\/foreach\}/is', '', $tabContent);
-        $tabContent = preg_replace('/\{foreachelse\}/i', '', $tabContent);
-        $tabContent = preg_replace('/\{\/foreach\}/i', '', $tabContent);
-        $tabContent = preg_replace('/\{if\s+[^}]+\}/i', '', $tabContent);
-        $tabContent = preg_replace('/\{else\}/i', '', $tabContent);
-        $tabContent = preg_replace('/\{\/if\}/i', '', $tabContent);
-        $tabContent = preg_replace('/\{\$[^}]+\}/i', '', $tabContent);
-        $tabContent = preg_replace('/\{assign\s+[^}]+\}/i', '', $tabContent);
-        $tabContent = preg_replace('/\{elseif\s+[^}]+\}/i', '', $tabContent);
-        $tabContent = preg_replace('/\{\*.*?\*\}/s', '', $tabContent);
-
-        // Inject tab content into the placeholder
-        $placeholder = '<!-- Tab content will be loaded dynamically or compiled -->';
-        if (strpos($html, $placeholder) !== false) {
-            $html = str_replace($placeholder, $tabContent, $html);
-        }
-
-        // Dynamically inject base path and CSRF token into the frontend config block to support relative AJAX calls
-        $basePathJs = json_encode($basePath);
-        $csrfTokenJs = json_encode($_SESSION['csrf_token'] ?? '');
+        $configJson = json_encode([
+            'basePath' => $basePath,
+            'csrfToken' => $_SESSION['csrf_token'] ?? '',
+            'settings' => $settingsRepo->getAll()
+        ]);
+        
         $html = str_replace(
-            'window.PM_CONFIG = {',
-            "window.PM_CONFIG = {\n        basePath: {$basePathJs},\n        csrfToken: {$csrfTokenJs},",
+            '</head>',
+            '<script>window.PM_CONFIG = ' . $configJson . ';</script></head>',
             $html
         );
         
+        $html = str_replace(
+            './assets/',
+            $basePath . '/v2/assets/',
+            $html
+        );
+        
+        header('Content-Type: text/html');
         echo $html;
+        exit;
     } else {
-        echo "<h1>SaaS Dashboard</h1><p>Template not found at: {$templatePath}</p>";
+        header('Content-Type: text/html');
+        echo "<h1>Mass Utility SaaS Dashboard V2</h1><p>Compiled V2 React SPA asset not found at: {$reactIndex}. Run <code>npm run build</code> inside frontend/.</p>";
+        exit;
     }
-    exit;
 }
 
 if ($path === '/api/ping') {
