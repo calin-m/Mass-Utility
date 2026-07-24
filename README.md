@@ -116,13 +116,14 @@ sequenceDiagram
 
 ---
 
-## 🎨 2. Dual-UI Architecture Policy & V2 React 18 SPA
+## 🎨 2. User Interface Architecture Policy (V2 React 18 SPA + PrestaShop Launcher)
 
-The Mass Utility Dashboard enforces a **Dual-UI Architecture Policy**:
+The Mass Utility Dashboard enforces a **Unified V2 React 18 SPA Architecture Policy**:
 
-### 2.1 Dual-UI Co-Existence
-- **V1 Legacy UI (Smarty TPL)**: Retained inside `mass_utility_dashboard/views/templates/` for backward compatibility on legacy PHP environments.
-- **V2 Active Scope (React 18 + TypeScript + Vite SPA)**: The active production interface located in `mass_utility_dashboard/frontend/` and compiled directly to `mass_utility_dashboard/public/v2/`.
+### 2.1 Single UI & PrestaShop Launcher Integration
+- **V2 React 18 SPA**: Primary production interface located in `mass_utility_dashboard/frontend/` and compiled directly to `mass_utility_dashboard/public/v2/`.
+- **PrestaShop Back-Office Launcher Card**: Clean, native PrestaShop Smarty template (`mass_utility_dashboard/views/templates/admin/configure.tpl`) providing 1-click AES-256 OTT redirection from PrestaShop Back-Office directly to the V2 Standalone Dashboard.
+
 
 ### 2.2 V2 React Component Architecture (`src/components/`)
 - `<QueryWizardTab>`: Visual AST builder with live preview, domain preset selection, and execution simulation mode.
