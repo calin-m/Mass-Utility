@@ -25,13 +25,20 @@ export const App: React.FC = () => {
     setLoading(true);
     try {
       const res = await fetch('index.php?action=api_list');
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        window.location.href = 'index.php?action=login';
+        return;
+      }
       const data = await res.json();
       if (data.success) {
         setLicenses(data.licenses || []);
         setTiers(data.package_tiers || []);
+      } else {
+        showAlert('❌ ' + (data.error || 'Failed to fetch admin data'), 'error');
       }
-    } catch (e) {
-      showAlert('Failed to fetch admin data', 'error');
+    } catch (e: any) {
+      showAlert('Failed to fetch admin data: ' + e.message, 'error');
     } finally {
       setLoading(false);
     }
