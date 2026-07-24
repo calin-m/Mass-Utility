@@ -155,42 +155,46 @@ export const App: React.FC = () => {
       </header>
 
       {/* Tab Navigation */}
-      <nav className="flex gap-2 mb-8 border-b border-pm-border pb-4 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('licenses')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
-            activeTab === 'licenses' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
-          }`}
-        >
-          <Key className="w-4 h-4" /> Licenses & Clients
-        </button>
+      <nav className="flex w-full justify-between mb-8 border-b border-pm-border pb-4 overflow-x-auto gap-4">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab('licenses')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'licenses' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <Key className="w-4 h-4" /> Licenses & Clients
+          </button>
 
-        <button
-          onClick={() => setActiveTab('tiers')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
-            activeTab === 'tiers' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
-          }`}
-        >
-          <Package className="w-4 h-4" /> Package Tiers
-        </button>
+          <button
+            onClick={() => setActiveTab('tiers')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'tiers' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <Package className="w-4 h-4" /> Package Tiers
+          </button>
+        </div>
 
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
-            activeTab === 'settings' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
-          }`}
-        >
-          <Settings className="w-4 h-4" /> Settings
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'settings' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <Settings className="w-4 h-4" /> Settings
+          </button>
 
-        <button
-          onClick={() => setActiveTab('security')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
-            activeTab === 'security' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4" /> Security & Health
-        </button>
+          <button
+            onClick={() => setActiveTab('security')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'security' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" /> Security & Health
+          </button>
+        </div>
       </nav>
 
       {/* Main Tab Content */}
