@@ -322,5 +322,21 @@ if (str_starts_with($action, 'api_')) {
     exit;
 }
 
-// Render Dashboard UI
+// Dual UI Mode Selector & Session Handler
+$uiMode = $_GET['ui'] ?? $_SESSION['admin_ui_mode'] ?? 'v2';
+if (in_array($uiMode, ['v1', 'v2'], true)) {
+    $_SESSION['admin_ui_mode'] = $uiMode;
+} else {
+    $uiMode = 'v2';
+}
+
+// Render Dashboard UI (V2 React SPA vs V1 Legacy TPL)
+if ($uiMode === 'v2') {
+    $v2IndexPath = __DIR__ . '/v2/index.html';
+    if (file_exists($v2IndexPath)) {
+        readfile($v2IndexPath);
+        exit;
+    }
+}
+
 require_once dirname(__DIR__) . '/views/templates/admin_dashboard.tpl';
