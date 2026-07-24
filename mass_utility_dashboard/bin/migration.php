@@ -59,28 +59,43 @@ $stmtTiers = $db->query("SELECT COUNT(*) FROM pm_package_tiers");
 if ($stmtTiers->fetchColumn() == 0) {
     $defaultTiers = [
         'basic' => [
-            'backup_destinations' => ['local'],
-            'backup_automation' => false,
-            'rollback_history_limit' => 0,
+            'PM_ENABLE_DB_TOOLS' => false,
+            'PM_ENABLE_FILE_TOOLS' => false,
+            'PM_ENABLE_GHOST_PURGER' => true,
+            'PM_ENABLE_GDPR_SWEEPER' => true,
+            'PM_ENABLE_HISTORY' => true,
             'query_visual_execute' => false,
+            'backup_automation' => false,
             'governor_autopilot' => false,
-            'sweeper_execution' => false
+            'sweeper_execution' => false,
+            'rollback_history_limit' => 0,
+            'backup_destinations' => ['local']
         ],
         'pro' => [
-            'backup_destinations' => ['local', 'gdrive'],
-            'backup_automation' => true,
-            'rollback_history_limit' => 10,
+            'PM_ENABLE_DB_TOOLS' => false,
+            'PM_ENABLE_FILE_TOOLS' => false,
+            'PM_ENABLE_GHOST_PURGER' => true,
+            'PM_ENABLE_GDPR_SWEEPER' => true,
+            'PM_ENABLE_HISTORY' => true,
             'query_visual_execute' => true,
+            'backup_automation' => true,
             'governor_autopilot' => true,
-            'sweeper_execution' => true
+            'sweeper_execution' => true,
+            'rollback_history_limit' => 10,
+            'backup_destinations' => ['local', 'gdrive']
         ],
         'developer' => [
-            'backup_destinations' => ['local', 'gdrive'],
-            'backup_automation' => true,
-            'rollback_history_limit' => 999,
+            'PM_ENABLE_DB_TOOLS' => true,
+            'PM_ENABLE_FILE_TOOLS' => true,
+            'PM_ENABLE_GHOST_PURGER' => true,
+            'PM_ENABLE_GDPR_SWEEPER' => true,
+            'PM_ENABLE_HISTORY' => true,
             'query_visual_execute' => true,
+            'backup_automation' => true,
             'governor_autopilot' => true,
-            'sweeper_execution' => true
+            'sweeper_execution' => true,
+            'rollback_history_limit' => 999,
+            'backup_destinations' => ['local', 'gdrive']
         ]
     ];
     

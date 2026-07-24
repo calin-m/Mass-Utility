@@ -27,18 +27,56 @@ interface PackageTiersTabProps {
   showAlert: (msg: string, type?: 'success' | 'error') => void;
 }
 
-const DEFAULT_CAPS = {
-  PM_ENABLE_DB_TOOLS: true,
-  PM_ENABLE_FILE_TOOLS: true,
-  PM_ENABLE_GHOST_PURGER: true,
-  PM_ENABLE_GDPR_SWEEPER: true,
-  PM_ENABLE_HISTORY: true,
-  query_visual_execute: false,
-  backup_automation: false,
-  governor_autopilot: false,
-  sweeper_execution: false,
-  rollback_history_limit: 0,
-  backup_destinations: ['local']
+const getDefaultCapsForTier = (tierName: string) => {
+  const name = tierName.toLowerCase();
+  
+  // Base configuration that applies to ALL tiers
+  const base = {
+    PM_ENABLE_GHOST_PURGER: true,
+    PM_ENABLE_GDPR_SWEEPER: true,
+    PM_ENABLE_HISTORY: true,
+  };
+
+  if (name === 'developer' || name === 'enterprise') {
+    return {
+      ...base,
+      PM_ENABLE_DB_TOOLS: true,
+      PM_ENABLE_FILE_TOOLS: true,
+      query_visual_execute: true,
+      backup_automation: true,
+      governor_autopilot: true,
+      sweeper_execution: true,
+      rollback_history_limit: 999,
+      backup_destinations: ['local', 'gdrive']
+    };
+  }
+
+  if (name === 'pro') {
+    return {
+      ...base,
+      PM_ENABLE_DB_TOOLS: false,
+      PM_ENABLE_FILE_TOOLS: false,
+      query_visual_execute: true,
+      backup_automation: true,
+      governor_autopilot: true,
+      sweeper_execution: true,
+      rollback_history_limit: 10,
+      backup_destinations: ['local', 'gdrive']
+    };
+  }
+
+  // Basic tier (default strict fallback)
+  return {
+    ...base,
+    PM_ENABLE_DB_TOOLS: false,
+    PM_ENABLE_FILE_TOOLS: false,
+    query_visual_execute: false,
+    backup_automation: false,
+    governor_autopilot: false,
+    sweeper_execution: false,
+    rollback_history_limit: 0,
+    backup_destinations: ['local']
+  };
 };
 
 export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefresh, showAlert }) => {
@@ -47,7 +85,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
   const getTierCaps = (tierName: string) => {
     const found = tiers.find(t => t.name.toLowerCase() === tierName.toLowerCase());
-    return { ...DEFAULT_CAPS, ...(found?.capabilities || {}) };
+    return { ...getDefaultCapsForTier(tierName), ...(found?.capabilities || {}) };
   };
 
   const [caps, setCaps] = useState(() => getTierCaps(selectedTier));
