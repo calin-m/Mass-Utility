@@ -716,7 +716,7 @@ export const QueryMutateTab: React.FC = () => {
             const updated = handleDeleteRule(rule.id, queryTree);
             setQueryTree(updated);
           }}
-          className="pm-btn pm-btn-danger text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 font-bold focus:outline-none"
+          className="pm-btn pm-btn-sm pm-btn-danger-outline text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 font-bold focus:outline-none"
         >
           🗑️ Delete
         </button>
@@ -776,7 +776,7 @@ export const QueryMutateTab: React.FC = () => {
                   const updated = handleDeleteGroup(group.id, queryTree);
                   setQueryTree(updated);
                 }}
-                className="pm-btn pm-btn-danger text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
+                className="pm-btn pm-btn-sm pm-btn-danger-outline text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase"
               >
                 Delete Group
               </button>
@@ -847,7 +847,7 @@ export const QueryMutateTab: React.FC = () => {
               ))}
             </select>
             <button type="button" onClick={() => handleSavePreset('query')} className="pm-btn pm-btn-neutral px-2 py-1 rounded text-xs">Save</button>
-            <button type="button" onClick={() => handleDeletePreset('query', selectedQueryPreset)} disabled={!selectedQueryPreset} className="pm-btn pm-btn-danger px-2 py-1 rounded text-xs disabled:opacity-30">Delete</button>
+            <button type="button" onClick={() => handleDeletePreset('query', selectedQueryPreset)} disabled={!selectedQueryPreset} className="pm-btn pm-btn-sm pm-btn-danger-outline px-2 py-1 rounded text-xs disabled:opacity-30">Delete</button>
           </div>
         </div>
 
