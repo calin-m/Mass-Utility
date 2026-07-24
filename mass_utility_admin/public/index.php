@@ -112,18 +112,50 @@ if (str_starts_with($action, 'api_')) {
 
 // Compute dynamic basePath for subfolder-safe React SPA asset loading
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-$basePath = rtrim(dirname($scriptName), '/\\');
+$scriptDir = rtrim(dirname($scriptName), '/\\');
+$basePath = (str_ends_with($scriptDir, '/public') || str_ends_with($scriptDir, '\public'))
+    ? $scriptDir
+    : $scriptDir . '/public';
 
-// Serve Pure React 18 SPA
-$v2IndexPath = __DIR__ . '/v2/index.html';
-if (file_exists($v2IndexPath)) {
-    $html = file_get_contents($v2IndexPath);
-    $html = str_replace('./assets/', $basePath . '/v2/assets/', $html);
-    header('Content-Type: text/html');
-    echo $html;
-    exit;
-}
+// Dynamic Asset Discovery (glob scanner for compiled Vite bundles)
+$assetsDir = __DIR__ . '/v2/assets';
+$jsFiles = glob($assetsDir . '/index-*.js');
+$cssFiles = glob($assetsDir . '/index-*.css');
 
-header('Content-Type: text/html');
-echo "<h1>Project Mass - Super Admin Portal V2</h1><p>Compiled React SPA not found at: {$v2IndexPath}. Please run build pipeline.</p>";
+$jsFile = !empty($jsFiles) ? basename($jsFiles[0]) : '';
+$cssFile = !empty($cssFiles) ? basename($cssFiles[0]) : '';
+
+$jsUrl = $basePath . '/v2/assets/' . $jsFile;
+$cssUrl = $basePath . '/v2/assets/' . $cssFile;
+
+header('Content-Type: text/html; charset=UTF-8');
+?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Mass - Super Admin Portal</title>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('pm-theme');
+        if (theme !== 'light') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
+    <?php if ($cssFile): ?>
+    <link rel="stylesheet" crossorigin href="<?= htmlspecialchars($cssUrl) ?>">
+    <?php endif; ?>
+    <?php if ($jsFile): ?>
+    <script type="module" crossorigin src="<?= htmlspecialchars($jsUrl) ?>"></script>
+    <?php endif; ?>
+  </head>
+  <body class="bg-pm-bg text-pm-text min-h-screen font-sans antialiased transition-colors duration-200">
+    <div id="root"></div>
+  </body>
+</html>
+<?php
 exit;
