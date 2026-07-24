@@ -126,12 +126,9 @@ export const App: React.FC = () => {
       {/* Header Bar */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-8 border-b border-pm-border gap-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-indigo-500 bg-clip-text text-transparent">
-            🛠️ Project Mass - Super Admin Portal
+          <h2 className="text-base font-bold tracking-tight text-pm-text flex items-center gap-2">
+            🛠️ Mass Utility - Super Admin Portal
           </h2>
-          <span className="px-2.5 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30">
-            Pure React SPA
-          </span>
         </div>
 
         <div className="flex items-center gap-3">
