@@ -206,7 +206,7 @@ export const App: React.FC = () => {
           <PackageTiersTab tiers={tiers} onRefresh={fetchAdminData} showAlert={showAlert} />
         )}
         {activeTab === 'settings' && <SettingsTab showAlert={showAlert} />}
-        {activeTab === 'security' && <SecurityHealthTab />}
+        {activeTab === 'security' && <SecurityHealthTab showAlert={showAlert} />}
       </main>
     </div>
   );

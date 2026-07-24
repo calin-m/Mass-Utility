@@ -17,7 +17,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
   const runDiagnostics = async () => {
     setLoading(true);
     try {
-      const res = await fetch(getApiUrl('get_diagnostics'));
+      const res = await fetch(getApiUrl('api_get_diagnostics'));
       const data = await res.json();
       if (data.success) {
         setDiagnostics(data.diagnostics);
@@ -35,7 +35,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
   const fixPermissions = async () => {
     setLoading(true);
     try {
-      const res = await fetch(getApiUrl('fix_permissions'));
+      const res = await fetch(getApiUrl('api_fix_permissions'));
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert('Permissions automatically repaired!', 'success');

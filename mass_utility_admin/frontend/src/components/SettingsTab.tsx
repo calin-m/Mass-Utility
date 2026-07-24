@@ -28,7 +28,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
       formData.append('old_password', currentPassword);
       formData.append('new_password', newPassword);
 
-      const res = await fetch(getApiUrl('change_password'), {
+      const res = await fetch(getApiUrl('api_change_password'), {
         method: 'POST',
         body: formData
       });
@@ -49,7 +49,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 w-full">
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
         <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2 mb-4">
           <Settings className="w-5 h-5 text-pm-primary" /> Super Admin Portal Configuration
