@@ -191,6 +191,7 @@ class AdminApiController
             return;
         }
 
+        try {
             $success = $this->repo->updateLicense($id, $status, $tier, $expiry, $storeUrl, $userId);
             echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
