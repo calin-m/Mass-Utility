@@ -29,7 +29,7 @@
 !/.orchestra/.conductor/tools/workspace_inspector.py
 !/.orchestra/orchestra.lock
 !/.orchestra/README.md
-!/.orchestra/.conductor/docs/templates/
+!/.orchestra/.conductor/docs/templates/**
 
 # Ignore build and runtime junk inside whitelisted folders
 **/__pycache__/
