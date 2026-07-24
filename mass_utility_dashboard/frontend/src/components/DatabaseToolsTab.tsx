@@ -1010,6 +1010,7 @@ export const DatabaseToolsTab: React.FC = () => {
             onDeleteBackup={handleDeleteBackup}
             formatSqlSize={formatSqlSize}
             formatDate={formatDate}
+            showAlert={showAlert}
           />
         )}
 

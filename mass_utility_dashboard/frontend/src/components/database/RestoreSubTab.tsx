@@ -5,6 +5,7 @@ import React, { useState, useMemo } from 'react';
 import { LogTerminal } from '../common/LogTerminal';
 import { SearchFilterBar } from '../common/SearchFilterBar';
 import { SectionHeader } from '../common/SectionHeader';
+import { StatusBadge } from '../common/StatusBadge';
 
 export interface BackupFile {
   basename: string;
@@ -46,6 +47,7 @@ interface RestoreSubTabProps {
   onDeleteBackup: (filename: string) => void;
   formatSqlSize: (bytes: number) => string;
   formatDate: (ts: number) => string;
+  showAlert?: (title: string, message: string, type?: 'success' | 'danger' | 'warning' | 'info') => void;
 }
 
 export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
@@ -72,6 +74,7 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
   onDeleteBackup,
   formatSqlSize,
   formatDate,
+  showAlert,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState<'basename' | 'sql_size' | 'date'>('date');
@@ -189,7 +192,7 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
       {/* Select Local Backups list */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl space-y-4">
         <SectionHeader
-          dotColor="bg-pm-primary"
+          icon="📤"
           title="Select Backup to Restore"
         />
 
@@ -215,7 +218,10 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
                   onClick={() => handleSort('sql_size')}
                   className="px-6 py-3.5 cursor-pointer select-none hover:text-pm-primary transition-colors"
                 >
-                  Size {sortKey === 'sql_size' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                  SQL Size {sortKey === 'sql_size' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                </th>
+                <th className="px-6 py-3.5">
+                  Log Size
                 </th>
                 <th
                   onClick={() => handleSort('date')}
@@ -229,7 +235,7 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
             {filteredAndSortedBackups.length === 0 ? (
               <tbody>
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-pm-text-secondary">
+                  <td colSpan={5} className="px-6 py-12 text-center text-pm-text-secondary">
                     <div className="text-2xl animate-pulse mb-2">⏳</div>
                     <strong className="text-sm text-pm-text-secondary block mb-1">No Matching Backups Found</strong>
                     <span>Try adjusting your search filter or upload a new SQL archive.</span>
@@ -240,32 +246,70 @@ export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
               <tbody className="divide-y divide-pm-border text-xs text-pm-text-secondary">
                 {filteredAndSortedBackups.map((b) => {
                   const isLocal = b.is_local !== false;
+                  const isCloud = b.is_cloud === true;
 
                   return (
                     <tr
                       key={b.basename}
                       className="even:bg-[var(--pm-body-bg)]/40 hover:bg-[var(--pm-input-bg)]/40 transition-colors"
                     >
-                      <td className="px-6 py-3.5 font-mono font-semibold text-pm-text">{b.basename}</td>
-                      <td className="px-6 py-3.5 font-mono">{formatSqlSize(b.sql_size)}</td>
-                      <td className="px-6 py-3.5">{formatDate(b.date)}</td>
-                      <td className="px-6 py-3.5 text-right space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => onStartRestore(b.basename)}
-                          className={`pm-btn pm-btn-sm ${isLocal ? 'pm-btn-danger' : 'bg-pm-primary text-white hover:bg-opacity-90'} text-[0.7rem] px-2.5 py-1 rounded-md`}
-                        >
-                          <span>{isLocal ? '⚡' : '☁️'}</span> Restore
-                        </button>
-                        {isLocal && (
+                      <td className="px-6 py-3.5 font-mono text-[11px]">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-pm-text select-all">{b.basename}</span>
+                            <span
+                              className="cursor-pointer opacity-60 hover:opacity-100 transition"
+                              onClick={() => {
+                                navigator.clipboard.writeText(b.basename);
+                                if (showAlert) {
+                                  showAlert('Copied', 'Filename copied!', 'success');
+                                }
+                              }}
+                              title="Copy filename"
+                            >
+                              📋
+                            </span>
+                          </div>
+                          <div className="flex gap-2 mt-1 flex-wrap">
+                            {isCloud ? (
+                              <StatusBadge variant="cloud" label="☁️ Cloud Only" />
+                            ) : b.is_uploaded ? (
+                              <StatusBadge variant="cloud" label="📁 Uploaded" />
+                            ) : (
+                              <StatusBadge variant="local" label="💾 Local" />
+                            )}
+                            {b.duration && (
+                              <span className="text-[0.65rem] text-pm-text-secondary">
+                                Completed in: {b.duration}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3.5 font-mono text-[11px]">{formatSqlSize(b.sql_size)}</td>
+                      <td className="px-6 py-3.5 font-mono text-[11px]">
+                        {b.log_size ? formatSqlSize(b.log_size) : '-'}
+                      </td>
+                      <td className="px-6 py-3.5 font-mono text-[11px]">{formatDate(b.date)}</td>
+                      <td className="px-6 py-3.5 text-right">
+                        <div className="inline-flex gap-1.5 items-center justify-end flex-wrap">
                           <button
                             type="button"
-                            onClick={() => onDeleteBackup(b.basename)}
-                            className="pm-btn pm-btn-sm pm-btn-danger text-[0.7rem] px-2.5 py-1 rounded-md"
+                            onClick={() => onStartRestore(b.basename)}
+                            className="pm-btn pm-btn-sm pm-btn-neutral text-[0.7rem] px-2.5 py-1 font-semibold"
                           >
-                            <span>🗑️</span> Delete
+                            <span>{isLocal ? '⚡' : '☁️'}</span> Restore
                           </button>
-                        )}
+                          {isLocal && (
+                            <button
+                              type="button"
+                              onClick={() => onDeleteBackup(b.basename)}
+                              className="pm-btn pm-btn-sm pm-btn-danger-outline text-[0.7rem] px-2.5 py-1 font-semibold"
+                            >
+                              <span>🗑️</span> Delete
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
