@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Key, Package, Settings, ShieldCheck, Sun, Moon, LogOut, AlertCircle, CheckCircle } from 'lucide-react';
-import { LicensesTab, License } from './components/LicensesTab';
+import { LicensesTab, License, UserAccount } from './components/LicensesTab';
 import { PackageTiersTab, PackageTier } from './components/PackageTiersTab';
 import { SettingsTab } from './components/SettingsTab';
 import { SecurityHealthTab } from './components/SecurityHealthTab';
@@ -19,6 +19,7 @@ export const App: React.FC = () => {
 
   const [licenses, setLicenses] = useState<License[]>([]);
   const [tiers, setTiers] = useState<PackageTier[]>([]);
+  const [users, setUsers] = useState<UserAccount[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
@@ -59,6 +60,7 @@ export const App: React.FC = () => {
       if (data.success) {
         setLicenses(data.licenses || []);
         setTiers(data.tiers || []);
+        setUsers(data.users || []);
       } else {
         showAlert('❌ ' + (data.error || 'Failed to fetch admin data'), 'error');
       }
@@ -197,7 +199,7 @@ export const App: React.FC = () => {
       {/* Main Tab Content */}
       <main>
         {activeTab === 'licenses' && (
-          <LicensesTab licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} />
+          <LicensesTab licenses={licenses} users={users} onRefresh={fetchAdminData} showAlert={showAlert} />
         )}
         {activeTab === 'tiers' && (
           <PackageTiersTab tiers={tiers} onRefresh={fetchAdminData} showAlert={showAlert} />

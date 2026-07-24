@@ -157,15 +157,10 @@ class AdminApiController
     private function generate(): void
     {
         $userId = (int)($_POST['user_id'] ?? 0);
-        $tier = $_POST['tier'] ?? 'basic';
-        $expiry = $_POST['expiry'] ?? null;
+        $tier = $_POST['package_tier'] ?? $_POST['tier'] ?? 'basic';
+        $expiry = $_POST['expires_at'] ?? $_POST['expiry'] ?? null;
         if (empty($expiry)) {
             $expiry = null;
-        }
-
-        if ($userId <= 0) {
-            echo json_encode(['success' => false, 'error' => 'A valid client user ID is required.']);
-            return;
         }
 
         try {

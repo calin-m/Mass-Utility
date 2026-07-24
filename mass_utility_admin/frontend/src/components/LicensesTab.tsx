@@ -12,13 +12,22 @@ export interface License {
   created_at: string;
 }
 
+export interface UserAccount {
+  id: number;
+  email: string;
+  company_name: string | null;
+  status: string;
+  created_at: string;
+}
+
 interface LicensesTabProps {
   licenses: License[];
+  users?: UserAccount[];
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
 }
 
-export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, onRefresh, showAlert }) => {
+export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], onRefresh, showAlert }) => {
   // Account Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,6 +35,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, onRefresh, s
   const [creatingAccount, setCreatingAccount] = useState(false);
 
   // License Key Generation State
+  const [genUserId, setGenUserId] = useState<number>(0);
   const [genTier, setGenTier] = useState('basic');
   const [genExpires, setGenExpires] = useState('');
   const [genDomain, setGenDomain] = useState('');
@@ -76,6 +86,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, onRefresh, s
     setGeneratingKey(true);
     try {
       const formData = new FormData();
+      formData.append('user_id', String(genUserId));
       formData.append('package_tier', genTier);
       formData.append('expires_at', genExpires);
       formData.append('store_url', genDomain);
@@ -84,6 +95,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, onRefresh, s
       const data = await res.json();
       if (data.success) {
         showAlert('🔑 New License Key generated successfully!', 'success');
+        setGenUserId(0);
         setGenExpires('');
         setGenDomain('');
         onRefresh();
@@ -197,9 +209,24 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, onRefresh, s
         {/* Generate License Key Card */}
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
           <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2">
-            <Key className="w-4 h-4 text-pm-primary" /> Generate Unassigned License Key
+            <Key className="w-4 h-4 text-pm-primary" /> Issue & Assign License Key
           </h3>
           <form onSubmit={handleGenerateKey} className="mt-4 space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Target Client Account</label>
+              <select
+                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                value={genUserId}
+                onChange={e => setGenUserId(Number(e.target.value))}
+              >
+                <option value={0}>-- Unassigned License (Standalone Key) --</option>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>
+                    👤 {u.email} {u.company_name ? `(${u.company_name})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Package Tier</label>
               <select
