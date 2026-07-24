@@ -1,29 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --pm-bg-main: #0b0b14;
-    --pm-bg-card: rgba(20, 20, 35, 0.65);
-    --pm-border-color: rgba(255, 255, 255, 0.08);
-    --pm-text-primary: #f3f4f6;
-    --pm-text-secondary: #9ca3af;
-    --pm-accent: #8b5cf6;
-    --pm-accent-hover: #6d28d9;
+    --pm-bg-main: #09090e;
+    --pm-bg-card: rgba(18, 18, 26, 0.85);
+    --pm-border-color: #262638;
+    --pm-text-primary: #e2e8f0;
+    --pm-text-secondary: #94a3b8;
+    --pm-accent: #a78bfa;
+    --pm-accent-hover: #8b5cf6;
     --pm-warning: #f59e0b;
     --pm-danger: #ef4444;
     --pm-success: #10b981;
 
     /* V2 Dashboard UI System Tokens */
-    --pm-bg: #09090e;
-    --pm-card-bg: rgba(18, 18, 28, 0.75);
-    --pm-input-bg: rgba(10, 10, 18, 0.85);
-    --pm-primary: #8b5cf6;
-    --pm-primary-dark: #6d28d9;
+    --pm-body-bg: #09090e;
+    --pm-card-bg: #12121a;
+    --pm-input-bg: #171725;
+    --pm-primary: #a78bfa;
+    --pm-primary-dark: #8b5cf6;
+    --pm-scrollbar-thumb: #3a3a54;
 }
 
 body {
-    background-color: var(--pm-bg-main);
+    background-color: var(--pm-body-bg);
     color: var(--pm-text-primary);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -36,14 +37,14 @@ body {
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.3);
-    border-radius: 4px;
+    background: var(--pm-scrollbar-thumb);
+    border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 92, 246, 0.6);
+    background: var(--pm-text-secondary);
 }
 
 /* Background Glow Effect */
@@ -52,7 +53,7 @@ body::before {
     position: absolute;
     width: 700px;
     height: 700px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.05) 0%, transparent 70%);
     top: -10%;
     right: 0;
     z-index: -1;
@@ -87,18 +88,19 @@ body::before {
 }
 
 .pm-card {
-    background: var(--pm-bg-card);
+    background: var(--pm-card-bg);
     border: 1px solid var(--pm-border-color);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-radius: 12px;
     padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .pm-card:hover {
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+    border-color: rgba(167, 139, 250, 0.25);
 }
 
 .pm-card h3 {
@@ -107,7 +109,7 @@ body::before {
     font-weight: 600;
     border-left: 3px solid var(--pm-accent);
     padding-left: 0.75rem;
-    color: #ffffff;
+    color: var(--pm-text-primary);
 }
 
 .pm-grid-2 {
@@ -130,7 +132,7 @@ body::before {
 }
 
 .pm-input {
-    background-color: #05070f;
+    background-color: var(--pm-input-bg);
     border: 1px solid var(--pm-border-color);
     border-radius: 8px;
     color: var(--pm-text-primary);
