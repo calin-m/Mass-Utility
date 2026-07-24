@@ -8,8 +8,15 @@
 <body>
     <div class="pm-admin-wrapper">
         <header class="pm-admin-header">
-            <h2>🛠️ Project Mass - Super Admin Portal</h2>
-            <a href="index.php?action=logout" class="pm-logout-btn">Logout</a>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <h2>🛠️ Project Mass - Super Admin Portal</h2>
+                <span class="pm-badge badge-active" style="font-size: 0.65rem; text-transform: uppercase; tracking-wide: 0.05em;">V2 Modern UI Active</span>
+            </div>
+            <div style="display: flex; items-center; gap: 0.75rem;">
+                <a href="index.php?ui=v1" class="pm-btn pm-btn-sm pm-btn-neutral" style="text-decoration: none;" title="Switch to Legacy V1 TPL Layout">📜 V1 Legacy View</a>
+                <a href="index.php?ui=v2" class="pm-btn pm-btn-sm pm-btn-primary" style="text-decoration: none;" title="Active V2 Glassmorphic Layout">✨ V2 Modern SPA</a>
+                <a href="index.php?action=logout" class="pm-logout-btn">Logout</a>
+            </div>
         </header>
 
         <main class="pm-admin-main">

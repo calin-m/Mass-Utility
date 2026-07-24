@@ -281,9 +281,9 @@ function renderLicenses(licenses) {
         
         let toggleButton = '';
         if (l.status === 'active') {
-            toggleButton = `<button class="pm-btn pm-btn-sm pm-btn-danger" style="margin-left: 0.5rem;" onclick="toggleStatus(${l.id}, 'suspended', '${escapeHtml(tierVal)}', '${escapeHtml(expiryVal)}', '${escapeHtml(domainVal)}')">🛑 Suspend</button>`;
+            toggleButton = `<button class="pm-btn pm-btn-sm pm-btn-danger-outline" style="margin-left: 0.5rem;" onclick="toggleStatus(${l.id}, 'suspended', '${escapeHtml(tierVal)}', '${escapeHtml(expiryVal)}', '${escapeHtml(domainVal)}')">🛑 Suspend</button>`;
         } else {
-            toggleButton = `<button class="pm-btn pm-btn-sm pm-btn-primary" style="margin-left: 0.5rem;" onclick="toggleStatus(${l.id}, 'active', '${escapeHtml(tierVal)}', '${escapeHtml(expiryVal)}', '${escapeHtml(domainVal)}')">✅ Activate</button>`;
+            toggleButton = `<button class="pm-btn pm-btn-sm pm-btn-neutral" style="margin-left: 0.5rem;" onclick="toggleStatus(${l.id}, 'active', '${escapeHtml(tierVal)}', '${escapeHtml(expiryVal)}', '${escapeHtml(domainVal)}')">✅ Activate</button>`;
         }
 
         tr.innerHTML = /* nosec */ `
