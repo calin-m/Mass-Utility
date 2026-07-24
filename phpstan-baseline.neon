@@ -1,0 +1,253 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: mass_utility/src/Controller/Api/DatabaseApiController.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: mass_utility/src/Controller/Api/FileToolsApiController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: mass_utility/src/Controller/Api/FileToolsApiController.php
+
+		-
+			message: '#^Call to an undefined static method Configuration\:\:getGlobalValue\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Call to method log\(\) on an unknown class MassUtility\\Service\\Logger\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Call to method logError\(\) on an unknown class MassUtility\\Service\\Logger\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Elseif condition is always false\.$#'
+			identifier: elseif.alwaysFalse
+			count: 2
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 2
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Parameter \#1 \$logger of class MassUtility\\Service\\FileBackupEngine constructor expects MassUtility\\Service\\BridgeLogger, MassUtility\\Service\\Logger given\.$#'
+			identifier: argument.type
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Parameter \#1 \$logger of class MassUtility\\Service\\TableBackupManager constructor expects MassUtility\\Service\\BridgeLogger, MassUtility\\Service\\Logger given\.$#'
+			identifier: argument.type
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Parameter \$logger of method MassUtility\\Controller\\Api\\GoogleDriveApiController\:\:__construct\(\) has invalid type MassUtility\\Service\\Logger\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Property MassUtility\\Controller\\Api\\GoogleDriveApiController\:\:\$logger has unknown class MassUtility\\Service\\Logger as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Property MassUtility\\Controller\\Api\\GoogleDriveApiController\:\:\$logger in isset\(\) is not nullable nor uninitialized\.$#'
+			identifier: isset.initializedProperty
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Right side of && is always false\.$#'
+			identifier: booleanAnd.rightAlwaysFalse
+			count: 2
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 2
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Variable \$payload on left side of \?\? is never defined\.$#'
+			identifier: nullCoalesce.variable
+			count: 4
+			path: mass_utility/src/Controller/Api/GoogleDriveApiController.php
+
+		-
+			message: '#^Call to an undefined method MassUtility\\Service\\MaintenanceSweeperEngine\:\:purgeGhostImages\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: mass_utility/src/Controller/Api/SweeperApiController.php
+
+		-
+			message: '#^Offset 0 on array\{float, float, float\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: mass_utility/src/Controller/Api/SystemApiController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: mass_utility/src/Controller/Api/SystemApiController.php
+
+		-
+			message: '#^Function bqSQL not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: mass_utility/src/Service/DatabaseProfilerEngine.php
+
+		-
+			message: '#^Call to method logError\(\) on an unknown class MassUtility\\Service\\Logger\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Service/GoogleDriveClient.php
+
+		-
+			message: '#^Parameter \$logger of method MassUtility\\Service\\GoogleDriveClient\:\:__construct\(\) has invalid type MassUtility\\Service\\Logger\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Service/GoogleDriveClient.php
+
+		-
+			message: '#^Property MassUtility\\Service\\GoogleDriveClient\:\:\$logger has unknown class MassUtility\\Service\\Logger as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Service/GoogleDriveClient.php
+
+		-
+			message: '#^Constant _PS_IMG_DIR_ not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: mass_utility/src/Service/MaintenanceSweeperEngine.php
+
+		-
+			message: '#^Call to method executeMutation\(\) on an unknown class MassUtility\\Service\\TransactionProcessor\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Service/MassUpdateCommand.php
+
+		-
+			message: '#^Parameter \$processor of method MassUtility\\Service\\MassUpdateCommand\:\:__construct\(\) has invalid type MassUtility\\Service\\TransactionProcessor\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Service/MassUpdateCommand.php
+
+		-
+			message: '#^Parameter \$repository of method MassUtility\\Service\\MassUpdateCommand\:\:__construct\(\) has invalid type MassUtility\\Service\\MassUpdateLogRepository\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Service/MassUpdateCommand.php
+
+		-
+			message: '#^Property MassUtility\\Service\\MassUpdateCommand\:\:\$processor has unknown class MassUtility\\Service\\TransactionProcessor as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Service/MassUpdateCommand.php
+
+		-
+			message: '#^Property MassUtility\\Service\\MassUpdateCommand\:\:\$repository has unknown class MassUtility\\Service\\MassUpdateLogRepository as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: mass_utility/src/Service/MassUpdateCommand.php
+
+		-
+			message: '#^Property MassUtility\\Service\\MassUpdateCommand\:\:\$repository is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: mass_utility/src/Service/MassUpdateCommand.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: mass_utility/src/Service/ResourceMonitor.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: mass_utility/src/Service/ResourceMonitor.php
+
+		-
+			message: '#^Offset 0 on array\{float, float, float\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: mass_utility/src/Service/ResourceMonitor.php
+
+		-
+			message: '#^Call to an undefined static method Configuration\:\:getGlobalValue\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 4
+			path: mass_utility/src/Service/SettingsManager.php
+
+		-
+			message: '#^Call to an undefined static method Configuration\:\:updateGlobalValue\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: mass_utility/src/Service/SettingsManager.php
+
+		-
+			message: '#^Call to function is_array\(\) with non\-empty\-list\<string\|null\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: mass_utility/src/Service/TableBackupManager.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 2
+			path: mass_utility/src/Service/TableBackupManager.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between ''ps_'' and '''' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: mass_utility/src/Service/TableBackupManager.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between resource and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: mass_utility/src/Service/TableBackupManager.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: mass_utility_dashboard/src/Service/TransactionProcessor.php

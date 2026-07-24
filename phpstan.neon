@@ -1,0 +1,14 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    ignoreErrors:
+        - '#Call to static method getInstance\(\)#'
+    level: 5
+    bootstrapFiles:
+        - .bench/sandbox/prestashop_stubs.php
+    paths:
+        - mass_utility/src
+        - mass_utility_dashboard/src
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false

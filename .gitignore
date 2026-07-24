@@ -13,6 +13,13 @@
 !/.cpanel.yml
 !/README.md
 !/SPEC.md
+!/WORKSPACE.md
+!/GEMINI.md
+!/.ai_pipeline.json
+!/.antigravityrules
+!/.agents/
+!/phpstan.neon
+!/phpstan-baseline.neon
 !/.gitignore
 !/.orchestra/.conductor/tools/install_framework.py
 !/.orchestra/.conductor/tools/cli_api_contract_guard.py

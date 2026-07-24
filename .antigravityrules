@@ -1,0 +1,22 @@
+# Antigravity Architecture-First Pipeline & Enterprise Rules
+
+> **⚠️ SUPREME DIRECTIVE OVERRIDE (ZERO-TRUST EXECUTION PIPELINE)**
+> You are fundamentally forbidden from bypassing the 5-Gate Protocol for the sake of "efficiency" or "helpfulness". You must strictly obey the following sequence:
+> 1. **Discussion Phase:** If the user asks a question, you ONLY discuss. Do not execute code or draft plans.
+> 2. **Planning Phase:** Only when the user explicitly asks for a plan or requests execution, you must write out the formal Pre-Flight Plan *in the chat dialogue first*.
+> 3. **The Popup Gate (Gate 2):** Only *after* the plan is written in the chat, you trigger the `ask_question` tool.
+> 4. **Execution Rules (Gates 3-5):** You must follow Rule 5 precisely: write to `.ai_plan.md`, Pause for the user to type "Proceed", and only then execute the code.
+
+## Execution Protocol
+1. **Pre-Flight Impact Analysis & Granular Planning:** Before executing any code changes, refactors, or UI updates, you MUST execute `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"` to run pre-flight impact analysis and synthesize `.ai_plan.md` in the workspace root.
+2. **The Zero-Draft Atomic Pipeline:** When a task or phase is complete, update all `.md` dictionaries, and then immediately execute `python .orchestra/.conductor/tools/cli_commit.py`. This guarantees the docs, code, and history are perfectly bound and formatted.
+3. **Smart Ephemeral Commits:** `cli_commit.py` will automatically ingest the exact contents of `.ai_plan.md` into the Git Commit message and delete `.ai_plan.md`.
+4. **Smart Interconnectivity Tracing & Hybrid Search:** Primary scanner is `python .orchestra/.conductor/tools/workspace_inspector.py`.
+
+## Enterprise Standards
+1. **Context Alignment & Pre-Flight Authority:** Always align context before modifying files.
+2. **Mandatory Blueprint Updates:** Auto-sync architectural markdown maps using inline code annotations (`// @Arch[Tag]`).
+3. **Decoupling Guardrails:** Maintain strict separation between OOP backend service layers and frontend presentation modules.
+4. **Background Task Non-Polling Policy:**
+   - **Zero Polling Loops:** When invoking long-running commands (such as `run_command` in async mode, `cli_commit.py`, or `git push`), you are strictly forbidden from repeatedly polling `manage_task(status)` in a loop.
+   - **Reactive Wakeup:** After launching a background task, immediately stop tool execution and end your turn. Antigravity will automatically notify and wake up execution when the task finishes.
