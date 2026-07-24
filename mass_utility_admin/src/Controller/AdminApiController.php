@@ -25,6 +25,65 @@ class AdminApiController
         }
     }
 
+    private function status(): void
+    {
+        try {
+            $hasAdmin = $this->auth->hasAnyAdmin();
+            $authenticated = $this->auth->isAuthenticated();
+            echo json_encode([
+                'success' => true,
+                'has_admin' => $hasAdmin,
+                'authenticated' => $authenticated
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function login(): void
+    {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        if (empty($username) || empty($password)) {
+            echo json_encode(['success' => false, 'error' => 'Username and password are required.']);
+            return;
+        }
+
+        if ($this->auth->login($username, $password)) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Invalid username or password.']);
+        }
+    }
+
+    private function setup(): void
+    {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        if (empty($username) || strlen($password) < 8) {
+            echo json_encode(['success' => false, 'error' => 'Username is required and password must be at least 8 characters.']);
+            return;
+        }
+
+        try {
+            $success = $this->auth->createAdmin($username, $password);
+            if ($success) {
+                $this->auth->login($username, $password);
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Failed to initialize admin credentials.']);
+            }
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function logout(): void
+    {
+        $this->auth->logout();
+        echo json_encode(['success' => true]);
+    }
+
     private function list(): void
     {
         try {

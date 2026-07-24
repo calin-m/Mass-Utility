@@ -211,109 +211,11 @@ if (!$hasAdmin) {
 
 $auth = new \MassUtilityAdmin\Service\AdminSettingsManager();
 
-// Simple Router
-if (!$auth->isAuthenticated() && $action !== 'login' && $action !== 'activate_key' && !str_starts_with($action, 'api_')) {
-    // Render Login page
-    require_once dirname(__DIR__) . '/views/templates/login.tpl';
-    exit;
-}
-
-if ($action === 'login') {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
-        if (!empty($username) && !empty($password) && $auth->login($username, $password)) {
-            header("Location: index.php");
-            exit;
-        } else {
-            $error = "Invalid credentials";
-            require_once dirname(__DIR__) . '/views/templates/login.tpl';
-            exit;
-        }
-    } else {
-        header("Location: index.php");
-        exit;
-    }
-}
-
-if ($action === 'logout') {
-    $auth->logout();
-    header("Location: index.php");
-    exit;
-}
-
-if ($action === 'activate_key') {
-    header('Content-Type: application/json');
-    $licenseKey = trim($_POST['license_key'] ?? $_GET['license_key'] ?? '');
-    $storeUrl = trim($_POST['store_url'] ?? $_GET['store_url'] ?? '');
-
-    if (empty($licenseKey) || empty($storeUrl)) {
-        echo json_encode(['success' => false, 'error' => 'License key and store URL are required.']);
-        exit;
-    }
-
-    try {
-        $pdo = new PDO('sqlite:' . $dbPath);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Find the license
-        $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE license_key = ?");
-        $stmt->execute([$licenseKey]);
-        $lic = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$lic) {
-            echo json_encode(['success' => false, 'error' => 'Invalid license key.']);
-            exit;
-        }
-
-        if ($lic['status'] !== 'active') {
-            echo json_encode(['success' => false, 'error' => 'This license is ' . $lic['status'] . '.']);
-            exit;
-        }
-
-        if ($lic['expires_at'] && strtotime($lic['expires_at']) < time()) {
-            echo json_encode(['success' => false, 'error' => 'This license key has expired.']);
-            exit;
-        }
-
-        if (!empty($lic['store_url']) && $lic['store_url'] !== $storeUrl) {
-            echo json_encode(['success' => false, 'error' => 'This license key is already bound to another store: ' . $lic['store_url']]);
-            exit;
-        }
-
-        // Generate dynamic secure bridge token
-        $secureToken = bin2hex(random_bytes(32));
-
-        // Bind the store URL in the admin DB if not already set
-        if (empty($lic['store_url'])) {
-            $stmt = $pdo->prepare("UPDATE pm_licenses SET store_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-            $stmt->execute([$storeUrl, $lic['id']]);
-        }
-
-        // Fetch capabilities of this package tier (Self-healing fallback included)
-        $stmtTier = $pdo->prepare("SELECT capabilities FROM pm_package_tiers WHERE name = ?");
-        $stmtTier->execute([$lic['package_tier']]);
-        $tierCapsJson = $stmtTier->fetchColumn();
-        $capabilities = $tierCapsJson ? json_decode($tierCapsJson, true) : null;
-
-        echo json_encode([
-            'success' => true,
-            'secure_token' => $secureToken,
-            'tier' => $lic['package_tier'],
-            'capabilities' => $capabilities,
-            'expires_at' => $lic['expires_at']
-        ]);
-        exit;
-    } catch (\Exception $e) {
-        echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
-        exit;
-    }
-}
-
 // API Dispatcher
 if (str_starts_with($action, 'api_')) {
     header('Content-Type: application/json');
-    if (!$auth->isAuthenticated()) {
+    $publicApiActions = ['api_status', 'api_login', 'api_setup'];
+    if (!$auth->isAuthenticated() && !in_array($action, $publicApiActions, true)) {
         echo json_encode(['success' => false, 'error' => 'Unauthenticated session. Please log in again.']);
         exit;
     }
@@ -322,28 +224,20 @@ if (str_starts_with($action, 'api_')) {
     exit;
 }
 
-// Dual UI Mode Selector & Session Handler
-$uiMode = $_GET['ui'] ?? $_SESSION['admin_ui_mode'] ?? 'v2';
-if (in_array($uiMode, ['v1', 'v2'], true)) {
-    $_SESSION['admin_ui_mode'] = $uiMode;
-} else {
-    $uiMode = 'v2';
-}
-
-// Compute dynamic basePath for subfolder-safe asset loading
+// Compute dynamic basePath for subfolder-safe React SPA asset loading
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 $basePath = rtrim(dirname($scriptName), '/\\');
 
-// Render Dashboard UI (V2 React SPA vs V1 Legacy TPL)
-if ($uiMode === 'v2') {
-    $v2IndexPath = __DIR__ . '/v2/index.html';
-    if (file_exists($v2IndexPath)) {
-        $html = file_get_contents($v2IndexPath);
-        $html = str_replace('./assets/', $basePath . '/v2/assets/', $html);
-        header('Content-Type: text/html');
-        echo $html;
-        exit;
-    }
+// Serve Pure React 18 SPA
+$v2IndexPath = __DIR__ . '/v2/index.html';
+if (file_exists($v2IndexPath)) {
+    $html = file_get_contents($v2IndexPath);
+    $html = str_replace('./assets/', $basePath . '/v2/assets/', $html);
+    header('Content-Type: text/html');
+    echo $html;
+    exit;
 }
 
-require_once dirname(__DIR__) . '/views/templates/admin_dashboard.tpl';
+header('Content-Type: text/html');
+echo "<h1>Project Mass - Super Admin Portal V2</h1><p>Compiled React SPA not found at: {$v2IndexPath}. Please run build pipeline.</p>";
+exit;

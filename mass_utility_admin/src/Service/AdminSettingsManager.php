@@ -64,4 +64,27 @@ class AdminSettingsManager
             session_destroy();
         }
     }
+
+    public function hasAnyAdmin(): bool
+    {
+        try {
+            $pdo = $this->getDbConnection();
+            $stmt = $pdo->query("SELECT COUNT(*) FROM pm_admins");
+            return ($stmt && (int)$stmt->fetchColumn() > 0);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    public function createAdmin(string $username, string $password): bool
+    {
+        try {
+            $pdo = $this->getDbConnection();
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("INSERT INTO pm_admins (username, password_hash) VALUES (?, ?)");
+            return $stmt->execute([$username, $hash]);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }
