@@ -30,6 +30,33 @@ class AdminSettingsManager
                 username VARCHAR(255) NOT NULL UNIQUE,
                 password_hash VARCHAR(255) NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )'); /* nosec */
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_users ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email VARCHAR(255) NOT NULL UNIQUE,
+                password_hash VARCHAR(255) NOT NULL,
+                company_name VARCHAR(255),
+                status VARCHAR(50) DEFAULT "active",
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_package_tiers ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(50) NOT NULL UNIQUE,
+                capabilities TEXT,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_licenses ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                license_key VARCHAR(100) NOT NULL UNIQUE,
+                package_tier VARCHAR(50) NOT NULL,
+                store_url VARCHAR(255),
+                status VARCHAR(50) DEFAULT "active",
+                expires_at DATETIME,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME,
+                FOREIGN KEY (user_id) REFERENCES pm_users(id),
+                FOREIGN KEY (package_tier) REFERENCES pm_package_tiers(name)
             )');
         } catch (\Throwable $t) {}
         return $pdo;

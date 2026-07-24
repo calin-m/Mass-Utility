@@ -113,7 +113,7 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-pm-bg text-pm-text p-6 transition-colors duration-200">
       {/* Toast Alert Banner */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border text-xs font-bold flex items-center gap-2 ${
+        <div className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border text-xs font-bold flex items-center gap-2 ${
           toast.type === 'success'
             ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
             : 'bg-rose-500/10 text-rose-500 border-rose-500/30'
