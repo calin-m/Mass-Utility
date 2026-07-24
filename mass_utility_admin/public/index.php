@@ -334,7 +334,9 @@ if (in_array($uiMode, ['v1', 'v2'], true)) {
 if ($uiMode === 'v2') {
     $v2IndexPath = __DIR__ . '/v2/index.html';
     if (file_exists($v2IndexPath)) {
-        readfile($v2IndexPath);
+        $html = file_get_contents($v2IndexPath);
+        $html = str_replace(['./assets/', '/v2/assets/'], 'v2/assets/', $html);
+        echo $html;
         exit;
     }
 }
