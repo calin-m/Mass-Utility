@@ -555,36 +555,38 @@ if (strpos($path, '/views/') === 0) {
 // ----------------------------------------------------
 // SECURE GATEWAY MIDDLEWARE
 // ----------------------------------------------------
-$isAuthorized = !empty($_SESSION['employee_id']);
+$licenseKey = $settingsRepo->get('PM_LICENSE_KEY');
+$hasValidLicenseConfig = !empty($licenseKey) && !empty($bridgeToken);
+
+// Session authorization check
+$isAuthorized = !empty($_SESSION['employee_id']) && $hasValidLicenseConfig;
 
 // If X-Bridge-Token header is provided and matches, allow API requests (from the Bridge)
-if (!$isAuthorized && !empty($bridgeToken) && isset($_SERVER['HTTP_X_BRIDGE_TOKEN']) && $_SERVER['HTTP_X_BRIDGE_TOKEN'] === $bridgeToken) {
+if (!$isAuthorized && !empty($bridgeToken) && isset($_SERVER['HTTP_X_BRIDGE_TOKEN']) && $_SERVER['HTTP_X_BRIDGE_TOKEN'] === $bridgeToken && $hasValidLicenseConfig) {
     $isAuthorized = true;
 }
 
 $suspendedMessage = false;
 if ($isAuthorized) {
-    $licenseKey = $settingsRepo->get('PM_LICENSE_KEY');
-    if (!empty($licenseKey)) {
-        try {
-            $dbCheckPath = dirname(__DIR__) . '/data/pm_cloud_backups.db';
-            if (file_exists($dbCheckPath)) {
-                $pdoCheck = new \PDO('sqlite:' . $dbCheckPath);
-                $pdoCheck->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-                $stmtCheck = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSE_STATUS'");
-                $stmtCheck->execute();
-                $valJson = $stmtCheck->fetchColumn();
-                $licStatus = $valJson ? json_decode($valJson, true) : 'active';
-                
-                if ($licStatus === 'suspended' || $licStatus === 'expired') {
-                    // Try to re-verify status with the central server in case it was reactivated
-                    $licServer = 'https://startviziune.ro/mass_utility_admin';
-                    $stmtServer = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSING_SERVER_URL'");
-                    $stmtServer->execute();
-                    $srvVal = $stmtServer->fetchColumn();
-                    if ($srvVal) {
-                        $licServer = json_decode($srvVal, true) ?? $licServer;
-                    }
+    try {
+        $dbCheckPath = dirname(__DIR__) . '/data/pm_cloud_backups.db';
+        if (file_exists($dbCheckPath)) {
+            $pdoCheck = new \PDO('sqlite:' . $dbCheckPath);
+            $pdoCheck->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $stmtCheck = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSE_STATUS'");
+            $stmtCheck->execute();
+            $valJson = $stmtCheck->fetchColumn();
+            $licStatus = $valJson ? json_decode($valJson, true) : 'active';
+            
+            if ($licStatus === 'suspended' || $licStatus === 'expired') {
+                // Try to re-verify status with the central server in case it was reactivated
+                $licServer = 'https://startviziune.ro/mass_utility_admin';
+                $stmtServer = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSING_SERVER_URL'");
+                $stmtServer->execute();
+                $srvVal = $stmtServer->fetchColumn();
+                if ($srvVal) {
+                    $licServer = json_decode($srvVal, true) ?? $licServer;
+                }
                     
                     $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
                     $isReactivated = false;
@@ -622,7 +624,6 @@ if ($isAuthorized) {
             }
         } catch (\Throwable $e) {}
     }
-}
 
 // Webhook endpoints do not require session auth
 $isWebhook = ($path === '/webhook/product-updated');
