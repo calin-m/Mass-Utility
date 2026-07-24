@@ -27,35 +27,37 @@ interface PackageTiersTabProps {
   showAlert: (msg: string, type?: 'success' | 'error') => void;
 }
 
+const DEFAULT_CAPS = {
+  PM_ENABLE_DB_TOOLS: true,
+  PM_ENABLE_FILE_TOOLS: true,
+  PM_ENABLE_GHOST_PURGER: true,
+  PM_ENABLE_GDPR_SWEEPER: true,
+  PM_ENABLE_HISTORY: true,
+  query_visual_execute: false,
+  backup_automation: false,
+  governor_autopilot: false,
+  sweeper_execution: false,
+  rollback_history_limit: 0,
+  backup_destinations: ['local']
+};
+
 export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefresh, showAlert }) => {
   const [selectedTier, setSelectedTier] = useState<string>('basic');
   const [saving, setSaving] = useState(false);
 
-  const activeTierObj = tiers.find(t => t.name.toLowerCase() === selectedTier.toLowerCase()) || {
-    name: selectedTier,
-    capabilities: {
-      PM_ENABLE_DB_TOOLS: true,
-      PM_ENABLE_FILE_TOOLS: true,
-      PM_ENABLE_GHOST_PURGER: true,
-      PM_ENABLE_GDPR_SWEEPER: true,
-      PM_ENABLE_HISTORY: true,
-      query_visual_execute: false,
-      backup_automation: false,
-      governor_autopilot: false,
-      sweeper_execution: false,
-      rollback_history_limit: 0,
-      backup_destinations: ['local']
-    }
+  const getTierCaps = (tierName: string) => {
+    const found = tiers.find(t => t.name.toLowerCase() === tierName.toLowerCase());
+    return { ...DEFAULT_CAPS, ...(found?.capabilities || {}) };
   };
 
-  const [caps, setCaps] = useState(activeTierObj.capabilities);
+  const [caps, setCaps] = useState(() => getTierCaps(selectedTier));
+
+  React.useEffect(() => {
+    setCaps(getTierCaps(selectedTier));
+  }, [tiers, selectedTier]);
 
   const handleTierChange = (tierName: string) => {
     setSelectedTier(tierName);
-    const found = tiers.find(t => t.name.toLowerCase() === tierName.toLowerCase());
-    if (found) {
-      setCaps(found.capabilities);
-    }
   };
 
   const handleToggleCap = (key: keyof typeof caps) => {
