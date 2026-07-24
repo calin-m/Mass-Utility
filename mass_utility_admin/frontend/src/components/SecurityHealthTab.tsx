@@ -61,58 +61,89 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
 
   return (
     <div className="space-y-6 w-full">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-pm-secondary uppercase">API Security Guard</div>
-            <div className="text-lg font-bold text-pm-text">HEALTHY</div>
-          </div>
-        </div>
-
-        <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation flex items-center gap-4">
-          <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl">
-            <Lock className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-pm-secondary uppercase">Token Cryptography</div>
-            <div className="text-lg font-bold text-pm-text">AES-256</div>
-          </div>
-        </div>
-
-        <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation flex items-center gap-4">
-          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl">
-            <Activity className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-pm-secondary uppercase">Session Integrity</div>
-            <div className="text-lg font-bold text-pm-text">VERIFIED</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
-        <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2 mb-4">
-          <Settings className="w-5 h-5 text-pm-primary" /> Super Admin Portal System Status
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-pm-input border border-pm-border rounded-lg flex items-center justify-between">
-            <div>
-              <div className="text-sm font-bold text-pm-text">SQLite Database Path</div>
-              <div className="text-xs text-pm-secondary font-mono">mass_utility_dashboard/data/pm_cloud_backups.db</div>
+      {/* Consolidated System & Security Status Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        {/* 1. API Security Guard */}
+        <div className="bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm pm-card-elevation flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg shrink-0">
+              <ShieldCheck className="w-5 h-5" />
             </div>
-            <span className="px-2.5 py-1 text-xs font-bold bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/30">CONNECTED</span>
+            <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/30">
+              HEALTHY
+            </span>
           </div>
+          <div>
+            <div className="text-xs font-bold text-pm-text">API Security Guard</div>
+            <div className="text-[0.7rem] text-pm-secondary truncate mt-0.5">Request Validation</div>
+          </div>
+        </div>
 
-          <div className="p-4 bg-pm-input border border-pm-border rounded-lg flex items-center justify-between">
-            <div>
-              <div className="text-sm font-bold text-pm-text">V2 SPA Frontend Engine</div>
-              <div className="text-xs text-pm-secondary">React 18 + TypeScript + Vite + Tailwind CSS</div>
+        {/* 2. Token Cryptography */}
+        <div className="bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm pm-card-elevation flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="p-2 bg-purple-500/10 text-purple-400 rounded-lg shrink-0">
+              <Lock className="w-5 h-5" />
             </div>
-            <span className="px-2.5 py-1 text-xs font-bold bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/30">ACTIVE</span>
+            <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/30">
+              AES-256
+            </span>
+          </div>
+          <div>
+            <div className="text-xs font-bold text-pm-text">Token Cryptography</div>
+            <div className="text-[0.7rem] text-pm-secondary truncate mt-0.5">Payload Encryption</div>
+          </div>
+        </div>
+
+        {/* 3. Session Integrity */}
+        <div className="bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm pm-card-elevation flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="p-2 bg-blue-500/10 text-blue-400 rounded-lg shrink-0">
+              <Activity className="w-5 h-5" />
+            </div>
+            <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/30">
+              VERIFIED
+            </span>
+          </div>
+          <div>
+            <div className="text-xs font-bold text-pm-text">Session Integrity</div>
+            <div className="text-[0.7rem] text-pm-secondary truncate mt-0.5">OTT Anti-Replay</div>
+          </div>
+        </div>
+
+        {/* 4. SQLite Database */}
+        <div className="bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm pm-card-elevation flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="p-2 bg-amber-500/10 text-amber-500 rounded-lg shrink-0">
+              <Database className="w-5 h-5" />
+            </div>
+            <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/30">
+              CONNECTED
+            </span>
+          </div>
+          <div>
+            <div className="text-xs font-bold text-pm-text">SQLite Database</div>
+            <div className="text-[0.68rem] text-pm-secondary font-mono truncate mt-0.5" title="mass_utility_dashboard/data/pm_cloud_backups.db">
+              pm_cloud_backups.db
+            </div>
+          </div>
+        </div>
+
+        {/* 5. SPA Frontend Engine */}
+        <div className="bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm pm-card-elevation flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg shrink-0">
+              <Cpu className="w-5 h-5" />
+            </div>
+            <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/30">
+              ACTIVE
+            </span>
+          </div>
+          <div>
+            <div className="text-xs font-bold text-pm-text">V2 SPA Frontend</div>
+            <div className="text-[0.7rem] text-pm-secondary truncate mt-0.5" title="React 18 + TS + Vite + Tailwind">
+              React 18 + Vite + TS
+            </div>
           </div>
         </div>
       </div>
