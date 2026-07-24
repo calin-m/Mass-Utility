@@ -1,4 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Theme Toggle Handler
+    const themeBtn = document.getElementById('pm-theme-toggle-btn');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                document.body.classList.remove('pm-dark-mode');
+                localStorage.setItem('pm-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('pm-dark-mode');
+                localStorage.setItem('pm-theme', 'dark');
+            }
+        });
+    }
+
     // Tab Switching
     const tabBtns = document.querySelectorAll('.pm-tab-btn');
     const tabPanes = document.querySelectorAll('.pm-tab-pane');

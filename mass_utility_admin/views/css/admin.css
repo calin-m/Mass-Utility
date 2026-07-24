@@ -1,6 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
+    color-scheme: light;
+    --pm-bg-main: #f8fafc;
+    --pm-bg-card: #ffffff;
+    --pm-border-color: #cbd5e1;
+    --pm-text-primary: #0f172a;
+    --pm-text-secondary: #334155;
+    --pm-accent: #7c3aed;
+    --pm-accent-hover: #6d28d9;
+    --pm-warning: #d97706;
+    --pm-danger: #dc2626;
+    --pm-success: #059669;
+
+    /* V2 Dashboard UI System Tokens */
+    --pm-body-bg: #f8fafc;
+    --pm-card-bg: #ffffff;
+    --pm-input-bg: #f1f5f9;
+    --pm-primary: #7c3aed;
+    --pm-primary-dark: #6d28d9;
+    --pm-scrollbar-thumb: #cbd5e1;
+}
+
+:root.dark, :root .dark, .dark {
+    color-scheme: dark;
     --pm-bg-main: #09090e;
     --pm-bg-card: rgba(18, 18, 26, 0.85);
     --pm-border-color: #262638;
@@ -12,7 +35,7 @@
     --pm-danger: #ef4444;
     --pm-success: #10b981;
 
-    /* V2 Dashboard UI System Tokens */
+    /* V2 Dashboard Dark UI System Tokens */
     --pm-body-bg: #09090e;
     --pm-card-bg: #12121a;
     --pm-input-bg: #171725;
