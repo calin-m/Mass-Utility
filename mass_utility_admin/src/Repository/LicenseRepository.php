@@ -62,6 +62,12 @@ class LicenseRepository
         return $stmt->execute([$status, $tier, $expiry, $storeUrl, $id]);
     }
 
+    public function deleteLicense(int $id): bool
+    {
+        $stmt = $this->db->prepare("DELETE FROM pm_licenses WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+
     public function verifyLicense(string $key, string $url): array
     {
         $stmt = $this->db->prepare("SELECT * FROM pm_licenses WHERE license_key = ?");

@@ -191,8 +191,23 @@ class AdminApiController
             return;
         }
 
-        try {
             $success = $this->repo->updateLicense($id, $status, $tier, $expiry, $storeUrl, $userId);
+            echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function delete_license(): void
+    {
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Invalid license ID.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->deleteLicense($id);
             echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);

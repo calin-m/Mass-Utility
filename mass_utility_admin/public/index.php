@@ -97,6 +97,27 @@ $auth = new \MassUtilityAdmin\Service\AdminSettingsManager();
 
 $action = $_GET['action'] ?? '';
 
+// Public Licensing Verification / Activation Endpoint (Used by client modules & SaaS Dashboard)
+if ($action === 'activate_key' || $action === 'verify_license' || $action === 'activate' || $action === 'api_activate_key') {
+    header('Content-Type: application/json');
+    $key = trim($_POST['license_key'] ?? $_GET['license_key'] ?? '');
+    $storeUrl = trim($_POST['store_url'] ?? $_GET['store_url'] ?? ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+    if (empty($key)) {
+        echo json_encode(['success' => false, 'error' => 'License key is required.']);
+        exit;
+    }
+    $repo = new \MassUtilityAdmin\Repository\LicenseRepository($auth->getDbConnection());
+    $result = $repo->verifyLicense($key, $storeUrl);
+    if (!empty($result['valid'])) {
+        $result['success'] = true;
+    } else {
+        $result['success'] = false;
+        $result['error'] = $result['message'] ?? 'Invalid license key or activation failed.';
+    }
+    echo json_encode($result);
+    exit;
+}
+
 // API Dispatcher
 if (str_starts_with($action, 'api_')) {
     header('Content-Type: application/json');

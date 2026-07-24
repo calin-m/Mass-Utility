@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key } from 'lucide-react';
+import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2 } from 'lucide-react';
 
 export interface License {
   id: number;
@@ -149,7 +149,6 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     setEditDomain(lic.store_url || '');
     setEditExpires(lic.expires_at || '');
   };
-
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingLicense) return;
@@ -176,6 +175,28 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
       showAlert('❌ Request failed: ' + err.message, 'error');
     } finally {
       setSavingEdit(false);
+    }
+  };
+
+  const handleDeleteLicense = async (id: number, key: string) => {
+    if (!window.confirm(`Are you sure you want to delete license key "${key}" (ID #${id})?\n\nThis action is permanent and cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('id', String(id));
+
+      const res = await fetch('index.php?action=api_delete_license', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        showAlert(`🗑️ License Key #${id} deleted successfully.`, 'success');
+        onRefresh();
+      } else {
+        showAlert('❌ Error: ' + (data.error || 'Failed to delete license'), 'error');
+      }
+    } catch (err: any) {
+      showAlert('❌ Request failed: ' + err.message, 'error');
     }
   };
 
@@ -404,6 +425,13 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                           }`}
                         >
                           {lic.status === 'active' ? '🛑 Suspend' : '✅ Activate'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteLicense(lic.id, lic.license_key)}
+                          className="pm-btn-danger-outline px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                          title="Delete License Key"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
                         </button>
                       </td>
                     </tr>
