@@ -87,7 +87,8 @@ export const MutationHistoryTab: React.FC = () => {
         } catch (err: any) {
           showAlert('Rollback Failed', err.message || 'Operation aborted.', 'error');
         }
-      }
+      },
+      'danger'
     );
   };
 
@@ -106,7 +107,8 @@ export const MutationHistoryTab: React.FC = () => {
         } catch (err: any) {
           showAlert('Re-apply Failed', err.message || 'Operation aborted.', 'error');
         }
-      }
+      },
+      'warning'
     );
   };
 
@@ -114,7 +116,7 @@ export const MutationHistoryTab: React.FC = () => {
     showConfirm(
       'Permanently Delete Ledger Entry',
       `Are you sure you want to permanently erase the ledger transaction for <strong>${job.job_id}</strong>?<br><br><strong>Warning:</strong> This does not undo any database modifications, but deletes the reversion metadata from the disk.`,
-      null,
+      'DELETE',
       async () => {
         try {
           const data = await FetchService.post('delete_mutation_job', { job_id: job.job_id });
@@ -125,7 +127,8 @@ export const MutationHistoryTab: React.FC = () => {
         } catch (err: any) {
           showAlert('Deletion Failed', err.message || 'Operation aborted.', 'error');
         }
-      }
+      },
+      'warning'
     );
   };
 
@@ -133,18 +136,19 @@ export const MutationHistoryTab: React.FC = () => {
     showConfirm(
       'Clear Complete Mutation Ledger',
       'Are you sure you want to permanently delete all mutation history logs from the SQLite database? This cannot be undone.',
-      'CLEAR ALL',
+      'DELETE ALL',
       async () => {
         try {
           const data = await FetchService.post('clear_mutation_history');
           if (data.success) {
-            showToast('All mutation history erased successfully.', 'success');
+            showToast('All mutation history logs cleared.', 'success');
             fetchHistory();
           }
         } catch (err: any) {
           showAlert('Clear Failed', err.message || 'Operation aborted.', 'error');
         }
-      }
+      },
+      'danger'
     );
   };
 

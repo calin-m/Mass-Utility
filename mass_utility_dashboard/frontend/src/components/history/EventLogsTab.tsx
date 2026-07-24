@@ -63,7 +63,7 @@ export const EventLogsTab: React.FC = () => {
     showConfirm(
       'Clear Application Logs',
       'Are you sure you want to permanently erase the SaaS telemetry logs from the host server? This action is irreversible.',
-      'CLEAR',
+      'DELETE ALL',
       async () => {
         try {
           const data = await FetchService.post('clear_saas_log');
@@ -74,7 +74,8 @@ export const EventLogsTab: React.FC = () => {
         } catch (err: any) {
           showAlert('Clear Failed', err.message || 'Failed to clear logs.', 'error');
         }
-      }
+      },
+      'danger'
     );
   };
 

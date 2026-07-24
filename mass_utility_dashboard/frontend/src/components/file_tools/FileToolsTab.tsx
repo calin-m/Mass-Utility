@@ -102,7 +102,7 @@ export const FileToolsTab: React.FC = () => {
         showAlert('Backup Setup Failed', 'Error initializing backup job: ' + err.message, 'error');
         setIsGenerating(false);
       }
-    });
+    }, 'primary');
   };
 
   const handleCancelBackup = async () => {
@@ -126,7 +126,7 @@ export const FileToolsTab: React.FC = () => {
       } catch (err: any) {
         showAlert('Clear Failed', 'Failed to clear backups repository: ' + err.message, 'error');
       }
-    });
+    }, 'danger');
   };
 
   // SSE and Polling worker routines

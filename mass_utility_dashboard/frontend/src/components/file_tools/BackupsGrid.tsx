@@ -114,7 +114,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       } finally {
         setPushingCloudFile(null);
       }
-    });
+    }, 'primary');
   };
 
   const handleCopyText = (text: string) => {
@@ -143,7 +143,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       } catch (err: any) {
         showAlert('Delete Failed', err.message || 'Could not delete backup.', 'error');
       }
-    });
+    }, 'warning');
   };
 
   const handleTogglePin = async (name: string) => {
@@ -176,7 +176,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       } finally {
         setRestoringFile(null);
       }
-    });
+    }, 'danger');
   };
 
   const formatDate = (timestamp: number) => {

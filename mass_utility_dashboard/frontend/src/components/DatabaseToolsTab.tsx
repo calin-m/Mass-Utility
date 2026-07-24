@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { FetchService } from '../utils/FetchService';
+import { useModal } from '../utils/overlay';
 import { BackupSubTab } from './database/BackupSubTab';
 import { RestoreSubTab } from './database/RestoreSubTab';
 import { ProfilerSubTab } from './database/ProfilerSubTab';
@@ -77,6 +78,7 @@ interface SweeperStats {
 }
 
 export const DatabaseToolsTab: React.FC = () => {
+  const { showConfirm, showAlert, showToast, showPrompt } = useModal();
   const [activeSubTab, setActiveSubTab] = useState<SubTabType>('backup');
 
   // 1. Generate Backup state
@@ -197,50 +199,6 @@ export const DatabaseToolsTab: React.FC = () => {
     return dateVal || 'Unknown Date';
   };
 
-  // Environment-aware confirmation and alert wrappers
-  const getGlobalWin = () => {
-    const win = window as any;
-    if (win.showPremiumConfirmModal) return win;
-    if (win.parent && win.parent.showPremiumConfirmModal) return win.parent;
-    return win;
-  };
-
-  const showConfirm = (title: string, message: string, expectedPhrase: string | null, callback: () => void) => {
-    const targetWin = getGlobalWin();
-    if (targetWin.showPremiumConfirmModal) {
-      targetWin.showPremiumConfirmModal(title, message, expectedPhrase, callback);
-    } else {
-      // Local dev fallback
-      if (expectedPhrase) {
-        const input = window.prompt(`Type "${expectedPhrase}" to confirm:\n${message}`);
-        if (input?.toLowerCase() === expectedPhrase.toLowerCase()) {
-          callback();
-        }
-      } else {
-        if (window.confirm(message)) {
-          callback();
-        }
-      }
-    }
-  };
-
-  const showAlert = (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    const targetWin = getGlobalWin();
-    if (targetWin.showPremiumAlert) {
-      targetWin.showPremiumAlert(title, message, type);
-    } else {
-      console.warn(`[ALERT ${type.toUpperCase()}] ${title}: ${message}`);
-    }
-  };
-
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    const targetWin = getGlobalWin();
-    if (targetWin.showToast) {
-      targetWin.showToast(message, type);
-    } else {
-      console.log(`[TOAST ${type.toUpperCase()}] ${message}`);
-    }
-  };
 
   const fetchCategorizedTables = async () => {
     try {
@@ -292,7 +250,6 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   const handleSavePreset = () => {
-    const targetWin = getGlobalWin();
     const promptCallback = async (name: string) => {
       if (!name) return;
       try {
@@ -305,12 +262,7 @@ export const DatabaseToolsTab: React.FC = () => {
       } catch (e) {}
     };
 
-    if (targetWin.showPremiumPromptModal) {
-      targetWin.showPremiumPromptModal('Save Preset', 'Enter new preset name:', 'Preset Name', promptCallback);
-    } else {
-      const name = window.prompt('Enter new preset name:');
-      if (name) promptCallback(name);
-    }
+    showPrompt('Save Preset', 'Enter new preset name:', 'Preset Name', promptCallback);
   };
 
   const handleDeletePreset = () => {
@@ -914,7 +866,7 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   const handleClearBackupHistory = () => {
-    showConfirm('Clear History', 'Clear all backup history? This will delete all local archives permanently.', 'CLEAR ALL', async () => {
+    showConfirm('Clear History', 'Clear all backup history? This will delete all local archives permanently.', 'DELETE ALL', async () => {
       try {
         const res = await FetchService.post('clear_backup_history');
         if (res && res.success) {
@@ -922,7 +874,7 @@ export const DatabaseToolsTab: React.FC = () => {
           fetchBackups();
         }
       } catch (e) {}
-    });
+    }, 'danger');
   };
 
   // Compute stats inside comparison modal

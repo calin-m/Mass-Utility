@@ -130,7 +130,7 @@ function AppContent() {
       const basePath = config.basePath || '';
       const cleanBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
       window.location.href = `${cleanBase}/index.php?action=logout`;
-    });
+    }, 'primary');
   };
 
   return (

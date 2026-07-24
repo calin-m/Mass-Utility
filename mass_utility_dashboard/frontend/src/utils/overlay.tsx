@@ -8,6 +8,7 @@ interface ModalState {
   title: string;
   message: string;
   alertType?: 'success' | 'error' | 'info';
+  variant?: 'danger' | 'warning' | 'primary';
   expectedPhrase?: string | null;
   placeholder?: string;
   onConfirm?: (value?: string) => void;
@@ -22,7 +23,7 @@ interface ToastMessage {
 
 interface ModalContextType {
   showAlert: (title: string, message: string, alertType?: 'success' | 'error' | 'info') => void;
-  showConfirm: (title: string, message: string, expectedPhrase: string | null, onConfirm: () => void) => void;
+  showConfirm: (title: string, message: string, expectedPhrase?: string | null, onConfirm?: () => void, variant?: 'danger' | 'warning' | 'primary') => void;
   showPrompt: (title: string, message: string, placeholder: string, onConfirm: (val: string) => void) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -40,7 +41,8 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     isOpen: false,
     type: 'alert',
     title: '',
-    message: ''
+    message: '',
+    variant: 'danger'
   });
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -67,16 +69,24 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [state.isOpen, state.type, state.expectedPhrase]);
 
   const showAlert = (title: string, message: string, alertType: 'success' | 'error' | 'info' = 'info') => {
-    setState({ isOpen: true, type: 'alert', title, message, alertType });
+    setState({ isOpen: true, type: 'alert', title, message, alertType, variant: alertType === 'error' ? 'danger' : 'primary' });
   };
 
-  const showConfirm = (title: string, message: string, expectedPhrase: string | null, onConfirm: () => void) => {
+  const showConfirm = (
+    title: string,
+    message: string,
+    expectedPhrase: string | null = null,
+    onConfirm: () => void = () => {},
+    variant?: 'danger' | 'warning' | 'primary'
+  ) => {
+    const defaultVariant = variant || (expectedPhrase ? 'danger' : 'primary');
     setState({
       isOpen: true,
       type: 'confirm',
       title,
       message,
       expectedPhrase,
+      variant: defaultVariant,
       onConfirm: () => {
         closeModal();
         onConfirm();
@@ -91,6 +101,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       title,
       message,
       placeholder,
+      variant: 'primary',
       onConfirm: (val) => {
         closeModal();
         onConfirm(val || '');
@@ -113,8 +124,8 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Register on window for legacy standalone interoperability
   useEffect(() => {
-    (window as any).showPremiumConfirmModal = (title: string, message: string, expectedPhrase: string | null, callback: () => void) => {
-      showConfirm(title, message, expectedPhrase, callback);
+    (window as any).showPremiumConfirmModal = (title: string, message: string, expectedPhrase: string | null, callback: () => void, variant?: any) => {
+      showConfirm(title, message, expectedPhrase, callback, variant);
     };
     (window as any).showPremiumAlert = (title: string, message: string, type: any) => {
       showAlert(title, message, type);
@@ -151,6 +162,15 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     closeModal();
   };
 
+  const getConfirmButtonBg = () => {
+    if (state.type === 'alert') {
+      return state.alertType === 'error' ? 'bg-pm-danger hover:bg-red-600' : 'bg-pm-primary hover:bg-violet-600';
+    }
+    if (state.variant === 'warning') return 'bg-amber-600 hover:bg-amber-700';
+    if (state.variant === 'primary') return 'bg-pm-primary hover:bg-violet-600';
+    return 'bg-pm-danger hover:bg-red-600';
+  };
+
   return (
     <ModalContext.Provider value={{ showAlert, showConfirm, showPrompt, showToast }}>
       {children}
@@ -181,10 +201,10 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       {state.isOpen && (
         <div className="pm-modal-overlay fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-[99999] transition-opacity duration-300">
-          <div className="pm-modal-card rounded-2xl p-6 shadow-2xl w-full max-w-lg mx-4 relative animate-fade-in">
-            <div className="pm-modal-header flex justify-between items-center pb-3 mb-4">
+          <div className="pm-modal-card rounded-2xl p-6 shadow-2xl w-full max-w-lg mx-4 relative animate-fade-in border border-pm-border">
+            <div className="pm-modal-header flex justify-between items-center pb-3 mb-4 border-b border-pm-border/30">
               <h2 className="pm-modal-title text-sm font-bold uppercase tracking-wider">{state.title}</h2>
-              <button onClick={closeModal} className="pm-modal-close-icon text-lg font-bold">&times;</button>
+              <button onClick={closeModal} className="pm-modal-close-icon text-lg font-bold hover:text-white">&times;</button>
             </div>
             
             <div 
@@ -198,7 +218,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   type="text"
                   value={inputValue}
                   onChange={handleInputChange}
-                  placeholder={state.expectedPhrase ? `Type '${state.expectedPhrase.toUpperCase()}' to confirm` : state.placeholder}
+                  placeholder={state.expectedPhrase ? `Type "${state.expectedPhrase.toUpperCase()}" to confirm` : state.placeholder}
                   className="w-full px-3 py-2 text-xs border border-pm-border bg-pm-input text-[var(--pm-text-primary)] rounded-lg font-mono text-center focus:outline-none focus:border-pm-primary/50 uppercase"
                   autoFocus
                   onKeyDown={(e) => {
@@ -210,13 +230,13 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               </div>
             )}
 
-            <div className="flex justify-between items-center pt-2">
+            <div className="flex justify-between items-center pt-2 border-t border-pm-border/30">
               <span className="text-[10px] text-pm-text-secondary"><kbd className="bg-pm-input border border-pm-border px-1 py-0.5 rounded text-[9px] mr-1">Esc</kbd> to close</span>
               <div className="flex gap-2">
                 {state.type !== 'alert' && (
                   <button
                     onClick={closeModal}
-                    className="pm-btn pm-btn-neutral px-4 py-2 text-xs font-bold"
+                    className="pm-btn pm-btn-neutral px-4 py-2 text-xs font-bold rounded-lg border border-pm-border hover:bg-pm-border/20 transition"
                   >
                     Cancel
                   </button>
@@ -225,7 +245,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   disabled={isConfirmDisabled}
                   onClick={handleConfirm}
                   className={`pm-btn px-4 py-2 text-xs font-bold rounded-lg text-white transition ${
-                    state.alertType === 'error' || state.type === 'confirm' ? 'bg-pm-danger' : 'bg-pm-success'
+                    isConfirmDisabled ? 'opacity-50 cursor-not-allowed bg-gray-600' : getConfirmButtonBg()
                   }`}
                 >
                   {state.type === 'alert' ? 'OK' : 'Confirm'}
