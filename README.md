@@ -424,9 +424,11 @@ npm run build
 
 ### 10.3 Orchestra Pre-Commit Pipeline & Tools
 The workspace includes automated Orchestra developer tools in `.orchestra/.conductor/tools/`:
-- `python .orchestra/.conductor/tools/workspace_inspector.py matrix`: Audits cross-layer API route contracts, AST symbol maps, and design system inheritance.
-- `python .orchestra/.conductor/tools/cli_security_audit.py`: Scans JS/PHP files for security vulnerabilities.
-- `python .orchestra/.conductor/tools/cli_commit.py`: Atomically ingests `.ai_plan.md` into conventional git commits, runs all 11 build pipeline hooks, and stages changes.
+- `python .orchestra/.conductor/tools/workspace_inspector.py plan "<GOAL>"`: Pre-flight impact analysis, symbol mapping, and pre-flight plan synthesis.
+- `python .bench/scripts/generate_frontend_map.py`: Universal stack-conditioned frontend AST mapper (React TSX/JSX, Vanilla JS, CSS tokens, Smarty/HTML).
+- `python .orchestra/.conductor/tools/cli_doctor.py`: Environment health audit & SHA-256 cryptographic integrity lockfile (`.orchestra/orchestra.lock`) generator.
+- `python .orchestra/.conductor/tools/cli_security_audit.py`: Scans JS/PHP files for security vulnerabilities and high-entropy secrets.
+- `python .orchestra/.conductor/tools/cli_commit.py`: Atomically ingests `.ai_plan.md` into conventional git commits, runs all 11 build pipeline hooks in parallel (with Smart Conditional Vite Auto-Build when `frontend/src/` is modified), and stages changes.
 
 ---
 
