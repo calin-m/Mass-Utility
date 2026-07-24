@@ -312,9 +312,9 @@ class Mass_Utility extends Module
         $licenseSuspended = false;
         // Live status verification check
         if (!empty($secureToken) && !empty($licenseKey)) {
-            $licensingServer = self::LICENSING_SERVER_URL;
+            $licensingServer = $this->getLicensingServerUrl();
             $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $checkUrl = rtrim($licensingServer, '/') . '/?action=activate_key';
+            $checkUrl = rtrim($licensingServer, '/') . '/index.php?action=activate_key';
             
             $ch = curl_init($checkUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -339,16 +339,22 @@ class Mass_Utility extends Module
                         if (class_exists('\Configuration')) {
                             $currentTier = \Configuration::get('PM_LICENSE_TIER');
                         }
-                        if ($currentTier !== $data['tier']) {
+                        if ($currentTier !== ($data['tier'] ?? 'pro')) {
                             if (class_exists('\Configuration')) {
-                                \Configuration::updateValue('PM_LICENSE_TIER', $data['tier']);
+                                \Configuration::updateValue('PM_LICENSE_TIER', $data['tier'] ?? 'pro');
                             }
-                            $this->syncLocalSQLite($licenseKey, $secureToken, $data['tier'], $data['capabilities'] ?? null);
+                            $this->syncLocalSQLite($licenseKey, $secureToken, $data['tier'] ?? 'pro', $data['capabilities'] ?? null);
                         }
                     } else {
                         $serverError = $data['error'] ?? '';
-                        if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false) {
+                        if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false || strpos(strtolower($serverError), 'not found') !== false) {
                             $licenseSuspended = true;
+                            if (class_exists('\Configuration')) {
+                                \Configuration::deleteByName('PM_SECURE_TOKEN');
+                                \Configuration::deleteByName('PM_LICENSE_KEY');
+                            }
+                            $secureToken = '';
+                            $licenseKey = '';
                         }
                     }
                 }

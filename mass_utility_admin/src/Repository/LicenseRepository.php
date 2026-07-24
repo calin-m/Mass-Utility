@@ -148,9 +148,12 @@ class LicenseRepository
             ];
         }
 
+        $secureToken = hash_hmac('sha256', $lic['license_key'] . ':' . ($lic['store_url'] ?? $url), 'pm_secure_bridge_secret_key_2026');
         return [
             'valid' => true,
             'tier' => $lic['package_tier'],
+            'secure_token' => $secureToken,
+            'capabilities' => $features['capabilities'] ?? [],
             'features' => $features
         ];
     }
