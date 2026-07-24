@@ -280,14 +280,18 @@ class Mass_Utility extends Module
                 } else {
                     $data = json_decode((string)$res, true);
                     if ($httpCode === 200 && !empty($data['success'])) {
+                        $token = (string)($data['secure_token'] ?? '');
+                        $tier = (string)($data['tier'] ?? 'pro');
+                        $caps = $data['features']['capabilities'] ?? $data['capabilities'] ?? null;
+
                         if (class_exists('\Configuration')) {
                             \Configuration::updateValue('PM_LICENSE_KEY', $licenseKey);
-                            \Configuration::updateValue('PM_SECURE_TOKEN', $data['secure_token']);
-                            \Configuration::updateValue('PM_LICENSE_TIER', $data['tier']);
+                            \Configuration::updateValue('PM_SECURE_TOKEN', $token);
+                            \Configuration::updateValue('PM_LICENSE_TIER', $tier);
                             \Configuration::updateValue('PM_SAAS_DASHBOARD_URL', rtrim($licensingServer, '/') . '/../mass_utility_dashboard/');
                         }
                         
-                        $this->syncLocalSQLite($licenseKey, $data['secure_token'], $data['tier'], $data['capabilities'] ?? null);
+                        $this->syncLocalSQLite($licenseKey, $token, $tier, is_array($caps) ? $caps : null);
                         
                         $redirectUrl = $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility';
                         \Tools::redirectAdmin($redirectUrl);
@@ -939,8 +943,10 @@ class Mass_Utility extends Module
         </div>';
     }
 
-    private function syncLocalSQLite(string $licenseKey, string $secureToken, string $tier = 'pro', ?array $capabilities = null): void
+    private function syncLocalSQLite(string $licenseKey, ?string $secureToken = '', ?string $tier = 'pro', ?array $capabilities = null): void
     {
+        $secureToken = (string)($secureToken ?? '');
+        $tier = (string)($tier ?? 'pro');
         try {
             $dbPath = _PS_ROOT_DIR_ . '/mass_utility_dashboard/data/pm_cloud_backups.db';
             $dbDir = dirname($dbPath);
