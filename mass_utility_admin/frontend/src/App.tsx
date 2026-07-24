@@ -29,8 +29,7 @@ export const App: React.FC = () => {
 
   const getApiUrl = (action: string) => {
     const path = window.location.pathname;
-    const basePath = path.endsWith('.php') ? path : `${path.replace(/\/$/, '')}/index.php`;
-    return `${basePath}?action=${action}`;
+    return `${path}?action=${action}`;
   };
 
   const checkStatus = async () => {

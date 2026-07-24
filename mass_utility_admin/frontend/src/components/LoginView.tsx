@@ -22,7 +22,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
       formData.append('password', password);
 
       const path = window.location.pathname;
-      const apiUrl = (path.endsWith('.php') ? path : `${path.replace(/\/$/, '')}/index.php`) + '?action=api_login';
+      const apiUrl = path + '?action=api_login';
       const res = await fetch(apiUrl, { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {

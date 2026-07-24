@@ -114,8 +114,8 @@ if (str_starts_with($action, 'api_')) {
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 $scriptDir = rtrim(dirname($scriptName), '/\\');
 $basePath = (str_ends_with($scriptDir, '/public') || str_ends_with($scriptDir, '\public'))
-    ? $scriptDir
-    : $scriptDir . '/public';
+    ? substr($scriptDir, 0, -7)
+    : $scriptDir;
 
 // Dynamic Asset Discovery (glob scanner for compiled Vite bundles)
 $assetsDir = __DIR__ . '/v2/assets';

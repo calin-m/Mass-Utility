@@ -26,7 +26,7 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSetupSuccess }) => {
       formData.append('password', password);
 
       const path = window.location.pathname;
-      const apiUrl = (path.endsWith('.php') ? path : `${path.replace(/\/$/, '')}/index.php`) + '?action=api_setup';
+      const apiUrl = path + '?action=api_setup';
       const res = await fetch(apiUrl, { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
