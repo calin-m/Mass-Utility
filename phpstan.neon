@@ -10,5 +10,6 @@ parameters:
     paths:
         - mass_utility/src
         - mass_utility_dashboard/src
+        - mass_utility_admin/src
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false
