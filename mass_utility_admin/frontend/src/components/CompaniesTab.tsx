@@ -10,9 +10,10 @@ interface CompaniesTabProps {
   licenses: any[];
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
+  onInspectClient?: (user: any) => void;
 }
 
-export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, licenses, onRefresh, showAlert }) => {
+export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, licenses, onRefresh, showAlert, onInspectClient }) => {
   const [activeSubView, setActiveSubView] = useState<'list' | 'details'>('list');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
@@ -41,6 +42,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
           onBack={handleBackToList}
           onRefresh={onRefresh}
           showAlert={showAlert}
+          onInspectClient={onInspectClient}
         />
       ) : (
         <CompanyListView

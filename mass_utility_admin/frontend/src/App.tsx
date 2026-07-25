@@ -113,6 +113,12 @@ export const App: React.FC = () => {
   if (!authenticated) {
     return <LoginView onLoginSuccess={() => { setAuthenticated(true); fetchAdminData(); }} />;
   }
+  const [inspectedClient, setInspectedClient] = useState<any | null>(null);
+
+  const handleInspectClient = (client: any) => {
+    setInspectedClient(client);
+    setActiveTab('clients');
+  };
 
   return (
     <div className="min-h-screen bg-pm-bg text-pm-text p-4 md:p-8 transition-colors duration-200">
@@ -169,7 +175,10 @@ export const App: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('clients')}
+            onClick={() => {
+              setInspectedClient(null);
+              setActiveTab('clients');
+            }}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
               activeTab === 'clients' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
@@ -220,10 +229,10 @@ export const App: React.FC = () => {
       {/* Main Tab Content */}
       <main>
         {activeTab === 'companies' && (
-          <CompaniesTab companies={companies} users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} />
+          <CompaniesTab companies={companies} users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} onInspectClient={handleInspectClient} />
         )}
         {activeTab === 'clients' && (
-          <ClientsTab users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} />
+          <ClientsTab users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} initialSelectedUser={inspectedClient} />
         )}
         {activeTab === 'licenses' && (
           <LicensesTab licenses={licenses} users={users} onRefresh={fetchAdminData} showAlert={showAlert} />
