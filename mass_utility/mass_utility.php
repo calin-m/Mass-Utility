@@ -486,7 +486,7 @@ class Mass_Utility extends Module
         return $protocol . $host . $this->_path . 'api.php';
     }
 
-    private function encryptToken(int $employeeId, string $bridgeToken, int $ttlSeconds = 60): string
+    private function encryptToken(int $employeeId, string $bridgeToken, int $ttlSeconds = 300): string
     {
         $payload = json_encode([
             'id_employee' => $employeeId,

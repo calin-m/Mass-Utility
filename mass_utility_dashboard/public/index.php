@@ -133,11 +133,14 @@ if (isset($_GET['ott']) && !empty($bridgeToken)) {
             $payload = json_decode($decrypted, true);
             if (isset($payload['id_employee'], $payload['expiry']) && $payload['expiry'] >= time()) {
                 $_SESSION['employee_id'] = $payload['id_employee'];
+                $_SESSION['last_activity'] = time();
                 
                 // Store dynamically injected Bridge URL if present
                 if (!empty($payload['bridge_url'])) {
                     $settingsRepo->set('PM_BRIDGE_URL', $payload['bridge_url']);
                 }
+                
+                @session_write_close();
                 
                 // Strip the OTT from URL parameters and redirect to avoid token leakage
                 $queryParams = $_GET;
