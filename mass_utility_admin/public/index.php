@@ -153,8 +153,11 @@ $cssFiles = glob($assetsDir . '/index-*.css');
 $jsFile = !empty($jsFiles) ? basename($jsFiles[0]) : '';
 $cssFile = !empty($cssFiles) ? basename($cssFiles[0]) : '';
 
-$jsUrl = $basePath . '/v2/assets/' . $jsFile;
-$cssUrl = $basePath . '/v2/assets/' . $cssFile;
+$jsVersion = !empty($jsFiles) && file_exists($jsFiles[0]) ? filemtime($jsFiles[0]) : time();
+$cssVersion = !empty($cssFiles) && file_exists($cssFiles[0]) ? filemtime($cssFiles[0]) : time();
+
+$jsUrl = $basePath . '/v2/assets/' . $jsFile . '?v=' . $jsVersion;
+$cssUrl = $basePath . '/v2/assets/' . $cssFile . '?v=' . $cssVersion;
 
 header('Content-Type: text/html; charset=UTF-8');
 ?>

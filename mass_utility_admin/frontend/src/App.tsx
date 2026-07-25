@@ -127,10 +127,13 @@ export const App: React.FC = () => {
 
       {/* Header Bar */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-8 border-b border-pm-border gap-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-base font-bold tracking-tight text-pm-text flex items-center gap-2">
-            🛠️ Mass Utility - Super Admin Portal
-          </h2>
+        <div>
+          <h1 className="text-2xl font-black tracking-wider bg-gradient-to-r from-pm-primary to-pm-purple bg-clip-text text-transparent uppercase">
+            🛠️ Mass Utility
+          </h1>
+          <p className="text-xs mt-1 uppercase tracking-widest text-pm-secondary font-bold">
+            Super Admin Portal &amp; Licensing Control
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
