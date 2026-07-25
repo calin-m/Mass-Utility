@@ -145,18 +145,40 @@ if ($action === 'verify_session') {
     $isLoggedIn = false;
     $employeeId = 0;
     
+    $reqEmpId = (int)($_POST['employee_id'] ?? $_GET['employee_id'] ?? 0);
+
+    // 1. Check native PrestaShop session context
     if (class_exists('Context') && Context::getContext() && isset(Context::getContext()->employee)) {
         $emp = Context::getContext()->employee;
-        if (is_object($emp) && !empty($emp->id) && $emp->id > 0) {
+        if (is_object($emp) && !empty($emp->id) && (int)$emp->id > 0) {
             $isLoggedIn = true;
             $employeeId = (int)$emp->id;
         }
     }
     
-    $reqEmpId = (int)($_POST['employee_id'] ?? $_GET['employee_id'] ?? 0);
-    if ($reqEmpId > 0 && !$isLoggedIn && class_exists('Context') && Context::getContext()) {
+    if (!$isLoggedIn && $reqEmpId > 0 && class_exists('Context') && Context::getContext()) {
         $cookie = Context::getContext()->cookie;
         if ($cookie && isset($cookie->id_employee) && (int)$cookie->id_employee === $reqEmpId) {
+            $isLoggedIn = true;
+            $employeeId = $reqEmpId;
+        }
+    }
+
+    // 2. Server-to-server cURL ping fallback (Validated by X-Bridge-Token above)
+    if (!$isLoggedIn && $reqEmpId > 0 && $tokenValid) {
+        if (class_exists('Db')) {
+            try {
+                $sql = 'SELECT `id_employee` FROM `' . _DB_PREFIX_ . 'employee` WHERE `id_employee` = ' . (int)$reqEmpId . ' AND `active` = 1';
+                $validEmp = (int)\Db::getInstance()->getValue($sql);
+                if ($validEmp > 0) {
+                    $isLoggedIn = true;
+                    $employeeId = $validEmp;
+                }
+            } catch (\Throwable $e) {
+                $isLoggedIn = true;
+                $employeeId = $reqEmpId;
+            }
+        } else {
             $isLoggedIn = true;
             $employeeId = $reqEmpId;
         }

@@ -347,9 +347,10 @@ class Mass_Utility extends Module
                             $this->syncLocalSQLite($licenseKey, $secureToken, $data['tier'] ?? 'pro', $data['capabilities'] ?? null);
                         }
                     } else {
-                        $serverError = $data['error'] ?? '';
-                        if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false || strpos(strtolower($serverError), 'not found') !== false) {
+                        $serverError = $data['error'] ?? ($data['message'] ?? '');
+                        if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false) {
                             $licenseSuspended = true;
+                        } elseif (strpos(strtolower($serverError), 'not found') !== false) {
                             if (class_exists('\Configuration')) {
                                 \Configuration::deleteByName('PM_SECURE_TOKEN');
                                 \Configuration::deleteByName('PM_LICENSE_KEY');
@@ -362,7 +363,7 @@ class Mass_Utility extends Module
             }
         }
 
-        if (empty($secureToken)) {
+        if (empty($secureToken) && !$licenseSuspended) {
             return $this->renderActivationForm($activationError);
         }
         

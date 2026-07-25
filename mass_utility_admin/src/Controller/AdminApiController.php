@@ -58,6 +58,11 @@ class AdminApiController
 
     private function setup(): void
     {
+        if ($this->auth->hasAnyAdmin()) {
+            echo json_encode(['success' => false, 'error' => 'Admin account already initialized. Please log in using your admin credentials.']);
+            return;
+        }
+
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
         if (empty($username) || strlen($password) < 8) {
