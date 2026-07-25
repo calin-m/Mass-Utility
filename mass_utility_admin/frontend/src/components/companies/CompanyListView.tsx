@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle, Eye, Copy, Check, RefreshCw } from 'lucide-react';
+import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { BaseModal } from '../common/BaseModal';
@@ -48,6 +48,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
   const [createOwnerAccount, setCreateOwnerAccount] = useState(false);
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
+  const [showOwnerPassword, setShowOwnerPassword] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [copiedVatId, setCopiedVatId] = useState<number | null>(null);
@@ -99,6 +100,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
             const userForm = new FormData();
             userForm.append('email', ownerEmail.trim());
             userForm.append('password', ownerPassword.trim());
+            userForm.append('company', name.trim());
             userForm.append('company_name', name.trim());
             await fetch(getApiUrl('api_create_user'), { method: 'POST', body: userForm });
             ownerMsg = ' & Primary Owner Account created!';
@@ -329,17 +331,17 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                             type="button"
                             onClick={() => onSelectCompany(c)}
                             className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                            title="Inspect Team & Licenses Workspace"
+                            title="Inspect Company 360° Details View"
                           >
-                            <Eye className="w-3.5 h-3.5" /> Team
+                            <Eye className="w-3.5 h-3.5 text-purple-400" /> View
                           </button>
                           <button
                             type="button"
-                            onClick={() => openEditModal(c)}
-                            className="pm-btn-neutral p-1.5 rounded text-xs font-semibold flex items-center gap-1 transition"
-                            title="Edit Profile"
+                            onClick={() => onSelectCompany(c)}
+                            className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                            title="Edit Company Profile Details"
                           >
-                            <Edit className="w-3.5 h-3.5" />
+                            <Edit className="w-3.5 h-3.5 text-indigo-400" /> Edit
                           </button>
                           <button
                             type="button"
@@ -426,14 +428,24 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                       Generate Strong Pass
                     </button>
                   </div>
-                  <input
-                    type="text"
-                    required={createOwnerAccount}
-                    value={ownerPassword}
-                    onChange={e => setOwnerPassword(e.target.value)}
-                    placeholder="Set strong password..."
-                    className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 text-xs font-mono text-pm-text focus:border-pm-primary focus:outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showOwnerPassword ? "text" : "password"}
+                      required={createOwnerAccount}
+                      value={ownerPassword}
+                      onChange={e => setOwnerPassword(e.target.value)}
+                      placeholder="Set strong password..."
+                      className="w-full bg-pm-input border border-pm-border rounded-lg pl-3 pr-9 py-1.5 text-xs font-mono text-pm-text focus:border-pm-primary focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowOwnerPassword(!showOwnerPassword)}
+                      className="absolute right-2.5 top-2 text-pm-secondary hover:text-pm-text transition"
+                      title={showOwnerPassword ? "Hide Password" : "Show Password"}
+                    >
+                      {showOwnerPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

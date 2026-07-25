@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye } from 'lucide-react';
+import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
 
@@ -547,14 +547,24 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                         Generate Strong Pass
                       </button>
                     </div>
-                    <input
-                      type="text"
-                      required
-                      value={newMemberPassword}
-                      onChange={e => setNewMemberPassword(e.target.value)}
-                      placeholder="Set password..."
-                      className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:outline-none focus:border-purple-500"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showMemberPassword ? "text" : "password"}
+                        required
+                        value={newMemberPassword}
+                        onChange={e => setNewMemberPassword(e.target.value)}
+                        placeholder="Set password..."
+                        className="w-full bg-pm-card border border-pm-border rounded-lg pl-3 pr-9 py-2 text-xs font-mono text-pm-text focus:outline-none focus:border-purple-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowMemberPassword(!showMemberPassword)}
+                        className="absolute right-2.5 top-2.5 text-pm-secondary hover:text-pm-text transition"
+                        title={showMemberPassword ? "Hide Password" : "Show Password"}
+                      >
+                        {showMemberPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
 

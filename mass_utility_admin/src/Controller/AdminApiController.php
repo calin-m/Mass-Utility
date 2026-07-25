@@ -199,9 +199,10 @@ class AdminApiController
 
     private function create_user(): void
     {
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
-        $company = $_POST['company'] ?? null;
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+        $companyRaw = trim($_POST['company'] ?? $_POST['company_name'] ?? '');
+        $company = !empty($companyRaw) ? $companyRaw : null;
 
         if (empty($email) || empty($password)) {
             echo json_encode(['success' => false, 'error' => 'Email and password are required.']);
