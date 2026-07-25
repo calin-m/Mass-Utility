@@ -352,6 +352,14 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                     <td className="p-3 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
+                          variant="neutral"
+                          size="sm"
+                          icon={Eye}
+                          onClick={() => onSelectCompany(c, 'overview')}
+                        >
+                          {t('btn_inspect_company')}
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="sm"
                           icon={Edit}

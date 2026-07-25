@@ -345,7 +345,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             icon={CheckCircle}
           />
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-2">
+          <div className="grid grid-cols-2 gap-3 my-2">
             <StatCard label={t('stat_total_keys')} value={licenses.length} icon={Key} color="purple" />
             <StatCard label={t('stat_active_keys')} value={licenses.filter(l => l.status === 'active').length} icon={CheckCircle} color="emerald" />
             <StatCard label={t('stat_expiring_soon')} value={expiringSoonCount} icon={Clock} color="amber" />

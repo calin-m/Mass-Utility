@@ -506,6 +506,14 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                       <td className="p-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <Button
+                            variant="neutral"
+                            size="sm"
+                            icon={Eye}
+                            onClick={() => onSelectClient(user, 'overview')}
+                          >
+                            {t('btn_inspect_client')}
+                          </Button>
+                          <Button
                             variant="ghost"
                             size="sm"
                             icon={Edit}
