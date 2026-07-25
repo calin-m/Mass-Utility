@@ -41,6 +41,15 @@ const fr: TranslationSchema = {
   btn_show_password: 'Afficher le Mot de Passe',
   btn_regenerate: 'Régénérer',
   btn_save_expiration: 'Enregistrer l’Expiration',
+  btn_back: 'Retour à l’Annuaire',
+  btn_inspect_company: 'Inspecter l’Entreprise',
+  btn_inspect_client: 'Inspecter le Client',
+
+  // Sub-Tab Navigation
+  subtab_overview: 'Aperçu & Licences',
+  subtab_team: 'Membres d’Équipe',
+  subtab_settings: 'Paramètres du Profil d’Entreprise',
+  subtab_client_settings: 'Paramètres du Compte Client',
 
   // Stat Card Labels
   stat_total_companies: 'Total Entreprises',

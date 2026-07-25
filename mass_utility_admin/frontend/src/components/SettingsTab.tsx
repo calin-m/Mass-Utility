@@ -59,7 +59,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
     const newLang = e.target.value as Language;
     setLanguage(newLang);
     const selectedOpt = SUPPORTED_LANGUAGES.find(l => l.code === newLang);
-    showAlert(`🌐 Interface language changed to ${selectedOpt?.flag} ${selectedOpt?.label}`, 'success');
+    showAlert(`🌐 Interface language changed to ${selectedOpt?.flag} ${selectedOpt?.name}`, 'success');
   };
 
   return (
@@ -128,7 +128,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
               onChange={handleLanguageChange}
               options={SUPPORTED_LANGUAGES.map(l => ({
                 value: l.code,
-                label: `${l.flag}  ${l.label}`
+                label: `${l.flag}  ${l.name}`
               }))}
             />
           </div>

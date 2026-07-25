@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Mail, Building, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
+import { useTranslation } from '../../i18n/LanguageContext';
 
 interface ClientDetailsViewProps {
   user: UserAccount;
@@ -14,6 +15,7 @@ interface ClientDetailsViewProps {
 }
 
 export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], initialTab, onBack, onRefresh, showAlert }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
   const [selectedTier, setSelectedTier] = useState('pro');
@@ -210,7 +212,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                   : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
               }`}
             >
-              <Mail className="w-3.5 h-3.5" /> Overview &amp; Keys
+              <Mail className="w-3.5 h-3.5" /> {t('subtab_overview')}
             </button>
             <button
               type="button"
@@ -221,7 +223,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                   : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
               }`}
             >
-              <Edit className="w-3.5 h-3.5" /> Edit Client &amp; Settings
+              <Edit className="w-3.5 h-3.5" /> {t('subtab_client_settings')}
             </button>
           </div>
 
@@ -230,7 +232,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
             onClick={() => setShowResetModal(true)}
             className="pm-btn-neutral px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5"
           >
-            <Key className="w-3.5 h-3.5 text-amber-400" /> Reset Password
+            <Key className="w-3.5 h-3.5 text-amber-400" /> {t('btn_reset_password')}
           </button>
 
           <button

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle } from 'lucide-react';
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
+import { Button } from '../common/Button';
+import { useTranslation } from '../../i18n/LanguageContext';
 
 interface CompanyDetailsViewProps {
   company: Company;
@@ -15,6 +17,7 @@ interface CompanyDetailsViewProps {
 }
 
 export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
   const [copiedVat, setCopiedVat] = useState(false);
@@ -293,7 +296,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                   : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
               }`}
             >
-              <Eye className="w-3.5 h-3.5" /> Overview
+              <Eye className="w-3.5 h-3.5" /> {t('subtab_overview')}
             </button>
             <button
               type="button"
@@ -304,7 +307,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                   : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
               }`}
             >
-              <Edit className="w-3.5 h-3.5" /> Edit Profile &amp; Settings
+              <Edit className="w-3.5 h-3.5" /> {t('subtab_settings')}
             </button>
           </div>
 

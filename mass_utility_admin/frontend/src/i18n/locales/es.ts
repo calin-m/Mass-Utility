@@ -41,6 +41,15 @@ const es: TranslationSchema = {
   btn_show_password: 'Mostrar Contraseña',
   btn_regenerate: 'Regenerar',
   btn_save_expiration: 'Guardar Expiración',
+  btn_back: 'Volver al Directorio',
+  btn_inspect_company: 'Inspeccionar Empresa',
+  btn_inspect_client: 'Inspeccionar Cliente',
+
+  // Sub-Tab Navigation
+  subtab_overview: 'Visión General & Licencias',
+  subtab_team: 'Miembros del Equipo',
+  subtab_settings: 'Ajustes del Perfil de Empresa',
+  subtab_client_settings: 'Ajustes de la Cuenta de Cliente',
 
   // Stat Card Labels
   stat_total_companies: 'Total Empresas',

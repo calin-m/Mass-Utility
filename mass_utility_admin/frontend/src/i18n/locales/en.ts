@@ -39,6 +39,15 @@ const en = {
   btn_show_password: 'Show Password',
   btn_regenerate: 'Regenerate',
   btn_save_expiration: 'Save Expiration',
+  btn_back: 'Back to Directory',
+  btn_inspect_company: 'Inspect Company',
+  btn_inspect_client: 'Inspect Client',
+
+  // Sub-Tab Navigation
+  subtab_overview: 'Overview & Licenses',
+  subtab_team: 'Team Members',
+  subtab_settings: 'Company Profile Settings',
+  subtab_client_settings: 'Client Account Settings',
 
   // Stat Card Labels
   stat_total_companies: 'Total Companies',

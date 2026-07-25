@@ -41,6 +41,15 @@ const ro: TranslationSchema = {
   btn_show_password: 'Arată Parola',
   btn_regenerate: 'Regenerează',
   btn_save_expiration: 'Salvează Expirarea',
+  btn_back: 'Înapoi la Director',
+  btn_inspect_company: 'Inspectează Compania',
+  btn_inspect_client: 'Inspectează Clientul',
+
+  // Sub-Tab Navigation
+  subtab_overview: 'General & Licențe',
+  subtab_team: 'Membri Echipă',
+  subtab_settings: 'Setări Profil Companie',
+  subtab_client_settings: 'Setări Cont Client',
 
   // Stat Card Labels
   stat_total_companies: 'Total Companii',
