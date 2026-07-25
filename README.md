@@ -1,8 +1,8 @@
 # 🗃️ Mass Utility - Consolidated Technical Manual & Reference Guide
 
-Welcome to the **Mass Utility Framework**, an enterprise-grade, zero-trust decoupled administration suite designed for PrestaShop.
+Welcome to the **Mass Utility Framework**, an enterprise-grade, zero-trust decoupled administration suite and B2B SaaS licensing infrastructure designed for PrestaShop.
 
-This framework separates your **Presentation / SaaS Dashboard UI (V2 React 18 SPA)** from your **PrestaShop Active Core** using a secure, transactional HTTP Bridge API. By segregating complex operations (such as AST database operations, chunked backups, search index sweeps, and local transaction log rollbacks) from the main database execution stream, Mass Utility preserves store speed and hosting limits while offering maximum operational security.
+This framework separates your **Presentation / SaaS Dashboard UI (V2 React 18 SPA)** and **Super-Admin Licensing Portal (V2 React 18 SPA)** from your **PrestaShop Active Core** using a secure, transactional HTTP Bridge API. By segregating complex operations (such as AST database operations, chunked backups, search index sweeps, B2B license pool management, and local transaction log rollbacks) from the main database execution stream, Mass Utility preserves store speed and hosting limits while offering maximum operational security.
 
 ---
 
@@ -11,7 +11,7 @@ This framework separates your **Presentation / SaaS Dashboard UI (V2 React 18 SP
 Mass Utility is structured as a decoupled monorepo containing three primary subsystems:
 1. **Native PrestaShop Module (`mass_utility/`)**: The transactional bridge executing operations on PrestaShop core tables (MariaDB) and enforcing CloudLinux LVE safety bounds.
 2. **Standalone SaaS Dashboard (`mass_utility_dashboard/`)**: The modern V2 Single-Page Application (SPA) built with **React 18 + TypeScript + Vite** used by merchant operators to write AST queries, manage files, inspect diffs, and control backup repositories.
-3. **Super-Admin Licensing Portal (`mass_utility_admin/`)**: The licensing server used by system operators to issue license keys, update subscription tiers, and enforce domain bindings.
+3. **Super-Admin Licensing & B2B Portal (`mass_utility_admin/`)**: The centralized licensing server and B2B directory used by system operators to manage company profiles, issue company license pools, reassign team members, and enforce domain bindings.
 
 ---
 
@@ -20,8 +20,9 @@ Mass Utility is structured as a decoupled monorepo containing three primary subs
 ```mermaid
 graph TD
     subgraph Browser ["Client Browser"]
-        V2React["V2 React 18 SPA Dashboard<br/>(React, TypeScript, Vite)"]
-        V1Smarty["V1 Legacy TPL Views<br/>(Smarty Fallback)"]
+        V2DashboardReact["V2 React 18 SPA Dashboard<br/>(React, TypeScript, Vite)"]
+        V2AdminReact["V2 React 18 SPA Admin Portal<br/>(React, TypeScript, Vite)"]
+        V1Smarty["V1 Legacy TPL Views<br/>(Smarty Launcher Fallback)"]
     end
 
     subgraph DashboardServer ["Dashboard Subsystem (mass_utility_dashboard)"]
@@ -40,25 +41,27 @@ graph TD
     end
 
     subgraph LicensingServer ["Super-Admin Portal (mass_utility_admin)"]
-        LicenseAdmin["Licensing Portal<br/>(public/index.php)"]
-        LicenseDB[("Licensing Registry<br/>SQLite")]
+        LicenseAdmin["Licensing Gateway<br/>(public/index.php)"]
+        LicenseRepo["License & B2B Repository<br/>(LicenseRepository.php)"]
     end
 
-    V2React -->|AJAX / Fetch| FrontRouter
-    V1Smarty -->|Legacy POST| FrontRouter
+    V2DashboardReact -->|AJAX / Fetch| FrontRouter
+    V2AdminReact -->|AJAX / Fetch| LicenseAdmin
+    V1Smarty -->|1-Click OTT Launch| FrontRouter
     FrontRouter --> OTTBroker
     OTTBroker <--> SQLiteDB
     FrontRouter --> DownloadGuard
     DownloadGuard --> SidecarStorage
 
-    V2React -->|X-Bridge-Token HTTP| BridgeAPI
+    V2DashboardReact -->|X-Bridge-Token HTTP| BridgeAPI
     BridgeAPI --> SafetyGovernor
     SafetyGovernor --> ASTCompiler
     ASTCompiler --> MariaDB
     BridgeAPI --> SidecarStorage
 
-    BridgeAPI -->|cURL License Verification| LicenseAdmin
-    LicenseAdmin <--> LicenseDB
+    BridgeAPI -->|cURL Key Verification| LicenseAdmin
+    LicenseAdmin --> LicenseRepo
+    LicenseRepo <--> SQLiteDB
 ```
 
 ---
@@ -68,23 +71,21 @@ graph TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Admin as Store Administrator
+    actor Admin as Merchant / Operator
     participant Dashboard as V2 React SPA Dashboard
+    participant AdminPortal as Super-Admin SPA Portal
     participant Router as Front Router (public/index.php)
     participant Bridge as PrestaShop Bridge (api.php)
     participant MySQL as Shop Core DB (MariaDB)
-    participant SQLite as SQLite DB (pm_cloud_backups.db)
-    participant Licensing as Licensing Portal (mass_utility_admin)
+    participant SQLite as Central SQLite DB (pm_cloud_backups.db)
 
-    Note over Admin, Licensing: 1. Setup & Domain Key Activation Handshake
-    Admin->>Bridge: Input License Key in Back Office
-    Bridge->>Licensing: POST /?action=activate_key (License Key & Store URL)
-    Licensing->>SQLite: Verify status & domain binding
-    Licensing-->>Bridge: Return signed dynamic security token & tier
-    Bridge->>Bridge: Save token & sync to local SQLite configurations
-    Bridge-->>Admin: Render Active Status page
+    Note over Admin, SQLite: 1. B2B Company License Pool Generation & Employee Assignment
+    Admin->>AdminPortal: Issue License Key to Company Pool (e.g. Acme Inc)
+    AdminPortal->>SQLite: Write pm_licenses (company_id=Acme, user_id=NULL)
+    Admin->>AdminPortal: Assign Pool Key to Employee (user_id=12)
+    AdminPortal->>SQLite: Update pm_licenses (user_id=12, company_id=Acme)
 
-    Note over Admin, Licensing: 2. Standalone Dashboard SSO (AES-256 OTT Flow)
+    Note over Admin, SQLite: 2. Standalone Dashboard SSO (AES-256 OTT Flow)
     Admin->>Bridge: Click "Launch Standalone Dashboard"
     Bridge->>Bridge: Encrypt employee ID using Bridge Token (AES-256-CBC, 60s TTL)
     Bridge-->>Admin: Redirect to Dashboard URL with ?ott=TOKEN
@@ -93,11 +94,11 @@ sequenceDiagram
     Router->>Router: Issue HttpOnly & SameSite=Lax Session Cookie
     Router-->>Admin: Render V2 React Dashboard (Strips OTT from URL)
 
-    Note over Admin, Licensing: 3. Transactional AST Query Execution & Rollback Snapshot
+    Note over Admin, SQLite: 3. Transactional AST Query Execution & Rollback Snapshot
     Admin->>Dashboard: Input SQL Mutation in Query Wizard
     Note over Dashboard: FetchEngine compiles query to JSON AST
     Dashboard->>Bridge: POST /api.php?action=execute_query_ast (X-Bridge-Token)
-    Note over Bridge: SafetyGovernor checks CPU load & Live status
+    Note over Bridge: SafetyGovernor checks CPU load (<= 4.5) & Maintenance Mode
     Note over Bridge: QueryTranslationEngine validates columns vs Whitelist
     alt Safety Checks Fail
         Bridge-->>Dashboard: Return 403 Forbidden (JSON Error)
@@ -105,29 +106,36 @@ sequenceDiagram
     else Safety Checks Pass
         Bridge->>MySQL: Begin Transaction & Read Row State
         MySQL-->>Bridge: Return Original Row Snapshot
-        Bridge->>SQLite: Write Row Snapshot to mutation_history
+        Bridge->>SQLite: Write Row Snapshot to mass_update_log
         Bridge->>MySQL: Execute Safe Translated Mutation
         Bridge->>MySQL: Commit Transaction
         MySQL-->>Bridge: Return Mutation Success
         Bridge-->>Dashboard: Return 200 OK (JSON Metadata)
         Dashboard-->>Admin: Hydrate transaction tables & success notification
     end
+
+    Note over Admin, SQLite: 4. B2B Key Retention Safeguard (Employee Transfer)
+    Admin->>AdminPortal: Reassign Employee (user_id=12) to New Company
+    AdminPortal->>SQLite: Update pm_users SET company_id = NewCompany
+    Note over AdminPortal: B2B Retention Safeguard Triggers
+    AdminPortal->>SQLite: UPDATE pm_licenses SET user_id=NULL WHERE company_id=Acme AND user_id=12
+    Note over AdminPortal: Key remains safely in Acme Inc pool as Unassigned / Available key
 ```
 
 ---
 
-## 🎨 2. User Interface Architecture Policy (V2 React 18 SPA + PrestaShop Launcher)
+## 🎨 2. User Interface Architecture & Design System
 
-The Mass Utility Dashboard enforces a **Unified V2 React 18 SPA Architecture Policy**:
+The Mass Utility Framework enforces a unified **V2 React 18 SPA Architecture & Design System Policy**:
 
 ### 2.1 Single UI & PrestaShop Launcher Integration
-- **V2 React 18 SPA**: Primary production interface located in `mass_utility_dashboard/frontend/` and compiled directly to `mass_utility_dashboard/public/v2/`.
+- **V2 React 18 SPA Dashboard**: Primary merchant interface located in `mass_utility_dashboard/frontend/` and compiled directly to `mass_utility_dashboard/public/v2/`.
+- **V2 React 18 SPA Super-Admin**: Primary licensing & tenant operations interface located in `mass_utility_admin/frontend/` and compiled directly to `mass_utility_admin/public/v2/`.
 - **PrestaShop Back-Office Launcher Card**: Clean, native PrestaShop Smarty template (`mass_utility_dashboard/views/templates/admin/configure.tpl`) providing 1-click AES-256 OTT redirection from PrestaShop Back-Office directly to the V2 Standalone Dashboard.
 
-
-### 2.2 V2 React Component Architecture (`src/components/`)
-- `<QueryWizardTab>` (`🛒 Mass Updates`): Visual AST builder with live preview, domain preset selection, and execution simulation mode.
-- `<MutationHistoryTab>` (`🕒 Mutation History`): Historical execution ledger featuring the **MariaDB SQL Reconstruction Engine** (`sqlReconstructor.ts`) and 1-click copy utilities.
+### 2.2 Dashboard V2 React Component Architecture (`mass_utility_dashboard/frontend/src/components/`)
+- `<QueryWizardTab>` (`🛒 Mass Updates`): Visual AST query builder with live SQL preview, domain preset loadout bar, and execution simulation mode.
+- `<MutationHistoryTab>` (`🕒 Mutation History`): Historical execution ledger featuring the **MariaDB SQL Reconstruction Engine** (`sqlReconstructor.ts`), revert payload inspect modal, and 1-click rollback execution.
 - `<MerchantSecurityTab>` (`🛡️ Security & Health`): Top-level merchant security inspector featuring 4 diagnostic cards (HTTP Headers, PrestaShop Core & SSL, Filesystem Permissions, Executive System Health) with 1-click repairs (**`[🔒 Apply .htaccess Headers]`**, **`[📁 Repair Permissions]`**, **`[⚡ Enforce Store SSL]`**).
 - `<EventLogsTab>` (`📜 Event Logs`): Searchable audit trail for system operations and Bridge API communication logs.
 - `<SettingsTab>` (`⚙️ Settings`): Dashboard configuration, license key details, and connection status settings.
@@ -135,12 +143,19 @@ The Mass Utility Dashboard enforces a **Unified V2 React 18 SPA Architecture Pol
 - `<BackupsGrid>` & `<BackupSubTab>`: Time-resilient backup management featuring the **`.pinned` Sidecar Metadata Subsystem**.
 - `<GovernorTab>`: Real-time CloudLinux LVE telemetry dashboard featuring **Zero-CLS Instant Skeleton Frame Architecture**.
 
-### 2.3 Super Admin React Component Architecture (`mass_utility_admin/frontend/src/components/`)
+### 2.3 Super-Admin V2 React Component Architecture (`mass_utility_admin/frontend/src/components/`)
+- `<CompanyListView>` & `<CompanyDetailsView>`: B2B Companies Directory featuring real-time license utilization meters (`usedCount` / `max_licenses`), Dual-Mode tab switcher (`[📊 Overview]` vs `[⚙️ Edit Profile & Settings]`), 1-click pool key generator, and employee assignment select dropdowns.
+- `<ClientListView>` & `<ClientDetailsView>`: Client Accounts Directory featuring Client Full Name (`name`) support, Company Dropdown client reassignment, Dual-Mode tab switcher (`[📊 Overview & Keys]` vs `[⚙️ Edit Client & Settings]`), password masking toggles (`<Eye />` / `<EyeOff />`), and Company Pool Ownership badges (`🏢 Owned by Acme Inc Pool`).
+- `<LicensesTab>`: Active License Registry & Subscriptions table featuring 9-column exact header alignment, `Company Owner` column, `Assigned Employee` column, and 1-click key masking.
+- `<PackageTiersTab>`: Feature capability matrix editor for `basic`, `pro`, `enterprise` subscription tiers.
 - `<SecurityHealthTab>`: Super Admin 4-Card Security Grid auditing SaaS server infrastructure (HSTS, SSL 301 Redirect Enforcer, Vault Isolation `pm_cloud_backups.db` 403, SaaS Server Filesystem Permissions).
-- `<ClientsTab>`: Client accounts directory featuring BCRYPT password hashing and client password masking (`••••••••••••` with `<Eye />` / `<EyeOff />` toggle).
-- `<LicensesTab>`: Active License Registry & Subscriptions table with key masking (`maskKey()`), tier capability management, and unassigned key handling.
 
-### 2.3 Design System & System Tokens (`src/index.css`)
+### 2.4 Normalized Interactive UX Features
+- **Normalized Bottom-Right Toast Engine**: Notifications across both portals are positioned at **Bottom-Right** (`fixed bottom-5 right-5 z-[999999]`), featuring dark backdrop blur (`backdrop-blur-md`), elevated drop shadows (`shadow-2xl`), left status accent borders (`border-l-4`), and an instant manual dismissal button (`<X />`).
+- **Animated Refresh Feedback**: Toolbar Refresh buttons feature an active spinning animation (`<RefreshCw className="animate-spin text-purple-400" />`), disabled click states, and success toast responses across all directory tabs.
+- **Interactive Password Visibility Toggles**: All password input fields feature interactive `<Eye />` / `<EyeOff />` toggles.
+
+### 2.5 Design System & System Tokens (`index.css`)
 All V2 React components inherit from unified CSS design tokens (`var(--pm-*)`):
 - **Theme Variables**: `--pm-bg`, `--pm-card-bg`, `--pm-input-bg`, `--pm-border-color`, `--pm-primary`, `--pm-success`, `--pm-danger`.
 - **Dark & Light Mode Adaptation**: Root level `color-scheme: dark` and `color-scheme: light` coupled with custom WebKit scrollbars (`::-webkit-scrollbar`).
@@ -156,7 +171,7 @@ All V2 React components inherit from unified CSS design tokens (`var(--pm-*)`):
 ```
 d:/Project Mass/
 ├── WORKSPACE.md                    # Workspace constitution and directory manifest
-├── README.md                       # This comprehensive technical manual
+├── README.md                       # Master consolidated technical manual
 ├── .gitignore                      # Workspace ignore rules (DBs, logs, build outputs)
 ├── .bench/                         # Benchmarking, audits, and automated doc maps
 │   ├── docs/                       # Architectural dictionaries & design system maps
@@ -176,13 +191,13 @@ d:/Project Mass/
 │   │   └── Governor/
 │   │       └── SafetyGovernor.php          # Monitors CloudLinux LVE limits & shop maintenance mode
 │   │
-├── mass_utility_dashboard/         # MERCHANTS CLIENT PORTAL (Standalone Dashboard)
+│   mass_utility_dashboard/         # MERCHANTS CLIENT PORTAL (Standalone Dashboard)
 │   ├── backups/                    # Dashboard local backup storage protected by .htaccess
 │   ├── data/                       # Central SQLite database (pm_cloud_backups.db)
 │   ├── frontend/                   # V2 REACT 18 + TYPESCRIPT + VITE SPA SOURCE
 │   │   ├── src/
 │   │   │   ├── components/         # React Tab Orchestrators & Feature Panels
-│   │   │   │   └── common/         # Atomic UI Primitives (SectionHeader, BaseModal, DataTable, LogTerminal, PresetLoadoutBar, StatusBadge, ProgressHUD)
+│   │   │   │   └── common/         # Atomic UI Primitives (SectionHeader, BaseModal, DataTable, LogTerminal, PresetLoadoutBar, StatusBadge, ProgressHUD, DirectoryToolbar, DirectoryCardTable)
 │   │   │   ├── utils/              # sqlReconstructor.ts, FetchService.ts
 │   │   │   └── index.css           # Design tokens, cross-browser scrollbars (.pm-scrollbar), & 3-Tier Shadow Elevation UX System
 │   │   ├── package.json            # Vite build scripts
@@ -196,15 +211,20 @@ d:/Project Mass/
 │           ├── SQLiteConnectionManager.php # SQLite PDO manager
 │           └── TenantSettingsRepository.php# Settings repository with KV cache
 │
-└── mass_utility_admin/             # SUPER-ADMIN LICENSING PORTAL (Licensing Console)
+└── mass_utility_admin/             # SUPER-ADMIN LICENSING & B2B PORTAL
     ├── public/
-    │   └── index.php               # Licensing gateway, activate_key endpoint & admin login
+    │   ├── index.php               # Licensing gateway, activate_key endpoint & admin router
+    │   └── v2/                     # Compiled V2 Super-Admin React SPA static assets (index.html, JS, CSS)
     ├── src/
     │   ├── Controller/
-    │   │   └── AdminApiController.php # Admin AJAX actions (key generation, suspend, activate)
-    │   └── Repository/
-    │       └── LicenseRepository.php  # License CRUD operations
-    └── views/                      # Admin login & management TPL templates
+    │   │   └── AdminApiController.php # Admin AJAX actions (key generation, company CRUD, user CRUD, assign license)
+    │   ├── Repository/
+    │   │   └── LicenseRepository.php  # License, company, and user CRUD with B2B retention safeguard
+    │   └── Service/
+    │       └── AdminSettingsManager.php # PDO manager & self-healing SQLite schema auto-migrations
+    └── frontend/                   # V2 REACT 18 + TYPESCRIPT + VITE SPA SOURCE
+        └── src/
+            └── components/         # CompanyListView, CompanyDetailsView, ClientListView, ClientDetailsView, LicensesTab, PackageTiersTab, SecurityHealthTab
 ```
 
 ---
@@ -238,16 +258,12 @@ Direct web access to backup storage directories (`mass_utility/backups/` and `ma
 ```
 *Note: PHP scripts on the server use internal filesystem access (`readfile()`), bypassing HTTP `.htaccess` blocks to stream downloads securely to authenticated users.*
 
-### 4.5 Session Cookie Hardening
-Session cookies enforce strict OWASP flags before `session_start()`:
-```php
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
-```
+### 4.5 SaaS Server 4-Card Security Inspector & 1-Click Repairs
+The Super Admin Portal includes a 4-Card Infrastructure Security Inspector (`SecurityHealthTab.tsx`):
+- **Card 1: HTTP Security Headers**: Checks HSTS, `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`. Includes 1-click repair (`[🔒 Apply Security Headers]`).
+- **Card 2: SSL 301 HTTPS Enforcer**: Checks whether HTTP requests automatically redirect to HTTPS. Includes 1-click repair (`[⚡ Enforce SSL Redirect]`).
+- **Card 3: Vault Storage Isolation**: Verifies `pm_cloud_backups.db` returns 403 Forbidden via HTTP.
+- **Card 4: SaaS Filesystem Permissions**: Audits directory (`0755`) and file (`0644`) permissions. Includes 1-click repair (`[📁 Repair Permissions]`).
 
 ### 4.6 Automated Security Audit Pipeline (`cli_security_audit.py`)
 Integrated into the pre-commit build pipeline, `cli_security_audit.py` scans JavaScript files for unsafe DOM injections (`innerHTML`), verifies `escapeshellarg()` on PHP shell executions, and audits SQLite queries for prepared statement compliance.
@@ -322,7 +338,7 @@ To eliminate Cumulative Layout Shift (CLS) on page refresh in `GovernorTab.tsx`:
 
 ## 🗄️ 8. Centralized SQLite Database Schema Reference
 
-All dashboard configurations, licensing data, query presets, and rollback snapshots are stored in `mass_utility_dashboard/data/pm_cloud_backups.db`:
+All dashboard configurations, licensing data, B2B companies, query presets, and rollback snapshots are stored in `mass_utility_dashboard/data/pm_cloud_backups.db`:
 
 ```sql
 -- 1. Tenant Settings Configuration
@@ -354,10 +370,37 @@ CREATE TABLE mass_update_log (
     UNIQUE (job_id)
 );
 
--- 4. License Keys Registry (Super-Admin)
+-- 4. B2B Companies Directory
+CREATE TABLE pm_companies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_name VARCHAR(255) UNIQUE NOT NULL,
+    tax_id VARCHAR(100) NULL,
+    max_licenses INTEGER DEFAULT 10,
+    status VARCHAR(32) DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. Merchant Users / Client Accounts Registry
+CREATE TABLE pm_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(255) NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    company_name VARCHAR(255) NULL,
+    company_id INTEGER NULL,
+    role VARCHAR(50) DEFAULT 'owner',
+    status VARCHAR(32) DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(company_id) REFERENCES pm_companies(id) ON DELETE SET NULL
+);
+
+-- 6. License Keys & Company Pool Registry
 CREATE TABLE pm_licenses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
+    company_id INTEGER NULL,
+    user_id INTEGER NULL,
     license_key VARCHAR(64) UNIQUE NOT NULL,
     store_url VARCHAR(255) NULL,
     package_tier VARCHAR(32) DEFAULT 'basic',
@@ -365,20 +408,11 @@ CREATE TABLE pm_licenses (
     expires_at DATETIME NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES pm_users(id) ON DELETE CASCADE
+    FOREIGN KEY(company_id) REFERENCES pm_companies(id) ON DELETE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES pm_users(id) ON DELETE SET NULL
 );
 
--- 5. Merchant Users Registry
-CREATE TABLE pm_users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    company_name VARCHAR(255) NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- 6. Super-Admin Credentials
+-- 7. Super-Admin Credentials
 CREATE TABLE pm_admins (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(128) UNIQUE NOT NULL,
@@ -428,8 +462,15 @@ CREATE TABLE pm_admins (
 | `api_status` | `GET` | No | Returns admin account setup status and authentication state. |
 | `api_login` | `POST` | No | Authenticates Super Admin credentials against `pm_admins` table. |
 | `api_list` | `GET` | Yes | Returns all clients, active licenses, package tiers, and system diagnostics. |
-| `api_create_user` | `POST` | Yes | Creates new client account with BCRYPT password hashing. |
-| `api_generate` | `POST` | Yes | Issues new license key linked to client account or unassigned. |
+| `api_create_company` | `POST` | Yes | Creates new B2B company profile with license capacity limits and optional owner account. |
+| `api_update_company` | `POST` | Yes | Updates company profile settings, VAT ID, and license cap limits. |
+| `api_delete_company` | `POST` | Yes | Permanently deletes company profile and unlinks team members. |
+| `api_create_user` | `POST` | Yes | Creates new client account with BCRYPT password hashing and company linking. |
+| `api_update_user` | `POST` | Yes | Updates client full name, email, company association, role, and status. Triggers B2B Key Retention Safeguard. |
+| `api_delete_user` | `POST` | Yes | Safely unbinds client licenses and deletes client account. |
+| `api_reset_user_password` | `POST` | Yes | Resets client account password with BCRYPT hashing. |
+| `api_generate` | `POST` | Yes | Issues new license key directly to a Company Pool (`company_id`) or standalone client. |
+| `api_assign_license` | `POST` | Yes | Assigns or unassigns a company pool license key to/from a team member (`user_id`). |
 | `api_get_diagnostics` | `GET` | Yes | Runs 4-Card SaaS Server Infrastructure Security Audit. |
 | `api_apply_security_headers` | `POST` | Yes | Injects HSTS, `nosniff`, and `SAMEORIGIN` headers into SaaS server root `.htaccess`. |
 | `api_enable_ssl_redirect` | `POST` | Yes | Injects 301 HTTPS Rewrite Rule into SaaS server root `.htaccess`. |
@@ -445,13 +486,20 @@ Run the SQLite migration script from the root workspace:
 php mass_utility_dashboard/bin/migration.php
 ```
 
-### 10.2 Building the V2 React SPA Dashboard
-Navigate to `mass_utility_dashboard/frontend/` and build production assets:
+### 10.2 Building the V2 React SPA Dashboard & Super-Admin
+Build production static assets for the Standalone Dashboard:
 ```bash
 cd mass_utility_dashboard/frontend
 npm run build
 ```
 *Outputs compiled assets (`index-*.js`, `index-*.css`) to `mass_utility_dashboard/public/v2/`.*
+
+Build production static assets for the Super-Admin Licensing Portal:
+```bash
+cd mass_utility_admin/frontend
+npm run build
+```
+*Outputs compiled assets (`index-*.js`, `index-*.css`) to `mass_utility_admin/public/v2/`.*
 
 ### 10.3 Orchestra Pre-Commit Pipeline & Tools
 The workspace includes automated Orchestra developer tools in `.orchestra/.conductor/tools/`:
