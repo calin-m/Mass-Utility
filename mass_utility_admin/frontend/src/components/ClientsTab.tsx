@@ -390,7 +390,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
               type="button"
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-2 rounded-lg text-xs font-bold uppercase transition ${
-                statusFilter === 'all' ? 'pm-btn-primary shadow-sm' : 'pm-btn-neutral'
+                statusFilter === 'all' ? 'bg-pm-input text-pm-text border border-pm-primary/50 shadow-sm' : 'pm-btn-neutral'
               }`}
             >
               All ({users.length})
@@ -399,7 +399,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
               type="button"
               onClick={() => setStatusFilter('active')}
               className={`px-3 py-2 rounded-lg text-xs font-bold uppercase transition ${
-                statusFilter === 'active' ? 'pm-btn-primary shadow-sm' : 'pm-btn-neutral'
+                statusFilter === 'active' ? 'bg-pm-input text-pm-text border border-pm-primary/50 shadow-sm' : 'pm-btn-neutral'
               }`}
             >
               Active ({activeClients})
@@ -408,7 +408,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
               type="button"
               onClick={() => setStatusFilter('suspended')}
               className={`px-3 py-2 rounded-lg text-xs font-bold uppercase transition ${
-                statusFilter === 'suspended' ? 'pm-btn-primary shadow-sm' : 'pm-btn-neutral'
+                statusFilter === 'suspended' ? 'bg-pm-input text-pm-text border border-pm-primary/50 shadow-sm' : 'pm-btn-neutral'
               }`}
             >
               Suspended ({suspendedClients})

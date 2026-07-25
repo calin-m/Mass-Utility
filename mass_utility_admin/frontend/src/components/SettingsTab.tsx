@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, ShieldCheck, Database, HardDrive, Lock } from 'lucide-react';
+import { Settings, ShieldCheck, Database, HardDrive, Lock, RefreshCw } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 
 interface SettingsTabProps {
@@ -84,9 +84,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
           <button 
             type="submit" 
             disabled={loading}
-            className={`w-full py-2.5 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition ${loading ? 'bg-pm-border text-pm-secondary cursor-not-allowed' : 'pm-btn-danger'}`}
+            className={`w-full pm-btn-danger py-2.5 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition ${loading ? 'opacity-80 cursor-wait' : ''}`}
           >
-            {loading ? 'Updating...' : 'Update Admin Password'}
+            {loading && <RefreshCw className="w-4 h-4 animate-spin text-white" />}
+            <span>Update Admin Password</span>
           </button>
         </form>
       </div>

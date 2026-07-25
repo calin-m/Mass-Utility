@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, KeyRound, Unlock } from 'lucide-react';
+import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, KeyRound, Unlock, RefreshCw } from 'lucide-react';
 import { BaseModal } from './common/BaseModal';
 import { SectionHeader } from './common/SectionHeader';
 import { StatCard } from './common/StatCard';
@@ -254,9 +254,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             <button
               type="submit"
               disabled={generatingKey}
-              className="w-full pm-btn-primary py-2.5 rounded-lg text-xs font-bold uppercase transition"
+              className={`w-full pm-btn-primary py-2.5 rounded-lg text-xs font-bold uppercase transition flex items-center justify-center gap-2 ${generatingKey ? 'opacity-85 cursor-wait' : ''}`}
             >
-              {generatingKey ? 'Generating...' : '🔑 Issue License Key'}
+              {generatingKey && <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />}
+              <span>Issue License Key</span>
             </button>
           </form>
         </div>

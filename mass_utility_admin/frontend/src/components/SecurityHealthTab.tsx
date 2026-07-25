@@ -244,9 +244,9 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
             <button 
               onClick={runDiagnostics}
               disabled={loading}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[215px] shrink-0 ${activeAction === 'audit' ? 'bg-pm-border text-pm-secondary' : 'pm-btn-primary'}`}
+              className={`pm-btn-primary px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[215px] shrink-0 ${activeAction === 'audit' ? 'opacity-85 cursor-wait' : ''}`}
             >
-              {activeAction === 'audit' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
+              {activeAction === 'audit' ? <RefreshCw className="w-4 h-4 animate-spin text-white" /> : <Activity className="w-4 h-4 text-white" />}
               <span>Run System Security Audit</span>
             </button>
           </div>

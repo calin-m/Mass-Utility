@@ -187,7 +187,7 @@ export const MerchantSecurityTab: React.FC = () => {
               type="button"
               onClick={runAudit}
               disabled={loading}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[175px] shrink-0 ${activeAction === 'audit' ? 'bg-pm-border text-pm-secondary' : 'pm-btn-primary'}`}
+              className={`pm-btn-primary px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[175px] shrink-0 ${activeAction === 'audit' ? 'opacity-85 cursor-wait' : ''}`}
             >
               {activeAction === 'audit' ? <span className="animate-spin">🔄</span> : <span>🔄</span>}
               <span>Run Security Audit</span>
