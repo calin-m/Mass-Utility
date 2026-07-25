@@ -43,13 +43,13 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   }[maxWidth];
 
   const borderClass = variant === 'danger' ? 'border-rose-500/30' : 'border-pm-border';
-  const iconColorClass = variant === 'danger' ? 'text-rose-500' : 'text-pm-primary';
+  const iconColorClass = variant === 'danger' ? 'text-rose-500' : 'text-purple-600 dark:text-purple-400';
   const titleColorClass = variant === 'danger' ? 'text-rose-500' : 'text-pm-text';
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 top-0 left-0 w-screen h-screen min-h-screen bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-center justify-center p-4 overflow-y-auto">
       <div
-        className={`bg-pm-card border ${borderClass} rounded-xl ${maxWidthClasses} w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200`}
+        className={`bg-pm-card border ${borderClass} rounded-xl ${maxWidthClasses} w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 my-auto`}
       >
         {/* Modal Header */}
         <div className="flex justify-between items-center pb-3 border-b border-pm-border">
@@ -60,14 +60,14 @@ export const BaseModal: React.FC<BaseModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1 transition"
-            title="Close Modal (ESC)"
+            className="text-pm-secondary hover:text-pm-text p-1 rounded-lg hover:bg-pm-input transition text-xs"
+            title="Close (ESC)"
           >
             ✕
           </button>
         </div>
 
-        {/* Modal Body */}
+        {/* Modal Body Content */}
         <div>{children}</div>
       </div>
     </div>

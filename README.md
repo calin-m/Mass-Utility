@@ -144,13 +144,18 @@ The Mass Utility Framework enforces a unified **V2 React 18 SPA Architecture & D
 - `<GovernorTab>`: Real-time CloudLinux LVE telemetry dashboard featuring **Zero-CLS Instant Skeleton Frame Architecture**.
 
 ### 2.3 Super-Admin V2 React Component Architecture (`mass_utility_admin/frontend/src/components/`)
-- `<CompanyListView>` & `<CompanyDetailsView>`: B2B Companies Directory featuring real-time license utilization meters (`usedCount` / `max_licenses`), Dual-Mode tab switcher (`[📊 Overview]` vs `[⚙️ Edit Profile & Settings]`), 1-click pool key generator, and employee assignment select dropdowns.
-- `<ClientListView>` & `<ClientDetailsView>`: Client Accounts Directory featuring Client Full Name (`name`) support, Company Dropdown client reassignment, Dual-Mode tab switcher (`[📊 Overview & Keys]` vs `[⚙️ Edit Client & Settings]`), password masking toggles (`<Eye />` / `<EyeOff />`), and Company Pool Ownership badges (`🏢 Owned by Acme Inc Pool`).
-- `<LicensesTab>`: Active License Registry & Subscriptions table featuring 9-column exact header alignment, `Company Owner` column, `Assigned Employee` column, and 1-click key masking.
-- `<PackageTiersTab>`: Feature capability matrix editor for `basic`, `pro`, `enterprise` subscription tiers.
+- `<CompanyListView>` & `<CompanyDetailsView>`: **Companies Directory** featuring real-time license utilization meters (`usedCount` / `max_licenses`), Dual-Mode tab switcher (`[📊 Overview]` vs `[⚙️ Edit Profile & Settings]`), 1-click pool key generator, master `<PaginationBar>`, and employee assignment select dropdowns.
+- `<ClientListView>` & `<ClientDetailsView>`: **Clients Directory** featuring Client Full Name (`name`) support, Company Dropdown client reassignment, Dual-Mode tab switcher (`[📊 Overview & Keys]` vs `[⚙️ Edit Client & Settings]`), password masking toggles (`<Eye />` / `<EyeOff />`), master `<PaginationBar>`, and Company Pool Ownership badges (`🏢 Owned by Acme Inc Pool`).
+- `<LicensesTab>`: **License Registry & Subscriptions** featuring 9-column exact header alignment, `<ConfirmModal>` Suspend/Activate safety shield, 4-card telemetry grid, `Company Owner` column, `Assigned Employee` column, master `<PaginationBar>`, and 1-click key masking.
+- `<AuditLogsTab>`: **Operations Audit Trail** featuring search & filter toolbar, **`[Clear Audit Logs]`** with red `<ConfirmModal>` confirmation safety prompt, master `<PaginationBar>`, and Light/Dark adaptive code terminal for raw JSON inspection.
+- `<SettingsTab>`: Full-width 2-column side-by-side password form layout with icon inputs (`<FormInput type="password" icon={Lock} />`).
+- `<PackageTiersTab>`: **Package Tiers & Quotas** feature capability matrix editor for `basic`, `pro`, `enterprise` subscription tiers.
 - `<SecurityHealthTab>`: Super Admin 4-Card Security Grid auditing SaaS server infrastructure (HSTS, SSL 301 Redirect Enforcer, Vault Isolation `pm_cloud_backups.db` 403, SaaS Server Filesystem Permissions).
 
-### 2.4 Normalized Interactive UX Features
+### 2.4 Normalized Interactive UX Features & Primitives
+- **Master Data Table Pagination (`<PaginationBar>`)**: Standardized data table pagination with dynamic page size options (`10`, `25`, `50`, `100`), `< Previous` / `Next >` navigation, and real-time item counter across all listing tables.
+- **Safety Confirmation Shield (`<ConfirmModal>`)**: Modal overlay shield for high-impact actions (Suspend, Activate, Delete Company/Client, Clear Audit Logs) featuring backdrop blur (`backdrop-blur-md z-[9999999]`), `top-0 left-0 w-screen h-screen` bounds, and variant-specific color schemes (`danger`, `warning`, `info`).
+- **Enhanced Select Dropdowns (`<FormSelect>`)**: Standardized custom dropdown primitive featuring custom SVG chevron arrow icons, hover/focus rings (`focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30`), and option styling.
 - **Normalized Bottom-Right Toast Engine**: Notifications across both portals are positioned at **Bottom-Right** (`fixed bottom-5 right-5 z-[999999]`), featuring dark backdrop blur (`backdrop-blur-md`), elevated drop shadows (`shadow-2xl`), left status accent borders (`border-l-4`), and an instant manual dismissal button (`<X />`).
 - **Animated Refresh Feedback**: Toolbar Refresh buttons feature an active spinning animation (`<RefreshCw className="animate-spin text-purple-400" />`), disabled click states, and success toast responses across all directory tabs.
 - **Interactive Password Visibility Toggles**: All password input fields feature interactive `<Eye />` / `<EyeOff />` toggles.

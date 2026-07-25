@@ -861,4 +861,27 @@ class AdminApiController
             exit;
         }
     }
+
+    private function clear_admin_logs(): void
+    {
+        if (!$this->auth->isAuthenticated()) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->clearAdminLogs();
+            if ($success) {
+                $adminUser = $_SESSION['admin_username'] ?? 'admin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $this->repo->logAdminAction($adminUser, 'CLEAR_AUDIT_LOGS', 'audit_trail', null, ['status' => 'cleared'], $ip);
+                echo json_encode(['success' => true, 'message' => 'Audit logs cleared successfully!']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Failed to clear audit logs.']);
+            }
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
 }
+

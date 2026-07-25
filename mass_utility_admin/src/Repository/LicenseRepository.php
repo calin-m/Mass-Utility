@@ -402,4 +402,16 @@ class LicenseRepository
             return $row;
         }, is_array($rows) ? $rows : []);
     }
+
+    public function clearAdminLogs(): bool
+    {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM pm_admin_logs");
+            return $stmt->execute();
+        } catch (\PDOException $e) {
+            error_log("[MassUtilityAdmin] Failed to clear admin logs: " . $e->getMessage());
+            return false;
+        }
+    }
 }
+
