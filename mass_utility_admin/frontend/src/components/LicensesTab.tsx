@@ -18,6 +18,7 @@ export interface License {
 
 export interface UserAccount {
   id: number;
+  name?: string | null;
   email: string;
   company_name: string | null;
   company_id?: number | null;

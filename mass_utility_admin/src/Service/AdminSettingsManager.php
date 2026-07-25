@@ -97,15 +97,20 @@ class AdminSettingsManager
             $userCols = $pdo->query("PRAGMA table_info(pm_users)")->fetchAll(\PDO::FETCH_ASSOC);
             $hasCompanyId = false;
             $hasRole = false;
+            $hasName = false;
             foreach ($userCols as $col) {
                 if ($col['name'] === 'company_id') $hasCompanyId = true;
                 if ($col['name'] === 'role') $hasRole = true;
+                if ($col['name'] === 'name') $hasName = true;
             }
             if (!$hasCompanyId) {
                 $pdo->exec("ALTER TABLE pm_users ADD COLUMN company_id INTEGER"); /* nosec */
             }
             if (!$hasRole) {
                 $pdo->exec("ALTER TABLE pm_users ADD COLUMN role VARCHAR(50) DEFAULT 'owner'"); /* nosec */
+            }
+            if (!$hasName) {
+                $pdo->exec("ALTER TABLE pm_users ADD COLUMN name VARCHAR(255) NULL"); /* nosec */
             }
 
             $licCols = $pdo->query("PRAGMA table_info(pm_licenses)")->fetchAll(\PDO::FETCH_ASSOC);

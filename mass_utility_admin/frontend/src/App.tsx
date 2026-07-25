@@ -232,7 +232,7 @@ export const App: React.FC = () => {
           <CompaniesTab companies={companies} users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} onInspectClient={handleInspectClient} />
         )}
         {activeTab === 'clients' && (
-          <ClientsTab users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} initialSelectedUser={inspectedClient} />
+          <ClientsTab users={users} licenses={licenses} companies={companies} onRefresh={fetchAdminData} showAlert={showAlert} initialSelectedUser={inspectedClient} />
         )}
         {activeTab === 'licenses' && (
           <LicensesTab licenses={licenses} users={users} onRefresh={fetchAdminData} showAlert={showAlert} />

@@ -199,10 +199,12 @@ class AdminApiController
 
     private function create_user(): void
     {
+        $name = trim($_POST['name'] ?? '') ?: null;
         $email = trim($_POST['email'] ?? '');
         $password = trim($_POST['password'] ?? '');
         $companyRaw = trim($_POST['company'] ?? $_POST['company_name'] ?? '');
         $company = !empty($companyRaw) ? $companyRaw : null;
+        $role = trim($_POST['role'] ?? 'Owner') ?: 'Owner';
 
         if (empty($email) || empty($password)) {
             echo json_encode(['success' => false, 'error' => 'Email and password are required.']);
@@ -210,7 +212,7 @@ class AdminApiController
         }
 
         try {
-            $userId = $this->repo->createUser($email, $password, $company);
+            $userId = $this->repo->createUser($email, $password, $company, $name, $role);
             echo json_encode(['success' => true, 'user_id' => $userId, 'users' => $this->repo->getAllUsers()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -220,9 +222,11 @@ class AdminApiController
     private function update_user(): void
     {
         $id = (int)($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '') ?: null;
         $email = trim($_POST['email'] ?? '');
         $companyRaw = trim($_POST['company'] ?? $_POST['company_name'] ?? '');
         $company = !empty($companyRaw) ? $companyRaw : null;
+        $role = trim($_POST['role'] ?? '') ?: null;
         $status = $_POST['status'] ?? 'active';
 
         if ($id <= 0 || empty($email)) {
@@ -231,7 +235,7 @@ class AdminApiController
         }
 
         try {
-            $this->repo->updateUser($id, $email, $company, $status);
+            $this->repo->updateUser($id, $email, $company, $status, $name, $role);
             echo json_encode(['success' => true, 'users' => $this->repo->getAllUsers(), 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);

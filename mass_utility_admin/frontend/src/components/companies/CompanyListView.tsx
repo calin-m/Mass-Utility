@@ -267,7 +267,10 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
           </thead>
           <tbody className="divide-y divide-pm-border">
             {filteredCompanies.map(c => {
-              const usedCount = c.license_count || 0;
+              const companyMembers = users.filter(u => u.company_name && u.company_name.trim().toLowerCase() === c.company_name.trim().toLowerCase());
+              const companyLicenses = licenses.filter(l => l.user_email && companyMembers.some(m => m.email.toLowerCase() === l.user_email.toLowerCase()));
+              const usedCount = companyLicenses.length > 0 ? companyLicenses.length : (c.license_count || 0);
+              const memberCount = companyMembers.length > 0 ? companyMembers.length : (c.user_count || 0);
               const maxCount = c.max_licenses || 10;
               const pct = Math.min(100, Math.round((usedCount / maxCount) * 100));
               const isFull = usedCount >= maxCount;
@@ -300,7 +303,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                   </td>
                   <td className="p-3">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/20">
-                      <Users className="w-3.5 h-3.5" /> {c.user_count || 0} Members
+                      <Users className="w-3.5 h-3.5" /> {memberCount} Members
                     </span>
                   </td>
                   <td className="p-3">

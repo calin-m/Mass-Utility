@@ -389,7 +389,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
           <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
             <tr>
               <th className="p-3">ID</th>
-              <th className="p-3">Client Email</th>
+              <th className="p-3">Client Name / Email</th>
               <th className="p-3">Company / Store Name</th>
               <th className="p-3">Assigned Licenses &amp; Stores</th>
               <th className="p-3">Account Status</th>
@@ -406,7 +406,10 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                   <td className="p-3">
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-purple-400 shrink-0" />
-                      <span className="font-bold text-pm-text">{u.email}</span>
+                      <div className="flex flex-col">
+                        {u.name ? <span className="font-bold text-pm-text">{u.name}</span> : null}
+                        <span className={u.name ? "text-[11px] font-mono text-pm-secondary" : "font-bold text-pm-text font-mono"}>{u.email}</span>
+                      </div>
                     </div>
                   </td>
                   <td className="p-3 text-pm-secondary">

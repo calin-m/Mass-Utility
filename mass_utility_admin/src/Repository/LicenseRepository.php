@@ -25,12 +25,12 @@ class LicenseRepository
 
     public function getAllUsers(): array
     {
-        $stmt = $this->db->query("SELECT id, email, company_name, status, created_at FROM pm_users ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT id, name, email, company_name, role, status, created_at FROM pm_users ORDER BY id DESC");
         $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return is_array($res) ? $res : [];
     }
 
-    public function createUser(string $email, string $password, ?string $company): int
+    public function createUser(string $email, string $password, ?string $company, ?string $name = null, ?string $role = 'Owner'): int
     {
         $checkStmt = $this->db->prepare("SELECT id FROM pm_users WHERE email = ?");
         $checkStmt->execute([$email]);
@@ -39,12 +39,12 @@ class LicenseRepository
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $this->db->prepare("INSERT INTO pm_users (email, password_hash, company_name) VALUES (?, ?, ?)");
-        $stmt->execute([$email, $hash, $company]);
+        $stmt = $this->db->prepare("INSERT INTO pm_users (name, email, password_hash, company_name, role) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $email, $hash, $company, $role]);
         return (int)$this->db->lastInsertId();
     }
 
-    public function updateUser(int $id, string $email, ?string $company, string $status): bool
+    public function updateUser(int $id, string $email, ?string $company, string $status, ?string $name = null, ?string $role = null): bool
     {
         $checkStmt = $this->db->prepare("SELECT id FROM pm_users WHERE email = ? AND id != ?");
         $checkStmt->execute([$email, $id]);
@@ -52,8 +52,8 @@ class LicenseRepository
             throw new \Exception("The email address '{$email}' is already registered to another client account.");
         }
 
-        $stmt = $this->db->prepare("UPDATE pm_users SET email = ?, company_name = ?, status = ? WHERE id = ?");
-        return $stmt->execute([$email, $company, $status, $id]);
+        $stmt = $this->db->prepare("UPDATE pm_users SET name = COALESCE(?, name), email = ?, company_name = ?, status = ?, role = COALESCE(?, role) WHERE id = ?");
+        return $stmt->execute([$name, $email, $company, $status, $role, $id]);
     }
 
     public function resetUserPassword(int $id, string $newPassword): bool
@@ -211,8 +211,10 @@ class LicenseRepository
     public function getAllCompanies(): array
     {
         $sql = "SELECT c.*, 
-                (SELECT COUNT(*) FROM pm_users u WHERE u.company_id = c.id) as user_count,
-                (SELECT COUNT(*) FROM pm_licenses l WHERE l.company_id = c.id) as license_count
+                (SELECT COUNT(*) FROM pm_users u WHERE u.company_id = c.id OR (u.company_name IS NOT NULL AND LOWER(u.company_name) = LOWER(c.company_name))) as user_count,
+                (SELECT COUNT(*) FROM pm_licenses l 
+                 JOIN pm_users u2 ON (l.user_id = u2.id OR (l.user_email IS NOT NULL AND LOWER(l.user_email) = LOWER(u2.email)))
+                 WHERE u2.company_id = c.id OR (u2.company_name IS NOT NULL AND LOWER(u2.company_name) = LOWER(c.company_name))) as license_count
                 FROM pm_companies c
                 ORDER BY c.id DESC";
         $stmt = $this->db->query($sql);

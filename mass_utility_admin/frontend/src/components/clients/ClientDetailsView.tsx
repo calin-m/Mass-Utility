@@ -6,18 +6,20 @@ import { BaseModal } from '../common/BaseModal';
 interface ClientDetailsViewProps {
   user: UserAccount;
   licenses: License[];
+  companies?: any[];
   initialTab?: 'overview' | 'edit';
   onBack: () => void;
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
 }
 
-export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, initialTab, onBack, onRefresh, showAlert }) => {
+export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], initialTab, onBack, onRefresh, showAlert }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
   const [selectedTier, setSelectedTier] = useState('pro');
 
   // Form State
+  const [editName, setEditName] = useState(user.name || '');
   const [editCompany, setEditCompany] = useState(user.company_name || '');
   const [editRole, setEditRole] = useState(user.role || 'Owner');
 
@@ -70,6 +72,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
     try {
       const formData = new FormData();
       formData.append('id', String(user.id));
+      formData.append('name', editName.trim());
       formData.append('email', user.email);
       formData.append('company', editCompany.trim());
       formData.append('company_name', editCompany.trim());
@@ -185,7 +188,8 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
               <span className="text-purple-400 font-mono">{user.email}</span>
             </div>
             <h2 className="text-lg font-extrabold text-pm-text flex items-center gap-2">
-              <span>{user.email}</span>
+              <span>{user.name ? user.name : user.email}</span>
+              {user.name && <span className="text-xs font-mono font-normal text-pm-secondary">({user.email})</span>}
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
                 isSuspended ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
               }`}>
@@ -281,7 +285,18 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                 <Mail className="w-3.5 h-3.5 text-purple-400" /> Account Identity &amp; Organization
               </h4>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Client Full Name</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-pm-primary focus:outline-none"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-pm-secondary mb-1">Client Email (Read Only)</label>
                   <input
@@ -293,14 +308,19 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Company / Store Profile Name</label>
-                  <input
-                    type="text"
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Assigned Company Profile</label>
+                  <select
                     value={editCompany}
                     onChange={e => setEditCompany(e.target.value)}
-                    placeholder="e.g. Acme Fashion Store"
-                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:border-pm-primary focus:outline-none"
-                  />
+                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-pm-primary focus:outline-none"
+                  >
+                    <option value="">-- Standalone Client (No Company) --</option>
+                    {companies.map(c => (
+                      <option key={c.id} value={c.company_name}>
+                        🏢 {c.company_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
