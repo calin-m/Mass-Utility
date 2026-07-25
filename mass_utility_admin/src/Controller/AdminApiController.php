@@ -95,7 +95,64 @@ class AdminApiController
             $licenses = $this->repo->getAllLicenses();
             $users = $this->repo->getAllUsers();
             $tiers = $this->repo->getAllTiers();
-            echo json_encode(['success' => true, 'licenses' => $licenses, 'users' => $users, 'tiers' => $tiers]);
+            $companies = $this->repo->getAllCompanies();
+            echo json_encode(['success' => true, 'licenses' => $licenses, 'users' => $users, 'tiers' => $tiers, 'companies' => $companies]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function create_company(): void
+    {
+        $name = trim($_POST['company_name'] ?? '');
+        $taxId = trim($_POST['tax_id'] ?? '') ?: null;
+        $maxLicenses = (int)($_POST['max_licenses'] ?? 10);
+
+        if (empty($name)) {
+            echo json_encode(['success' => false, 'error' => 'Company name is required.']);
+            return;
+        }
+
+        try {
+            $cId = $this->repo->createCompany($name, $taxId, $maxLicenses);
+            echo json_encode(['success' => true, 'company_id' => $cId, 'companies' => $this->repo->getAllCompanies()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function update_company(): void
+    {
+        $id = (int)($_POST['id'] ?? 0);
+        $name = trim($_POST['company_name'] ?? '');
+        $taxId = trim($_POST['tax_id'] ?? '') ?: null;
+        $maxLicenses = (int)($_POST['max_licenses'] ?? 10);
+        $status = trim($_POST['status'] ?? 'active');
+
+        if ($id <= 0 || empty($name)) {
+            echo json_encode(['success' => false, 'error' => 'Company ID and name are required.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->updateCompany($id, $name, $taxId, $maxLicenses, $status);
+            echo json_encode(['success' => $success, 'companies' => $this->repo->getAllCompanies()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function delete_company(): void
+    {
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Invalid company ID.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->deleteCompany($id);
+            echo json_encode(['success' => $success, 'companies' => $this->repo->getAllCompanies()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }

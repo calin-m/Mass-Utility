@@ -83,6 +83,63 @@ class AdminSettingsManager
                 FOREIGN KEY (user_id) REFERENCES pm_users(id),
                 FOREIGN KEY (package_tier) REFERENCES pm_package_tiers(name)
             )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_companies ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                company_name VARCHAR(255) NOT NULL UNIQUE,
+                tax_id VARCHAR(100),
+                max_licenses INTEGER DEFAULT 10,
+                status VARCHAR(50) DEFAULT "active",
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
+
+            // Auto-migrate schema columns safely
+            $userCols = $pdo->query("PRAGMA table_info(pm_users)")->fetchAll(\PDO::FETCH_ASSOC);
+            $hasCompanyId = false;
+            $hasRole = false;
+            foreach ($userCols as $col) {
+                if ($col['name'] === 'company_id') $hasCompanyId = true;
+                if ($col['name'] === 'role') $hasRole = true;
+            }
+            if (!$hasCompanyId) {
+                $pdo->exec("ALTER TABLE pm_users ADD COLUMN company_id INTEGER"); /* nosec */
+            }
+            if (!$hasRole) {
+                $pdo->exec("ALTER TABLE pm_users ADD COLUMN role VARCHAR(50) DEFAULT 'owner'"); /* nosec */
+            }
+
+            $licCols = $pdo->query("PRAGMA table_info(pm_licenses)")->fetchAll(\PDO::FETCH_ASSOC);
+            $hasLicCompanyId = false;
+            foreach ($licCols as $col) {
+                if ($col['name'] === 'company_id') $hasLicCompanyId = true;
+            }
+            if (!$hasLicCompanyId) {
+                $pdo->exec("ALTER TABLE pm_licenses ADD COLUMN company_id INTEGER"); /* nosec */
+            }
+
+            // Auto-migrate existing company_name strings into linked pm_companies records
+            $unlinkedUsers = $pdo->query("SELECT id, company_name FROM pm_users WHERE company_name IS NOT NULL AND company_name != '' AND company_id IS NULL")->fetchAll(\PDO::FETCH_ASSOC);
+            foreach ($unlinkedUsers as $u) {
+                $cName = trim($u['company_name']);
+                if ($cName === '') continue;
+                $stmtC = $pdo->prepare("SELECT id FROM pm_companies WHERE company_name = ?");
+                $stmtC->execute([$cName]);
+                $c = $stmtC->fetch(\PDO::FETCH_ASSOC);
+                $cId = null;
+                if ($c) {
+                    $cId = $c['id'];
+                } else {
+                    $insC = $pdo->prepare("INSERT INTO pm_companies (company_name) VALUES (?)");
+                    $insC->execute([$cName]);
+                    $cId = $pdo->lastInsertId();
+                }
+                if ($cId) {
+                    $upU = $pdo->prepare("UPDATE pm_users SET company_id = ? WHERE id = ?");
+                    $upU->execute([$cId, $u['id']]);
+                    $upL = $pdo->prepare("UPDATE pm_licenses SET company_id = ? WHERE user_id = ? AND company_id IS NULL");
+                    $upL->execute([$cId, $u['id']]);
+                }
+            }
         } catch (\Throwable $t) {}
         return $pdo;
     }

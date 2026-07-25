@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Key, Package, Settings, ShieldCheck, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users } from 'lucide-react';
+import { Key, Package, Settings, ShieldCheck, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users, Building2 } from 'lucide-react';
 import { LicensesTab, License, UserAccount } from './components/LicensesTab';
 import { ClientsTab } from './components/ClientsTab';
+import { CompaniesTab, Company } from './components/CompaniesTab';
 import { PackageTiersTab, PackageTier } from './components/PackageTiersTab';
 import { SettingsTab } from './components/SettingsTab';
 import { SecurityHealthTab } from './components/SecurityHealthTab';
@@ -13,12 +14,13 @@ export const App: React.FC = () => {
   const [hasAdmin, setHasAdmin] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'licenses' | 'clients' | 'tiers' | 'settings' | 'security'>('licenses');
+  const [activeTab, setActiveTab] = useState<'licenses' | 'companies' | 'clients' | 'tiers' | 'settings' | 'security'>('licenses');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
 
   const [licenses, setLicenses] = useState<License[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [tiers, setTiers] = useState<PackageTier[]>([]);
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,6 @@ export const App: React.FC = () => {
         }
       }
     } catch (e) {
-      // If status fetch fails, fallback to unauthenticated state
       setAuthenticated(false);
     } finally {
       setAuthChecked(true);
@@ -60,6 +61,7 @@ export const App: React.FC = () => {
       const data = await res.json();
       if (data.success) {
         setLicenses(data.licenses || []);
+        setCompanies(data.companies || []);
         setTiers(data.tiers || []);
         setUsers(data.users || []);
       } else {
@@ -98,43 +100,40 @@ export const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-pm-bg text-pm-text flex items-center justify-center">
         <div className="text-xs font-semibold text-pm-secondary animate-pulse">
-          ⚡ Initializing Super Admin Portal...
+          Initializing Super Admin Gateway...
         </div>
       </div>
     );
   }
 
   if (!hasAdmin) {
-    return <SetupView onSetupSuccess={() => checkStatus()} />;
+    return <SetupView onSetupSuccess={() => { setHasAdmin(true); setAuthenticated(true); fetchAdminData(); }} />;
   }
 
   if (!authenticated) {
-    return <LoginView onLoginSuccess={() => checkStatus()} />;
+    return <LoginView onLoginSuccess={() => { setAuthenticated(true); fetchAdminData(); }} />;
   }
 
   return (
-    <div className="min-h-screen bg-pm-bg text-pm-text p-6 transition-colors duration-200">
-      {/* Toast Alert Banner */}
+    <div className="min-h-screen bg-pm-bg text-pm-text p-4 md:p-8 transition-colors duration-200">
+      {/* Toast Notification */}
       {toast && (
-        <div className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border text-xs font-bold flex items-center gap-2 ${
-          toast.type === 'success'
-            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
-            : 'bg-rose-500/10 text-rose-500 border-rose-500/30'
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border text-xs font-bold flex items-center gap-2 animate-in slide-in-from-top duration-200 ${
+          toast.type === 'error' ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
         }`}>
-          {toast.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          {toast.type === 'error' ? <AlertCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
           <span>{toast.msg}</span>
         </div>
       )}
 
-      {/* Header Bar */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-8 border-b border-pm-border gap-4">
+      {/* Admin Navigation Header */}
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-pm-border">
         <div>
-          <h1 className="text-2xl font-black tracking-wider bg-gradient-to-r from-pm-primary to-pm-purple bg-clip-text text-transparent uppercase">
-            🛠️ Mass Utility
+          <h1 className="text-xl font-extrabold text-pm-text flex items-center gap-2">
+            <span className="bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">Mass Utility Super Admin</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold uppercase">B2B v2.1</span>
           </h1>
-          <p className="text-xs mt-1 uppercase tracking-widest text-pm-secondary font-bold">
-            Super Admin Portal &amp; Licensing Control
-          </p>
+          <p className="text-xs text-pm-secondary mt-0.5">Centralized Enterprise SaaS License Broker, B2B Companies Directory &amp; Tenant Operations Center</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -167,6 +166,15 @@ export const App: React.FC = () => {
             }`}
           >
             <Key className="w-4 h-4" /> Licenses &amp; Subscriptions
+          </button>
+
+          <button
+            onClick={() => setActiveTab('companies')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'companies' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <Building2 className="w-4 h-4" /> Companies Directory
           </button>
 
           <button
@@ -213,6 +221,9 @@ export const App: React.FC = () => {
       <main>
         {activeTab === 'licenses' && (
           <LicensesTab licenses={licenses} users={users} onRefresh={fetchAdminData} showAlert={showAlert} />
+        )}
+        {activeTab === 'companies' && (
+          <CompaniesTab companies={companies} users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} />
         )}
         {activeTab === 'clients' && (
           <ClientsTab users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} />

@@ -207,4 +207,49 @@ class LicenseRepository
         $stmt = $this->db->prepare("DELETE FROM pm_package_tiers WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+    public function getAllCompanies(): array
+    {
+        $sql = "SELECT c.*, 
+                (SELECT COUNT(*) FROM pm_users u WHERE u.company_id = c.id) as user_count,
+                (SELECT COUNT(*) FROM pm_licenses l WHERE l.company_id = c.id) as license_count
+                FROM pm_companies c
+                ORDER BY c.id DESC";
+        $stmt = $this->db->query($sql);
+        $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($res) ? $res : [];
+    }
+
+    public function createCompany(string $name, ?string $taxId = null, int $maxLicenses = 10): int
+    {
+        $checkStmt = $this->db->prepare("SELECT id FROM pm_companies WHERE company_name = ?");
+        $checkStmt->execute([$name]);
+        if ($checkStmt->fetch()) {
+            throw new \Exception("A company profile with this name already exists.");
+        }
+
+        $stmt = $this->db->prepare("INSERT INTO pm_companies (company_name, tax_id, max_licenses) VALUES (?, ?, ?)");
+        $stmt->execute([$name, $taxId, $maxLicenses]);
+        return (int)$this->db->lastInsertId();
+    }
+
+    public function updateCompany(int $id, string $name, ?string $taxId, int $maxLicenses, string $status): bool
+    {
+        $checkStmt = $this->db->prepare("SELECT id FROM pm_companies WHERE company_name = ? AND id != ?");
+        $checkStmt->execute([$name, $id]);
+        if ($checkStmt->fetch()) {
+            throw new \Exception("A company with the name '{$name}' already exists.");
+        }
+
+        $stmt = $this->db->prepare("UPDATE pm_companies SET company_name = ?, tax_id = ?, max_licenses = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        return $stmt->execute([$name, $taxId, $maxLicenses, $status, $id]);
+    }
+
+    public function deleteCompany(int $id): bool
+    {
+        $this->db->prepare("UPDATE pm_users SET company_id = NULL WHERE company_id = ?")->execute([$id]);
+        $this->db->prepare("UPDATE pm_licenses SET company_id = NULL WHERE company_id = ?")->execute([$id]);
+        $stmt = $this->db->prepare("DELETE FROM pm_companies WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
 }
