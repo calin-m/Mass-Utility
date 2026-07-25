@@ -10,10 +10,11 @@ import { DatabaseToolsTab } from './components/DatabaseToolsTab';
 import { QueryMutateTab } from './components/QueryMutateTab';
 import { MutationHistoryTab } from './components/history/MutationHistoryTab';
 import { EventLogsTab } from './components/history/EventLogsTab';
+import { MerchantSecurityTab } from './components/security/MerchantSecurityTab';
 import { ModalProvider, useModal } from './utils/overlay';
 import { FetchService } from './utils/FetchService';
 
-type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'logs' | 'settings';
+type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'security' | 'logs' | 'settings';
 
 function AppContent() {
   const { showConfirm, showToast } = useModal();
@@ -229,6 +230,17 @@ function AppContent() {
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab('security')}
+            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+              activeTab === 'security'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+            }`}
+          >
+            🛡️ Security &amp; Health
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('logs')}
             className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
               activeTab === 'logs'
@@ -273,6 +285,7 @@ function AppContent() {
         {activeTab === 'database' && <DatabaseToolsTab />}
         {activeTab === 'query' && <QueryMutateTab />}
         {activeTab === 'history' && <MutationHistoryTab />}
+        {activeTab === 'security' && <MerchantSecurityTab />}
         {activeTab === 'logs' && <EventLogsTab />}
       </main>
     </div>

@@ -5,13 +5,12 @@
 import React, { useState, useEffect } from 'react';
 import { SettingsGeneral } from './SettingsGeneral';
 import { SettingsInfo } from './SettingsInfo';
-import { SettingsSecurity } from './SettingsSecurity';
 import { FetchService } from '../../utils/FetchService';
 import { useModal } from '../../utils/overlay';
 
 export const SettingsTab: React.FC = () => {
   const { showAlert, showToast } = useModal();
-  const [activeSubTab, setActiveSubTab] = useState<'general' | 'info' | 'security'>('general');
+  const [activeSubTab, setActiveSubTab] = useState<'general' | 'info'>('general');
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -76,17 +75,6 @@ export const SettingsTab: React.FC = () => {
         >
           📖 Documentation & Info
         </button>
-        <button
-          type="button"
-          onClick={() => setActiveSubTab('security')}
-          className={`pm-sub-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-            activeSubTab === 'security'
-              ? 'bg-pm-card text-pm-primary border-pm-border shadow-sm'
-              : 'text-pm-text-secondary hover:text-pm-text border-transparent'
-          }`}
-        >
-          🛡️ Security & Health
-        </button>
       </div>
 
       {/* Pane Content */}
@@ -99,7 +87,6 @@ export const SettingsTab: React.FC = () => {
           />
         )}
         {activeSubTab === 'info' && <SettingsInfo />}
-        {activeSubTab === 'security' && <SettingsSecurity />}
       </div>
     </div>
   );
