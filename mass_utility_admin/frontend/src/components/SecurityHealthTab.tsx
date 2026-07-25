@@ -104,10 +104,10 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
 
   return (
     <div className="space-y-6 w-full">
-      {/* Super Admin Portal System Status Card Container */}
+      {/* Portal System Status Card Container */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation">
         <SectionHeader
-          title="Super Admin Portal System Status"
+          title="Portal System Status"
           subtitle="System health, security diagnostics, and permission integrity checks."
           icon={Settings}
         />
@@ -179,20 +179,20 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
             </div>
           </div>
 
-          {/* 5. V2 SPA Frontend Engine */}
+          {/* 5. Licensing Gateway Engine */}
           <div className="p-3.5 bg-pm-input border border-pm-border rounded-lg flex flex-col justify-between">
             <div className="flex items-center justify-between gap-2 mb-2">
-              <div className="p-1.5 bg-indigo-500/10 text-indigo-400 rounded-md shrink-0">
+              <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-md shrink-0">
                 <Cpu className="w-4 h-4" />
               </div>
-              <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/30">
+              <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/30">
                 ACTIVE
               </span>
             </div>
             <div>
-              <div className="text-xs font-bold text-pm-text">V2 SPA Frontend Engine</div>
-              <div className="text-[0.68rem] text-pm-secondary truncate mt-0.5" title="React 18 + TypeScript + Vite + Tailwind CSS">
-                React 18 + Vite + TS
+              <div className="text-xs font-bold text-pm-text">Licensing Gateway Engine</div>
+              <div className="text-[0.68rem] text-pm-secondary font-mono truncate mt-0.5" title="PHP Runtime Engine (PDO SQLite & cURL Synchronized)">
+                PHP {diagnostics?.php_version || '8.x'} (PDO / cURL)
               </div>
             </div>
           </div>
