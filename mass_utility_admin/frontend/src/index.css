@@ -17,6 +17,7 @@ body {
   --pm-border-color: #cbd5e1;
   --pm-text-primary: #0f172a;
   --pm-text-secondary: #334155;
+  --pm-text-muted: #475569;
   --pm-primary: #7c3aed;
   --pm-primary-dark: #6d28d9;
   --pm-input-bg: #f1f5f9;
@@ -30,10 +31,16 @@ body {
   --pm-border-color: #262638;
   --pm-text-primary: #e2e8f0;
   --pm-text-secondary: #94a3b8;
+  --pm-text-muted: #94a3b8;
   --pm-primary: #a78bfa;
   --pm-primary-dark: #8b5cf6;
   --pm-input-bg: #171725;
   --pm-scrollbar-thumb: #3a3a54;
+}
+
+/* WCAG 2.1 AA Contrast Normalization */
+.text-gray-400, .text-slate-400 {
+  color: var(--pm-text-muted, #475569) !important;
 }
 
 /* Scrollbars */

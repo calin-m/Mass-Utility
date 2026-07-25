@@ -153,7 +153,7 @@ class LicenseRepository
             'valid' => true,
             'tier' => $lic['package_tier'],
             'secure_token' => $secureToken,
-            'capabilities' => $features['capabilities'] ?? [],
+            'capabilities' => $features['capabilities'],
             'features' => $features
         ];
     }

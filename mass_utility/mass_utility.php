@@ -678,7 +678,7 @@ class Mass_Utility extends Module
 
             <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
                 ' . ($isSuspended ? '
-                <span class="pm-bridge-btn" style="background: #334155; opacity: 0.6; cursor: not-allowed; box-shadow: none;">
+                <span class="pm-bridge-btn" style="background: var(--bridge-border); opacity: 0.6; cursor: not-allowed; box-shadow: none;">
                     Launch Standalone Dashboard (Locked)
                 </span>
                 ' : '
