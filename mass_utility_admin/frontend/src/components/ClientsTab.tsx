@@ -32,6 +32,10 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
   const [copiedCreds, setCopiedCreds] = useState(false);
   const [showBannerPass, setShowBannerPass] = useState(false);
 
+  // Client 360 Deep-Dive Modal State
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
+
   const setCreateEmail = (val: string) => {
     setCreateEmailState(val);
     try { localStorage.setItem('pm_draft_client_email', val); } catch (e) {}
@@ -489,6 +493,14 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
                       <td className="p-3 flex items-center gap-2">
                         <button
                           type="button"
+                          onClick={() => { setSelectedUser(u); setIsDetailsOpen(true); }}
+                          className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                          title="Inspect Client 360° Profile"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> View
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => openEditModal(u)}
                           className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
                           title="Edit Client Profile"
@@ -807,6 +819,116 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
           </div>
         </form>
       </BaseModal>
+
+      {/* Client 360° Deep-Dive Inspection Modal */}
+      {selectedUser && (
+        <BaseModal isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} title={`Client 360° Profile: ${selectedUser.email}`}>
+          <div className="space-y-6">
+            {/* Account Health Header */}
+            <div className="p-4 bg-pm-input/60 border border-pm-border rounded-xl flex items-center justify-between text-xs">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-purple-400" />
+                  <span className="font-bold text-sm text-pm-text">{selectedUser.email}</span>
+                </div>
+                <div className="text-pm-secondary flex items-center gap-3">
+                  <span>ID: #{selectedUser.id}</span>
+                  <span>•</span>
+                  <span>Registered: {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : 'N/A'}</span>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] border ${
+                  selectedUser.status === 'suspended' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                }`}>
+                  {selectedUser.status || 'ACTIVE'}
+                </span>
+              </div>
+            </div>
+
+            {/* Company Context */}
+            <div className="p-3 bg-pm-card border border-pm-border rounded-xl text-xs space-y-1">
+              <div className="font-bold text-pm-secondary uppercase tracking-wider text-[10px]">Organization Context</div>
+              <div className="flex justify-between items-center text-pm-text font-semibold">
+                <span className="flex items-center gap-1.5">
+                  <Building className="w-4 h-4 text-indigo-400" />
+                  {selectedUser.company_name || 'Independent Client'}
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400">
+                  Client Account
+                </span>
+              </div>
+            </div>
+
+            {/* Assigned License Keys & Store Domains */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-amber-400" /> Issued Licenses ({licenses.filter(l => l.user_email?.toLowerCase() === selectedUser.email.toLowerCase()).length})
+              </h4>
+              <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
+                {licenses.filter(l => l.user_email?.toLowerCase() === selectedUser.email.toLowerCase()).length === 0 ? (
+                  <p className="p-4 text-center text-pm-secondary">No license keys issued to this client email yet.</p>
+                ) : (
+                  <div className="divide-y divide-pm-border">
+                    {licenses.filter(l => l.user_email?.toLowerCase() === selectedUser.email.toLowerCase()).map(l => (
+                      <div key={l.id} className="p-3 flex justify-between items-center bg-pm-card">
+                        <div className="space-y-0.5">
+                          <div className="font-mono text-amber-400 font-bold flex items-center gap-2">
+                            <span>{l.license_key}</span>
+                          </div>
+                          <div className="text-[11px] text-pm-secondary flex items-center gap-2">
+                            <span className="uppercase font-bold text-purple-400">{l.package_tier} Tier</span>
+                            <span>•</span>
+                            <span>Status: {l.status}</span>
+                          </div>
+                        </div>
+                        <div>
+                          {l.store_url ? (
+                            <a
+                              href={`https://${l.store_url.replace(/^https?:\/\//, '')}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-400 hover:underline bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20"
+                            >
+                              <ExternalLink className="w-3 h-3" /> {l.store_url}
+                            </a>
+                          ) : (
+                            <span className="italic text-pm-secondary/60">Unbound Store</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center pt-4 border-t border-pm-border">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setIsDetailsOpen(false); openResetModal(selectedUser); }}
+                  className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5"
+                >
+                  <Key className="w-3.5 h-3.5" /> Reset Pass
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsDetailsOpen(false); openEditModal(selectedUser); }}
+                  className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5"
+                >
+                  <Edit className="w-3.5 h-3.5" /> Edit Profile
+                </button>
+              </div>
+
+              <button type="button" onClick={() => setIsDetailsOpen(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
+                Close Inspection Window
+              </button>
+            </div>
+          </div>
+        </BaseModal>
+      )}
     </div>
   );
 };

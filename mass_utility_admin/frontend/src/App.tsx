@@ -14,7 +14,7 @@ export const App: React.FC = () => {
   const [hasAdmin, setHasAdmin] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'licenses' | 'companies' | 'clients' | 'tiers' | 'settings' | 'security'>('licenses');
+  const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security'>('companies');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
@@ -160,15 +160,6 @@ export const App: React.FC = () => {
       <nav className="flex w-full justify-between mb-8 border-b border-pm-border pb-4 overflow-x-auto gap-4">
         <div className="flex gap-2">
           <button
-            onClick={() => setActiveTab('licenses')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
-              activeTab === 'licenses' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
-            }`}
-          >
-            <Key className="w-4 h-4" /> Licenses &amp; Subscriptions
-          </button>
-
-          <button
             onClick={() => setActiveTab('companies')}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
               activeTab === 'companies' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
@@ -184,6 +175,15 @@ export const App: React.FC = () => {
             }`}
           >
             <Users className="w-4 h-4" /> Clients Directory
+          </button>
+
+          <button
+            onClick={() => setActiveTab('licenses')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'licenses' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <Key className="w-4 h-4" /> Licenses &amp; Subscriptions
           </button>
 
           <button
@@ -219,14 +219,14 @@ export const App: React.FC = () => {
 
       {/* Main Tab Content */}
       <main>
-        {activeTab === 'licenses' && (
-          <LicensesTab licenses={licenses} users={users} onRefresh={fetchAdminData} showAlert={showAlert} />
-        )}
         {activeTab === 'companies' && (
           <CompaniesTab companies={companies} users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} />
         )}
         {activeTab === 'clients' && (
           <ClientsTab users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} />
+        )}
+        {activeTab === 'licenses' && (
+          <LicensesTab licenses={licenses} users={users} onRefresh={fetchAdminData} showAlert={showAlert} />
         )}
         {activeTab === 'tiers' && (
           <PackageTiersTab tiers={tiers} onRefresh={fetchAdminData} showAlert={showAlert} />
