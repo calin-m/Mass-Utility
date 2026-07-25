@@ -13,6 +13,65 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
 
+  // Create Client Modal State (with localStorage draft persistence)
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createEmail, setCreateEmailState] = useState(() => localStorage.getItem('pm_draft_client_email') || '');
+  const [createPassword, setCreatePassword] = useState('');
+  const [createCompany, setCreateCompanyState] = useState(() => localStorage.getItem('pm_draft_client_company') || '');
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+
+  const setCreateEmail = (val: string) => {
+    setCreateEmailState(val);
+    try { localStorage.setItem('pm_draft_client_email', val); } catch (e) {}
+  };
+
+  const setCreateCompany = (val: string) => {
+    setCreateCompanyState(val);
+    try { localStorage.setItem('pm_draft_client_company', val); } catch (e) {}
+  };
+
+  const generateCreatePassword = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+=-';
+    let pass = '';
+    for (let i = 0; i < 16; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCreatePassword(pass);
+  };
+
+  const handleCreateClient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createEmail || !createPassword) return;
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('email', createEmail);
+      formData.append('password', createPassword);
+      formData.append('company_name', createCompany);
+
+      const res = await fetch('index.php?action=api_create_user', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        showAlert('✨ Standalone Client Account created successfully!', 'success');
+        setCreateEmail('');
+        setCreatePassword('');
+        setCreateCompany('');
+        try {
+          localStorage.removeItem('pm_draft_client_email');
+          localStorage.removeItem('pm_draft_client_company');
+        } catch (e) {}
+        setShowCreateModal(false);
+        onRefresh();
+      } else {
+        showAlert(`❌ Creation failed: ${data.error || 'Unknown error'}`, 'error');
+      }
+    } catch (err: any) {
+      showAlert(`❌ Request failed: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Modal States
   const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
   const [editEmail, setEditEmail] = useState('');
@@ -217,15 +276,26 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onRefresh}
-            className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
-            title="Refresh Client Data"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Refresh</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="pm-btn-primary px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1.5 transition shadow-sm"
+              title="Create New Standalone Client Account"
+            >
+              <span>✨ + Create Client Account</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onRefresh}
+              className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Refresh Client Data"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
 
         {/* Search & Filter Controls */}
@@ -564,6 +634,99 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
                 {loading ? 'Deleting...' : '🗑️ Confirm Delete'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 0: Create Standalone Client Account */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-pm-card border border-pm-border rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-3 border-b border-pm-border">
+              <h3 className="text-base font-bold text-pm-text flex items-center gap-2">
+                <Users className="w-5 h-5 text-pm-primary" /> Create Standalone Client Account
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateClient} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Client Email</label>
+                <input
+                  type="email"
+                  required
+                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                  placeholder="merchant@email.com"
+                  value={createEmail}
+                  onChange={e => setCreateEmail(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Password</label>
+                <div className="flex gap-2">
+                  <input
+                    type={showCreatePassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    placeholder="Min 8 chars or click ⚡ Auto"
+                    className="flex-1 bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none min-w-0"
+                    value={createPassword}
+                    onChange={e => setCreatePassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCreatePassword(!showCreatePassword)}
+                    className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center transition shrink-0"
+                    title={showCreatePassword ? "Hide Password" : "Show Password"}
+                  >
+                    {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={generateCreatePassword}
+                    className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1 shrink-0"
+                    title="Generate Random Password"
+                  >
+                    ⚡ Auto
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company / Store Name</label>
+                <input
+                  type="text"
+                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                  placeholder="Optional Store Name"
+                  value={createCompany}
+                  onChange={e => setCreateCompany(e.target.value)}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase"
+                >
+                  {loading ? 'Creating...' : '✨ Create Client Account'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
