@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { ShieldAlert, UserPlus, KeyRound, AlertCircle } from 'lucide-react';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface SetupViewProps {
   onSetupSuccess: () => void;
 }
 
 export const SetupView: React.FC<SetupViewProps> = ({ onSetupSuccess }) => {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -79,7 +81,7 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSetupSuccess }) => {
               type="password"
               required
               className="w-full bg-pm-input border border-pm-border rounded-xl px-3 py-2.5 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-              placeholder="Minimum 8 characters"
+              placeholder={t('ph_new_pass')}
               value={password}
               onChange={e => setPassword(e.target.value)}
             />

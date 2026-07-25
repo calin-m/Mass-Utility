@@ -54,6 +54,7 @@ const de: TranslationSchema = {
   btn_inspect_company: 'Firma Prüfen',
   btn_inspect_client: 'Kunde Prüfen',
   btn_add_team_member: 'Teammitglied Hinzufügen',
+  btn_confirm: 'Bestätigen',
 
   // Sub-Tab Navigation
   subtab_overview: 'Übersicht & Lizenzen',
@@ -97,6 +98,39 @@ const de: TranslationSchema = {
   security_title: 'Portal-Systemstatus',
   security_subtitle: 'Systemstatus, Sicherheitsdiagnose und Prüfung der Berechtigungsintegrität.',
 
+  // Placeholders & Empty States
+  ph_search_companies: 'Nach Firmenname oder USt-IdNr. suchen...',
+  ph_search_clients: 'Nach Kunden-E-Mail oder Shop-Name suchen...',
+  ph_search_audit: 'Protokolle nach Benutzer, Ziel oder Details suchen...',
+  empty_companies: 'Keine Firmenprofile entsprechen der Suche.',
+  empty_clients: 'Keine Kundenkonten entsprechen der Suche.',
+  ph_store_url: 'z.B. shop.meinshop.de',
+  ph_current_pass: 'Aktuelles Passwort eingeben',
+  ph_new_pass: 'Neues Passwort eingeben',
+  ph_full_name: 'z.B. Max Mustermann',
+  ph_strong_pass: 'Sicheres Passwort eingeben...',
+  ph_client_email: 'kunde@firma.de',
+  ph_gen_pass: 'Passwort eingeben oder generieren',
+  ph_company_inc: 'z.B. Acme Handel GmbH',
+  ph_member_email: 'mitglied@firma.de',
+  ph_set_pass: 'Passwort festlegen...',
+  ph_owner_email: 'inhaber@firma.de',
+
+  // Common Table & Badge Labels
+  lbl_members: 'Mitglieder',
+  lbl_allocated: 'Zugewiesen',
+  lbl_individual_client: 'Einzelkunde',
+  lbl_no_licenses: 'Keine Lizenzen',
+  lbl_unspecified: 'Nicht angegeben',
+  lbl_none: 'Keine',
+  lbl_more: 'mehr',
+  lbl_creds_title: 'Neu erstellte Zugangsdaten für',
+  lbl_creds_email: 'E-Mail:',
+  lbl_creds_password: 'Passwort:',
+  lbl_creds_key: 'Schlüssel:',
+  lbl_creds_hide: 'Verbergen',
+  lbl_creds_show: 'Anzeigen',
+
   // Company Details View
   cd_team_accounts_title: 'Verknüpfte Mitarbeiterkonten',
   cd_team_accounts_sub: 'Verwalten Sie Mitarbeiterkonten dieser Organisation.',
@@ -134,7 +168,7 @@ const de: TranslationSchema = {
   tier_gdpr_sweeper_name: 'DSGVO-Bereiniger',
   tier_gdpr_sweeper_desc: 'Schaltet Datenschutz-Scan und Anonymisierung frei',
   tier_visual_query_name: 'Visueller Abfrage-Assistent',
-  tier_visual_query_desc: 'Schaltet visuelle No-Code-Abfragen frei',
+  tier_visual_query_desc: 'Schaltet visueller No-Code-Abfragen frei',
   tier_backup_auto_name: 'Automatische Cron-Backups',
   tier_backup_auto_desc: 'Aktiviert automatische Hintergrund-Sicherungen',
   tier_autopilot_name: 'CloudLinux Autopilot',

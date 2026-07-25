@@ -353,7 +353,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
       {/* Shared Directory Toolbar */}
       <DirectoryToolbar
-        searchPlaceholder="Search by client email or store name..."
+        searchPlaceholder={t('ph_search_clients')}
         searchTerm={searchTerm}
         onSearchChange={(val) => {
           setSearchTerm(val);
@@ -383,20 +383,20 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
           <div className="space-y-1">
             <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
               <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>Newly Provisioned Client Credentials for <strong>{lastCreatedCreds.email}</strong></span>
+              <span>{t('lbl_creds_title')} <strong>{lastCreatedCreds.email}</strong></span>
             </div>
             <div className="text-[11px] font-mono text-pm-secondary flex flex-wrap items-center gap-4 pt-1">
-              <span>Email: <strong className="text-pm-text">{lastCreatedCreds.email}</strong></span>
-              <span>Password: <strong className="text-pm-text font-bold">{showBannerPass ? lastCreatedCreds.pass : '••••••••••••'}</strong></span>
+              <span>{t('lbl_creds_email')} <strong className="text-pm-text">{lastCreatedCreds.email}</strong></span>
+              <span>{t('lbl_creds_password')} <strong className="text-pm-text font-bold">{showBannerPass ? lastCreatedCreds.pass : '••••••••••••'}</strong></span>
               <button
                 type="button"
                 onClick={() => setShowBannerPass(!showBannerPass)}
                 className="text-purple-600 dark:text-purple-400 hover:underline font-bold text-[10px]"
               >
-                {showBannerPass ? 'Hide' : 'Show'} Password
+                {showBannerPass ? t('lbl_creds_hide') : t('lbl_creds_show')} {t('login_password_label')}
               </button>
               {lastCreatedCreds.key && (
-                <span>Issued Key: <strong className="text-purple-600 dark:text-purple-400">{lastCreatedCreds.key}</strong></span>
+                <span>{t('lbl_creds_key')} <strong className="text-purple-600 dark:text-purple-400">{lastCreatedCreds.key}</strong></span>
               )}
             </div>
           </div>
@@ -407,7 +407,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
               icon={copiedCreds ? Check : Copy}
               onClick={copyCreatedCredentials}
             >
-              {copiedCreds ? 'Copied!' : 'Copy Credentials'}
+              {copiedCreds ? t('btn_copied') : t('btn_copy_creds')}
             </Button>
             <button
               type="button"
@@ -438,7 +438,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
               {paginatedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-pm-secondary italic">
-                    No client accounts match the active search or filter view.
+                    {t('empty_clients')}
                   </td>
                 </tr>
               ) : (
@@ -460,7 +460,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                             >
                               {user.email}
                             </button>
-                            <div className="text-[10px] text-pm-secondary font-mono">ID #{user.id} • Joined {user.created_at}</div>
+                            <div className="text-[10px] text-pm-secondary font-mono">ID #{user.id} • {t('stat_joined_date')} {user.created_at}</div>
                           </div>
                         </div>
                       </td>
@@ -472,27 +472,27 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                             <span>{user.company_name}</span>
                           </div>
                         ) : (
-                          <span className="italic text-pm-secondary">Individual Client</span>
+                          <span className="italic text-pm-secondary">{t('lbl_individual_client')}</span>
                         )}
                       </td>
 
                       <td className="p-3 font-mono font-semibold text-pm-text">
                         {metrics.total === 0 ? (
-                          <span className="italic text-pm-secondary">No Licenses</span>
+                          <span className="italic text-pm-secondary">{t('lbl_no_licenses')}</span>
                         ) : (
-                          <span className="text-purple-600 dark:text-purple-400 font-bold">{metrics.active} Active</span>
+                          <span className="text-purple-600 dark:text-purple-400 font-bold">{metrics.active} {t('status_active')}</span>
                         )}
                       </td>
 
                       <td className="p-3 font-mono text-[0.72rem]">
                         {metrics.boundDomains.length === 0 ? (
-                          <span className="italic text-pm-secondary">None</span>
+                          <span className="italic text-pm-secondary">{t('lbl_none')}</span>
                         ) : (
                           <div className="flex items-center gap-1">
                             <span className="text-pm-text font-bold">{metrics.boundDomains[0]}</span>
                             {metrics.boundDomains.length > 1 && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">
-                                +{metrics.boundDomains.length - 1} more
+                                +{metrics.boundDomains.length - 1} {t('lbl_more')}
                               </span>
                             )}
                           </div>
@@ -562,28 +562,28 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
       <BaseModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="Provision New Client Account"
+        title={t('modal_create_client')}
         icon={UserPlus}
         maxWidth="lg"
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
           <FormInput
-            label="Client Email Address"
+            label={t('field_client_email')}
             type="email"
             required
-            placeholder="client@company.com"
+            placeholder={t('ph_client_email')}
             value={createEmail}
             onChange={e => setCreateEmail(e.target.value)}
           />
 
           <div>
-            <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">Account Password</label>
+            <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">{t('field_account_password')}</label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <FormInput
                   type={showCreatePassword ? 'text' : 'password'}
                   required
-                  placeholder="Enter or generate password"
+                  placeholder={t('ph_gen_pass')}
                   value={createPassword}
                   onChange={e => setCreatePassword(e.target.value)}
                 />
@@ -596,15 +596,15 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                 </button>
               </div>
               <Button type="button" variant="neutral" size="md" onClick={generateRandomPassword}>
-                Generate
+                {t('btn_generate')}
               </Button>
             </div>
           </div>
 
           <FormInput
-            label="Company / Organization Name (Optional)"
+            label={t('field_company_name')}
             type="text"
-            placeholder="e.g. Acme Stores Inc."
+            placeholder={t('ph_company_inc')}
             value={createCompany}
             onChange={e => setCreateCompany(e.target.value)}
           />
@@ -658,9 +658,9 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         {editingUser && (
           <form onSubmit={handleEditProfile} className="space-y-4">
             <FormInput
-              label="Company / Organization Name"
+              label={t('field_company_name')}
               type="text"
-              placeholder="e.g. Acme Stores Ltd."
+              placeholder={t('field_company_name_placeholder')}
               value={editCompany}
               onChange={e => setEditCompany(e.target.value)}
             />
@@ -681,20 +681,20 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
       <BaseModal
         isOpen={!!resetUser}
         onClose={() => setResetUser(null)}
-        title={`Reset Password: ${resetUser?.email || ''}`}
+        title={`${t('modal_reset_password')}: ${resetUser?.email || ''}`}
         icon={Key}
         maxWidth="md"
       >
         {resetUser && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
-              <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">New Password</label>
+              <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">{t('settings_new_password')}</label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <FormInput
                     type={showResetPassword ? 'text' : 'password'}
                     required
-                    placeholder="Enter new password"
+                    placeholder={t('ph_new_pass')}
                     value={resetPassword}
                     onChange={e => setResetPassword(e.target.value)}
                   />

@@ -381,7 +381,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                     type="text"
                     value={editTaxId}
                     onChange={e => setEditTaxId(e.target.value)}
-                    placeholder="e.g. US987654321 or DE123456789"
+                    placeholder={t('field_vat_id_placeholder')}
                     className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-pm-primary focus:outline-none"
                   />
                 </div>
@@ -747,22 +747,22 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                 <form onSubmit={handleAddTeamMember} className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Member Email Address</label>
+                      <label className="block text-[11px] font-semibold text-pm-secondary mb-1">{t('field_client_email')}</label>
                       <input
                         type="email"
                         required
                         value={newMemberEmail}
                         onChange={e => setNewMemberEmail(e.target.value)}
-                        placeholder="member@company.com"
+                        placeholder={t('ph_member_email')}
                         className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500"
                       />
                     </div>
 
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <label className="block text-[11px] font-semibold text-pm-secondary">Account Password</label>
+                        <label className="block text-[11px] font-semibold text-pm-secondary">{t('field_account_password')}</label>
                         <button type="button" onClick={generateMemberPass} className="text-[10px] text-pm-primary hover:underline">
-                          Generate Strong Pass
+                          {t('btn_generate')}
                         </button>
                       </div>
                       <div className="relative">
@@ -771,7 +771,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                           required
                           value={newMemberPassword}
                           onChange={e => setNewMemberPassword(e.target.value)}
-                          placeholder="Set password..."
+                          placeholder={t('ph_set_pass')}
                           className="w-full bg-pm-card border border-pm-border rounded-lg pl-3 pr-9 py-2 text-xs font-mono text-pm-text focus:outline-none focus:border-purple-500"
                         />
                         <button

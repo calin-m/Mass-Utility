@@ -52,6 +52,7 @@ const en = {
   btn_inspect_company: 'Inspect Company',
   btn_inspect_client: 'Inspect Client',
   btn_add_team_member: 'Add Team Member',
+  btn_confirm: 'Confirm',
 
   // Sub-Tab Navigation
   subtab_overview: 'Overview & Licenses',
@@ -94,6 +95,39 @@ const en = {
   tiers_subtitle: 'Configure feature unlock flags, module quotas, and capability matrices across Basic, Pro, and Enterprise tiers.',
   security_title: 'Portal System Status',
   security_subtitle: 'System health, security diagnostics, and permission integrity checks.',
+
+  // Placeholders & Empty States
+  ph_search_companies: 'Search by company name or VAT ID...',
+  ph_search_clients: 'Search by client email or store name...',
+  ph_search_audit: 'Search logs by admin username, target ID, or payload details...',
+  empty_companies: 'No company profiles match the active search or filter view.',
+  empty_clients: 'No client accounts match the active search or filter view.',
+  ph_store_url: 'e.g. store.myshop.com',
+  ph_current_pass: 'Enter current password',
+  ph_new_pass: 'Enter new password',
+  ph_full_name: 'e.g. John Doe',
+  ph_strong_pass: 'Enter strong password...',
+  ph_client_email: 'client@company.com',
+  ph_gen_pass: 'Enter or generate password',
+  ph_company_inc: 'e.g. Acme Stores Inc.',
+  ph_member_email: 'member@company.com',
+  ph_set_pass: 'Set password...',
+  ph_owner_email: 'owner@company.com',
+
+  // Common Table & Badge Labels
+  lbl_members: 'Members',
+  lbl_allocated: 'Allocated',
+  lbl_individual_client: 'Individual Client',
+  lbl_no_licenses: 'No Licenses',
+  lbl_unspecified: 'Unspecified',
+  lbl_none: 'None',
+  lbl_more: 'more',
+  lbl_creds_title: 'Newly Provisioned Client Credentials for',
+  lbl_creds_email: 'Email:',
+  lbl_creds_password: 'Password:',
+  lbl_creds_key: 'Issued Key:',
+  lbl_creds_hide: 'Hide',
+  lbl_creds_show: 'Show',
 
   // Company Details View
   cd_team_accounts_title: 'Linked Employee Accounts',

@@ -54,6 +54,7 @@ const fr: TranslationSchema = {
   btn_inspect_company: 'Inspecter l’Entreprise',
   btn_inspect_client: 'Inspecter le Client',
   btn_add_team_member: 'Ajouter un Membre d’Équipe',
+  btn_confirm: 'Confirmer',
 
   // Sub-Tab Navigation
   subtab_overview: 'Aperçu & Licences',
@@ -96,6 +97,39 @@ const fr: TranslationSchema = {
   tiers_subtitle: 'Configurez les fonctionnalités et quotas pour les niveaux Basic, Pro et Enterprise.',
   security_title: 'État du Système du Portail',
   security_subtitle: 'Diagnostic de sécurité et vérification de l’intégrité des permissions.',
+
+  // Placeholders & Empty States
+  ph_search_companies: 'Rechercher par nom d’entreprise ou SIRET...',
+  ph_search_clients: 'Rechercher par e-mail client ou nom de boutique...',
+  ph_search_audit: 'Rechercher par utilisateur, cible ou détails...',
+  empty_companies: 'Aucune entreprise ne correspond à la recherche.',
+  empty_clients: 'Aucun compte client ne correspond à la recherche.',
+  ph_store_url: 'ex. boutique.maboutique.fr',
+  ph_current_pass: 'Saisissez le mot de passe actuel',
+  ph_new_pass: 'Saisissez le nouveau mot de passe',
+  ph_full_name: 'ex. Jean Dupont',
+  ph_strong_pass: 'Saisissez un mot de passe fort...',
+  ph_client_email: 'client@entreprise.fr',
+  ph_gen_pass: 'Saisissez ou générez un mot de passe',
+  ph_company_inc: 'ex. Acme France SAS',
+  ph_member_email: 'membre@entreprise.fr',
+  ph_set_pass: 'Définissez un mot de passe...',
+  ph_owner_email: 'proprietaire@entreprise.fr',
+
+  // Common Table & Badge Labels
+  lbl_members: 'Membres',
+  lbl_allocated: 'Allouées',
+  lbl_individual_client: 'Client Individuel',
+  lbl_no_licenses: 'Aucune Licence',
+  lbl_unspecified: 'Non spécifié',
+  lbl_none: 'Aucun',
+  lbl_more: 'de plus',
+  lbl_creds_title: 'Identifiants client nouvellement générés pour',
+  lbl_creds_email: 'E-mail :',
+  lbl_creds_password: 'Mot de passe :',
+  lbl_creds_key: 'Clé émise :',
+  lbl_creds_hide: 'Masquer',
+  lbl_creds_show: 'Afficher',
 
   // Company Details View
   cd_team_accounts_title: 'Comptes d’Employés Liés',

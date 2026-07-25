@@ -250,7 +250,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
 
       {/* Shared Directory Toolbar */}
       <DirectoryToolbar
-        searchPlaceholder="Search by company name or VAT ID..."
+        searchPlaceholder={t('ph_search_companies')}
         searchTerm={searchTerm}
         onSearchChange={(val) => {
           setSearchTerm(val);
@@ -299,7 +299,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
               {paginatedCompanies.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-pm-secondary italic">
-                    No company profiles match the active search or filter view.
+                    {t('empty_companies')}
                   </td>
                 </tr>
               ) : (
@@ -334,17 +334,17 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                           </button>
                         </div>
                       ) : (
-                        <span className="italic text-pm-secondary">Unspecified</span>
+                        <span className="italic text-pm-secondary">{t('lbl_unspecified')}</span>
                       )}
                     </td>
                     <td className="p-3 font-bold text-pm-text">
                       <div className="flex items-center gap-1">
                         <Users className="w-3.5 h-3.5 text-purple-400" />
-                        <span>{c.user_count || 0} Members</span>
+                        <span>{c.user_count || 0} {t('lbl_members')}</span>
                       </div>
                     </td>
                     <td className="p-3 font-mono font-semibold text-pm-text">
-                      <span className="text-purple-600 dark:text-purple-400">{c.license_count || 0}</span> / {c.max_licenses} Allocated
+                      <span className="text-purple-600 dark:text-purple-400">{c.license_count || 0}</span> / {c.max_licenses} {t('lbl_allocated')}
                     </td>
                     <td className="p-3">
                       <StatusBadge status={c.status} />
@@ -397,24 +397,24 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       >
         <form onSubmit={handleCreate} className="space-y-4">
           <FormInput
-            label="Company / Organization Name"
+            label={t('field_company_name')}
             type="text"
             required
-            placeholder="e.g. Acme Retail Solutions Ltd."
+            placeholder={t('field_company_name_placeholder')}
             value={name}
             onChange={e => setName(e.target.value)}
           />
 
           <FormInput
-            label="Tax / VAT Identification Number (Optional)"
+            label={t('field_vat_id')}
             type="text"
-            placeholder="e.g. US987654321 or DE123456789"
+            placeholder={t('field_vat_id_placeholder')}
             value={taxId}
             onChange={e => setTaxId(e.target.value)}
           />
 
           <FormInput
-            label="Maximum License Key Pool Allocation"
+            label={t('field_max_licenses')}
             type="number"
             min={1}
             max={500}
@@ -433,17 +433,17 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                 }}
                 className="rounded border-pm-border text-purple-600 focus:ring-purple-500"
               />
-              <span>Automatically provision initial Company Owner Admin account</span>
+              <span>{t('field_auto_owner')}</span>
             </label>
           </div>
 
           {createOwnerAccount && (
             <div className="space-y-3 p-3 bg-pm-input/50 rounded-xl border border-pm-border text-xs">
               <FormInput
-                label="Owner Email Address"
+                label={t('field_owner_email')}
                 type="email"
                 required={createOwnerAccount}
-                placeholder="owner@company.com"
+                placeholder={t('ph_owner_email')}
                 value={ownerEmail}
                 onChange={e => setOwnerEmail(e.target.value)}
               />

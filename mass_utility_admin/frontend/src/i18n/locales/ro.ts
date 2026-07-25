@@ -54,6 +54,7 @@ const ro: TranslationSchema = {
   btn_inspect_company: 'Inspectează Compania',
   btn_inspect_client: 'Inspectează Clientul',
   btn_add_team_member: 'Adaugă Membru Echipă',
+  btn_confirm: 'Confirmă',
 
   // Sub-Tab Navigation
   subtab_overview: 'General & Licențe',
@@ -96,6 +97,39 @@ const ro: TranslationSchema = {
   tiers_subtitle: 'Configurează permisiunile funcționalităților, cotele de module și matricea de capabilități pentru pachetele Basic, Pro și Enterprise.',
   security_title: 'Stare Sistem Portal',
   security_subtitle: 'Diagnostice de securitate, starea sistemului și verificarea integrității permisiunilor.',
+
+  // Placeholders & Empty States
+  ph_search_companies: 'Căutați după nume companie sau CUI / CIF...',
+  ph_search_clients: 'Căutați după email client sau nume magazin...',
+  ph_search_audit: 'Căutați loguri după utilizator admin, ID țintă sau detalii payload...',
+  empty_companies: 'Nicio companie nu se potrivește căutării sau filtrului de status activ.',
+  empty_clients: 'Niciun cont client nu se potrivește căutării sau filtrului de status activ.',
+  ph_store_url: 'ex. magazin.meu.ro',
+  ph_current_pass: 'Introduceți parola curentă',
+  ph_new_pass: 'Introduceți parola nouă',
+  ph_full_name: 'ex. Ion Popescu',
+  ph_strong_pass: 'Introduceți o parolă puternică...',
+  ph_client_email: 'client@companie.ro',
+  ph_gen_pass: 'Introduceți sau generați parola',
+  ph_company_inc: 'ex. Acme SRL',
+  ph_member_email: 'membru@companie.ro',
+  ph_set_pass: 'Setează parola...',
+  ph_owner_email: 'proprietar@companie.ro',
+
+  // Common Table & Badge Labels
+  lbl_members: 'Membri',
+  lbl_allocated: 'Alocate',
+  lbl_individual_client: 'Client Individual',
+  lbl_no_licenses: 'Fără Licențe',
+  lbl_unspecified: 'Nespecificat',
+  lbl_none: 'Niciunul',
+  lbl_more: 'în plus',
+  lbl_creds_title: 'Credențiale Client Nou Generate pentru',
+  lbl_creds_email: 'Email:',
+  lbl_creds_password: 'Parolă:',
+  lbl_creds_key: 'Cheie Emisă:',
+  lbl_creds_hide: 'Ascunde',
+  lbl_creds_show: 'Arată',
 
   // Company Details View
   cd_team_accounts_title: 'Conturi Angajați Vinculați',

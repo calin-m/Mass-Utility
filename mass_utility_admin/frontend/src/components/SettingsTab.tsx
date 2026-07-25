@@ -79,7 +79,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
               label={t('settings_current_password')}
               icon={KeyRound}
               type="password"
-              placeholder="Enter current password"
+              placeholder={t('ph_current_pass')}
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
@@ -90,7 +90,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
               label={t('settings_new_password')}
               icon={ShieldCheck}
               type="password"
-              placeholder="Enter new password"
+              placeholder={t('ph_new_pass')}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required

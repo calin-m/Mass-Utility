@@ -289,12 +289,12 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Client Full Name</label>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1">{t('field_full_name')}</label>
                   <input
                     type="text"
                     value={editName}
                     onChange={e => setEditName(e.target.value)}
-                    placeholder="e.g. John Doe"
+                    placeholder={t('ph_full_name')}
                     className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-pm-primary focus:outline-none"
                   />
                 </div>
@@ -555,13 +555,13 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       <BaseModal isOpen={showResetModal} onClose={() => setShowResetModal(false)} title={`Reset Password: ${user.email}`}>
         <form onSubmit={handleResetPassword} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">New Password</label>
+            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">{t('settings_new_password')}</label>
             <input
               type="text"
               required
               value={resetPassword}
               onChange={e => setResetPassword(e.target.value)}
-              placeholder="Enter strong password..."
+              placeholder={t('ph_strong_pass')}
               className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm font-mono text-pm-text focus:border-pm-primary focus:outline-none"
             />
           </div>

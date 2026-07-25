@@ -391,10 +391,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             />
 
             <FormInput
-              label="Pre-Bound Store URL (Optional)"
+              label={t('field_bound_url')}
               icon={Globe}
               type="text"
-              placeholder="e.g. store.myshop.com"
+              placeholder={t('ph_store_url')}
               value={genStoreUrl}
               onChange={e => setGenStoreUrl(e.target.value)}
             />

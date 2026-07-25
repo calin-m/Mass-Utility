@@ -196,7 +196,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   };
 
   const filterOptions = [
-    { value: 'ALL', label: 'All Action Types' },
+    { value: 'ALL', label: t('audit_all_types') },
     { value: 'GENERATE_LICENSE', label: 'GENERATE_LICENSE' },
     { value: 'ASSIGN_LICENSE', label: 'ASSIGN_LICENSE' },
     { value: 'EXTEND_LICENSE', label: 'EXTEND_LICENSE' },
@@ -267,7 +267,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                 setSearch('');
                 fetchLogs();
               }}
-              placeholder="Search logs by admin username, target ID, or payload details..."
+              placeholder={t('ph_search_audit')}
             />
           </div>
           {(search || actionFilter !== 'ALL') && (
@@ -315,13 +315,13 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-pm-secondary italic">
-                    Loading security audit telemetry log stream...
+                    {t('audit_loading')}
                   </td>
                 </tr>
               ) : paginatedLogs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-pm-secondary italic">
-                    No security audit logs found matching the active filters.
+                    {t('audit_no_logs')}
                   </td>
                 </tr>
               ) : (

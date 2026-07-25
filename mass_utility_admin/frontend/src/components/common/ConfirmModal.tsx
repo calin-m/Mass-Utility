@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertTriangle, ShieldAlert, CheckCircle, X } from 'lucide-react';
 import { Button } from './Button';
+import { useTranslation } from '../../i18n/LanguageContext';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -20,12 +21,16 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirm Action',
-  cancelText = 'Cancel',
+  confirmText,
+  cancelText,
   variant = 'danger',
   loading = false,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
+
+  const finalConfirmText = confirmText || t('btn_confirm');
+  const finalCancelText = cancelText || t('btn_cancel');
 
   const getVariantConfig = () => {
     switch (variant) {
@@ -75,7 +80,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
           <div className="flex justify-end gap-2.5 pt-3 border-t border-pm-border">
             <Button variant="neutral" size="sm" onClick={onClose} disabled={loading}>
-              {cancelText}
+              {finalCancelText}
             </Button>
             <Button
               variant={config.btnVariant}
@@ -83,7 +88,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               onClick={onConfirm}
               loading={loading}
             >
-              {confirmText}
+              {finalConfirmText}
             </Button>
           </div>
         </div>

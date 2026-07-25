@@ -54,6 +54,7 @@ const es: TranslationSchema = {
   btn_inspect_company: 'Inspeccionar Empresa',
   btn_inspect_client: 'Inspeccionar Cliente',
   btn_add_team_member: 'Añadir Miembro del Equipo',
+  btn_confirm: 'Confirmar',
 
   // Sub-Tab Navigation
   subtab_overview: 'Visión General & Licencias',
@@ -96,6 +97,39 @@ const es: TranslationSchema = {
   tiers_subtitle: 'Configure permisos y cuotas de módulos para niveles Basic, Pro y Enterprise.',
   security_title: 'Estado del Sistema del Portal',
   security_subtitle: 'Diagnóstico de seguridad y verificación de integridad de permisos.',
+
+  // Placeholders & Empty States
+  ph_search_companies: 'Buscar por nombre de empresa o CIF / NIF...',
+  ph_search_clients: 'Buscar por correo del cliente o nombre de tienda...',
+  ph_search_audit: 'Buscar por usuario, destino o detalles...',
+  empty_companies: 'No hay perfiles de empresas que coincidan con la búsqueda.',
+  empty_clients: 'No hay cuentas de clientes que coincidan con la búsqueda.',
+  ph_store_url: 'ej. tienda.mitienda.es',
+  ph_current_pass: 'Ingrese contraseña actual',
+  ph_new_pass: 'Ingrese nueva contraseña',
+  ph_full_name: 'ej. Juan Pérez',
+  ph_strong_pass: 'Ingrese contraseña segura...',
+  ph_client_email: 'cliente@empresa.es',
+  ph_gen_pass: 'Ingrese o genere contraseña',
+  ph_company_inc: 'ej. Acme Tiendas SL',
+  ph_member_email: 'miembro@empresa.es',
+  ph_set_pass: 'Establecer contraseña...',
+  ph_owner_email: 'propietario@empresa.es',
+
+  // Common Table & Badge Labels
+  lbl_members: 'Miembros',
+  lbl_allocated: 'Asignadas',
+  lbl_individual_client: 'Cliente Individual',
+  lbl_no_licenses: 'Sin Licencias',
+  lbl_unspecified: 'Sin especificar',
+  lbl_none: 'Ninguno',
+  lbl_more: 'más',
+  lbl_creds_title: 'Nuevas credenciales de cliente generadas para',
+  lbl_creds_email: 'Correo:',
+  lbl_creds_password: 'Contraseña:',
+  lbl_creds_key: 'Clave Emitida:',
+  lbl_creds_hide: 'Ocultar',
+  lbl_creds_show: 'Mostrar',
 
   // Company Details View
   cd_team_accounts_title: 'Cuentas de Empleados Vinculadas',
