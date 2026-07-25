@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, KeyRound, Unlock, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, KeyRound, Unlock, RefreshCw, Clock, User, Package, Calendar, Globe } from 'lucide-react';
 import { BaseModal } from './common/BaseModal';
 import { ConfirmModal } from './common/ConfirmModal';
 import { SectionHeader } from './common/SectionHeader';
@@ -70,6 +70,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
   const [editExpires, setEditExpires] = useState<string>('');
   const [savingEdit, setSavingEdit] = useState<boolean>(false);
 
+  // Status Toggle Confirmation State
+  const [toggleConfirmLicense, setToggleConfirmLicense] = useState<License | null>(null);
+  const [togglingLicense, setTogglingLicense] = useState<boolean>(false);
+
   // Key Masking State
   const [revealedKeys, setRevealedKeys] = useState<{ [id: number]: boolean }>({});
 
@@ -125,26 +129,31 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     }
   };
 
-  const handleToggleStatus = async (id: number, currentStatus: string, tier: string, expiry: string, domain: string) => {
-    const nextStatus = currentStatus === 'active' ? 'suspended' : 'active';
+  const handleExecuteToggleStatus = async () => {
+    if (!toggleConfirmLicense) return;
+    setTogglingLicense(true);
+    const nextStatus = toggleConfirmLicense.status === 'active' ? 'suspended' : 'active';
     try {
       const formData = new FormData();
-      formData.append('id', String(id));
+      formData.append('id', String(toggleConfirmLicense.id));
       formData.append('status', nextStatus);
-      formData.append('package_tier', tier);
-      formData.append('expires_at', expiry);
-      formData.append('store_url', domain);
+      formData.append('package_tier', toggleConfirmLicense.package_tier);
+      formData.append('expires_at', toggleConfirmLicense.expires_at || '');
+      formData.append('store_url', toggleConfirmLicense.store_url || '');
 
       const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        showAlert(`License status updated to ${nextStatus.toUpperCase()}`, 'success');
+        showAlert(`License #${toggleConfirmLicense.id} status updated to ${nextStatus.toUpperCase()}`, 'success');
+        setToggleConfirmLicense(null);
         onRefresh();
       } else {
         showAlert('❌ Error: ' + (data.error || 'Failed to update license'), 'error');
       }
     } catch (err: any) {
       showAlert('❌ Request failed: ' + err.message, 'error');
+    } finally {
+      setTogglingLicense(false);
     }
   };
 
@@ -317,6 +326,12 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     }
   };
 
+  const expiringSoonCount = licenses.filter(l => {
+    if (!l.expires_at) return false;
+    const diffDays = Math.ceil((new Date(l.expires_at).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+    return diffDays > 0 && diffDays <= 30;
+  }).length;
+
   const filteredLicenses = licenses.filter(lic => {
     if (filterMode === 'ALL') return true;
     if (filterMode === 'ACTIVE') return lic.status === 'active';
@@ -348,28 +363,30 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
   return (
     <div className="space-y-6">
-      {/* 2-Column Form Grid */}
+      {/* 2-Column Overview & Issue Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Subscription Inventory Overview */}
-        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm flex flex-col justify-between">
+        {/* Normalized 4-Card Overview Inventory */}
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm flex flex-col justify-between space-y-4">
           <SectionHeader
             title="Active Subscriptions Inventory"
             subtitle="Real-time breakdown of store license keys, package tier allocations, and unassigned standalone keys."
             icon={CheckCircle}
           />
 
-          <div className="grid grid-cols-3 gap-3 my-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-2">
             <StatCard label="Total Keys" value={licenses.length} icon={Key} color="purple" />
             <StatCard label="Active Keys" value={licenses.filter(l => l.status === 'active').length} icon={CheckCircle} color="emerald" />
-            <StatCard label="Unassigned" value={licenses.filter(l => !l.user_id).length} icon={Unlock} color="amber" />
+            <StatCard label="Expiring Soon" value={expiringSoonCount} icon={Clock} color="amber" />
+            <StatCard label="Unassigned" value={licenses.filter(l => !l.user_id).length} icon={Unlock} color="blue" />
           </div>
 
-          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-[0.72rem] text-purple-700 dark:text-purple-300">
-            💡 <strong>Need a new client profile?</strong> Create and manage standalone client credentials under the <strong>👥 Clients Directory</strong> tab.
+          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-[0.72rem] text-purple-700 dark:text-purple-300 flex items-center gap-2">
+            <span className="shrink-0">💡</span>
+            <span>Need a new client profile? Manage client credentials under <strong>👥 Clients Directory</strong>.</span>
           </div>
         </div>
 
-        {/* Issue & Assign License Key Form with Master Form Primitives */}
+        {/* Issue & Assign License Key Form with Master Primitives & Visual Field Guidance */}
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm">
           <SectionHeader
             title="Issue & Assign License Key"
@@ -379,6 +396,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
           <form onSubmit={handleGenerateKey} className="mt-4 space-y-4">
             <FormSelect
               label="Target Client Account"
+              icon={User}
               value={genUserId}
               onChange={e => setGenUserId(Number(e.target.value))}
               options={clientOptions}
@@ -386,6 +404,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
             <FormSelect
               label="Package Tier"
+              icon={Package}
               value={genTier}
               onChange={e => setGenTier(e.target.value)}
               options={tierOptions}
@@ -393,6 +412,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
             <FormInput
               label="Optional Expiry Date"
+              icon={Calendar}
               type="date"
               value={genExpires}
               onChange={e => setGenExpires(e.target.value)}
@@ -400,6 +420,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
             <FormInput
               label="Pre-Bound Store URL (Optional)"
+              icon={Globe}
               type="text"
               placeholder="e.g. store.myshop.com"
               value={genDomain}
@@ -439,7 +460,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             }
           />
 
-          {/* Cleaned Status Filter Tab Pills (Zero Double Outline Stacking) */}
+          {/* Cleaned Status Filter Tab Pills */}
           <div className="flex items-center gap-1 bg-pm-input p-1 rounded-xl shrink-0 self-start md:self-auto">
             {(['ALL', 'ACTIVE', 'EXPIRING', 'EXPIRED'] as const).map(mode => (
               <button
@@ -590,23 +611,30 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                           >
                             Edit
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={lic.status === 'active' ? ShieldAlert : CheckCircle}
-                            onClick={() =>
-                              handleToggleStatus(
-                                lic.id,
-                                lic.status,
-                                lic.package_tier,
-                                lic.expires_at || '',
-                                lic.store_url || ''
-                              )
-                            }
-                            title={lic.status === 'active' ? 'Suspend License Key' : 'Activate License Key'}
-                          >
-                            {lic.status === 'active' ? 'Suspend' : 'Activate'}
-                          </Button>
+
+                          {/* Semantic UX Variants for Suspend (Danger) & Activate (Success) */}
+                          {lic.status === 'active' ? (
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              icon={ShieldAlert}
+                              onClick={() => setToggleConfirmLicense(lic)}
+                              title="Suspend License Key"
+                            >
+                              Suspend
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="success"
+                              size="sm"
+                              icon={CheckCircle}
+                              onClick={() => setToggleConfirmLicense(lic)}
+                              title="Activate License Key"
+                            >
+                              Activate
+                            </Button>
+                          )}
+
                           <Button
                             variant="danger"
                             size="sm"
@@ -639,6 +667,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
           <form onSubmit={handleSaveEdit} className="space-y-4">
             <FormSelect
               label="Assigned Client Account"
+              icon={User}
               value={editUserId}
               onChange={e => setEditUserId(Number(e.target.value))}
               options={clientOptions}
@@ -646,6 +675,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
             <FormSelect
               label="Package Tier"
+              icon={Package}
               value={editTier}
               onChange={e => setEditTier(e.target.value)}
               options={tierOptions}
@@ -664,6 +694,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
             <FormInput
               label="Authorized Store Domain URL"
+              icon={Globe}
               type="text"
               placeholder="e.g. store.myshop.com"
               value={editDomain}
@@ -672,6 +703,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
             <FormInput
               label="Expiry Date (Leave empty for Lifetime)"
+              icon={Calendar}
               type="date"
               value={editExpires}
               onChange={e => setEditExpires(e.target.value)}
@@ -732,6 +764,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
             <FormInput
               label="Or Set Exact Expiration Date"
+              icon={Calendar}
               type="date"
               value={extCustomDate}
               onChange={e => setExtCustomDate(e.target.value)}
@@ -800,6 +833,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             <form onSubmit={handleAddDomain} className="flex items-end gap-2">
               <div className="flex-1">
                 <FormInput
+                  icon={Globe}
                   placeholder="e.g. staging.myshop.com"
                   value={newDomainInput}
                   onChange={e => setNewDomainInput(e.target.value)}
@@ -821,6 +855,23 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
           </div>
         )}
       </BaseModal>
+
+      {/* Suspend / Activate Safety Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!toggleConfirmLicense}
+        onClose={() => setToggleConfirmLicense(null)}
+        onConfirm={handleExecuteToggleStatus}
+        title={toggleConfirmLicense?.status === 'active' ? 'Suspend License Key?' : 'Activate License Key?'}
+        message={
+          toggleConfirmLicense?.status === 'active'
+            ? `Are you sure you want to suspend License Key "${toggleConfirmLicense?.license_key}" (ID #${toggleConfirmLicense?.id})? Active store integration requests will be rejected immediately.`
+            : `Are you sure you want to activate License Key "${toggleConfirmLicense?.license_key}" (ID #${toggleConfirmLicense?.id})? Active store integration requests will be restored.`
+        }
+        confirmText={toggleConfirmLicense?.status === 'active' ? 'Suspend License' : 'Activate License'}
+        cancelText="Cancel"
+        variant={toggleConfirmLicense?.status === 'active' ? 'danger' : 'info'}
+        loading={togglingLicense}
+      />
 
       {/* Delete License Confirmation Modal */}
       <ConfirmModal
