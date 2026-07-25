@@ -866,6 +866,18 @@ class Mass_Utility extends Module
                             ' . ($showFixButton ? '<div style="text-align: right; margin-top: 0.75rem;"><a href="javascript:void(0);" onclick="event.stopPropagation(); window.location.href=\'' . $this->context->link->getAdminLink('AdminModules', true) . '&configure=mass_utility&action=fix_bridge_permissions\';" style="background: var(--bridge-accent); border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; color: #fff; font-weight: bold; text-decoration: none; display: inline-block;">⚡ Auto-Fix & Harden Permissions</a></div>' : '') . '
                         </details>
 
+                        ' . (($gitExposed || !$sslActive || $showFixButton) ? '
+                            <div style="margin-top: 1rem; padding: 1rem; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <strong style="color: var(--bridge-warning); font-size: 0.85rem;">⚠️ Security Warnings Detected on Host</strong>
+                                    <p style="font-size: 0.75rem; color: var(--bridge-muted); margin: 0.2rem 0 0 0;">Open your Standalone Dashboard to run full 1-click Security & Health repairs (Security Headers, SSL Enforcement, Permission Repair).</p>
+                                </div>
+                                <a href="' . $launcherUrl . '" target="_blank" style="background: var(--bridge-accent); border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; color: #fff; font-weight: bold; text-decoration: none; shrink: 0; margin-left: 1rem; display: inline-block;">
+                                    🚀 Launch Dashboard Security & Health <i class="icon-external-link"></i>
+                                </a>
+                            </div>
+                        ' : '') . '
+
                     </div>
                 </div>';
             })() . '
