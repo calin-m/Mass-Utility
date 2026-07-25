@@ -535,7 +535,7 @@ class SystemApiController extends AbstractApiController
     protected function getDiagnostics(): void
     {
         try {
-            $rootDir = _PS_ROOT_DIR_;
+            $rootDir = rtrim(_PS_ROOT_DIR_, '/') . '/';
             $htaccessPath = $rootDir . '.htaccess';
             
             $htaccessContent = file_exists($htaccessPath) ? (file_get_contents($htaccessPath) ?: '') : '';
@@ -558,18 +558,22 @@ class SystemApiController extends AbstractApiController
                 if (!file_exists($path)) return 'N/A';
                 clearstatcache(true, $path);
                 $perms = substr(sprintf('%o', fileperms($path)), -4);
-                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && $perms === '0666' && $recommended === '0644') {
-                    return '0644';
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                    if ($perms === '0666' && $recommended === '0644') return '0644';
+                    if ($perms === '0777' && $recommended === '0755') return '0755';
                 }
                 return $perms;
             };
+
+            $logsDir = is_dir($rootDir . 'var/logs') ? $rootDir . 'var/logs' : (is_dir($rootDir . 'app/logs') ? $rootDir . 'app/logs' : (is_dir($rootDir . 'log') ? $rootDir . 'log' : $rootDir . 'var/logs'));
+            $logsDisplay = is_dir($rootDir . 'var/logs') ? 'var/logs/' : (is_dir($rootDir . 'app/logs') ? 'app/logs/' : 'log/');
 
             $paths = [
                 'root_dir' => ['path' => 'PrestaShop Web Root', 'current' => $getOctalPerms($rootDir, '0755'), 'recommended' => '0755', 'is_dir' => true],
                 'config_dir' => ['path' => 'config/', 'current' => $getOctalPerms($rootDir . 'config', '0755'), 'recommended' => '0755', 'is_dir' => true],
                 'modules_dir' => ['path' => 'modules/', 'current' => $getOctalPerms($rootDir . 'modules', '0755'), 'recommended' => '0755', 'is_dir' => true],
                 'override_dir' => ['path' => 'override/', 'current' => $getOctalPerms($rootDir . 'override', '0755'), 'recommended' => '0755', 'is_dir' => true],
-                'var_logs_dir' => ['path' => 'var/logs/', 'current' => $getOctalPerms($rootDir . 'var/logs', '0755'), 'recommended' => '0755', 'is_dir' => true],
+                'var_logs_dir' => ['path' => $logsDisplay, 'current' => $getOctalPerms($logsDir, '0755'), 'recommended' => '0755', 'is_dir' => true],
                 'htaccess_file' => ['path' => '.htaccess', 'current' => $getOctalPerms($htaccessPath, '0644'), 'recommended' => '0644', 'is_dir' => false]
             ];
 
@@ -627,12 +631,13 @@ class SystemApiController extends AbstractApiController
     {
         try {
             $rootDir = rtrim(_PS_ROOT_DIR_, '/') . '/';
+            $logsDir = is_dir($rootDir . 'var/logs') ? $rootDir . 'var/logs' : (is_dir($rootDir . 'app/logs') ? $rootDir . 'app/logs' : (is_dir($rootDir . 'log') ? $rootDir . 'log' : $rootDir . 'var/logs'));
             $targets = [
                 $rootDir => 0755,
                 $rootDir . 'config' => 0755,
                 $rootDir . 'modules' => 0755,
                 $rootDir . 'override' => 0755,
-                $rootDir . 'var/logs' => 0755,
+                $logsDir => 0755,
                 $rootDir . '.htaccess' => 0644
             ];
 
