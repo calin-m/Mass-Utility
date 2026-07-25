@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Search, RefreshCw, Download, Terminal, Calendar, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Activity, Layers, UserCheck, ShieldAlert } from 'lucide-react';
+import { Shield, Search, RefreshCw, Download, Terminal, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Activity, Layers, UserCheck, ShieldAlert, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 import { StatCard } from './common/StatCard';
 import { BaseModal } from './common/BaseModal';
 import { StatusBadge } from './common/StatusBadge';
+import { Button } from './common/Button';
 
 interface AuditLog {
   id: number;
@@ -29,6 +30,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   const [actionFilter, setActionFilter] = useState<string>('ALL');
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [showRawJson, setShowRawJson] = useState<boolean>(false);
+  const [unmaskedIps, setUnmaskedIps] = useState<Record<number, boolean>>({});
 
   const fetchLogs = async () => {
     setIsRefreshing(true);
@@ -59,6 +61,19 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchLogs();
+  };
+
+  const toggleIpVisibility = (id: number) => {
+    setUnmaskedIps((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const maskIp = (ip: string): string => {
+    if (!ip) return '***.***.***.***';
+    const parts = ip.split('.');
+    if (parts.length === 4) {
+      return `${parts[0]}.***.***.${parts[3]}`;
+    }
+    return `${ip.substring(0, 3)}***`;
   };
 
   // Calculated Telemetry Metrics
@@ -137,55 +152,33 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         subtitle="Security event ledger tracking administrative operations, license updates, and authentication events."
         action={
           <div className="flex items-center gap-3">
-            <a
-              href="?action=api_export_admin_logs_csv"
-              download
-              className="pm-btn-primary text-xs py-2 px-4 flex items-center gap-2 shadow-md shadow-purple-950/30 hover:scale-[1.02] transition"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export CSV</span>
+            <a href="?action=api_export_admin_logs_csv" download className="no-underline">
+              <Button variant="primary" size="md" icon={Download}>
+                Export CSV
+              </Button>
             </a>
-            <button
+            <Button
+              variant="neutral"
+              size="md"
+              icon={RefreshCw}
+              loading={isRefreshing}
               onClick={() => {
                 fetchLogs();
                 onNotify('🔄 Audit logs reloaded!', 'success');
               }}
-              disabled={isRefreshing}
-              className="pm-btn-neutral text-xs py-2 px-3 flex items-center gap-2"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} />
-              <span>Refresh</span>
-            </button>
+              Refresh
+            </Button>
           </div>
         }
       />
 
       {/* Standardized 4-Card Overview Telemetry Stat Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Total Operations"
-          value={totalOperations}
-          icon={Activity}
-          color="purple"
-        />
-        <StatCard
-          label="License Key Mutations"
-          value={licenseMutations}
-          icon={Layers}
-          color="blue"
-        />
-        <StatCard
-          label="Corporate Account Actions"
-          value={accountCompanyActions}
-          icon={UserCheck}
-          color="emerald"
-        />
-        <StatCard
-          label="Security Events"
-          value={securityEvents}
-          icon={ShieldAlert}
-          color="amber"
-        />
+        <StatCard label="Total Operations" value={totalOperations} icon={Activity} color="purple" />
+        <StatCard label="License Key Mutations" value={licenseMutations} icon={Layers} color="blue" />
+        <StatCard label="Corporate Account Actions" value={accountCompanyActions} icon={UserCheck} color="emerald" />
+        <StatCard label="Security Events" value={securityEvents} icon={ShieldAlert} color="amber" />
       </div>
 
       {/* Filter Toolbar */}
@@ -230,6 +223,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
                 <th className="p-3">Log ID</th>
                 <th className="p-3">Timestamp</th>
+                <th className="p-3">Status</th>
                 <th className="p-3">Admin</th>
                 <th className="p-3">Action Type</th>
                 <th className="p-3">Target</th>
@@ -240,14 +234,14 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
             <tbody className="divide-y divide-pm-border">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-pm-secondary">
+                  <td colSpan={8} className="p-8 text-center text-pm-secondary">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto text-purple-400 mb-2" />
                     Loading audit trail logs...
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-pm-secondary">
+                  <td colSpan={8} className="p-8 text-center text-pm-secondary">
                     <Shield className="w-8 h-8 mx-auto text-pm-secondary/40 mb-2" />
                     No audit log records match the selected filter criteria.
                   </td>
@@ -257,6 +251,12 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                   <tr key={log.id} className="hover:bg-pm-input/50 transition">
                     <td className="p-3 font-mono font-bold text-pm-secondary">#{log.id}</td>
                     <td className="p-3 text-pm-secondary font-mono text-[11px]">{log.created_at}</td>
+                    <td className="p-3">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                        SUCCESS
+                      </span>
+                    </td>
                     <td className="p-3 font-semibold text-pm-text flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                       <span>{log.admin_username}</span>
@@ -265,21 +265,32 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                     <td className="p-3 text-pm-secondary font-mono">
                       <span className="capitalize">{log.target_entity}</span> {log.target_id ? `(#${log.target_id})` : ''}
                     </td>
-                    <td className="p-3 text-pm-secondary font-mono flex items-center gap-1">
-                      <Globe className="w-3 h-3 text-pm-secondary/60 shrink-0" />
-                      <span>{log.ip_address}</span>
+                    <td className="p-3 text-pm-secondary font-mono">
+                      <div className="flex items-center gap-1.5">
+                        <Globe className="w-3 h-3 text-pm-secondary/60 shrink-0" />
+                        <span>{unmaskedIps[log.id] ? log.ip_address : maskIp(log.ip_address)}</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleIpVisibility(log.id)}
+                          className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition ml-1"
+                          title={unmaskedIps[log.id] ? 'Hide IP Address' : 'Show Full IP Address'}
+                        >
+                          {unmaskedIps[log.id] ? <EyeOff className="w-3 h-3 text-purple-400" /> : <Eye className="w-3 h-3" />}
+                        </button>
+                      </div>
                     </td>
                     <td className="p-3 text-right">
-                      <button
+                      <Button
+                        variant="neutral"
+                        size="sm"
+                        icon={FileText}
                         onClick={() => {
                           setSelectedLog(log);
                           setShowRawJson(false);
                         }}
-                        className="pm-btn-neutral text-[11px] py-1 px-3 flex items-center gap-1.5 ml-auto font-semibold hover:border-pm-primary transition"
                       >
-                        <FileText className="w-3.5 h-3.5 text-purple-400" />
-                        <span>Inspect Log</span>
-                      </button>
+                        Inspect Log
+                      </Button>
                     </td>
                   </tr>
                 ))
@@ -370,13 +381,9 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
 
             {/* Modal Footer Action */}
             <div className="flex justify-end pt-3 border-t border-pm-border">
-              <button
-                type="button"
-                onClick={() => setSelectedLog(null)}
-                className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold"
-              >
+              <Button variant="primary" size="md" onClick={() => setSelectedLog(null)}>
                 Close Inspector
-              </button>
+              </Button>
             </div>
           </div>
         )}
