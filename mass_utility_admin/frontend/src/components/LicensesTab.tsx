@@ -252,28 +252,28 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             </div>
             <div>
               <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Password</label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type={showAccountPassword ? 'text' : 'password'}
-                    required
-                    className="w-full bg-pm-input border border-pm-border rounded-lg pl-3 pr-10 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowAccountPassword(!showAccountPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-pm-secondary hover:text-pm-text transition-colors"
-                    title={showAccountPassword ? "Hide Password" : "Show Password"}
-                  >
-                    {showAccountPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+              <div className="flex rounded-lg overflow-hidden border border-pm-border focus-within:border-pm-primary bg-pm-input transition-colors">
+                <input
+                  type={showAccountPassword ? 'text' : 'password'}
+                  required
+                  placeholder="Min 8 chars or click ⚡ Auto"
+                  className="flex-1 bg-transparent px-3 py-2 text-sm text-pm-text outline-none min-w-0"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAccountPassword(!showAccountPassword)}
+                  className="px-2.5 text-pm-secondary hover:text-pm-text border-l border-pm-border/50 hover:bg-pm-border/20 transition-colors flex items-center justify-center shrink-0"
+                  title={showAccountPassword ? "Hide Password" : "Show Password"}
+                >
+                  {showAccountPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
                 <button
                   type="button"
                   onClick={generateRandomPassword}
-                  className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap"
+                  className="bg-pm-primary/10 hover:bg-pm-primary/20 text-pm-primary border-l border-pm-border text-xs font-semibold px-3 py-2 transition-colors flex items-center gap-1 shrink-0"
+                  title="Generate Random Password"
                 >
                   ⚡ Auto
                 </button>
