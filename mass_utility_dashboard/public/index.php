@@ -102,7 +102,51 @@ function getBridgeToken(\MassUtility\SaaS\Service\TenantSettingsRepository $sett
     return '';
 }
 
+// Helper function to resolve the Merchant License key
+function getLicenseKey(\MassUtility\SaaS\Service\TenantSettingsRepository $settingsRepo, string $rootDir): string
+{
+    // 1. Try to read from SQLite settings cache first
+    $key = $settingsRepo->get('PM_LICENSE_KEY');
+    if (!empty($key)) {
+        return (string)$key;
+    }
+
+    // 2. If not cached, try to resolve it from local PrestaShop parameters/DB
+    try {
+        $setupWizard = new \MassUtility\SaaS\Service\SetupWizard($rootDir);
+        $dbParams = $setupWizard->detectLocalPrestaShop();
+        if ($dbParams) {
+            $host = $dbParams['database_host'] ?? 'localhost';
+            $port = $dbParams['database_port'] ?? '3306';
+            $dbName = $dbParams['database_name'] ?? '';
+            $user = $dbParams['database_user'] ?? '';
+            $pass = $dbParams['database_password'] ?? '';
+            $prefix = $dbParams['database_prefix'] ?? 'ps_';
+
+            if (!empty($dbName) && !empty($user)) {
+                $dsn = "mysql:host={$host};port={$port};dbname={$dbName};charset=utf8mb4";
+                $pdo = new \PDO($dsn, $user, $pass, [
+                    \PDO::ATTR_TIMEOUT => 3,
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+                ]);
+                $stmt = $pdo->prepare("SELECT `value` FROM `{$prefix}configuration` WHERE `name` = 'PM_LICENSE_KEY'");
+                $stmt->execute();
+                $dbKey = $stmt->fetchColumn();
+                if ($dbKey !== false && !empty($dbKey)) {
+                    $settingsRepo->set('PM_LICENSE_KEY', $dbKey);
+                    return (string)$dbKey;
+                }
+            }
+        }
+    } catch (\Throwable $e) {
+        // Fallback silently
+    }
+
+    return '';
+}
+
 $bridgeToken = getBridgeToken($settingsRepo, dirname(__DIR__));
+$licenseKey = getLicenseKey($settingsRepo, dirname(__DIR__));
 
 // Initialize session for authentication with hardened cookie flags
 if (session_status() === PHP_SESSION_NONE) {
@@ -593,8 +637,10 @@ if (!empty($_SESSION['employee_id'])) {
     }
 }
 
-$licenseKey = $settingsRepo->get('PM_LICENSE_KEY');
-$hasValidLicenseConfig = !empty($licenseKey) && !empty($bridgeToken);
+if (empty($licenseKey)) {
+    $licenseKey = getLicenseKey($settingsRepo, dirname(__DIR__));
+}
+$hasValidLicenseConfig = !empty($bridgeToken);
 
 // Session authorization check
 $isAuthorized = !empty($_SESSION['employee_id']) && $hasValidLicenseConfig;
