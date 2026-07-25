@@ -145,10 +145,16 @@ $basePath = (str_ends_with($scriptDir, '/public') || str_ends_with($scriptDir, '
     ? substr($scriptDir, 0, -7)
     : $scriptDir;
 
-// Dynamic Asset Discovery (glob scanner for compiled Vite bundles)
+// Dynamic Asset Discovery (glob scanner for compiled Vite bundles, sorted by newest timestamp)
 $assetsDir = __DIR__ . '/v2/assets';
-$jsFiles = glob($assetsDir . '/index-*.js');
-$cssFiles = glob($assetsDir . '/index-*.css');
+$jsFiles = glob($assetsDir . '/index-*.js') ?: [];
+$cssFiles = glob($assetsDir . '/index-*.css') ?: [];
+if (!empty($jsFiles)) {
+    usort($jsFiles, fn($a, $b) => filemtime($b) <=> filemtime($a));
+}
+if (!empty($cssFiles)) {
+    usort($cssFiles, fn($a, $b) => filemtime($b) <=> filemtime($a));
+}
 
 $jsFile = !empty($jsFiles) ? basename($jsFiles[0]) : '';
 $cssFile = !empty($cssFiles) ? basename($cssFiles[0]) : '';
