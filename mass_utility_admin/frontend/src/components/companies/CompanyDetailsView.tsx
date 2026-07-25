@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye } from 'lucide-react';
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
 
@@ -382,7 +382,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                             className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
                             title="Open Client Profile"
                           >
-                            <Mail className="w-3.5 h-3.5 text-purple-400" /> Inspect Client
+                            <Eye className="w-3.5 h-3.5 text-purple-400" /> Inspect Client
                           </button>
                         )}
                       </div>

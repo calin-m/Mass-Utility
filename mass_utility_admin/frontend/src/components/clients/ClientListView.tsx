@@ -5,6 +5,8 @@ import { BaseModal } from '../common/BaseModal';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
+import { DirectoryCardTable } from '../common/DirectoryCardTable';
+import { StatusBadge } from '../common/StatusBadge';
 
 interface ClientListViewProps {
   users: UserAccount[];
@@ -329,167 +331,152 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         }}
       />
 
-      {/* Main Client Directory Section */}
-      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
-        {/* Post-Creation Quick Credentials Banner */}
-        {lastCreatedCreds && (
-          <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="space-y-1">
-              <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-emerald-400" /> Merchant Credentials Onboarded Successfully
-              </div>
-              <div className="text-xs text-pm-text font-mono flex flex-wrap items-center gap-x-4 gap-y-1">
-                <span><strong>Email:</strong> {lastCreatedCreds.email}</span>
-                <span className="flex items-center gap-1.5 bg-pm-input/60 px-2 py-0.5 rounded border border-pm-border">
-                  <strong>Password:</strong> {showBannerPass ? lastCreatedCreds.pass : '••••••••••••'}
-                  <button
-                    type="button"
-                    onClick={() => setShowBannerPass(!showBannerPass)}
-                    className="text-pm-secondary hover:text-pm-primary p-0.5 rounded transition"
-                    title={showBannerPass ? "Hide Password" : "Reveal Password"}
-                  >
-                    {showBannerPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  </button>
-                </span>
-                {lastCreatedCreds.key && (
-                  <span className="text-amber-400 font-bold"><strong>Issued Key:</strong> {lastCreatedCreds.key}</span>
-                )}
-              </div>
+      {/* Post-Creation Quick Credentials Banner */}
+      {lastCreatedCreds && (
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="space-y-1">
+            <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-emerald-400" /> Merchant Credentials Onboarded Successfully
             </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={copyCreatedCredentials}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
-              >
-                {copiedCreds ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedCreds ? 'Copied to Clipboard!' : '📋 Copy Login Info'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setLastCreatedCreds(null)}
-                className="text-pm-secondary hover:text-pm-text text-xs p-1 rounded transition"
-                title="Dismiss Banner"
-              >
-                ✕
-              </button>
+            <div className="text-xs text-pm-text font-mono flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span><strong>Email:</strong> {lastCreatedCreds.email}</span>
+              <span className="flex items-center gap-1.5 bg-pm-input/60 px-2 py-0.5 rounded border border-pm-border">
+                <strong>Password:</strong> {showBannerPass ? lastCreatedCreds.pass : '••••••••••••'}
+                <button
+                  type="button"
+                  onClick={() => setShowBannerPass(!showBannerPass)}
+                  className="text-pm-secondary hover:text-pm-primary p-0.5 rounded transition"
+                  title={showBannerPass ? "Hide Password" : "Reveal Password"}
+                >
+                  {showBannerPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </span>
+              {lastCreatedCreds.key && (
+                <span className="text-amber-400 font-bold"><strong>Issued Key:</strong> {lastCreatedCreds.key}</span>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Client Accounts Table */}
-        <div className="overflow-x-auto rounded-lg border border-pm-border">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
-              <tr>
-                <th className="p-3">ID</th>
-                <th className="p-3">Client Email</th>
-                <th className="p-3">Company / Store Name</th>
-                <th className="p-3">Assigned Licenses &amp; Stores</th>
-                <th className="p-3">Account Status</th>
-                <th className="p-3">Registered At</th>
-                <th className="p-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-pm-border">
-              {filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-6 text-center text-pm-secondary">
-                    No client accounts match your current filter.
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={copyCreatedCredentials}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+            >
+              {copiedCreds ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedCreds ? 'Copied to Clipboard!' : '📋 Copy Login Info'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLastCreatedCreds(null)}
+              className="text-pm-secondary hover:text-pm-text text-xs p-1 rounded transition"
+              title="Dismiss Banner"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Client Accounts Table */}
+      <DirectoryCardTable
+        emptyState={{
+          isMessageVisible: filteredUsers.length === 0,
+          message: 'No client accounts match your current filter.'
+        }}
+      >
+        <table className="w-full text-left text-xs">
+          <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
+            <tr>
+              <th className="p-3">ID</th>
+              <th className="p-3">Client Email</th>
+              <th className="p-3">Company / Store Name</th>
+              <th className="p-3">Assigned Licenses &amp; Stores</th>
+              <th className="p-3">Account Status</th>
+              <th className="p-3">Registered At</th>
+              <th className="p-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-pm-border">
+            {filteredUsers.map(u => {
+              const stats = getClientStats(u.id);
+              return (
+                <tr key={u.id} className="hover:bg-pm-input/50 transition">
+                  <td className="p-3 font-semibold">{u.id}</td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-pm-secondary shrink-0" />
+                      <span className="font-semibold text-pm-text">{u.email}</span>
+                    </div>
+                  </td>
+                  <td className="p-3 text-pm-secondary">
+                    {u.company_name ? (
+                      <span className="flex items-center gap-1.5">
+                        <Building className="w-3.5 h-3.5 text-pm-primary shrink-0" />
+                        {u.company_name}
+                      </span>
+                    ) : (
+                      <span className="italic text-pm-secondary/60">Not specified</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-semibold text-pm-primary">
+                        🔑 {stats.total} {stats.total === 1 ? 'License' : 'Licenses'} ({stats.active} Active)
+                      </span>
+                      {stats.boundDomains.length > 0 && (
+                        <span className="text-[0.65rem] text-pm-secondary font-mono truncate max-w-[200px]" title={stats.boundDomains.join(', ')}>
+                          🌐 {stats.boundDomains.join(', ')}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    <StatusBadge status={u.status} />
+                  </td>
+                  <td className="p-3 text-pm-secondary">
+                    {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
+                  </td>
+                  <td className="p-3 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onSelectClient(u)}
+                      className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                      title="Inspect Client 360° Details View"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-purple-400" /> View
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onSelectClient(u)}
+                      className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                      title="Edit Client Profile Details"
+                    >
+                      <Edit className="w-3.5 h-3.5 text-indigo-400" /> Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openResetModal(u)}
+                      className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                      title="Reset Password"
+                    >
+                      <Key className="w-3.5 h-3.5" /> Pass
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeletingUser(u)}
+                      className="pm-btn-danger-outline px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                      title="Delete Account"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </td>
                 </tr>
-              ) : (
-                filteredUsers.map(u => {
-                  const stats = getClientStats(u.id);
-                  const isSuspended = u.status === 'suspended';
-                  return (
-                    <tr key={u.id} className="hover:bg-pm-input/50 transition">
-                      <td className="p-3 font-semibold">{u.id}</td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-3.5 h-3.5 text-pm-secondary shrink-0" />
-                          <span className="font-semibold text-pm-text">{u.email}</span>
-                        </div>
-                      </td>
-                      <td className="p-3 text-pm-secondary">
-                        {u.company_name ? (
-                          <span className="flex items-center gap-1.5">
-                            <Building className="w-3.5 h-3.5 text-pm-primary shrink-0" />
-                            {u.company_name}
-                          </span>
-                        ) : (
-                          <span className="italic text-pm-secondary/60">Not specified</span>
-                        )}
-                      </td>
-                      <td className="p-3">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-semibold text-pm-primary">
-                            🔑 {stats.total} {stats.total === 1 ? 'License' : 'Licenses'} ({stats.active} Active)
-                          </span>
-                          {stats.boundDomains.length > 0 && (
-                            <span className="text-[0.65rem] text-pm-secondary font-mono truncate max-w-[200px]" title={stats.boundDomains.join(', ')}>
-                              🌐 {stats.boundDomains.join(', ')}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full border ${
-                            isSuspended
-                              ? 'bg-rose-500/10 text-rose-500 border-rose-500/30'
-                              : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
-                          }`}
-                        >
-                          {isSuspended ? 'SUSPENDED' : 'ACTIVE'}
-                        </span>
-                      </td>
-                      <td className="p-3 text-pm-secondary">
-                        {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
-                      </td>
-                      <td className="p-3 flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => onSelectClient(u)}
-                          className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                          title="Inspect Client 360° Details View"
-                        >
-                          <Eye className="w-3.5 h-3.5" /> View
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(u)}
-                          className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                          title="Edit Client Profile"
-                        >
-                          <Edit className="w-3.5 h-3.5" /> Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openResetModal(u)}
-                          className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                          title="Reset Password"
-                        >
-                          <Key className="w-3.5 h-3.5" /> Pass
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeletingUser(u)}
-                          className="pm-btn-danger-outline px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                          title="Delete Account"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              );
+            })}
+          </tbody>
+        </table>
+      </DirectoryCardTable>
 
       {/* Edit Profile Modal */}
       {editingUser && (

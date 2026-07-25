@@ -4,6 +4,8 @@ import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { BaseModal } from '../common/BaseModal';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
+import { DirectoryCardTable } from '../common/DirectoryCardTable';
+import { StatusBadge } from '../common/StatusBadge';
 
 export interface Company {
   id: number;
@@ -242,91 +244,84 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       />
 
       {/* Companies Directory Table */}
-      <div className="bg-pm-card border border-pm-border rounded-xl shadow-sm overflow-hidden pm-card-elevation">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
-              <tr>
-                <th className="p-3">ID</th>
-                <th className="p-3">Company Name</th>
-                <th className="p-3">Tax / VAT ID</th>
-                <th className="p-3">Team Members</th>
-                <th className="p-3">License Utilization</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Created At</th>
-                <th className="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-pm-border">
-              {filteredCompanies.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="p-8 text-center text-pm-secondary">
-                    No company profiles match your search criteria.
-                  </td>
-                </tr>
-              ) : (
-                filteredCompanies.map(c => {
-                  const usedCount = c.license_count || 0;
-                  const maxCount = c.max_licenses || 10;
-                  const pct = Math.min(100, Math.round((usedCount / maxCount) * 100));
-                  const isFull = usedCount >= maxCount;
+      <DirectoryCardTable
+        emptyState={{
+          isMessageVisible: filteredCompanies.length === 0,
+          message: 'No company profiles match your search criteria.'
+        }}
+      >
+        <table className="w-full text-left text-xs">
+          <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
+            <tr>
+              <th className="p-3">ID</th>
+              <th className="p-3">Company Name</th>
+              <th className="p-3">Tax / VAT ID</th>
+              <th className="p-3">Team Members</th>
+              <th className="p-3">License Utilization</th>
+              <th className="p-3">Status</th>
+              <th className="p-3">Created At</th>
+              <th className="p-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-pm-border">
+            {filteredCompanies.map(c => {
+              const usedCount = c.license_count || 0;
+              const maxCount = c.max_licenses || 10;
+              const pct = Math.min(100, Math.round((usedCount / maxCount) * 100));
+              const isFull = usedCount >= maxCount;
 
-                  return (
-                    <tr key={c.id} className="hover:bg-pm-input/50 transition">
-                      <td className="p-3 font-mono font-semibold text-pm-secondary">#{c.id}</td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-purple-400 shrink-0" />
-                          <span className="font-bold text-pm-text">{c.company_name}</span>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        {c.tax_id ? (
-                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-pm-input border border-pm-border font-mono text-[11px] text-pm-text">
-                            <span>{c.tax_id}</span>
-                            <button
-                              type="button"
-                              onClick={() => copyVat(c.tax_id!, c.id)}
-                              className="text-pm-secondary hover:text-pm-primary transition"
-                              title="Copy Tax / VAT ID"
-                            >
-                              {copiedVatId === c.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="italic text-pm-secondary/60">Not specified</span>
-                        )}
-                      </td>
-                      <td className="p-3">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/20">
-                          <Users className="w-3.5 h-3.5" /> {c.user_count || 0} Members
+              return (
+                <tr key={c.id} className="hover:bg-pm-input/50 transition">
+                  <td className="p-3 font-mono font-semibold text-pm-secondary">#{c.id}</td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-purple-400 shrink-0" />
+                      <span className="font-bold text-pm-text">{c.company_name}</span>
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    {c.tax_id ? (
+                      <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-pm-input border border-pm-border font-mono text-[11px] text-pm-text">
+                        <span>{c.tax_id}</span>
+                        <button
+                          type="button"
+                          onClick={() => copyVat(c.tax_id!, c.id)}
+                          className="text-pm-secondary hover:text-pm-primary transition"
+                          title="Copy Tax / VAT ID"
+                        >
+                          {copiedVatId === c.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="italic text-pm-secondary/60">Not specified</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/20">
+                      <Users className="w-3.5 h-3.5" /> {c.user_count || 0} Members
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <div className="w-36 space-y-1">
+                      <div className="flex justify-between items-center text-[10px] font-bold">
+                        <span className={isFull ? 'text-rose-400' : 'text-pm-text'}>
+                          {usedCount} / {maxCount} Keys
                         </span>
-                      </td>
-                      <td className="p-3">
-                        <div className="w-36 space-y-1">
-                          <div className="flex justify-between items-center text-[10px] font-bold">
-                            <span className={isFull ? 'text-rose-400' : 'text-pm-text'}>
-                              {usedCount} / {maxCount} Keys
-                            </span>
-                            <span className="text-pm-secondary">{pct}%</span>
-                          </div>
-                          <div className="w-full bg-pm-input rounded-full h-1.5 overflow-hidden border border-pm-border">
-                            <div
-                              className={`h-full transition-all duration-300 ${
-                                pct >= 100 ? 'bg-rose-500' : pct >= 75 ? 'bg-amber-500' : 'bg-gradient-to-r from-purple-500 to-emerald-500'
-                              }`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] border ${
-                          c.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                        }`}>
-                          {c.status}
-                        </span>
-                      </td>
+                        <span className="text-pm-secondary">{pct}%</span>
+                      </div>
+                      <div className="w-full bg-pm-input rounded-full h-1.5 overflow-hidden border border-pm-border">
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            pct >= 100 ? 'bg-rose-500' : pct >= 75 ? 'bg-amber-500' : 'bg-gradient-to-r from-purple-500 to-emerald-500'
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    <StatusBadge status={c.status} />
+                  </td>
                       <td className="p-3 text-pm-secondary">{new Date(c.created_at).toLocaleDateString()}</td>
                       <td className="p-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
@@ -358,12 +353,10 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                       </td>
                     </tr>
                   );
-                })
-              )}
+                })}
             </tbody>
           </table>
-        </div>
-      </div>
+      </DirectoryCardTable>
 
       {/* Create Modal */}
       <BaseModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Add New Company Profile">
