@@ -213,7 +213,7 @@ class LicenseRepository
         $sql = "SELECT c.*, 
                 (SELECT COUNT(*) FROM pm_users u WHERE u.company_id = c.id OR (u.company_name IS NOT NULL AND LOWER(u.company_name) = LOWER(c.company_name))) as user_count,
                 (SELECT COUNT(*) FROM pm_licenses l 
-                 JOIN pm_users u2 ON (l.user_id = u2.id OR (l.user_email IS NOT NULL AND LOWER(l.user_email) = LOWER(u2.email)))
+                 JOIN pm_users u2 ON l.user_id = u2.id
                  WHERE u2.company_id = c.id OR (u2.company_name IS NOT NULL AND LOWER(u2.company_name) = LOWER(c.company_name))) as license_count
                 FROM pm_companies c
                 ORDER BY c.id DESC";
