@@ -557,15 +557,14 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                         </div>
 
                         {onInspectClient && (
-                          <button
-                            type="button"
+                          <Button
+                            variant="neutral"
+                            size="sm"
+                            icon={Eye}
                             onClick={() => onInspectClient(m)}
-                            className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition text-purple-400 shrink-0"
-                            title="Inspect Client Account Details"
                           >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Inspect Client</span>
-                          </button>
+                            {t('btn_inspect_client')}
+                          </Button>
                         )}
                       </div>
                     ))}
