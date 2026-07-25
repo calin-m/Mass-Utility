@@ -2,7 +2,8 @@
 declare(strict_types=1);
 
 /**
- * index.php: Standalone SaaS Dashboard Front Router
+ * Mass Utility SaaS Standalone Dashboard - Production Gateway
+ * Version 2.4.2 - OWASP Hardened & Clean Commit Engine
  */
 
 require_once dirname(__DIR__) . '/autoload.php';
