@@ -30,6 +30,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
   // Post-Creation Credentials Banner State
   const [lastCreatedCreds, setLastCreatedCreds] = useState<{ email: string; pass: string; key?: string } | null>(null);
   const [copiedCreds, setCopiedCreds] = useState(false);
+  const [showBannerPass, setShowBannerPass] = useState(false);
 
   const setCreateEmail = (val: string) => {
     setCreateEmailState(val);
@@ -333,9 +334,19 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
               </div>
               <div className="text-xs text-pm-text font-mono flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span><strong>Email:</strong> {lastCreatedCreds.email}</span>
-                <span><strong>Password:</strong> {lastCreatedCreds.pass}</span>
+                <span className="flex items-center gap-1.5 bg-pm-input/60 px-2 py-0.5 rounded border border-pm-border">
+                  <strong>Password:</strong> {showBannerPass ? lastCreatedCreds.pass : '••••••••••••'}
+                  <button
+                    type="button"
+                    onClick={() => setShowBannerPass(!showBannerPass)}
+                    className="text-pm-secondary hover:text-pm-primary p-0.5 rounded transition"
+                    title={showBannerPass ? "Hide Password" : "Reveal Password"}
+                  >
+                    {showBannerPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </span>
                 {lastCreatedCreds.key && (
-                  <span className="text-amber-400"><strong>Issued Key:</strong> {lastCreatedCreds.key}</span>
+                  <span className="text-amber-400 font-bold"><strong>Issued Key:</strong> {lastCreatedCreds.key}</span>
                 )}
               </div>
             </div>
