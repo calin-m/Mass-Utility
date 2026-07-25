@@ -7,7 +7,7 @@ class AdminSettingsManager
 
     public function __construct()
     {
-        $this->dbPath = dirname(dirname(__DIR__)) . '/../mass_utility_dashboard/data/pm_cloud_backups.db';
+        $this->dbPath = dirname(dirname(__DIR__)) . '/data/pm_admin.db';
     }
 
     public function getDbConnection(): \PDO
@@ -17,6 +17,13 @@ class AdminSettingsManager
             @mkdir($dbDir, 0755, true);
         }
         @chmod($dbDir, 0755);
+
+        // Security check: keep SQLite directory private from direct HTTP downloads
+        $htaccessPath = $dbDir . '/.htaccess';
+        if (!file_exists($htaccessPath)) {
+            @file_put_contents($htaccessPath, "Require all denied\nDeny from all\n");
+        }
+
         if (file_exists($this->dbPath)) {
             @chmod($this->dbPath, 0644);
         }
@@ -24,22 +31,23 @@ class AdminSettingsManager
         if (is_dir($dbDir) && !is_writable($dbDir)) {
             @chmod($dbDir, 0775);
             if (!is_writable($dbDir)) {
-                throw new \RuntimeException("Database directory ('mass_utility_dashboard/data') is not writable by web server user.");
+                throw new \RuntimeException("Database directory ('mass_utility_admin/data') is not writable by web server user.");
             }
         }
 
         if (file_exists($this->dbPath) && !is_writable($this->dbPath)) {
             @chmod($this->dbPath, 0664);
             if (!is_writable($this->dbPath)) {
-                throw new \RuntimeException("Database file ('pm_cloud_backups.db') is not writable.");
+                throw new \RuntimeException("Database file ('pm_admin.db') is not writable.");
             }
         }
 
         $pdo = new \PDO('sqlite:' . $this->dbPath);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(\PDO::ATTR_TIMEOUT, 5);
+        $pdo->setAttribute(\PDO::ATTR_TIMEOUT, 10);
         try {
-            $pdo->exec('PRAGMA busy_timeout = 5000;'); // nosec
+            $pdo->exec('PRAGMA journal_mode = WAL;'); // nosec
+            $pdo->exec('PRAGMA busy_timeout = 10000;'); // nosec
             $pdo->exec('CREATE TABLE IF NOT EXISTS pm_admins ( /* nosec */
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username VARCHAR(255) NOT NULL UNIQUE,
@@ -126,16 +134,27 @@ class AdminSettingsManager
 
     public function createAdmin(string $username, string $password): bool
     {
-        try {
-            $pdo = $this->getDbConnection();
-            $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO pm_admins (username, password_hash) VALUES (?, ?)");
-            return $stmt->execute([$username, $hash]);
-        } catch (\Throwable $e) {
-            if (strpos($e->getMessage(), 'UNIQUE constraint') !== false) {
-                throw new \RuntimeException("Admin username '{$username}' is already registered. Please log in or choose a different username.");
+        $lastException = null;
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            try {
+                $pdo = $this->getDbConnection();
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare("INSERT INTO pm_admins (username, password_hash) VALUES (?, ?)");
+                return $stmt->execute([$username, $hash]);
+            } catch (\Throwable $e) {
+                $lastException = $e;
+                if (strpos($e->getMessage(), 'UNIQUE constraint') !== false) {
+                    throw new \RuntimeException("Admin username '{$username}' is already registered. Please log in or choose a different username.");
+                }
+                if (strpos($e->getMessage(), 'locked') !== false || strpos($e->getMessage(), 'BUSY') !== false) {
+                    usleep(200000); // 200ms retry backoff
+                    continue;
+                }
+                break;
             }
-            throw new \RuntimeException("Failed to initialize admin credentials: " . $e->getMessage());
         }
+
+        $errMsg = $lastException ? $lastException->getMessage() : 'Unknown error';
+        throw new \RuntimeException("Failed to initialize admin credentials: " . $errMsg);
     }
 }

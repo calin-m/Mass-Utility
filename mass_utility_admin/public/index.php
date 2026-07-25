@@ -7,12 +7,18 @@ require_once dirname(__DIR__) . '/src/Repository/LicenseRepository.php';
 require_once dirname(__DIR__) . '/src/Controller/AdminApiController.php';
 
 // Auto-Migration Bootstrapper & First-Time Setup Check
-$dbPath = dirname(dirname(__DIR__)) . '/mass_utility_dashboard/data/pm_cloud_backups.db';
+$dbPath = dirname(__DIR__) . '/data/pm_admin.db';
 $dbDir = dirname($dbPath);
 if (!is_dir($dbDir)) {
     @mkdir($dbDir, 0755, true);
 }
 @chmod($dbDir, 0755);
+
+$htaccessPath = $dbDir . '/.htaccess';
+if (!file_exists($htaccessPath)) {
+    @file_put_contents($htaccessPath, "Require all denied\nDeny from all\n");
+}
+
 if (file_exists($dbPath)) {
     @chmod($dbPath, 0644);
 }
@@ -22,9 +28,10 @@ if (file_exists($dbPath) && filesize($dbPath) > 0) {
     try {
         $pdo = new PDO('sqlite:' . $dbPath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(PDO::ATTR_TIMEOUT, 5);
+        $pdo->setAttribute(PDO::ATTR_TIMEOUT, 10);
         try {
-            $pdo->exec('PRAGMA busy_timeout = 5000;'); // nosec
+            $pdo->exec('PRAGMA journal_mode = WAL;'); // nosec
+            $pdo->exec('PRAGMA busy_timeout = 10000;'); // nosec
         } catch (\Throwable $t) {}
 
         // Ensure pm_package_tiers table exists and is seeded (Self-healing repair)

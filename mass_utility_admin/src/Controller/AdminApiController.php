@@ -339,6 +339,18 @@ class AdminApiController
                         'recommended' => '0755',
                         'is_dir' => true
                     ],
+                    'admin_data_dir' => [
+                        'path' => 'mass_utility_admin/data',
+                        'current' => $getOctalPerms($adminDir . '/data', '0755'),
+                        'recommended' => '0755',
+                        'is_dir' => true
+                    ],
+                    'admin_db_file' => [
+                        'path' => 'mass_utility_admin/data/pm_admin.db',
+                        'current' => $getOctalPerms($adminDir . '/data/pm_admin.db', '0644'),
+                        'recommended' => '0644',
+                        'is_dir' => false
+                    ],
                     'dashboard_data_dir' => [
                         'path' => 'mass_utility_dashboard/data',
                         'current' => $getOctalPerms($dashboardDir . '/data', '0755'),
