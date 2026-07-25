@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import { ShieldCheck, Activity, Lock, Cpu, AlertTriangle, CheckCircle, RefreshCw, FolderLock, GitBranch, Database, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, ShieldAlert, CheckCircle2, CheckCircle, Lock, FileCode, Server, RefreshCw, Activity, AlertTriangle, Key, Terminal, Globe, ExternalLink, HardDrive, Shield, Check, Settings, Database, Cpu, FolderLock, GitBranch } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface SecurityHealthTabProps {
-  showAlert?: (msg: string, type?: 'success' | 'error') => void;
+  showAlert: (msg: string, type?: 'success' | 'error') => void;
 }
 
 export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert }) => {
+  const { t } = useTranslation();
   const [activeAction, setActiveAction] = useState<'headers' | 'perms' | 'ssl' | 'audit' | null>(null);
   const [diagnostics, setDiagnostics] = useState<any>(null);
 
@@ -107,8 +109,8 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
       {/* Portal System Status Card Container */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation">
         <SectionHeader
-          title="Portal System Status"
-          subtitle="System health, security diagnostics, and permission integrity checks."
+          title={t('security_title')}
+          subtitle={t('security_subtitle')}
           icon={Settings}
         />
 

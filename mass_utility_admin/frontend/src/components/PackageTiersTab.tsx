@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { PackageCheck, Save, RefreshCw } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
+import { Button } from './common/Button';
+import { useTranslation } from '../i18n/LanguageContext';
 
 export interface PackageTier {
   id: number;
@@ -38,102 +40,112 @@ const getDefaultCapsForTier = (tierName: string) => {
     PM_ENABLE_HISTORY: true,
   };
 
-  if (name === 'developer' || name === 'enterprise') {
+  if (name === 'basic') {
     return {
       ...base,
-      PM_ENABLE_DB_TOOLS: true,
-      PM_ENABLE_FILE_TOOLS: true,
-      query_visual_execute: true,
-      backup_automation: true,
-      governor_autopilot: true,
-      sweeper_execution: true,
-      rollback_history_limit: 999,
-      backup_destinations: ['local', 'gdrive']
+      PM_ENABLE_DB_TOOLS: false,
+      PM_ENABLE_FILE_TOOLS: false,
+      query_visual_execute: false,
+      backup_automation: false,
+      governor_autopilot: false,
+      sweeper_execution: false,
+      rollback_history_limit: 5,
+      backup_destinations: ['local'],
     };
   }
 
   if (name === 'pro') {
     return {
       ...base,
-      PM_ENABLE_DB_TOOLS: false,
-      PM_ENABLE_FILE_TOOLS: false,
+      PM_ENABLE_DB_TOOLS: true,
+      PM_ENABLE_FILE_TOOLS: true,
       query_visual_execute: true,
       backup_automation: true,
-      governor_autopilot: true,
+      governor_autopilot: false,
       sweeper_execution: true,
-      rollback_history_limit: 10,
-      backup_destinations: ['local', 'gdrive']
+      rollback_history_limit: 25,
+      backup_destinations: ['local', 'google_drive'],
     };
   }
 
-  // Basic tier (default strict fallback)
+  // Enterprise Tier
   return {
     ...base,
-    PM_ENABLE_DB_TOOLS: false,
-    PM_ENABLE_FILE_TOOLS: false,
-    query_visual_execute: false,
-    backup_automation: false,
-    governor_autopilot: false,
-    sweeper_execution: false,
-    rollback_history_limit: 0,
-    backup_destinations: ['local']
+    PM_ENABLE_DB_TOOLS: true,
+    PM_ENABLE_FILE_TOOLS: true,
+    query_visual_execute: true,
+    backup_automation: true,
+    governor_autopilot: true,
+    sweeper_execution: true,
+    rollback_history_limit: 100,
+    backup_destinations: ['local', 'google_drive', 's3'],
   };
 };
 
 export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefresh, showAlert }) => {
-  const [selectedTier, setSelectedTier] = useState<string>('basic');
-  const [saving, setSaving] = useState(false);
+  const { t } = useTranslation();
+  const [selectedTier, setSelectedTier] = useState('basic');
+  const [loading, setLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
       await onRefresh();
-      showAlert('🔄 Feature capability matrix reloaded!', 'success');
+      showAlert('🔄 Package tier matrix reloaded!', 'success');
     } finally {
       setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
-  const getTierCaps = (tierName: string) => {
-    const found = tiers.find(t => t.name.toLowerCase() === tierName.toLowerCase());
-    return { ...getDefaultCapsForTier(tierName), ...(found?.capabilities || {}) };
-  };
+  const activeTierObj = tiers.find(t => t.name.toLowerCase() === selectedTier.toLowerCase());
 
-  const [caps, setCaps] = useState(() => getTierCaps(selectedTier));
+  const currentCaps = activeTierObj && activeTierObj.capabilities && Object.keys(activeTierObj.capabilities).length > 0
+    ? activeTierObj.capabilities
+    : getDefaultCapsForTier(selectedTier);
 
-  React.useEffect(() => {
-    setCaps(getTierCaps(selectedTier));
-  }, [tiers, selectedTier]);
+  const [capabilities, setCapabilities] = useState(currentCaps);
 
   const handleTierChange = (tierName: string) => {
     setSelectedTier(tierName);
+    const tierObj = tiers.find(t => t.name.toLowerCase() === tierName.toLowerCase());
+    const caps = tierObj && tierObj.capabilities && Object.keys(tierObj.capabilities).length > 0
+      ? tierObj.capabilities
+      : getDefaultCapsForTier(tierName);
+    setCapabilities(caps);
   };
 
-  const handleToggleCap = (key: keyof typeof caps) => {
-    setCaps(prev => ({ ...prev, [key]: !prev[key] }));
+  const handleToggle = (key: string) => {
+    setCapabilities(prev => ({
+      ...prev,
+      [key]: !prev[key as keyof typeof prev],
+    }));
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append('name', selectedTier);
-      formData.append('capabilities', JSON.stringify(caps));
+      formData.append('capabilities', JSON.stringify(capabilities));
 
-      const res = await fetch('index.php?action=api_save_tier', { method: 'POST', body: formData });
+      const res = await fetch('index.php?action=api_save_tier', {
+        method: 'POST',
+        body: formData,
+      });
+
       const data = await res.json();
       if (data.success) {
-        showAlert(`✅ Package tier '${selectedTier.toUpperCase()}' capabilities updated!`, 'success');
+        showAlert(`Package tier '${selectedTier.toUpperCase()}' matrix saved successfully!`, 'success');
         onRefresh();
       } else {
-        showAlert('❌ Error: ' + (data.error || 'Failed to update tier'), 'error');
+        showAlert(data.error || 'Failed to save package tier matrix', 'error');
       }
     } catch (err: any) {
-      showAlert('❌ Request failed: ' + err.message, 'error');
+      showAlert('Failed to save package tier: ' + err.message, 'error');
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
@@ -141,23 +153,23 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     <div className="space-y-6">
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation w-full">
         <SectionHeader
-          title="Feature Capability Matrix Editor"
-          subtitle="Configure feature access tiers and license capabilities."
+          title={t('tiers_title')}
+          subtitle={t('tiers_subtitle')}
           icon={PackageCheck}
           action={
-            <button
-              type="button"
+            <Button
+              variant="neutral"
+              size="sm"
+              icon={RefreshCw}
+              loading={isRefreshing}
               onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Refresh Capability Matrix"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} /> Refresh
-            </button>
+              {t('btn_refresh')}
+            </Button>
           }
         />
 
-        <div className="flex gap-3 mb-6">
+        <div className="flex gap-3 my-6">
           {['basic', 'pro', 'enterprise'].map(tierName => (
             <button
               key={tierName}
@@ -165,7 +177,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               onClick={() => handleTierChange(tierName)}
               className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition ${
                 selectedTier === tierName
-                  ? 'pm-btn-primary'
+                  ? 'pm-btn-primary shadow-md'
                   : 'pm-btn-neutral'
               }`}
             >
@@ -178,171 +190,118 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           
           {/* Usability Section */}
           <div>
-            <h4 className="text-sm font-bold text-pm-text border-b border-pm-border pb-2 mb-3">Core Usability</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3">Usability Features</h4>
+            <div className="space-y-2">
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">Database Tools Access</span>
+                  <span className="text-[11px] text-pm-secondary">Unlocks AST SQL execution and Database Diff tools</span>
+                </div>
                 <input
                   type="checkbox"
-                  checked={caps.PM_ENABLE_DB_TOOLS}
-                  onChange={() => handleToggleCap('PM_ENABLE_DB_TOOLS')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
+                  checked={Boolean(capabilities.PM_ENABLE_DB_TOOLS)}
+                  onChange={() => handleToggle('PM_ENABLE_DB_TOOLS')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Database Tools</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Raw SQL execution and table browser</div>
-                </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">File Tools Access</span>
+                  <span className="text-[11px] text-pm-secondary">Unlocks filesystem browser, code diffing, and editing</span>
+                </div>
                 <input
                   type="checkbox"
-                  checked={caps.PM_ENABLE_FILE_TOOLS}
-                  onChange={() => handleToggleCap('PM_ENABLE_FILE_TOOLS')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
+                  checked={Boolean(capabilities.PM_ENABLE_FILE_TOOLS)}
+                  onChange={() => handleToggle('PM_ENABLE_FILE_TOOLS')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">File Explorer</div>
-                  <div className="text-[0.65rem] text-pm-secondary">On-server file management & editing</div>
-                </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">Ghost Table Purger</span>
+                  <span className="text-[11px] text-pm-secondary">Allows purging unindexed tables and unlinked data</span>
+                </div>
                 <input
                   type="checkbox"
-                  checked={caps.PM_ENABLE_HISTORY}
-                  onChange={() => handleToggleCap('PM_ENABLE_HISTORY')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
+                  checked={Boolean(capabilities.PM_ENABLE_GHOST_PURGER)}
+                  onChange={() => handleToggle('PM_ENABLE_GHOST_PURGER')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Rollback Snapshots</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Create backups before mutations</div>
-                </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">GDPR & Compliance Sweeper</span>
+                  <span className="text-[11px] text-pm-secondary">Unlocks privacy scanning and customer anonymization</span>
+                </div>
                 <input
                   type="checkbox"
-                  checked={caps.PM_ENABLE_GHOST_PURGER}
-                  onChange={() => handleToggleCap('PM_ENABLE_GHOST_PURGER')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
+                  checked={Boolean(capabilities.PM_ENABLE_GDPR_SWEEPER)}
+                  onChange={() => handleToggle('PM_ENABLE_GDPR_SWEEPER')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Ghost File Purger</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Audit unreferenced / orphaned files</div>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
-                <input
-                  type="checkbox"
-                  checked={caps.PM_ENABLE_GDPR_SWEEPER}
-                  onChange={() => handleToggleCap('PM_ENABLE_GDPR_SWEEPER')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
-                />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">GDPR Data Sweeper</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Audit and redact PII data</div>
-                </div>
               </label>
             </div>
           </div>
 
           {/* Convenience Section */}
           <div>
-            <h4 className="text-sm font-bold text-pm-text border-b border-pm-border pb-2 mb-3">Convenience & Automation</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3">Convenience Features</h4>
+            <div className="space-y-2">
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">Visual Query Wizard</span>
+                  <span className="text-[11px] text-pm-secondary">Unlocks no-code visual query builder interface</span>
+                </div>
                 <input
                   type="checkbox"
-                  checked={caps.backup_automation}
-                  onChange={() => handleToggleCap('backup_automation')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
+                  checked={Boolean(capabilities.query_visual_execute)}
+                  onChange={() => handleToggle('query_visual_execute')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Automated Cloud Backups</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Cron-driven scheduled backups</div>
-                </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">Automated Cron Backups</span>
+                  <span className="text-[11px] text-pm-secondary">Enables scheduled background backups and retention</span>
+                </div>
                 <input
                   type="checkbox"
-                  checked={caps.query_visual_execute}
-                  onChange={() => handleToggleCap('query_visual_execute')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
+                  checked={Boolean(capabilities.backup_automation)}
+                  onChange={() => handleToggle('backup_automation')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Visual Query Execution</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Batch mutation SQL engine</div>
-                </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">CloudLinux Autopilot</span>
+                  <span className="text-[11px] text-pm-secondary">Enables automatic LVE throttle prevention</span>
+                </div>
                 <input
                   type="checkbox"
-                  checked={caps.governor_autopilot}
-                  onChange={() => handleToggleCap('governor_autopilot')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
+                  checked={Boolean(capabilities.governor_autopilot)}
+                  onChange={() => handleToggle('governor_autopilot')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Governor Autopilot</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Database performance governor</div>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
-                <input
-                  type="checkbox"
-                  checked={caps.sweeper_execution}
-                  onChange={() => handleToggleCap('sweeper_execution')}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
-                />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Sweeper Active Execution</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Execute deletion of files & data</div>
-                </div>
-              </label>
-              
-              <label className="flex items-center gap-3 p-3 bg-pm-input border border-pm-border rounded-lg cursor-pointer hover:border-pm-primary transition">
-                <input
-                  type="checkbox"
-                  checked={caps.backup_destinations.includes('gdrive')}
-                  onChange={(e) => {
-                    const hasLocal = caps.backup_destinations.includes('local');
-                    const newDests = e.target.checked 
-                      ? (hasLocal ? ['local', 'gdrive'] : ['gdrive']) 
-                      : (hasLocal ? ['local'] : []);
-                    setCaps({ ...caps, backup_destinations: newDests });
-                  }}
-                  className="w-4 h-4 text-pm-primary rounded focus:ring-0"
-                />
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Cloud Destinations (GDrive)</div>
-                  <div className="text-[0.65rem] text-pm-secondary">Push backups to Google Drive</div>
-                </div>
               </label>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Rollback History Snapshots Limit</label>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-              value={caps.rollback_history_limit}
-              onChange={e => setCaps({ ...caps, rollback_history_limit: parseInt(e.target.value) || 0 })}
-            />
+          <div className="flex justify-end pt-4 border-t border-pm-border">
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              icon={Save}
+              loading={loading}
+            >
+              {t('btn_save')} Matrix
+            </Button>
           </div>
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="pm-btn-primary px-6 py-2.5 rounded-lg text-xs font-bold uppercase transition flex items-center gap-2"
-          >
-            <Save className="w-4 h-4" /> {saving ? 'Saving Tier...' : `Save ${selectedTier.toUpperCase()} Capabilities`}
-          </button>
         </form>
       </div>
     </div>

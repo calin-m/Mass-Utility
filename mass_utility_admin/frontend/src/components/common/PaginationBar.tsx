@@ -1,13 +1,14 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from '../../i18n/LanguageContext';
 
-export interface PaginationBarProps {
+interface PaginationBarProps {
   currentPage: number;
   totalPages: number;
   totalItems: number;
   pageSize: number;
   onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number) => void;
+  onPageSizeChange: (size: number) => void;
   pageSizeOptions?: number[];
 }
 
@@ -20,68 +21,63 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50, 100],
 }) => {
-  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const { t } = useTranslation();
+  if (totalItems === 0) return null;
+
+  const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-pm-card border-t border-pm-border text-xs text-pm-secondary">
-      {/* Page Size & Counter Info */}
-      <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+    <div className="bg-pm-card border-t border-pm-border px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      {/* Left: Page Size Selector & Counter */}
+      <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
         <div className="flex items-center gap-2">
-          <span>Show</span>
+          <span className="text-pm-secondary font-bold text-[11px] uppercase">{t('page_size')}:</span>
           <select
             value={pageSize}
             onChange={(e) => {
               onPageSizeChange(Number(e.target.value));
               onPageChange(1);
             }}
-            className="h-8 bg-pm-input border border-pm-border rounded-lg px-2 text-xs font-bold text-pm-text focus:outline-none focus:border-pm-primary transition cursor-pointer"
+            className="bg-pm-input border border-pm-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-pm-text focus:outline-none focus:border-pm-primary transition"
           >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size} className="bg-pm-card text-pm-text">
-                {size}
+            {pageSizeOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
               </option>
             ))}
           </select>
-          <span>entries per page</span>
         </div>
 
-        <span className="font-mono text-[11px] font-semibold text-pm-secondary">
-          Showing <strong className="text-pm-text">{startItem}</strong> - <strong className="text-pm-text">{endItem}</strong> of <strong className="text-pm-text">{totalItems}</strong>
-        </span>
+        <div className="text-pm-secondary font-mono text-[11px]">
+          {t('page_showing')} <strong className="text-pm-text font-bold">{startItem} - {endItem}</strong> {t('page_of')}{' '}
+          <strong className="text-pm-text font-bold">{totalItems}</strong>
+        </div>
       </div>
 
-      {/* Page Navigation Buttons */}
-      <div className="flex items-center gap-2">
+      {/* Right: Previous / Next Navigation Buttons */}
+      <div className="flex items-center gap-1.5 shrink-0">
         <button
           type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className={`px-3 py-1.5 rounded-lg border border-pm-border text-xs font-bold transition flex items-center gap-1 ${
-            currentPage <= 1
-              ? 'opacity-40 cursor-not-allowed bg-pm-input'
-              : 'bg-pm-input hover:bg-pm-card hover:border-pm-primary text-pm-text'
-          }`}
+          className="px-3 py-1.5 rounded-lg border border-pm-border text-xs font-bold transition flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed bg-pm-input hover:bg-pm-card text-pm-text"
         >
           <ChevronLeft className="w-3.5 h-3.5" />
-          <span>Previous</span>
+          <span>{t('page_previous')}</span>
         </button>
 
-        <span className="px-3 py-1 bg-pm-input/50 rounded-lg border border-pm-border font-mono font-bold text-[11px] text-pm-text">
-          {currentPage} / {Math.max(1, totalPages)}
+        <span className="px-3 py-1 text-xs font-mono font-extrabold text-pm-text">
+          {currentPage} / {totalPages}
         </span>
 
         <button
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className={`px-3 py-1.5 rounded-lg border border-pm-border text-xs font-bold transition flex items-center gap-1 ${
-            currentPage >= totalPages
-              ? 'opacity-40 cursor-not-allowed bg-pm-input'
-              : 'bg-pm-input hover:bg-pm-card hover:border-pm-primary text-pm-text'
-          }`}
+          className="px-3 py-1.5 rounded-lg border border-pm-border text-xs font-bold transition flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed bg-pm-input hover:bg-pm-card text-pm-text"
         >
-          <span>Next</span>
+          <span>{t('page_next')}</span>
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>

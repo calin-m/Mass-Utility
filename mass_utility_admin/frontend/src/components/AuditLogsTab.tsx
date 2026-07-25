@@ -9,6 +9,7 @@ import { Button } from './common/Button';
 import { FormInput } from './common/FormInput';
 import { FormSelect } from './common/FormSelect';
 import { PaginationBar } from './common/PaginationBar';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface AuditLog {
   id: number;
@@ -27,6 +28,7 @@ interface AuditLogsTabProps {
 }
 
 export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -210,13 +212,13 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Operations Audit Trail"
-        subtitle="Security event ledger tracking administrative operations, license updates, and authentication events."
+        title={t('audit_title')}
+        subtitle={t('audit_subtitle')}
         action={
           <div className="flex items-center gap-3">
             <a href="?action=api_export_admin_logs_csv" download className="no-underline">
               <Button variant="primary" size="md" icon={Download}>
-                Export CSV
+                {t('btn_export_csv')}
               </Button>
             </a>
             <Button
@@ -226,7 +228,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               onClick={() => setIsClearModalOpen(true)}
               title="Purge operations audit trail log history"
             >
-              Clear Audit Logs
+              {t('btn_clear')}
             </Button>
             <Button
               variant="neutral"
@@ -238,7 +240,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                 onNotify('🔄 Audit logs reloaded!', 'success');
               }}
             >
-              Refresh
+              {t('btn_refresh')}
             </Button>
           </div>
         }
@@ -246,10 +248,10 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
 
       {/* Standardized 4-Card Overview Telemetry Stat Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Operations" value={totalOperations} icon={Activity} color="purple" />
-        <StatCard label="License Key Mutations" value={licenseMutations} icon={Layers} color="blue" />
-        <StatCard label="Corporate Account Actions" value={accountCompanyActions} icon={UserCheck} color="emerald" />
-        <StatCard label="Security Events" value={securityEvents} icon={ShieldAlert} color="amber" />
+        <StatCard label={t('stat_total_ops')} value={totalOperations} icon={Activity} color="purple" />
+        <StatCard label={t('stat_license_mutations')} value={licenseMutations} icon={Layers} color="blue" />
+        <StatCard label={t('stat_account_actions')} value={accountCompanyActions} icon={UserCheck} color="emerald" />
+        <StatCard label={t('stat_security_events')} value={securityEvents} icon={ShieldAlert} color="amber" />
       </div>
 
       {/* Filter Toolbar with Clear Button */}
@@ -281,7 +283,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               }}
               title="Clear active log filters"
             >
-              Clear
+              {t('btn_clear')}
             </Button>
           )}
         </form>
@@ -301,12 +303,12 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3">Log ID & Time</th>
-                <th className="p-3">Admin Operator</th>
-                <th className="p-3">Action Type</th>
-                <th className="p-3">Target Entity</th>
-                <th className="p-3">IP Address</th>
-                <th className="p-3 text-right">Payload Details</th>
+                <th className="p-3">{t('th_log_id')}</th>
+                <th className="p-3">{t('th_admin_op')}</th>
+                <th className="p-3">{t('th_action_type')}</th>
+                <th className="p-3">{t('th_target')}</th>
+                <th className="p-3">{t('th_ip')}</th>
+                <th className="p-3 text-right">{t('th_details')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
@@ -374,7 +376,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                           setShowRawJson(false);
                         }}
                       >
-                        Inspect Log
+                        {t('btn_inspect')}
                       </Button>
                     </td>
                   </tr>
@@ -408,21 +410,21 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
             {/* Log Metadata Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-pm-input/50 rounded-xl border border-pm-border font-mono text-[11px]">
               <div>
-                <div className="text-[10px] text-pm-secondary uppercase font-bold">Admin Operator</div>
+                <div className="text-[10px] text-pm-secondary uppercase font-bold">{t('th_admin_op')}</div>
                 <div className="text-pm-text font-bold pt-0.5">{selectedLog.admin_username || 'system'}</div>
               </div>
               <div>
-                <div className="text-[10px] text-pm-secondary uppercase font-bold">Action Type</div>
+                <div className="text-[10px] text-pm-secondary uppercase font-bold">{t('th_action_type')}</div>
                 <div className="text-purple-600 dark:text-purple-400 font-bold pt-0.5">{selectedLog.action_type}</div>
               </div>
               <div>
-                <div className="text-[10px] text-pm-secondary uppercase font-bold">Target Entity</div>
+                <div className="text-[10px] text-pm-secondary uppercase font-bold">{t('th_target')}</div>
                 <div className="text-pm-text font-bold pt-0.5">
                   {selectedLog.target_entity} {selectedLog.target_id ? `#${selectedLog.target_id}` : ''}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] text-pm-secondary uppercase font-bold">IP Address</div>
+                <div className="text-[10px] text-pm-secondary uppercase font-bold">{t('th_ip')}</div>
                 <div className="text-pm-text font-bold pt-0.5">{selectedLog.ip_address}</div>
               </div>
             </div>
@@ -479,7 +481,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
 
             <div className="flex justify-end pt-2">
               <Button variant="neutral" size="md" onClick={() => setSelectedLog(null)}>
-                Close Telemetry
+                {t('btn_close')}
               </Button>
             </div>
           </div>

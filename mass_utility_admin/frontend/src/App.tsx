@@ -10,8 +10,10 @@ import { AuditLogsTab } from './components/AuditLogsTab';
 import { LoginView } from './components/LoginView';
 import { SetupView } from './components/SetupView';
 import { ToastNotification } from './components/common/ToastNotification';
+import { useTranslation } from './i18n/LanguageContext';
 
 export const App: React.FC = () => {
+  const { t } = useTranslation();
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAdmin, setHasAdmin] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
@@ -72,22 +74,12 @@ export const App: React.FC = () => {
         setCompanies(data.companies || []);
         setTiers(data.tiers || []);
         setUsers(data.users || []);
-      } else {
-        showAlert('❌ ' + (data.error || 'Failed to fetch admin data'), 'error');
       }
-    } catch (e: any) {
-      showAlert('Failed to fetch admin data: ' + e.message, 'error');
+    } catch (e) {
+      showAlert('Failed to connect to Admin Bridge Server', 'error');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await fetch(getApiUrl('api_logout'));
-      setAuthenticated(false);
-      showAlert('Logged out successfully', 'success');
-    } catch (e) {}
   };
 
   useEffect(() => {
@@ -104,18 +96,26 @@ export const App: React.FC = () => {
     }
   }, [darkMode]);
 
+  const handleLogout = async () => {
+    try {
+      await fetch(getApiUrl('api_logout'));
+      setAuthenticated(false);
+    } catch (e) {}
+  };
+
   if (!authChecked) {
     return (
-      <div className="min-h-screen bg-pm-bg text-pm-text flex items-center justify-center">
-        <div className="text-xs font-semibold text-pm-secondary animate-pulse">
-          Initializing Super Admin Gateway...
+      <div className="min-h-screen bg-pm-bg text-pm-text flex items-center justify-center p-4">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-4 border-pm-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-xs text-pm-secondary font-mono">Initializing Super Admin Portal...</p>
         </div>
       </div>
     );
   }
 
   if (!hasAdmin) {
-    return <SetupView onSetupSuccess={() => { setHasAdmin(true); setAuthenticated(true); fetchAdminData(); }} />;
+    return <SetupView onSetupSuccess={() => checkStatus()} />;
   }
 
   if (!authenticated) {
@@ -131,8 +131,8 @@ export const App: React.FC = () => {
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-pm-border">
         <div>
           <h1 className="text-xl font-extrabold text-pm-text flex items-center gap-2">
-            <span className="bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">Mass Utility Super Admin</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold uppercase">B2B v2.1</span>
+            <span className="bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">{t('portal_title')}</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold uppercase">{t('portal_tag')}</span>
           </h1>
           <p className="text-xs text-pm-secondary mt-0.5">Centralized Enterprise SaaS License Broker, B2B Companies Directory &amp; Tenant Operations Center</p>
         </div>
@@ -152,7 +152,7 @@ export const App: React.FC = () => {
             className="pm-btn-danger-outline px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Logout</span>
+            <span>{t('logout')}</span>
           </button>
         </div>
       </header>
@@ -166,7 +166,7 @@ export const App: React.FC = () => {
               activeTab === 'companies' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <Building2 className="w-4 h-4" /> Companies Directory
+            <Building2 className="w-4 h-4" /> {t('nav_companies')}
           </button>
 
           <button
@@ -178,7 +178,7 @@ export const App: React.FC = () => {
               activeTab === 'clients' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <Users className="w-4 h-4" /> Clients Directory
+            <Users className="w-4 h-4" /> {t('nav_clients')}
           </button>
 
           <button
@@ -187,7 +187,7 @@ export const App: React.FC = () => {
               activeTab === 'licenses' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <Key className="w-4 h-4" /> Licenses &amp; Subscriptions
+            <Key className="w-4 h-4" /> {t('nav_licenses')}
           </button>
 
           <button
@@ -196,7 +196,7 @@ export const App: React.FC = () => {
               activeTab === 'tiers' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <Package className="w-4 h-4" /> Package Tiers
+            <Package className="w-4 h-4" /> {t('nav_package_tiers')}
           </button>
         </div>
 
@@ -207,7 +207,7 @@ export const App: React.FC = () => {
               activeTab === 'settings' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <Settings className="w-4 h-4" /> Settings
+            <Settings className="w-4 h-4" /> {t('nav_settings')}
           </button>
 
           <button
@@ -216,7 +216,7 @@ export const App: React.FC = () => {
               activeTab === 'security' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <ShieldCheck className="w-4 h-4" /> Security &amp; Health
+            <ShieldCheck className="w-4 h-4" /> {t('nav_security')}
           </button>
 
           <button
@@ -225,28 +225,64 @@ export const App: React.FC = () => {
               activeTab === 'audit' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <Shield className="w-4 h-4" /> Audit Logs
+            <Shield className="w-4 h-4" /> {t('nav_audit_logs')}
           </button>
         </div>
       </nav>
 
-      {/* Main Tab Content */}
-      <main>
+      {/* Main Tab Content Display */}
+      <main className="w-full">
         {activeTab === 'companies' && (
-          <CompaniesTab companies={companies} users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} onInspectClient={handleInspectClient} />
+          <CompaniesTab
+            companies={companies}
+            users={users}
+            licenses={licenses}
+            onRefresh={fetchAdminData}
+            showAlert={showAlert}
+          />
         )}
+
         {activeTab === 'clients' && (
-          <ClientsTab users={users} licenses={licenses} companies={companies} onRefresh={fetchAdminData} showAlert={showAlert} initialSelectedUser={inspectedClient} />
+          <ClientsTab
+            users={users}
+            licenses={licenses}
+            companies={companies}
+            onRefresh={fetchAdminData}
+            showAlert={showAlert}
+            initialSelectedUser={inspectedClient}
+          />
         )}
+
         {activeTab === 'licenses' && (
-          <LicensesTab licenses={licenses} users={users} onRefresh={fetchAdminData} showAlert={showAlert} />
+          <LicensesTab
+            licenses={licenses}
+            users={users}
+            companies={companies}
+            onRefresh={fetchAdminData}
+            showAlert={showAlert}
+            onInspectClient={handleInspectClient}
+          />
         )}
+
         {activeTab === 'tiers' && (
-          <PackageTiersTab tiers={tiers} onRefresh={fetchAdminData} showAlert={showAlert} />
+          <PackageTiersTab
+            tiers={tiers}
+            onRefresh={fetchAdminData}
+            showAlert={showAlert}
+          />
         )}
-        {activeTab === 'settings' && <SettingsTab showAlert={showAlert} />}
-        {activeTab === 'security' && <SecurityHealthTab showAlert={showAlert} />}
-        {activeTab === 'audit' && <AuditLogsTab onNotify={showAlert} />}
+
+        {activeTab === 'settings' && (
+          <SettingsTab showAlert={showAlert} />
+        )}
+
+        {activeTab === 'security' && (
+          <SecurityHealthTab showAlert={showAlert} />
+        )}
+
+        {activeTab === 'audit' && (
+          <AuditLogsTab onNotify={showAlert} />
+        )}
       </main>
     </div>
   );

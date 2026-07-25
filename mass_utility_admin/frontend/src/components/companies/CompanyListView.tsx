@@ -9,6 +9,7 @@ import { Button } from '../common/Button';
 import { FormInput } from '../common/FormInput';
 import { FormSelect } from '../common/FormSelect';
 import { PaginationBar } from '../common/PaginationBar';
+import { useTranslation } from '../../i18n/LanguageContext';
 
 export interface Company {
   id: number;
@@ -32,6 +33,7 @@ interface CompanyListViewProps {
 }
 
 export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, users, licenses, onRefresh, showAlert, onSelectCompany }) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -222,8 +224,8 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Companies Directory"
-        subtitle="Manage B2B organizations, multi-user team access, and shared store license pools across tenant clients."
+        title={t('companies_title')}
+        subtitle={t('companies_subtitle')}
         icon={Building2}
         action={
           <Button
@@ -233,17 +235,17 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
             loading={isRefreshing}
             onClick={handleRefresh}
           >
-            Refresh
+            {t('btn_refresh')}
           </Button>
         }
       />
 
       {/* Horizontal Overview Stat Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Companies" value={companies.length} icon={Building2} color="purple" />
-        <StatCard label="Active Organizations" value={activeCount} icon={ShieldCheck} color="emerald" />
-        <StatCard label="Linked Team Members" value={totalMembers} icon={Users} color="blue" />
-        <StatCard label="Managed Licenses" value={totalCompanyLicenses} icon={Key} color="amber" />
+        <StatCard label={t('stat_total_companies')} value={companies.length} icon={Building2} color="purple" />
+        <StatCard label={t('stat_active_orgs')} value={activeCount} icon={ShieldCheck} color="emerald" />
+        <StatCard label={t('stat_team_members')} value={totalMembers} icon={Users} color="blue" />
+        <StatCard label={t('stat_managed_licenses')} value={totalCompanyLicenses} icon={Key} color="amber" />
       </div>
 
       {/* Shared Directory Toolbar */}
@@ -255,8 +257,8 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
           setCurrentPage(1);
         }}
         statusFilters={[
-          { key: 'all', label: 'All Companies', count: companies.length },
-          { key: 'active', label: 'Active', count: activeCount }
+          { key: 'all', label: t('nav_companies'), count: companies.length },
+          { key: 'active', label: t('btn_activate'), count: activeCount }
         ]}
         activeFilter={statusFilter}
         onFilterChange={(key) => {
@@ -265,7 +267,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
         }}
         onClearFilters={handleClearFilters}
         primaryAction={{
-          label: 'Add Company Profile',
+          label: t('btn_add_company'),
           icon: PlusCircle,
           onClick: () => {
             setName('');
@@ -285,12 +287,12 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3">Company Details</th>
-                <th className="p-3">Tax / VAT ID</th>
-                <th className="p-3">Users</th>
-                <th className="p-3">License Pool</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 text-right">Actions</th>
+                <th className="p-3">{t('th_company')}</th>
+                <th className="p-3">{t('th_vat')}</th>
+                <th className="p-3">{t('th_users')}</th>
+                <th className="p-3">{t('th_pool')}</th>
+                <th className="p-3">{t('th_status')}</th>
+                <th className="p-3 text-right">{t('th_actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
@@ -355,7 +357,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                           icon={Edit}
                           onClick={() => openEditModal(c)}
                         >
-                          Edit
+                          {t('btn_edit')}
                         </Button>
                         <Button
                           variant="danger"
@@ -363,7 +365,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                           icon={Trash2}
                           onClick={() => openDeleteModal(c)}
                         >
-                          Delete
+                          {t('btn_delete')}
                         </Button>
                       </div>
                     </td>
@@ -474,7 +476,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
 
           <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
             <Button variant="neutral" size="md" onClick={() => setIsCreateOpen(false)}>
-              Cancel
+              {t('btn_cancel')}
             </Button>
             <Button variant="primary" size="md" type="submit" loading={submitting}>
               Create Company Profile
@@ -528,10 +530,10 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
 
           <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
             <Button variant="neutral" size="md" onClick={() => setIsEditOpen(false)}>
-              Cancel
+              {t('btn_cancel')}
             </Button>
             <Button variant="primary" size="md" type="submit" loading={submitting}>
-              Save Changes
+              {t('btn_save')}
             </Button>
           </div>
         </form>
@@ -553,10 +555,10 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
           </p>
           <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
             <Button variant="neutral" size="md" onClick={() => setIsDeleteOpen(false)}>
-              Cancel
+              {t('btn_cancel')}
             </Button>
             <Button variant="danger" size="md" onClick={handleDelete} loading={submitting}>
-              Delete Company
+              {t('btn_delete')} Company
             </Button>
           </div>
         </div>

@@ -10,6 +10,7 @@ import { Button } from '../common/Button';
 import { FormInput } from '../common/FormInput';
 import { FormSelect } from '../common/FormSelect';
 import { PaginationBar } from '../common/PaginationBar';
+import { useTranslation } from '../../i18n/LanguageContext';
 
 interface ClientListViewProps {
   users: UserAccount[];
@@ -20,6 +21,7 @@ interface ClientListViewProps {
 }
 
 export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, onRefresh, showAlert, onSelectClient }) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -325,8 +327,8 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Clients Directory"
-        subtitle="Manage client credentials, company profiles, account statuses, and associated store licenses."
+        title={t('clients_title')}
+        subtitle={t('clients_subtitle')}
         icon={Users}
         action={
           <Button
@@ -336,17 +338,17 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
             loading={isRefreshing}
             onClick={handleRefresh}
           >
-            Refresh
+            {t('btn_refresh')}
           </Button>
         }
       />
 
       {/* Top Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Clients" value={totalClients} icon={Users} color="purple" />
-        <StatCard label="Active Accounts" value={activeClients} icon={CheckCircle} color="emerald" />
-        <StatCard label="Suspended Accounts" value={suspendedClients} icon={ShieldAlert} color="rose" />
-        <StatCard label="Bound Store Domains" value={totalBoundDomains} icon={Building} color="amber" />
+        <StatCard label={t('stat_total_clients')} value={totalClients} icon={Users} color="purple" />
+        <StatCard label={t('stat_active_accounts')} value={activeClients} icon={CheckCircle} color="emerald" />
+        <StatCard label={t('stat_suspended_accounts')} value={suspendedClients} icon={ShieldAlert} color="rose" />
+        <StatCard label={t('stat_bound_domains')} value={totalBoundDomains} icon={Building} color="amber" />
       </div>
 
       {/* Shared Directory Toolbar */}
@@ -358,9 +360,9 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
           setCurrentPage(1);
         }}
         statusFilters={[
-          { key: 'all', label: 'All Accounts', count: totalClients },
-          { key: 'active', label: 'Active', count: activeClients },
-          { key: 'suspended', label: 'Suspended', count: suspendedClients }
+          { key: 'all', label: t('nav_clients'), count: totalClients },
+          { key: 'active', label: t('btn_activate'), count: activeClients },
+          { key: 'suspended', label: t('btn_suspend'), count: suspendedClients }
         ]}
         activeFilter={statusFilter}
         onFilterChange={(key) => {
@@ -369,7 +371,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         }}
         onClearFilters={handleClearFilters}
         primaryAction={{
-          label: 'Create Client Account',
+          label: t('btn_create_client'),
           icon: UserPlus,
           onClick: () => setShowCreateModal(true)
         }}
@@ -424,12 +426,12 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3">Client Account</th>
-                <th className="p-3">Company Profile</th>
-                <th className="p-3">Active Licenses</th>
-                <th className="p-3">Authorized Store Domains</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 text-right">Actions</th>
+                <th className="p-3">{t('th_client')}</th>
+                <th className="p-3">{t('th_company_profile')}</th>
+                <th className="p-3">{t('th_active_licenses')}</th>
+                <th className="p-3">{t('th_domains')}</th>
+                <th className="p-3">{t('th_status')}</th>
+                <th className="p-3 text-right">{t('th_actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
@@ -509,7 +511,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                             icon={Edit}
                             onClick={() => openEditModal(user)}
                           >
-                            Edit
+                            {t('btn_edit')}
                           </Button>
                           <Button
                             variant="ghost"
@@ -525,7 +527,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                             icon={isSuspended ? CheckCircle : ShieldAlert}
                             onClick={() => handleToggleStatus(user)}
                           >
-                            {isSuspended ? 'Activate' : 'Suspend'}
+                            {isSuspended ? t('btn_activate') : t('btn_suspend')}
                           </Button>
                           <Button
                             variant="danger"
@@ -533,7 +535,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                             icon={Trash2}
                             onClick={() => setDeletingUser(user)}
                           >
-                            Delete
+                            {t('btn_delete')}
                           </Button>
                         </div>
                       </td>
@@ -636,7 +638,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
           <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
             <Button variant="neutral" size="md" onClick={() => setShowCreateModal(false)}>
-              Cancel
+              {t('btn_cancel')}
             </Button>
             <Button variant="primary" size="md" type="submit" loading={loading}>
               Create Client Account
@@ -665,10 +667,10 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
             <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
               <Button variant="neutral" size="md" onClick={() => setEditingUser(null)}>
-                Cancel
+                {t('btn_cancel')}
               </Button>
               <Button variant="primary" size="md" type="submit" loading={loading}>
-                Save Changes
+                {t('btn_save')}
               </Button>
             </div>
           </form>
@@ -722,7 +724,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
             <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
               <Button variant="neutral" size="md" onClick={() => setResetUser(null)}>
-                Cancel
+                {t('btn_cancel')}
               </Button>
               <Button variant="primary" size="md" type="submit" loading={loading}>
                 Reset Password
@@ -748,10 +750,10 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
           </p>
           <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
             <Button variant="neutral" size="md" onClick={() => setDeletingUser(null)}>
-              Cancel
+              {t('btn_cancel')}
             </Button>
             <Button variant="danger" size="md" onClick={handleDeleteUser} loading={loading}>
-              Delete Account
+              {t('btn_delete')} Account
             </Button>
           </div>
         </div>
