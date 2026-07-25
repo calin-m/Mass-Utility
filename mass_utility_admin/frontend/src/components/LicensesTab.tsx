@@ -20,6 +20,8 @@ export interface UserAccount {
   id: number;
   email: string;
   company_name: string | null;
+  company_id?: number | null;
+  role?: string | null;
   status: string;
   created_at: string;
 }
