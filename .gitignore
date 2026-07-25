@@ -58,9 +58,6 @@ test_concat.*
 **/logs/*.log
 **/bin/phpstan.phar
 
-# Node Dependencies & Package Caches
-**/node_modules/
-
 # Python Compile Caches & System Clutter
 __pycache__/
 *.pyc
