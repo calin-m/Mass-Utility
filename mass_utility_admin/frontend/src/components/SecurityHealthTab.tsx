@@ -69,12 +69,35 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
     }
   };
 
+  const enableSslRedirect = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(getApiUrl('api_enable_ssl_redirect'));
+      const data = await res.json();
+      if (data.success) {
+        if (showAlert) showAlert('🔒 HTTPS 301 Redirect rule applied to root .htaccess!', 'success');
+        runDiagnostics();
+      } else {
+        if (showAlert) showAlert('Failed to enforce SSL redirect: ' + (data.error || 'Unknown error'), 'error');
+      }
+    } catch (e: any) {
+      if (showAlert) showAlert('Error enforcing SSL redirect: ' + e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const headers = diagnostics?.headers || { hsts: false, nosniff: false, frame_options: false, referrer_policy: false, ssl_redirect: false };
+
   const hasIssues = diagnostics && (
     diagnostics.admin_git_exposed || 
     diagnostics.dashboard_git_exposed || 
     diagnostics.dashboard_db_exposed || 
     !diagnostics.admin_ssl_active || 
-    !diagnostics.dashboard_ssl_active
+    !diagnostics.dashboard_ssl_active ||
+    !headers.hsts ||
+    !headers.nosniff ||
+    !headers.frame_options
   );
 
   return (
@@ -202,6 +225,14 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
                   title="Repair folder permissions to 0755 and file permissions to 0644"
                 >
                   <FolderLock className="w-4 h-4 text-amber-400" /> Repair Permissions
+                </button>
+                <button 
+                  onClick={enableSslRedirect}
+                  disabled={loading}
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-emerald-400"
+                  title="Inject 301 HTTPS Redirect rule into SaaS server root .htaccess"
+                >
+                  <Lock className="w-4 h-4 text-emerald-400" /> Enforce HTTPS Redirect
                 </button>
               </>
             )}

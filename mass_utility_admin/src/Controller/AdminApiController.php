@@ -372,6 +372,16 @@ class AdminApiController
         $adminSslActive = ($scheme === 'https');
         $dashboardSslActive = ($scheme === 'https');
 
+        $rootDir = dirname(dirname(dirname(__DIR__)));
+        $htaccessPath = $rootDir . '/.htaccess';
+        $htaccessContent = file_exists($htaccessPath) ? (file_get_contents($htaccessPath) ?: '') : '';
+        
+        $hstsActive = (bool)preg_match('/Strict-Transport-Security/i', $htaccessContent);
+        $nosniffActive = (bool)preg_match('/X-Content-Type-Options/i', $htaccessContent);
+        $frameOptionsActive = (bool)preg_match('/X-Frame-Options/i', $htaccessContent);
+        $referrerPolicyActive = (bool)preg_match('/Referrer-Policy/i', $htaccessContent);
+        $sslRedirectActive = (bool)preg_match('/RewriteCond\s*%\{HTTPS\}\s*off/i', $htaccessContent);
+
         $getOctalPerms = function(string $path, string $recommended = ''): string {
             if (!file_exists($path)) return 'N/A';
             clearstatcache(true, $path);
@@ -386,6 +396,13 @@ class AdminApiController
         echo json_encode([
             'success' => true,
             'diagnostics' => [
+                'headers' => [
+                    'hsts' => $hstsActive,
+                    'nosniff' => $nosniffActive,
+                    'frame_options' => $frameOptionsActive,
+                    'referrer_policy' => $referrerPolicyActive,
+                    'ssl_redirect' => $sslRedirectActive
+                ],
                 'admin_git_exposed' => $adminGitExposed,
                 'admin_writeable' => $adminWriteable,
                 'admin_ssl_active' => $adminSslActive,
@@ -538,5 +555,25 @@ class AdminApiController
         }
 
         echo json_encode(['success' => true, 'message' => 'Security headers applied to root .htaccess successfully!']);
+    }
+
+    private function enable_ssl_redirect(): void
+    {
+        $rootDir = dirname(dirname(dirname(__DIR__)));
+        $htaccessPath = $rootDir . '/.htaccess';
+
+        $redirectBlock = "\n# Mass Utility HTTPS Enforcer\n" .
+            "<IfModule mod_rewrite.c>\n" .
+            "    RewriteEngine On\n" .
+            "    RewriteCond %{HTTPS} off\n" .
+            "    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n" .
+            "</IfModule>\n";
+
+        $existing = file_exists($htaccessPath) ? (file_get_contents($htaccessPath) ?: '') : '';
+        if (strpos($existing, 'RewriteCond %{HTTPS} off') === false) {
+            @file_put_contents($htaccessPath, $redirectBlock . $existing);
+        }
+
+        echo json_encode(['success' => true, 'message' => 'HTTPS 301 redirect rule injected into root .htaccess successfully!']);
     }
 }
