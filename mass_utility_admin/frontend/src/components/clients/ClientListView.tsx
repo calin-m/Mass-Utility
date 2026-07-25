@@ -19,6 +19,17 @@ interface ClientListViewProps {
 export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, onRefresh, showAlert, onSelectClient }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+      showAlert('🔄 Client accounts reloaded!', 'success');
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
 
   // Create Client Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -295,11 +306,12 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         action={
           <button
             type="button"
-            onClick={onRefresh}
+            onClick={handleRefresh}
+            disabled={isRefreshing}
             className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
             title="Refresh Client Accounts List"
           >
-            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} /> Refresh
           </button>
         }
       />

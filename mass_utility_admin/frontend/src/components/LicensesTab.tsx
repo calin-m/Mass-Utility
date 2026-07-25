@@ -38,6 +38,18 @@ interface LicensesTabProps {
 }
 
 export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], onRefresh, showAlert }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+      showAlert('🔄 License registry reloaded!', 'success');
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
+
   // License Key Generation State
   const [genUserId, setGenUserId] = useState<number>(0);
   const [genTier, setGenTier] = useState('basic');
@@ -275,6 +287,17 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
           title={`Active License Registry & Subscriptions (${licenses.length})`}
           subtitle="Complete audit ledger of active, suspended, and standalone license keys."
           icon={KeyRound}
+          action={
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Refresh License Registry"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} /> Refresh
+            </button>
+          }
         />
         <div className="overflow-x-auto rounded-lg border border-pm-border">
           <table className="w-full text-left text-xs">
@@ -287,6 +310,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                 <th className="p-3">Bound Store Domain</th>
                 <th className="p-3">Tier</th>
                 <th className="p-3">Status</th>
+                <th className="p-3">Expires At</th>
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>

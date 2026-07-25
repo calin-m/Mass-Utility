@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PackageCheck, Save } from 'lucide-react';
+import { PackageCheck, Save, RefreshCw } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 
 export interface PackageTier {
@@ -83,6 +83,17 @@ const getDefaultCapsForTier = (tierName: string) => {
 export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefresh, showAlert }) => {
   const [selectedTier, setSelectedTier] = useState<string>('basic');
   const [saving, setSaving] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+      showAlert('🔄 Feature capability matrix reloaded!', 'success');
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
 
   const getTierCaps = (tierName: string) => {
     const found = tiers.find(t => t.name.toLowerCase() === tierName.toLowerCase());
@@ -133,6 +144,17 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           title="Feature Capability Matrix Editor"
           subtitle="Configure feature access tiers and license capabilities."
           icon={PackageCheck}
+          action={
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Refresh Capability Matrix"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} /> Refresh
+            </button>
+          }
         />
 
         <div className="flex gap-3 mb-6">
