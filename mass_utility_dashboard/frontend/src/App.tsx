@@ -132,7 +132,7 @@ function AppContent() {
       const config = (window as any).PM_CONFIG || {};
       const basePath = config.basePath || '';
       const cleanBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-      window.location.href = `${cleanBase}/index.php?action=logout`;
+      window.location.href = `${cleanBase}/?action=logout`;
     }, 'primary');
   };
 
