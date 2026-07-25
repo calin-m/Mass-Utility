@@ -20,6 +20,21 @@ class AdminSettingsManager
         if (file_exists($this->dbPath)) {
             @chmod($this->dbPath, 0644);
         }
+
+        if (is_dir($dbDir) && !is_writable($dbDir)) {
+            @chmod($dbDir, 0775);
+            if (!is_writable($dbDir)) {
+                throw new \RuntimeException("Database directory ('mass_utility_dashboard/data') is not writable by web server user.");
+            }
+        }
+
+        if (file_exists($this->dbPath) && !is_writable($this->dbPath)) {
+            @chmod($this->dbPath, 0664);
+            if (!is_writable($this->dbPath)) {
+                throw new \RuntimeException("Database file ('pm_cloud_backups.db') is not writable.");
+            }
+        }
+
         $pdo = new \PDO('sqlite:' . $this->dbPath);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(\PDO::ATTR_TIMEOUT, 5);
@@ -116,8 +131,11 @@ class AdminSettingsManager
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO pm_admins (username, password_hash) VALUES (?, ?)");
             return $stmt->execute([$username, $hash]);
-        } catch (\Exception $e) {
-            return false;
+        } catch (\Throwable $e) {
+            if (strpos($e->getMessage(), 'UNIQUE constraint') !== false) {
+                throw new \RuntimeException("Admin username '{$username}' is already registered. Please log in or choose a different username.");
+            }
+            throw new \RuntimeException("Failed to initialize admin credentials: " . $e->getMessage());
         }
     }
 }

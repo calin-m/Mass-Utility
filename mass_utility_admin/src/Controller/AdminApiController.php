@@ -71,9 +71,9 @@ class AdminApiController
                 $this->auth->login($username, $password);
                 echo json_encode(['success' => true]);
             } else {
-                echo json_encode(['success' => false, 'error' => 'Failed to initialize admin credentials.']);
+                echo json_encode(['success' => false, 'error' => 'Failed to initialize admin credentials. Database write operation failed.']);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
