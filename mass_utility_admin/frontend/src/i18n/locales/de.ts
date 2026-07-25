@@ -313,6 +313,7 @@ const de: TranslationSchema = {
   modal_inspect_payload: 'Audit-Ereignis-Telemetrie',
   modal_raw_json_show: 'Roh-JSON-Payload-Daten Prüfen',
   modal_raw_json_hide: 'Roh-JSON-Payload-Daten Verbergen',
+  err_invalid_email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein (z. B. benutzer@domain.com)',
 };
 
 export default de;

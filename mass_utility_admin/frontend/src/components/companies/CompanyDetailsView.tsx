@@ -22,7 +22,21 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [submitting, setSubmitting] = useState(false);
   const [copiedVat, setCopiedVat] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
   const [poolTier, setPoolTier] = useState('pro');
+
+  const toggleKeyVisibility = (id: number) => {
+    setVisibleKeys(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const maskKey = (key: string) => {
+    if (!key || key.length < 10) return '••••-••••-••••-••••';
+    const parts = key.split('-');
+    if (parts.length >= 4) {
+      return `${parts[0]}-••••-••••-${parts[parts.length - 1]}`;
+    }
+    return key.substring(0, 4) + '••••••••••••' + key.substring(key.length - 4);
+  };
 
   // Edit Form State
   const [editName, setEditName] = useState(company.company_name);
@@ -590,11 +604,19 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                       <div key={l.id} className="p-3.5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
                         <div className="space-y-1">
                           <div className="font-mono text-amber-400 font-bold flex items-center gap-2 text-sm">
-                            <span>{l.license_key}</span>
+                            <span>{visibleKeys[l.id] ? l.license_key : maskKey(l.license_key)}</span>
+                            <button
+                              type="button"
+                              onClick={() => toggleKeyVisibility(l.id)}
+                              className="text-pm-secondary hover:text-pm-primary transition p-1 rounded hover:bg-pm-input"
+                              title={visibleKeys[l.id] ? t('modal_raw_json_hide') : t('modal_raw_json_show')}
+                            >
+                              {visibleKeys[l.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
                             <button
                               type="button"
                               onClick={() => copyLicenseKey(l.license_key)}
-                              className="text-pm-secondary hover:text-pm-primary transition p-1"
+                              className="text-pm-secondary hover:text-pm-primary transition p-1 rounded hover:bg-pm-input"
                               title="Copy License Key"
                             >
                               {copiedKey === l.license_key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}

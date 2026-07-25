@@ -313,6 +313,7 @@ const ro: TranslationSchema = {
   modal_inspect_payload: 'Telemetrie Eveniment Audit',
   modal_raw_json_show: 'Inspectează Datele Raw JSON Payload',
   modal_raw_json_hide: 'Ascunde Datele Raw JSON Payload',
+  err_invalid_email: 'Vă rugăm să introduceți o adresă de email validă (ex: utilizator@domeniu.com)',
 };
 
 export default ro;

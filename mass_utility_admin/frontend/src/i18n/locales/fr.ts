@@ -313,6 +313,7 @@ const fr: TranslationSchema = {
   modal_inspect_payload: 'Télémétrie d’Événement d’Audit',
   modal_raw_json_show: 'Inspecter les Données JSON Brut',
   modal_raw_json_hide: 'Masquer les Données JSON Brut',
+  err_invalid_email: 'Veuillez saisir une adresse e-mail valide (ex: utilisateur@domaine.com)',
 };
 
 export default fr;

@@ -311,6 +311,7 @@ const en = {
   modal_inspect_payload: 'Audit Event Telemetry',
   modal_raw_json_show: 'Inspect Raw JSON Payload Data',
   modal_raw_json_hide: 'Hide Raw JSON Payload Data',
+  err_invalid_email: 'Please enter a valid email address (e.g. user@domain.com)',
 };
 
 export type TranslationSchema = typeof en;

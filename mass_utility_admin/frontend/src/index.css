@@ -122,8 +122,7 @@ html:not(.dark) .shadow-sm {
   font-weight: 600;
 }
 .pm-btn-primary:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  opacity: 0.95;
 }
 
 .pm-btn-neutral {
