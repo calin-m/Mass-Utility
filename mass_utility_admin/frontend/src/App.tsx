@@ -144,7 +144,7 @@ export const App: React.FC = () => {
             title="Toggle Light / Dark Theme"
           >
             {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
-            <span>{darkMode ? '☀️ Light' : '🌙 Dark'}</span>
+            <span>{darkMode ? 'Light' : 'Dark'}</span>
           </button>
 
           <button

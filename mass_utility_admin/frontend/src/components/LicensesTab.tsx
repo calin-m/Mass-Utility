@@ -29,23 +29,6 @@ interface LicensesTabProps {
 }
 
 export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], onRefresh, showAlert }) => {
-  // Account Form State (Bound to localStorage draft persistence)
-  const [email, setEmailState] = useState(() => localStorage.getItem('pm_draft_client_email') || '');
-  const [password, setPassword] = useState('');
-  const [company, setCompanyState] = useState(() => localStorage.getItem('pm_draft_client_company') || '');
-  const [showAccountPassword, setShowAccountPassword] = useState(false);
-  const [creatingAccount, setCreatingAccount] = useState(false);
-
-  const setEmail = (val: string) => {
-    setEmailState(val);
-    try { localStorage.setItem('pm_draft_client_email', val); } catch (e) {}
-  };
-
-  const setCompany = (val: string) => {
-    setCompanyState(val);
-    try { localStorage.setItem('pm_draft_client_company', val); } catch (e) {}
-  };
-
   // License Key Generation State
   const [genUserId, setGenUserId] = useState<number>(0);
   const [genTier, setGenTier] = useState('basic');
@@ -72,38 +55,6 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
   const copyKey = (key: string) => {
     navigator.clipboard.writeText(key);
     showAlert('📋 License key copied to clipboard!', 'success');
-  };
-
-  const handleCreateAccount = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) return;
-    setCreatingAccount(true);
-    try {
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('password', password);
-      formData.append('company_name', company);
-
-      const res = await fetch('index.php?action=api_create_user', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.success) {
-        showAlert('✅ Standalone Client Account created successfully!', 'success');
-        setEmail('');
-        setPassword('');
-        setCompany('');
-        try {
-          localStorage.removeItem('pm_draft_client_email');
-          localStorage.removeItem('pm_draft_client_company');
-        } catch (e) {}
-        onRefresh();
-      } else {
-        showAlert('❌ Error: ' + (data.error || 'Failed to create user'), 'error');
-      }
-    } catch (err: any) {
-      showAlert('❌ Request failed: ' + err.message, 'error');
-    } finally {
-      setCreatingAccount(false);
-    }
   };
 
   const handleGenerateKey = async (e: React.FormEvent) => {
@@ -215,15 +166,6 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     }
   };
 
-  const generateRandomPassword = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+=-';
-    let pass = '';
-    for (let i = 0; i < 16; i++) {
-      pass += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setPassword(pass);
-  };
-
   const maskKey = (key: string) => {
     if (!key || key.length < 8) return '****';
     return key.substring(0, 4) + ' - **** - **** - ' + key.substring(key.length - 4);
@@ -233,70 +175,39 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     <div className="space-y-6">
       {/* 2-Column Form Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Create Client Card */}
-        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
-          <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2">
-            <PlusCircle className="w-4 h-4 text-pm-primary" /> Create Standalone Client Account
-          </h3>
-          <form onSubmit={handleCreateAccount} className="mt-4 space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Client Email</label>
-              <input
-                type="email"
-                required
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                placeholder="merchant@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-              />
+        {/* Subscription Inventory Overview */}
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation flex flex-col justify-between">
+          <div>
+            <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-pm-primary" /> Active Subscriptions Inventory
+            </h3>
+            <p className="text-xs text-pm-secondary mt-2">
+              Real-time breakdown of store license keys, package tier allocations, and unassigned standalone keys.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 my-4">
+            <div className="p-3 bg-pm-input border border-pm-border rounded-lg text-center">
+              <div className="text-[0.65rem] font-bold uppercase text-pm-secondary">Total Keys</div>
+              <div className="text-xl font-black text-pm-text mt-1">{licenses.length}</div>
             </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Password</label>
-              <div className="flex gap-2">
-                <input
-                  type={showAccountPassword ? 'text' : 'password'}
-                  required
-                  placeholder="Min 8 chars or click ⚡ Auto"
-                  className="flex-1 bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none min-w-0"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowAccountPassword(!showAccountPassword)}
-                  className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center transition shrink-0"
-                  title={showAccountPassword ? "Hide Password" : "Show Password"}
-                >
-                  {showAccountPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-                <button
-                  type="button"
-                  onClick={generateRandomPassword}
-                  className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1 shrink-0"
-                  title="Generate Random Password"
-                >
-                  ⚡ Auto
-                </button>
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
+              <div className="text-[0.65rem] font-bold uppercase text-emerald-500">Active Keys</div>
+              <div className="text-xl font-black text-emerald-500 mt-1">
+                {licenses.filter(l => l.status === 'active').length}
               </div>
             </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company / Store Name</label>
-              <input
-                type="text"
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                placeholder="Optional Store Name"
-                value={company}
-                onChange={e => setCompany(e.target.value)}
-              />
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
+              <div className="text-[0.65rem] font-bold uppercase text-amber-500">Unassigned</div>
+              <div className="text-xl font-black text-amber-500 mt-1">
+                {licenses.filter(l => !l.user_id).length}
+              </div>
             </div>
-            <button
-              type="submit"
-              disabled={creatingAccount}
-              className="w-full pm-btn-primary py-2.5 rounded-lg text-xs font-bold uppercase transition"
-            >
-              {creatingAccount ? 'Creating Account...' : '✨ Create Client Account'}
-            </button>
-          </form>
+          </div>
+
+          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-[0.72rem] text-purple-300">
+            💡 <strong>Need a new client profile?</strong> Create and manage standalone client credentials under the <strong>👥 Clients Directory</strong> tab.
+          </div>
         </div>
 
         {/* Generate License Key Card */}

@@ -30,6 +30,7 @@ class AdminSettingsManager
 
         if (is_dir($dbDir) && !is_writable($dbDir)) {
             @chmod($dbDir, 0775);
+            @clearstatcache(true, $dbDir);
             if (!is_writable($dbDir)) {
                 throw new \RuntimeException("Database directory ('mass_utility_admin/data') is not writable by web server user.");
             }
@@ -37,6 +38,7 @@ class AdminSettingsManager
 
         if (file_exists($this->dbPath) && !is_writable($this->dbPath)) {
             @chmod($this->dbPath, 0664);
+            @clearstatcache(true, $this->dbPath);
             if (!is_writable($this->dbPath)) {
                 throw new \RuntimeException("Database file ('pm_admin.db') is not writable.");
             }
