@@ -15,6 +15,15 @@ const en = {
   theme_dark: 'Dark',
   theme_toggle_title: 'Toggle Light / Dark Theme',
 
+  // Login View
+  login_title: 'Super Admin Access Gate',
+  login_subtitle: 'Authenticate with administrative master credentials to manage SaaS license keys and B2B directories.',
+  login_username_label: 'Username',
+  login_username_placeholder: 'Enter admin username',
+  login_password_label: 'Password',
+  login_password_placeholder: 'Enter admin password',
+  login_btn: 'Sign In to Super Admin Portal',
+
   // Buttons & Actions
   btn_save: 'Save Changes',
   btn_cancel: 'Cancel',
@@ -42,6 +51,7 @@ const en = {
   btn_back: 'Back to Directory',
   btn_inspect_company: 'Inspect Company',
   btn_inspect_client: 'Inspect Client',
+  btn_add_team_member: 'Add Team Member',
 
   // Sub-Tab Navigation
   subtab_overview: 'Overview & Licenses',
@@ -67,6 +77,7 @@ const en = {
   stat_license_mutations: 'License Mutations',
   stat_account_actions: 'Account Actions',
   stat_security_events: 'Security Events',
+  stat_joined_date: 'Joined Date',
 
   // Titles & Subtitles
   companies_title: 'Companies Directory',
@@ -83,6 +94,85 @@ const en = {
   tiers_subtitle: 'Configure feature unlock flags, module quotas, and capability matrices across Basic, Pro, and Enterprise tiers.',
   security_title: 'Portal System Status',
   security_subtitle: 'System health, security diagnostics, and permission integrity checks.',
+
+  // Company Details View
+  cd_team_accounts_title: 'Linked Employee Accounts',
+  cd_team_accounts_sub: 'Manage employee user accounts associated with this organization.',
+  cd_licenses_title: 'Company License Pool',
+  cd_licenses_sub: 'Active module licenses allocated to this B2B company profile.',
+  cd_no_members: 'No team member accounts linked to this company profile yet.',
+  cd_no_licenses: 'No license keys allocated to this company pool yet.',
+  cd_individual: 'Individual / Unassigned Users',
+  cd_unspecified: 'Unspecified',
+
+  // Client Details View
+  client_assigned_lic_title: 'Assigned PrestaShop Module Licenses',
+  client_issue_key_title: 'Issue New License Key',
+  client_no_licenses: 'No active module software licenses assigned to this client account yet.',
+  client_individual_client: 'Individual Client',
+  client_none: 'None',
+  client_creds_banner_title: 'Newly Provisioned Client Credentials for',
+
+  // License Tab Info
+  lic_inventory_tip: 'Need a new client profile? Manage client credentials under 👥 Clients Directory.',
+  lic_standalone: 'Unassigned Standalone',
+  lic_unbound: 'Unbound',
+  lic_no_matching: 'No license keys found matching the active filter view.',
+  lic_option_unassigned: '-- Unassigned License (Standalone Key) --',
+
+  // Package Tiers Categories & Descriptions
+  tier_cat_usability: 'Usability Features',
+  tier_cat_convenience: 'Convenience Features',
+  tier_db_tools_name: 'Database Tools Access',
+  tier_db_tools_desc: 'Unlocks AST SQL execution and Database Diff tools',
+  tier_file_tools_name: 'File Tools Access',
+  tier_file_tools_desc: 'Unlocks filesystem browser, code diffing, and editing',
+  tier_ghost_purger_name: 'Ghost Table Purger',
+  tier_ghost_purger_desc: 'Allows purging unindexed tables and unlinked data',
+  tier_gdpr_sweeper_name: 'GDPR & Compliance Sweeper',
+  tier_gdpr_sweeper_desc: 'Unlocks privacy scanning and customer anonymization',
+  tier_visual_query_name: 'Visual Query Wizard',
+  tier_visual_query_desc: 'Unlocks no-code visual query builder interface',
+  tier_backup_auto_name: 'Automated Cron Backups',
+  tier_backup_auto_desc: 'Enables scheduled background backups and retention',
+  tier_autopilot_name: 'CloudLinux Autopilot',
+  tier_autopilot_desc: 'Enables automatic LVE throttle prevention',
+
+  // System Status Diagnostics
+  diag_api_guard_name: 'API Security Guard',
+  diag_api_guard_desc: 'Request Validation',
+  diag_lic_gate_name: 'License Verification Gate',
+  diag_lic_gate_desc: 'Signature Integrity',
+  diag_storage_name: 'System Storage',
+  diag_storage_desc: 'Read / Write Perms',
+  diag_gateway_name: 'Licensing Gateway Engine',
+  diag_gateway_desc: 'PHP 8.x PDO / cURL',
+  diag_headers_title: 'HTTP Security Headers',
+  diag_headers_desc: 'Verify CORS, CSP, HSTS, and X-Frame Security Headers',
+  diag_headers_btn: 'Run Diagnostics',
+  diag_perms_title: 'Directory Permissions',
+  diag_perms_desc: 'Check 0755 / 0644 filesystem mode compliance',
+  diag_perms_btn: 'Audit Permissions',
+  diag_ssl_title: 'SSL / TLS Certificate',
+  diag_ssl_desc: 'Check HTTPS SSL handshake and encryption cipher suite',
+  diag_ssl_btn: 'Verify SSL',
+  diag_audit_title: 'Security Event Audit',
+  diag_audit_desc: 'Review admin login attempts and rate limit telemetry',
+  diag_audit_btn: 'Inspect Audit',
+  status_healthy: 'HEALTHY',
+  status_active: 'ACTIVE',
+  status_optimal: 'OPTIMAL',
+
+  // Audit Logs Strings
+  audit_search_placeholder: 'Search logs by admin username, target ID, or payload details...',
+  audit_all_types: 'All Action Types',
+  audit_loading: 'Loading security audit telemetry log stream...',
+  audit_no_logs: 'No security audit logs found matching the active filters.',
+  audit_struct_params: 'Structured Mutation Parameters',
+  audit_no_params: 'No additional structured parameters associated with this operation payload.',
+  val_enabled: 'Enabled',
+  val_disabled: 'Disabled',
+  val_unset: 'Not Specified / Unset',
 
   // Settings Tab
   settings_password_title: 'Change Admin Password',
@@ -148,6 +238,8 @@ const en = {
   field_bound_url: 'Pre-Bound Store URL (Optional)',
   field_add_duration: 'Add Duration Months',
   field_custom_expiry: 'Or Set Exact Custom Expiration Date',
+  field_full_name: 'Full Name',
+  field_account_role: 'Account Role',
 
   // Modals & Confirmation Alerts
   modal_create_company: 'Register New B2B Company',

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Lock, User, KeyRound, AlertCircle } from 'lucide-react';
+import { useTranslation } from '../i18n/LanguageContext';
 
 interface LoginViewProps {
   onLoginSuccess: () => void;
 }
 
 export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,9 +47,9 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <Lock className="w-6 h-6" />
           </div>
           <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-indigo-500 bg-clip-text text-transparent">
-            Super Admin Portal Login
+            {t('login_title')}
           </h2>
-          <p className="text-xs text-pm-secondary mt-1">Authenticate to access license & portal tools</p>
+          <p className="text-xs text-pm-secondary mt-1">{t('login_subtitle')}</p>
         </div>
 
         {error && (
@@ -59,7 +61,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Username</label>
+            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">{t('login_username_label')}</label>
             <div className="relative">
               <User className="w-4 h-4 text-pm-secondary absolute left-3 top-3" />
               <input
@@ -67,7 +69,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                 required
                 autoComplete="username"
                 className="w-full bg-pm-input border border-pm-border rounded-xl pl-9 pr-3 py-2.5 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                placeholder="Admin username"
+                placeholder={t('login_username_placeholder')}
                 value={username}
                 onChange={e => setUsername(e.target.value)}
               />
@@ -75,7 +77,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Password</label>
+            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">{t('login_password_label')}</label>
             <div className="relative">
               <KeyRound className="w-4 h-4 text-pm-secondary absolute left-3 top-3" />
               <input
@@ -83,7 +85,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                 required
                 autoComplete="current-password"
                 className="w-full bg-pm-input border border-pm-border rounded-xl pl-9 pr-3 py-2.5 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                placeholder="Enter password"
+                placeholder={t('login_password_placeholder')}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
               />
@@ -93,9 +95,9 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full pm-btn-primary py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-md mt-2"
+            className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-purple-500/20 disabled:opacity-50"
           >
-            {loading ? 'Authenticating...' : 'Access Super Admin Portal'}
+            {loading ? t('btn_refresh') : t('login_btn')}
           </button>
         </form>
       </div>

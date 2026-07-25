@@ -17,6 +17,15 @@ const de: TranslationSchema = {
   theme_dark: 'Dunkel',
   theme_toggle_title: 'Helles / Dunkles Design umschalten',
 
+  // Login View
+  login_title: 'Super-Admin Zugangstor',
+  login_subtitle: 'Authentifizieren Sie sich mit Zugangsdaten, um Lizenzschlüssel und B2B-Verzeichnisse zu verwalten.',
+  login_username_label: 'Benutzername',
+  login_username_placeholder: 'Admin-Benutzernamen eingeben',
+  login_password_label: 'Passwort',
+  login_password_placeholder: 'Admin-Passwort eingeben',
+  login_btn: 'Anmelden am Super-Admin Portal',
+
   // Buttons & Actions
   btn_save: 'Änderungen Speichern',
   btn_cancel: 'Abbrechen',
@@ -44,6 +53,7 @@ const de: TranslationSchema = {
   btn_back: 'Zurück zum Verzeichnis',
   btn_inspect_company: 'Firma Prüfen',
   btn_inspect_client: 'Kunde Prüfen',
+  btn_add_team_member: 'Teammitglied Hinzufügen',
 
   // Sub-Tab Navigation
   subtab_overview: 'Übersicht & Lizenzen',
@@ -69,6 +79,7 @@ const de: TranslationSchema = {
   stat_license_mutations: 'Lizenzänderungen',
   stat_account_actions: 'Kontoaktionen',
   stat_security_events: 'Sicherheitsereignisse',
+  stat_joined_date: 'Beitrittsdatum',
 
   // Titles & Subtitles
   companies_title: 'Firmenverzeichnis',
@@ -85,6 +96,85 @@ const de: TranslationSchema = {
   tiers_subtitle: 'Konfigurieren Sie Funktionsrechte und Modulquoten für Basic-, Pro- und Enterprise-Stufen.',
   security_title: 'Portal-Systemstatus',
   security_subtitle: 'Systemstatus, Sicherheitsdiagnose und Prüfung der Berechtigungsintegrität.',
+
+  // Company Details View
+  cd_team_accounts_title: 'Verknüpfte Mitarbeiterkonten',
+  cd_team_accounts_sub: 'Verwalten Sie Mitarbeiterkonten dieser Organisation.',
+  cd_licenses_title: 'Firmen-Lizenz-Pool',
+  cd_licenses_sub: 'Aktive Modullizenzen dieser B2B-Firma.',
+  cd_no_members: 'Noch keine Teammitglieder verknüpft.',
+  cd_no_licenses: 'Noch keine Lizenzen zugewiesen.',
+  cd_individual: 'Einzellbenutzer / Nicht zugewiesen',
+  cd_unspecified: 'Nicht angegeben',
+
+  // Client Details View
+  client_assigned_lic_title: 'Zugewiesene PrestaShop-Modullizenzen',
+  client_issue_key_title: 'Neuen Lizenzschlüssel Ausgeben',
+  client_no_licenses: 'Keine aktiven Modullizenzen zugewiesen.',
+  client_individual_client: 'Einzelkunde',
+  client_none: 'Keine',
+  client_creds_banner_title: 'Neu erstellte Zugangsdaten für',
+
+  // License Tab Info
+  lic_inventory_tip: 'Neues Kundenprofil erforderlich? Verwalten Sie Zugangsdaten unter 👥 Kundenverzeichnis.',
+  lic_standalone: 'Freistehend Nicht Zugewiesen',
+  lic_unbound: 'Ungebunden',
+  lic_no_matching: 'Keine Lizenzschlüssel gefunden.',
+  lic_option_unassigned: '-- Nicht zugewiesene Lizenz (Freistehend) --',
+
+  // Package Tiers Categories & Descriptions
+  tier_cat_usability: 'Nutzbarkeitsfunktionen',
+  tier_cat_convenience: 'Komfortfunktionen',
+  tier_db_tools_name: 'Datenbank-Tools Zugang',
+  tier_db_tools_desc: 'Schaltet AST-SQL-Ausführung und Database-Diff frei',
+  tier_file_tools_name: 'Datei-Tools Zugang',
+  tier_file_tools_desc: 'Schaltet Dateimanager und Code-Vergleich frei',
+  tier_ghost_purger_name: 'Geistertabellen-Bereiniger',
+  tier_ghost_purger_desc: 'Erlaubt das Bereinigen unindexierter Daten',
+  tier_gdpr_sweeper_name: 'DSGVO-Bereiniger',
+  tier_gdpr_sweeper_desc: 'Schaltet Datenschutz-Scan und Anonymisierung frei',
+  tier_visual_query_name: 'Visueller Abfrage-Assistent',
+  tier_visual_query_desc: 'Schaltet visuelle No-Code-Abfragen frei',
+  tier_backup_auto_name: 'Automatische Cron-Backups',
+  tier_backup_auto_desc: 'Aktiviert automatische Hintergrund-Sicherungen',
+  tier_autopilot_name: 'CloudLinux Autopilot',
+  tier_autopilot_desc: 'Aktiviert automatische LVE-Drosselungsschutze',
+
+  // System Status Diagnostics
+  diag_api_guard_name: 'API-Sicherheitswächter',
+  diag_api_guard_desc: 'Anfragevalidierung',
+  diag_lic_gate_name: 'Lizenzprüftor',
+  diag_lic_gate_desc: 'Signaturintegrität',
+  diag_storage_name: 'Systemspeicher',
+  diag_storage_desc: 'Lese- / Schreibrechte',
+  diag_gateway_name: 'Lizenz-Gateway-Engine',
+  diag_gateway_desc: 'PHP 8.x PDO / cURL',
+  diag_headers_title: 'HTTP-Sicherheits-Header',
+  diag_headers_desc: 'Prüft CORS, CSP, HSTS und X-Frame Sicherheits-Header',
+  diag_headers_btn: 'Diagnose Starten',
+  diag_perms_title: 'Verzeichnisrechte',
+  diag_perms_desc: 'Prüft Rechte 0755 / 0644 im Dateisystem',
+  diag_perms_btn: 'Rechte Prüfen',
+  diag_ssl_title: 'SSL / TLS Zertifikat',
+  diag_ssl_desc: 'Prüft HTTPS-SSL-Handshake und Verschlüsselung',
+  diag_ssl_btn: 'SSL Verifizieren',
+  diag_audit_title: 'Sicherheitsaudit',
+  diag_audit_desc: 'Überprüft Anmeldeversuche und Telemetrie',
+  diag_audit_btn: 'Audit Prüfen',
+  status_healthy: 'GESUND',
+  status_active: 'AKTIV',
+  status_optimal: 'OPTIMAL',
+
+  // Audit Logs Strings
+  audit_search_placeholder: 'Protokolle nach Benutzer, Ziel oder Details suchen...',
+  audit_all_types: 'Alle Aktionstypen',
+  audit_loading: 'Sicherheitsaudit-Daten werden geladen...',
+  audit_no_logs: 'Keine Sicherheitsprotokolle gefunden.',
+  audit_struct_params: 'Strukturierte Änderungsparameter',
+  audit_no_params: 'Keine zusätzlichen Parameter vorhanden.',
+  val_enabled: 'Aktiviert',
+  val_disabled: 'Deaktiviert',
+  val_unset: 'Nicht Gesetzt',
 
   // Settings Tab
   settings_password_title: 'Admin-Passwort Ändern',
@@ -150,6 +240,8 @@ const de: TranslationSchema = {
   field_bound_url: 'Vorgebundene Shop-URL (Optional)',
   field_add_duration: 'Monate Hinzufügen',
   field_custom_expiry: 'Oder Exaktes Ablaufdatum Festlegen',
+  field_full_name: 'Vollständiger Name',
+  field_account_role: 'Kontorolle',
 
   // Modals & Confirmation Alerts
   modal_create_company: 'Neues B2B-Unternehmen Registrieren',

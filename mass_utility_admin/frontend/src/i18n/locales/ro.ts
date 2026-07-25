@@ -17,6 +17,15 @@ const ro: TranslationSchema = {
   theme_dark: 'Întunecat',
   theme_toggle_title: 'Comută Tema Luminoasă / Întunecată',
 
+  // Login View
+  login_title: 'Poartă Acces Super Administrator',
+  login_subtitle: 'Autentificați-vă cu credențialele administrative principale pentru a gestiona cheile de licență și directoarele B2B.',
+  login_username_label: 'Nume Utilizator',
+  login_username_placeholder: 'Introduceți nume utilizator admin',
+  login_password_label: 'Parolă',
+  login_password_placeholder: 'Introduceți parola admin',
+  login_btn: 'Autentificare în Portal Super Admin',
+
   // Buttons & Actions
   btn_save: 'Salvează Modificările',
   btn_cancel: 'Anulează',
@@ -44,6 +53,7 @@ const ro: TranslationSchema = {
   btn_back: 'Înapoi la Director',
   btn_inspect_company: 'Inspectează Compania',
   btn_inspect_client: 'Inspectează Clientul',
+  btn_add_team_member: 'Adaugă Membru Echipă',
 
   // Sub-Tab Navigation
   subtab_overview: 'General & Licențe',
@@ -69,6 +79,7 @@ const ro: TranslationSchema = {
   stat_license_mutations: 'Modificări Licențe',
   stat_account_actions: 'Acțiuni Cont',
   stat_security_events: 'Evenimente Securitate',
+  stat_joined_date: 'Data Înregistrării',
 
   // Titles & Subtitles
   companies_title: 'Director Companii',
@@ -85,6 +96,85 @@ const ro: TranslationSchema = {
   tiers_subtitle: 'Configurează permisiunile funcționalităților, cotele de module și matricea de capabilități pentru pachetele Basic, Pro și Enterprise.',
   security_title: 'Stare Sistem Portal',
   security_subtitle: 'Diagnostice de securitate, starea sistemului și verificarea integrității permisiunilor.',
+
+  // Company Details View
+  cd_team_accounts_title: 'Conturi Angajați Vinculați',
+  cd_team_accounts_sub: 'Gestionează conturile de utilizatori angajați asociate acestei organizații.',
+  cd_licenses_title: 'Fond Licențe Companie',
+  cd_licenses_sub: 'Licențe de modul active alocate acestui profil de companie B2B.',
+  cd_no_members: 'Nu există încă niciun membru în echipa vinculat acestui profil.',
+  cd_no_licenses: 'Nu există încă nicio cheie de licență alocată acestui fond.',
+  cd_individual: 'Utilizatori Individuali / Neasignați',
+  cd_unspecified: 'Nespecificat',
+
+  // Client Details View
+  client_assigned_lic_title: 'Licențe Module PrestaShop Alocate',
+  client_issue_key_title: 'Emite Cheie de Licență Nouă',
+  client_no_licenses: 'Nu există nicio licență de modul activă alocată acestui cont client.',
+  client_individual_client: 'Client Individual',
+  client_none: 'Niciunul',
+  client_creds_banner_title: 'Credențiale Client Nou Generate pentru',
+
+  // License Tab Info
+  lic_inventory_tip: 'Aveți nevoie de un profil nou de client? Gestionați credențialele în 👥 Director Clienți.',
+  lic_standalone: 'De sine stătătoare Neasignată',
+  lic_unbound: 'Nevinculat',
+  lic_no_matching: 'Nu s-au găsit chei de licență care să se potrivească filtrului activ.',
+  lic_option_unassigned: '-- Licență Neasignată (Cheie de sine stătătoare) --',
+
+  // Package Tiers Categories & Descriptions
+  tier_cat_usability: 'Funcționalități de Utilizabilitate',
+  tier_cat_convenience: 'Funcționalități de Comoditate',
+  tier_db_tools_name: 'Acces Unelte Bază de Date',
+  tier_db_tools_desc: 'Deblochează executarea SQL AST și uneltele Database Diff',
+  tier_file_tools_name: 'Acces Unelte Fișiere',
+  tier_file_tools_desc: 'Deblochează managerul de fișiere, compararea codului și editarea',
+  tier_ghost_purger_name: 'Curățare Tabele Fantomă',
+  tier_ghost_purger_desc: 'Permite curățarea tabelelor neindexate și a datelor nevinculate',
+  tier_gdpr_sweeper_name: 'Curățare GDPR & Conformitate',
+  tier_gdpr_sweeper_desc: 'Deblochează scanarea confidențialității și anonimizarea clienților',
+  tier_visual_query_name: 'Asistent Vizual Interogări',
+  tier_visual_query_desc: 'Deblochează interfața no-code de construire vizuală a interogărilor',
+  tier_backup_auto_name: 'Backup-uri Automate Cron',
+  tier_backup_auto_desc: 'Activează backup-urile programate în fundal și retenția',
+  tier_autopilot_name: 'Autopilot CloudLinux',
+  tier_autopilot_desc: 'Activează prevenirea automată a limitării resurselor LVE',
+
+  // System Status Diagnostics
+  diag_api_guard_name: 'Protecție Securitate API',
+  diag_api_guard_desc: 'Validare Solicitări',
+  diag_lic_gate_name: 'Poartă Verificare Licență',
+  diag_lic_gate_desc: 'Integritate Semnătură',
+  diag_storage_name: 'Stocare Sistem',
+  diag_storage_desc: 'Permisiuni Citire / Scriere',
+  diag_gateway_name: 'Motor Poartă Licențiere',
+  diag_gateway_desc: 'PHP 8.x PDO / cURL',
+  diag_headers_title: 'Antete de Securitate HTTP',
+  diag_headers_desc: 'Verifică antetele de securitate CORS, CSP, HSTS și X-Frame',
+  diag_headers_btn: 'Rulează Diagnosticul',
+  diag_perms_title: 'Permisiuni Directoare',
+  diag_perms_desc: 'Verifică conformitatea permisiunilor 0755 / 0644 în sistemul de fișiere',
+  diag_perms_btn: 'Auditează Permisiunile',
+  diag_ssl_title: 'Certificat SSL / TLS',
+  diag_ssl_desc: 'Verifică conexiunea HTTPS SSL și suita de criptare',
+  diag_ssl_btn: 'Verifică SSL',
+  diag_audit_title: 'Audit Evenimente de Securitate',
+  diag_audit_desc: 'Revizuiește încercările de autentificare și telemetria de limitare',
+  diag_audit_btn: 'Inspectează Auditul',
+  status_healthy: 'SĂNĂTOS',
+  status_active: 'ACTIV',
+  status_optimal: 'OPTIM',
+
+  // Audit Logs Strings
+  audit_search_placeholder: 'Căutați loguri după utilizator admin, ID țintă sau detalii payload...',
+  audit_all_types: 'Toate Tipurile de Acțiuni',
+  audit_loading: 'Se încarcă fluxul de date al auditului de securitate...',
+  audit_no_logs: 'Nu s-au găsit loguri de audit care să se potrivească filtrelor active.',
+  audit_struct_params: 'Parametri de Modificare Structurați',
+  audit_no_params: 'Nu există alți parametri structurați asociați acestei operațiuni.',
+  val_enabled: 'Activat',
+  val_disabled: 'Dezactivat',
+  val_unset: 'Nespecificat / Nerealizat',
 
   // Settings Tab
   settings_password_title: 'Schimbare Parolă Administrator',
@@ -150,6 +240,8 @@ const ro: TranslationSchema = {
   field_bound_url: 'URL Magazin Pre-Vinculat (Opțional)',
   field_add_duration: 'Adaugă Luni Durată',
   field_custom_expiry: 'Sau Setează Data Exactă de Expirare',
+  field_full_name: 'Nume Complet',
+  field_account_role: 'Rol Cont',
 
   // Modals & Confirmation Alerts
   modal_create_company: 'Înregistrează Companie B2B Nouă',

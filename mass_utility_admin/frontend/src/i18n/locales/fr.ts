@@ -17,6 +17,15 @@ const fr: TranslationSchema = {
   theme_dark: 'Sombre',
   theme_toggle_title: 'Basculer le Thème Clair / Sombre',
 
+  // Login View
+  login_title: 'Portail d’Accès Super Administrateur',
+  login_subtitle: 'Authentifiez-vous avec les identifiants d’administration pour gérer les licences et les annuaires.',
+  login_username_label: 'Nom d’utilisateur',
+  login_username_placeholder: 'Saisissez le nom d’utilisateur',
+  login_password_label: 'Mot de passe',
+  login_password_placeholder: 'Saisissez le mot de passe',
+  login_btn: 'Connexion au Portail Super Admin',
+
   // Buttons & Actions
   btn_save: 'Enregistrer les Modifications',
   btn_cancel: 'Annuler',
@@ -44,6 +53,7 @@ const fr: TranslationSchema = {
   btn_back: 'Retour à l’Annuaire',
   btn_inspect_company: 'Inspecter l’Entreprise',
   btn_inspect_client: 'Inspecter le Client',
+  btn_add_team_member: 'Ajouter un Membre d’Équipe',
 
   // Sub-Tab Navigation
   subtab_overview: 'Aperçu & Licences',
@@ -69,6 +79,7 @@ const fr: TranslationSchema = {
   stat_license_mutations: 'Mutations de Licence',
   stat_account_actions: 'Actions sur les Comptes',
   stat_security_events: 'Événements de Sécurité',
+  stat_joined_date: 'Date d’Inscription',
 
   // Titles & Subtitles
   companies_title: 'Annuaire des Entreprises',
@@ -85,6 +96,85 @@ const fr: TranslationSchema = {
   tiers_subtitle: 'Configurez les fonctionnalités et quotas pour les niveaux Basic, Pro et Enterprise.',
   security_title: 'État du Système du Portail',
   security_subtitle: 'Diagnostic de sécurité et vérification de l’intégrité des permissions.',
+
+  // Company Details View
+  cd_team_accounts_title: 'Comptes d’Employés Liés',
+  cd_team_accounts_sub: 'Gérez les comptes d’employés associés à cette organisation.',
+  cd_licenses_title: 'Pool de Licences d’Entreprise',
+  cd_licenses_sub: 'Licences de modules actives allouées à cette entreprise B2B.',
+  cd_no_members: 'Aucun membre d’équipe lié à cette entreprise pour le moment.',
+  cd_no_licenses: 'Aucune licence allouée à ce pool d’entreprise pour le moment.',
+  cd_individual: 'Utilisateurs Individuels / Non Assignés',
+  cd_unspecified: 'Non spécifié',
+
+  // Client Details View
+  client_assigned_lic_title: 'Licences de Modules PrestaShop Assignées',
+  client_issue_key_title: 'Émettre une Nouvelle Clé de Licence',
+  client_no_licenses: 'Aucune licence de module active assignée à ce client.',
+  client_individual_client: 'Client Individuel',
+  client_none: 'Aucun',
+  client_creds_banner_title: 'Identifiants client nouvellement générés pour',
+
+  // License Tab Info
+  lic_inventory_tip: 'Besoin d’un nouveau profil client ? Gérez les accès dans 👥 Annuaire des Clients.',
+  lic_standalone: 'Indépendante Non Assignée',
+  lic_unbound: 'Non liée',
+  lic_no_matching: 'Aucune clé de licence ne correspond au filtre actif.',
+  lic_option_unassigned: '-- Licence Non Assignée (Clé Indépendante) --',
+
+  // Package Tiers Categories & Descriptions
+  tier_cat_usability: 'Fonctionnalités d’Utilisabilité',
+  tier_cat_convenience: 'Fonctionnalités de Confort',
+  tier_db_tools_name: 'Accès aux Outils de Base de Données',
+  tier_db_tools_desc: 'Débloque l’exécution SQL AST et le comparateur de bases',
+  tier_file_tools_name: 'Accès aux Outils de Fichiers',
+  tier_file_tools_desc: 'Débloque l’explorateur de fichiers et la modification de code',
+  tier_ghost_purger_name: 'Nettoyeur de Tables Fantômes',
+  tier_ghost_purger_desc: 'Permet d’effacer les tables non indexées et données orphelines',
+  tier_gdpr_sweeper_name: 'Nettoyeur RGPD & Conformité',
+  tier_gdpr_sweeper_desc: 'Débloque l’analyse de confidentialité et l’anonymisation',
+  tier_visual_query_name: 'Assistant Visuel de Requêtes',
+  tier_visual_query_desc: 'Débloque l’interface sans code de création de requêtes',
+  tier_backup_auto_name: 'Sauvegardes Automatiques Cron',
+  tier_backup_auto_desc: 'Active les sauvegardes planifiées en arrière-plan',
+  tier_autopilot_name: 'Pilote Automatique CloudLinux',
+  tier_autopilot_desc: 'Active la prévention automatique du bridage LVE',
+
+  // System Status Diagnostics
+  diag_api_guard_name: 'Garde de Sécurité API',
+  diag_api_guard_desc: 'Validation des Requêtes',
+  diag_lic_gate_name: 'Porte de Vérification des Licences',
+  diag_lic_gate_desc: 'Integrité de la Signature',
+  diag_storage_name: 'Stockage Système',
+  diag_storage_desc: 'Permissions Lecture / Écriture',
+  diag_gateway_name: 'Moteur de Passerelle de Licence',
+  diag_gateway_desc: 'PHP 8.x PDO / cURL',
+  diag_headers_title: 'En-têtes de Sécurité HTTP',
+  diag_headers_desc: 'Vérifie les en-têtes CORS, CSP, HSTS et X-Frame',
+  diag_headers_btn: 'Lancer le Diagnostic',
+  diag_perms_title: 'Permissions des Dossiers',
+  diag_perms_desc: 'Vérifie la conformité des permissions 0755 / 0644',
+  diag_perms_btn: 'Auditer les Permissions',
+  diag_ssl_title: 'Certificat SSL / TLS',
+  diag_ssl_desc: 'Vérifie le protocole HTTPS SSL et le chiffrement',
+  diag_ssl_btn: 'Vérifier SSL',
+  diag_audit_title: 'Audit des Événements de Sécurité',
+  diag_audit_desc: 'Examine les tentatives de connexion et la télémétrie',
+  diag_audit_btn: 'Inspecter l’Audit',
+  status_healthy: 'SAIN',
+  status_active: 'ACTIF',
+  status_optimal: 'OPTIMAL',
+
+  // Audit Logs Strings
+  audit_search_placeholder: 'Rechercher par utilisateur, cible ou détails...',
+  audit_all_types: 'Tous les Types d’Actions',
+  audit_loading: 'Chargement des données d’audit de sécurité...',
+  audit_no_logs: 'Aucun journal de sécurité ne correspond aux filtres.',
+  audit_struct_params: 'Paramètres de Mutation Structurés',
+  audit_no_params: 'Aucun paramètre supplémentaire associé à cette opération.',
+  val_enabled: 'Activé',
+  val_disabled: 'Désactivé',
+  val_unset: 'Non Spécifié / Non Défini',
 
   // Settings Tab
   settings_password_title: 'Changer le Mot de Passe Administrateur',
@@ -150,6 +240,8 @@ const fr: TranslationSchema = {
   field_bound_url: 'URL de Boutique Pré-Liée (Optionnel)',
   field_add_duration: 'Ajouter des Mois de Durée',
   field_custom_expiry: 'Ou Définir la Date d’Expiration Exacte',
+  field_full_name: 'Nom Complet',
+  field_account_role: 'Rôle du Compte',
 
   // Modals & Confirmation Alerts
   modal_create_company: 'Enregistrer une Nouvelle Entreprise B2B',

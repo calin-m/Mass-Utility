@@ -190,12 +190,12 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           
           {/* Usability Section */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3">Usability Features</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3">{t('tier_cat_usability')}</h4>
             <div className="space-y-2">
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
-                  <span className="text-xs font-semibold text-pm-text block">Database Tools Access</span>
-                  <span className="text-[11px] text-pm-secondary">Unlocks AST SQL execution and Database Diff tools</span>
+                  <span className="text-xs font-semibold text-pm-text block">{t('tier_db_tools_name')}</span>
+                  <span className="text-[11px] text-pm-secondary">{t('tier_db_tools_desc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -207,8 +207,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
-                  <span className="text-xs font-semibold text-pm-text block">File Tools Access</span>
-                  <span className="text-[11px] text-pm-secondary">Unlocks filesystem browser, code diffing, and editing</span>
+                  <span className="text-xs font-semibold text-pm-text block">{t('tier_file_tools_name')}</span>
+                  <span className="text-[11px] text-pm-secondary">{t('tier_file_tools_desc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -220,8 +220,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
-                  <span className="text-xs font-semibold text-pm-text block">Ghost Table Purger</span>
-                  <span className="text-[11px] text-pm-secondary">Allows purging unindexed tables and unlinked data</span>
+                  <span className="text-xs font-semibold text-pm-text block">{t('tier_ghost_purger_name')}</span>
+                  <span className="text-[11px] text-pm-secondary">{t('tier_ghost_purger_desc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -233,8 +233,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
-                  <span className="text-xs font-semibold text-pm-text block">GDPR & Compliance Sweeper</span>
-                  <span className="text-[11px] text-pm-secondary">Unlocks privacy scanning and customer anonymization</span>
+                  <span className="text-xs font-semibold text-pm-text block">{t('tier_gdpr_sweeper_name')}</span>
+                  <span className="text-[11px] text-pm-secondary">{t('tier_gdpr_sweeper_desc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -248,12 +248,12 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
           {/* Convenience Section */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3">Convenience Features</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3">{t('tier_cat_convenience')}</h4>
             <div className="space-y-2">
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
-                  <span className="text-xs font-semibold text-pm-text block">Visual Query Wizard</span>
-                  <span className="text-[11px] text-pm-secondary">Unlocks no-code visual query builder interface</span>
+                  <span className="text-xs font-semibold text-pm-text block">{t('tier_visual_query_name')}</span>
+                  <span className="text-[11px] text-pm-secondary">{t('tier_visual_query_desc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -265,8 +265,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
-                  <span className="text-xs font-semibold text-pm-text block">Automated Cron Backups</span>
-                  <span className="text-[11px] text-pm-secondary">Enables scheduled background backups and retention</span>
+                  <span className="text-xs font-semibold text-pm-text block">{t('tier_backup_auto_name')}</span>
+                  <span className="text-[11px] text-pm-secondary">{t('tier_backup_auto_desc')}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -278,8 +278,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
-                  <span className="text-xs font-semibold text-pm-text block">CloudLinux Autopilot</span>
-                  <span className="text-[11px] text-pm-secondary">Enables automatic LVE throttle prevention</span>
+                  <span className="text-xs font-semibold text-pm-text block">{t('tier_autopilot_name')}</span>
+                  <span className="text-[11px] text-pm-secondary">{t('tier_autopilot_desc')}</span>
                 </div>
                 <input
                   type="checkbox"
