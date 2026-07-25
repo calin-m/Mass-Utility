@@ -552,9 +552,43 @@ if (strpos($path, '/views/') === 0) {
     }
 }
 
+// Handle explicit Logout / Lock Dashboard action
+if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    $_SESSION = [];
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        @setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
+    }
+    @session_destroy();
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Pragma: no-cache");
+    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+    header("Location: index.php");
+    exit;
+}
+
 // ----------------------------------------------------
 // SECURE GATEWAY MIDDLEWARE
 // ----------------------------------------------------
+// Enforce 30-minute idle session timeout (1800s)
+if (!empty($_SESSION['employee_id'])) {
+    $now = time();
+    $lastAct = $_SESSION['last_activity'] ?? $now;
+    if (($now - (int)$lastAct) > 1800) {
+        unset($_SESSION['employee_id'], $_SESSION['last_activity']);
+    } else {
+        $_SESSION['last_activity'] = $now;
+    }
+}
+
 $licenseKey = $settingsRepo->get('PM_LICENSE_KEY');
 $hasValidLicenseConfig = !empty($licenseKey) && !empty($bridgeToken);
 
@@ -564,6 +598,40 @@ $isAuthorized = !empty($_SESSION['employee_id']) && $hasValidLicenseConfig;
 // If X-Bridge-Token header is provided and matches, allow API requests (from the Bridge)
 if (!$isAuthorized && !empty($bridgeToken) && isset($_SERVER['HTTP_X_BRIDGE_TOKEN']) && $_SERVER['HTTP_X_BRIDGE_TOKEN'] === $bridgeToken && $hasValidLicenseConfig) {
     $isAuthorized = true;
+}
+
+// Perform live PrestaShop employee session verification ping if session is active
+if ($isAuthorized && !empty($_SESSION['employee_id']) && !empty($bridgeToken)) {
+    $bridgeUrl = $settingsRepo->get('PM_BRIDGE_URL');
+    if (!empty($bridgeUrl)) {
+        try {
+            $verifyUrl = rtrim((string)$bridgeUrl, '/') . '?action=verify_session';
+            $ch = curl_init($verifyUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'X-Bridge-Token: ' . $bridgeToken,
+                'X-Bridge-Version: 1.0.0'
+            ]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                'employee_id' => $_SESSION['employee_id']
+            ]));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $resp = curl_exec($ch);
+            curl_close($ch);
+
+            if ($resp) {
+                $sessData = json_decode((string)$resp, true);
+                if (isset($sessData['active']) && $sessData['active'] === false) {
+                    unset($_SESSION['employee_id'], $_SESSION['last_activity']);
+                    $isAuthorized = false;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Fail open on network disconnect for offline mode
+        }
+    }
 }
 
 $suspendedMessage = false;
@@ -851,7 +919,10 @@ if ($path === '/' || $path === '/index.html') {
             $html
         );
         
-        header('Content-Type: text/html');
+        header('Content-Type: text/html; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
         echo $html;
         exit;
     } else {

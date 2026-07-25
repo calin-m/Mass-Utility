@@ -46,7 +46,9 @@ if (!class_exists('Configuration')) {
             if (array_key_exists($key, self::$storage)) {
                 return self::$storage[$key];
             }
-            if ($key === 'PM_SECURE_TOKEN') {
+            $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+            $isLocal = in_array($remoteAddr, ['127.0.0.1', '::1']);
+            if ($key === 'PM_SECURE_TOKEN' && $isLocal) {
                 return 'mock_token_for_testing';
             }
             return false;
@@ -137,6 +139,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // 4. Dispatch API Actions
 $action = $_GET['action'] ?? '';
+
+if ($action === 'verify_session') {
+    header('Content-Type: application/json');
+    $isLoggedIn = false;
+    $employeeId = 0;
+    
+    if (class_exists('Context') && Context::getContext() && isset(Context::getContext()->employee)) {
+        $emp = Context::getContext()->employee;
+        if (is_object($emp) && !empty($emp->id) && $emp->id > 0) {
+            $isLoggedIn = true;
+            $employeeId = (int)$emp->id;
+        }
+    }
+    
+    $reqEmpId = (int)($_POST['employee_id'] ?? $_GET['employee_id'] ?? 0);
+    if ($reqEmpId > 0 && !$isLoggedIn && class_exists('Context') && Context::getContext()) {
+        $cookie = Context::getContext()->cookie;
+        if ($cookie && isset($cookie->id_employee) && (int)$cookie->id_employee === $reqEmpId) {
+            $isLoggedIn = true;
+            $employeeId = $reqEmpId;
+        }
+    }
+
+    echo json_encode([
+        'success' => true,
+        'active' => $isLoggedIn,
+        'employee_id' => $employeeId
+    ]);
+    exit;
+}
 
 if ($action === 'fix_bridge_permissions') {
     header('Content-Type: application/json');

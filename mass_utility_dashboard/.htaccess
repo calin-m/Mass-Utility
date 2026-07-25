@@ -24,8 +24,9 @@
     # Block direct browser access to source and templates folders (403 Forbidden)
     RewriteRule ^(src|tests|views/templates)($|/) - [F,L]
 
-    # Expose the v2 directory for React static assets
-    RewriteRule ^v2/(.*)$ public/v2/$1 [QSA,L]
+    # Expose v2 static asset directory while forcing HTML pages through authentication middleware
+    RewriteRule ^v2/assets/(.*)$ public/v2/assets/$1 [QSA,L]
+    RewriteRule ^v2/index\.html$ public/index.php [QSA,L]
 
     # Internal rewrite: forward clean URLs to public/index.php if not a physical file
     RewriteCond %{REQUEST_FILENAME} !-f

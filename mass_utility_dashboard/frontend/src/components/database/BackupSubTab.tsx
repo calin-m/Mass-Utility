@@ -50,7 +50,7 @@ interface BackupSubTabProps {
   formatSqlSize?: (size: any) => string;
   formatLogSize?: (size: any) => string;
   formatDate?: (dateVal: any) => string;
-  showAlert: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
+  showAlert: (title: string, message: string, alertType?: 'success' | 'error' | 'info') => void;
 }
 
 const resolveDownloadUrlFallback = (url?: string): string => {

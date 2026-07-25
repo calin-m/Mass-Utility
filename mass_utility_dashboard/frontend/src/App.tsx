@@ -126,6 +126,9 @@ function AppContent() {
   const handleLogout = () => {
     showConfirm('Confirm Logout', 'Are you sure you want to log out from the administrative utility dashboard?', null, () => {
       showToast('Logging out...', 'info');
+      try {
+        sessionStorage.clear();
+      } catch (e) {}
       const config = (window as any).PM_CONFIG || {};
       const basePath = config.basePath || '';
       const cleanBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;

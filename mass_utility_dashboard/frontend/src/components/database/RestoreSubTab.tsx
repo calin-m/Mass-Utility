@@ -47,7 +47,7 @@ interface RestoreSubTabProps {
   onDeleteBackup: (filename: string) => void;
   formatSqlSize: (bytes: number) => string;
   formatDate: (ts: number) => string;
-  showAlert?: (title: string, message: string, type?: 'success' | 'danger' | 'warning' | 'info') => void;
+  showAlert?: (title: string, message: string, alertType?: 'success' | 'error' | 'info') => void;
 }
 
 export const RestoreSubTab: React.FC<RestoreSubTabProps> = ({
