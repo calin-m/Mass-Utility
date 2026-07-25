@@ -249,6 +249,7 @@ if (in_array($topAction, ['download_backup', 'download_from_drive', 'download_fi
                     $bDir . $folderName . '/' . $folderName . '.sql.gz',
                     $bDir . $folderName . '/' . $folderName . '.log'
                 ];
+                // @ProfilerLoopOptimized - Early exit candidate search via break 2
                 foreach ($candidatePaths as $cP) {
                     if (file_exists($cP)) {
                         $localPath = $cP;

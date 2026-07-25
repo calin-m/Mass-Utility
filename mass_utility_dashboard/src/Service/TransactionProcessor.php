@@ -106,6 +106,7 @@ class TransactionProcessor
             // 3. Acquire InnoDB FOR UPDATE intent locks on target rows in strict numerical order to prevent deadlocks
             sort($productIds, SORT_NUMERIC);
             $idChunks = array_chunk($productIds, 500);
+            // @ProfilerBatchQuery - Chunked 500-item batched query loop for pessimistic locking
             foreach ($idChunks as $chunk) {
                 $escapedIds = implode(',', array_map('intval', $chunk));
                 $this->db->execute('SELECT id_product FROM `' . $this->dbPrefix . 'product` WHERE id_product IN (' . $escapedIds . ') FOR UPDATE');

@@ -1259,6 +1259,7 @@ class TableBackupManager
         $db = Db::getInstance(true);
         $executedCount = 0;
 
+        // @ProfilerBatchQuery - Chunked SQL restore statement execution
         foreach ($chunk as $stmt) {
             if (!empty($stmt)) {
                 // Execute statement

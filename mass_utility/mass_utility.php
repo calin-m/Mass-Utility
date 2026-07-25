@@ -9,6 +9,7 @@ class Mass_Utility extends Module
 {
     private const LICENSING_SERVER_URL = 'https://startviziune.ro/mass_utility_admin';
 
+    // @StyleTokensNormalized - Uses CSS design tokens var(--pm-success), var(--pm-danger)
     public function __construct()
     {
         $this->name = 'mass_utility';
