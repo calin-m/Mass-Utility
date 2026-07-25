@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw } from 'lucide-react';
+import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw, UserPlus, Check, Sparkles, Copy } from 'lucide-react';
 import { License, UserAccount } from './LicensesTab';
 import { BaseModal } from './common/BaseModal';
 import { SectionHeader } from './common/SectionHeader';
@@ -23,6 +23,14 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
   const [createCompany, setCreateCompanyState] = useState(() => localStorage.getItem('pm_draft_client_company') || '');
   const [showCreatePassword, setShowCreatePassword] = useState(false);
 
+  // 1-Click License Key Provisioning State
+  const [issueKeyImmediately, setIssueKeyImmediately] = useState(false);
+  const [selectedIssueTier, setSelectedIssueTier] = useState('basic');
+
+  // Post-Creation Credentials Banner State
+  const [lastCreatedCreds, setLastCreatedCreds] = useState<{ email: string; pass: string; key?: string } | null>(null);
+  const [copiedCreds, setCopiedCreds] = useState(false);
+
   const setCreateEmail = (val: string) => {
     setCreateEmailState(val);
     try { localStorage.setItem('pm_draft_client_email', val); } catch (e) {}
@@ -31,6 +39,16 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
   const setCreateCompany = (val: string) => {
     setCreateCompanyState(val);
     try { localStorage.setItem('pm_draft_client_company', val); } catch (e) {}
+  };
+
+  const clearDraftMemory = () => {
+    setCreateEmailState('');
+    setCreateCompanyState('');
+    setCreatePassword('');
+    try {
+      localStorage.removeItem('pm_draft_client_email');
+      localStorage.removeItem('pm_draft_client_company');
+    } catch (e) {}
   };
 
   const generateCreatePassword = () => {
@@ -55,14 +73,43 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
       const res = await fetch('index.php?action=api_create_user', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        showAlert('✨ Standalone Client Account created successfully!', 'success');
-        setCreateEmail('');
-        setCreatePassword('');
-        setCreateCompany('');
-        try {
-          localStorage.removeItem('pm_draft_client_email');
-          localStorage.removeItem('pm_draft_client_company');
-        } catch (e) {}
+        let generatedKey: string | undefined = undefined;
+
+        // If 1-Click License Key Issue is checked, issue key immediately for newly created user
+        if (issueKeyImmediately) {
+          const newUser = data.users ? data.users.find((u: UserAccount) => u.email.toLowerCase() === createEmail.toLowerCase()) : null;
+          const newUserId = newUser ? newUser.id : 0;
+
+          if (newUserId > 0) {
+            try {
+              const genData = new FormData();
+              genData.append('user_id', String(newUserId));
+              genData.append('package_tier', selectedIssueTier);
+              const genRes = await fetch('index.php?action=api_generate', { method: 'POST', body: genData });
+              const genResult = await genRes.json();
+              if (genResult.success) {
+                generatedKey = genResult.key;
+                showAlert(`✨ Client Account & ${selectedIssueTier.toUpperCase()} License Key issued successfully!`, 'success');
+              } else {
+                showAlert(`⚠️ Client created, but key issue failed: ${genResult.error}`, 'error');
+              }
+            } catch (genErr: any) {
+              showAlert(`⚠️ Client created, but key issue failed: ${genErr.message}`, 'error');
+            }
+          }
+        } else {
+          showAlert('✨ Standalone Client Account created successfully!', 'success');
+        }
+
+        // Store credentials for quick copy banner
+        setLastCreatedCreds({
+          email: createEmail,
+          pass: createPassword,
+          key: generatedKey
+        });
+        setCopiedCreds(false);
+
+        clearDraftMemory();
         setShowCreateModal(false);
         onRefresh();
       } else {
@@ -73,6 +120,21 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
     } finally {
       setLoading(false);
     }
+  };
+
+  const copyCreatedCredentials = () => {
+    if (!lastCreatedCreds) return;
+    const text = [
+      `Client Email: ${lastCreatedCreds.email}`,
+      `Password: ${lastCreatedCreds.pass}`,
+      ...(lastCreatedCreds.key ? [`License Key: ${lastCreatedCreds.key}`] : []),
+      `SaaS Dashboard: ${window.location.origin}/mass_utility_dashboard/`
+    ].join('\n');
+
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedCreds(true);
+      setTimeout(() => setCopiedCreds(false), 3000);
+    });
   };
 
   // Modal States
@@ -243,16 +305,17 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="pm-btn-primary px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1.5 transition shadow-sm"
+                className="group bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-400/30 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/35 active:scale-95 transition-all duration-200"
                 title="Create New Standalone Client Account"
               >
-                <span>✨ + Create Client Account</span>
+                <UserPlus className="w-4 h-4 text-purple-200 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
+                <span>Create Client Account</span>
               </button>
 
               <button
                 type="button"
                 onClick={onRefresh}
-                className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
+                className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
                 title="Refresh Client Accounts List"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Refresh
@@ -260,6 +323,43 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
             </div>
           }
         />
+
+        {/* Post-Creation Quick Credentials Banner */}
+        {lastCreatedCreds && (
+          <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="space-y-1">
+              <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-emerald-400" /> Merchant Credentials Onboarded Successfully
+              </div>
+              <div className="text-xs text-pm-text font-mono flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span><strong>Email:</strong> {lastCreatedCreds.email}</span>
+                <span><strong>Password:</strong> {lastCreatedCreds.pass}</span>
+                {lastCreatedCreds.key && (
+                  <span className="text-amber-400"><strong>Issued Key:</strong> {lastCreatedCreds.key}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={copyCreatedCredentials}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+              >
+                {copiedCreds ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedCreds ? 'Copied to Clipboard!' : '📋 Copy Login Info'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setLastCreatedCreds(null)}
+                className="text-pm-secondary hover:text-pm-text text-xs p-1"
+                title="Dismiss Banner"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Search & Filter Controls */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -577,7 +677,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         title="Create Standalone Client Account"
-        icon={Users}
+        icon={UserPlus}
       >
         <form onSubmit={handleCreateClient} className="space-y-4">
           <div>
@@ -634,21 +734,65 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(false)}
-              className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase"
-            >
-              {loading ? 'Creating...' : '✨ Create Client Account'}
-            </button>
+          {/* 1-Click License Key Issue Checkbox Option */}
+          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl space-y-3">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={issueKeyImmediately}
+                onChange={e => setIssueKeyImmediately(e.target.checked)}
+                className="w-4 h-4 accent-purple-600 rounded cursor-pointer"
+              />
+              <span className="text-xs font-bold text-pm-text flex items-center gap-1">
+                🔑 Immediately Issue & Assign Store License Key
+              </span>
+            </label>
+
+            {issueKeyImmediately && (
+              <div className="pl-6 animate-in fade-in duration-200">
+                <label className="block text-[0.7rem] font-bold uppercase text-pm-secondary mb-1">Select Package Tier</label>
+                <select
+                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 text-xs text-pm-text font-bold focus:border-pm-primary focus:outline-none"
+                  value={selectedIssueTier}
+                  onChange={e => setSelectedIssueTier(e.target.value)}
+                >
+                  <option value="basic">BASIC TIER</option>
+                  <option value="pro">PRO TIER</option>
+                  <option value="enterprise">ENTERPRISE TIER</option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-between items-center pt-3 border-t border-pm-border">
+            {(createEmail || createCompany || createPassword) ? (
+              <button
+                type="button"
+                onClick={clearDraftMemory}
+                className="text-[0.72rem] text-rose-400 hover:text-rose-300 font-semibold transition"
+                title="Clear saved draft inputs"
+              >
+                🧹 Clear Draft
+              </button>
+            ) : <div />}
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase flex items-center gap-1.5"
+              >
+                <UserPlus className="w-4 h-4 text-white" />
+                <span>{loading ? 'Creating...' : 'Create Account'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </BaseModal>
