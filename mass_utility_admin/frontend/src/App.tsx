@@ -239,6 +239,7 @@ export const App: React.FC = () => {
             licenses={licenses}
             onRefresh={fetchAdminData}
             showAlert={showAlert}
+            onInspectClient={handleInspectClient}
           />
         )}
 
