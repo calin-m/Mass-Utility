@@ -617,7 +617,7 @@ if (in_array($action, $sweeperActions, true)) {
     exit;
 }
 
-$sysActions = ['get_server_status', 'set_shop_live', 'clear_logs', 'download_logs', 'poll_job_progress', 'cancel_job', 'stream_job_progress', 'get_gdrive_auth_details', 'save_settings', 'get_diagnostics', 'apply_security_headers', 'fix_permissions'];
+$sysActions = ['get_server_status', 'set_shop_live', 'clear_logs', 'download_logs', 'poll_job_progress', 'cancel_job', 'stream_job_progress', 'get_gdrive_auth_details', 'save_settings', 'get_diagnostics', 'apply_security_headers', 'fix_permissions', 'enable_ssl'];
 if (in_array($action, $sysActions, true)) {
     require_once __DIR__ . '/src/Service/BridgeLogger.php';
     require_once __DIR__ . '/src/Service/ResourceMonitor.php';

@@ -601,7 +601,7 @@ class SystemApiController extends AbstractApiController
     protected function applySecurityHeaders(): void
     {
         try {
-            $rootDir = _PS_ROOT_DIR_;
+            $rootDir = rtrim(_PS_ROOT_DIR_, '/') . '/';
             $htaccessPath = $rootDir . '.htaccess';
             
             $headerBlock = "\n# Mass Utility Security Headers Protection\n" .
@@ -613,7 +613,7 @@ class SystemApiController extends AbstractApiController
                 "</IfModule>\n";
 
             $existing = file_exists($htaccessPath) ? (file_get_contents($htaccessPath) ?: '') : '';
-            if (strpos($existing, 'Mass Utility Security Headers Protection') === false) {
+            if (strpos($existing, 'Strict-Transport-Security') === false) {
                 @file_put_contents($htaccessPath, $existing . $headerBlock);
             }
 
@@ -626,7 +626,7 @@ class SystemApiController extends AbstractApiController
     protected function fixPermissions(): void
     {
         try {
-            $rootDir = _PS_ROOT_DIR_;
+            $rootDir = rtrim(_PS_ROOT_DIR_, '/') . '/';
             $targets = [
                 $rootDir => 0755,
                 $rootDir . 'config' => 0755,
@@ -644,6 +644,21 @@ class SystemApiController extends AbstractApiController
             }
 
             $this->sendJsonResponse(['success' => true, 'message' => 'File permissions successfully repaired on host']);
+        } catch (Exception $e) {
+            $this->sendErrorResponse($e->getMessage());
+        }
+    }
+
+    protected function enableSsl(): void
+    {
+        try {
+            if (class_exists('Configuration')) {
+                \Configuration::updateValue('PS_SSL_ENABLED', 1);
+                \Configuration::updateValue('PS_SSL_ENABLED_EVERYWHERE', 1);
+                $this->sendJsonResponse(['success' => true, 'message' => 'SSL enforced successfully on store']);
+            } else {
+                $this->sendErrorResponse('Configuration class unavailable');
+            }
         } catch (Exception $e) {
             $this->sendErrorResponse($e->getMessage());
         }

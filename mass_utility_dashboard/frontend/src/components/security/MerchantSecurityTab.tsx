@@ -95,6 +95,24 @@ export const MerchantSecurityTab: React.FC = () => {
     }
   };
 
+  const enableSsl = async () => {
+    setLoading(true);
+    try {
+      const response = await FetchService.post('enable_ssl', {});
+      if (response && response.success) {
+        showToast('🔒 SSL / HTTPS successfully enforced on PrestaShop store!', 'success');
+        runAudit();
+      } else {
+        const msg = response?.error || 'Failed to enforce SSL.';
+        showAlert('SSL Error', msg, 'error');
+      }
+    } catch (err: any) {
+      showAlert('SSL Error', 'Network error during SSL enforcement: ' + err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Run initial audit on mount
   useEffect(() => {
     runAudit();
@@ -148,6 +166,15 @@ export const MerchantSecurityTab: React.FC = () => {
                   title="Repair folder permissions to 0755 and file permissions to 0644"
                 >
                   📁 Repair Permissions
+                </button>
+                <button
+                  type="button"
+                  onClick={enableSsl}
+                  disabled={loading}
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-emerald-400"
+                  title="Enforce SSL/HTTPS across all store pages in PrestaShop Configuration"
+                >
+                  ⚡ Enforce Store SSL
                 </button>
               </>
             )}

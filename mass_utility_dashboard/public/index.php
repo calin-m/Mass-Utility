@@ -1599,6 +1599,17 @@ if (strpos($path, '/api/v1/') === 0) {
         }
 
         if ($action === 'get_diagnostics') {
+            // Relay to PrestaShop Bridge module via HttpClient if configured
+            try {
+                $bridgeRes = $client->request('get_diagnostics', 'POST', []);
+                if (isset($bridgeRes['success']) && isset($bridgeRes['diagnostics'])) {
+                    echo json_encode(['success' => true, 'diagnostics' => $bridgeRes['diagnostics']]);
+                    exit;
+                }
+            } catch (\Throwable $e) {
+                // Fallthrough to local audit if standalone
+            }
+
             $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
             $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
             $selfUrl = $scheme . '://' . $host . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
@@ -1701,6 +1712,21 @@ if (strpos($path, '/api/v1/') === 0) {
             exit;
         }
 
+        if ($action === 'enable_ssl') {
+            try {
+                $res = $client->request('enable_ssl', 'POST', []);
+                if (isset($res['success']) && $res['success']) {
+                    echo json_encode(['success' => true, 'message' => 'SSL enforced on store']);
+                    exit;
+                }
+            } catch (\Throwable $e) {
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+                exit;
+            }
+            echo json_encode(['success' => true]);
+            exit;
+        }
+
         if ($action === 'apply_security_headers') {
             // Relay to PrestaShop Bridge module via HTTP Client if configured
             try {
@@ -1732,6 +1758,16 @@ if (strpos($path, '/api/v1/') === 0) {
         }
 
         if ($action === 'fix_diagnostics_permissions') {
+            try {
+                $res = $client->request('fix_permissions', 'POST', []);
+                if (isset($res['success']) && $res['success']) {
+                    echo json_encode(['success' => true, 'message' => 'Permissions repaired via bridge']);
+                    exit;
+                }
+            } catch (\Throwable $e) {
+                // Fallthrough to local permissions repair if standalone
+            }
+
             $dataDir = dirname(__DIR__) . '/data';
             $backupsDir = dirname(__DIR__) . '/backups';
             $dbFile = $dataDir . '/pm_cloud_backups.db';
