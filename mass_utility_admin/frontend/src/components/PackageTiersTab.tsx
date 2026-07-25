@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PackageCheck, Save } from 'lucide-react';
+import { SectionHeader } from './common/SectionHeader';
 
 export interface PackageTier {
   id: number;
@@ -128,9 +129,11 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
   return (
     <div className="space-y-6">
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation w-full">
-        <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2 mb-4">
-          <PackageCheck className="w-5 h-5 text-pm-primary" /> Feature Capability Matrix Editor
-        </h3>
+        <SectionHeader
+          title="Feature Capability Matrix Editor"
+          subtitle="Configure feature access tiers and license capabilities."
+          icon={PackageCheck}
+        />
 
         <div className="flex gap-3 mb-6">
           {['basic', 'pro', 'enterprise'].map(tierName => (

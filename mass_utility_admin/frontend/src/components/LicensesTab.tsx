@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, KeyRound, Unlock } from 'lucide-react';
+import { BaseModal } from './common/BaseModal';
+import { SectionHeader } from './common/SectionHeader';
+import { StatCard } from './common/StatCard';
 
 export interface License {
   id: number;
@@ -177,32 +180,16 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Subscription Inventory Overview */}
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation flex flex-col justify-between">
-          <div>
-            <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-pm-primary" /> Active Subscriptions Inventory
-            </h3>
-            <p className="text-xs text-pm-secondary mt-2">
-              Real-time breakdown of store license keys, package tier allocations, and unassigned standalone keys.
-            </p>
-          </div>
+          <SectionHeader
+            title="Active Subscriptions Inventory"
+            subtitle="Real-time breakdown of store license keys, package tier allocations, and unassigned standalone keys."
+            icon={CheckCircle}
+          />
 
           <div className="grid grid-cols-3 gap-3 my-4">
-            <div className="p-3 bg-pm-input border border-pm-border rounded-lg text-center">
-              <div className="text-[0.65rem] font-bold uppercase text-pm-secondary">Total Keys</div>
-              <div className="text-xl font-black text-pm-text mt-1">{licenses.length}</div>
-            </div>
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
-              <div className="text-[0.65rem] font-bold uppercase text-emerald-500">Active Keys</div>
-              <div className="text-xl font-black text-emerald-500 mt-1">
-                {licenses.filter(l => l.status === 'active').length}
-              </div>
-            </div>
-            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
-              <div className="text-[0.65rem] font-bold uppercase text-amber-500">Unassigned</div>
-              <div className="text-xl font-black text-amber-500 mt-1">
-                {licenses.filter(l => !l.user_id).length}
-              </div>
-            </div>
+            <StatCard label="Total Keys" value={licenses.length} icon={Key} color="purple" />
+            <StatCard label="Active Keys" value={licenses.filter(l => l.status === 'active').length} icon={CheckCircle} color="emerald" />
+            <StatCard label="Unassigned" value={licenses.filter(l => !l.user_id).length} icon={Unlock} color="amber" />
           </div>
 
           <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-[0.72rem] text-purple-300">
@@ -212,9 +199,11 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
         {/* Generate License Key Card */}
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
-          <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2">
-            <Key className="w-4 h-4 text-pm-primary" /> Issue & Assign License Key
-          </h3>
+          <SectionHeader
+            title="Issue & Assign License Key"
+            subtitle="Issue license keys and assign to client accounts."
+            icon={Key}
+          />
           <form onSubmit={handleGenerateKey} className="mt-4 space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Target Client Account</label>
@@ -275,9 +264,11 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
       {/* Active License Registry Table */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
-        <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 mb-4">
-          📜 Active License Registry & Subscriptions ({licenses.length})
-        </h3>
+        <SectionHeader
+          title={`Active License Registry & Subscriptions (${licenses.length})`}
+          subtitle="Complete audit ledger of active, suspended, and standalone license keys."
+          icon={KeyRound}
+        />
         <div className="overflow-x-auto rounded-lg border border-pm-border">
           <table className="w-full text-left text-xs">
             <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
@@ -380,118 +371,109 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
       </div>
 
       {/* Edit License Modal Dialog */}
-      {editingLicense && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-pm-card border border-pm-border rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center pb-3 border-b border-pm-border">
-              <h3 className="text-base font-bold text-pm-text flex items-center gap-2">
-                <Edit className="w-5 h-5 text-pm-primary" /> Edit License & Subscription #{editingLicense.id}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setEditingLicense(null)}
-                className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1"
-              >
-                ✕
-              </button>
+      <BaseModal
+        isOpen={!!editingLicense}
+        onClose={() => setEditingLicense(null)}
+        title={`Edit License & Subscription #${editingLicense?.id || ''}`}
+        icon={Edit}
+        maxWidth="lg"
+      >
+        {editingLicense && (
+          <form onSubmit={handleSaveEdit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">License Key (Read-Only)</label>
+              <input
+                type="text"
+                readOnly
+                className="w-full bg-pm-input/50 border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-amber-500 cursor-not-allowed"
+                value={editingLicense.license_key}
+              />
             </div>
 
-            <form onSubmit={handleSaveEdit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">License Key (Read-Only)</label>
-                <input
-                  type="text"
-                  readOnly
-                  className="w-full bg-pm-input/50 border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-amber-500 cursor-not-allowed"
-                  value={editingLicense.license_key}
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Assigned Client Email / Account</label>
+              <select
+                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                value={editUserId}
+                onChange={e => setEditUserId(Number(e.target.value))}
+              >
+                <option value={0}>-- Unassigned License (Standalone Key) --</option>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>
+                    👤 {u.email} {u.company_name ? `(${u.company_name})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Assigned Client Email / Account</label>
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Package Tier</label>
                 <select
                   className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                  value={editUserId}
-                  onChange={e => setEditUserId(Number(e.target.value))}
+                  value={editTier}
+                  onChange={e => setEditTier(e.target.value)}
                 >
-                  <option value={0}>-- Unassigned License (Standalone Key) --</option>
-                  {users.map(u => (
-                    <option key={u.id} value={u.id}>
-                      👤 {u.email} {u.company_name ? `(${u.company_name})` : ''}
-                    </option>
-                  ))}
+                  <option value="basic">BASIC TIER</option>
+                  <option value="pro">PRO TIER</option>
+                  <option value="enterprise">ENTERPRISE TIER</option>
                 </select>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Package Tier</label>
-                  <select
-                    className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                    value={editTier}
-                    onChange={e => setEditTier(e.target.value)}
-                  >
-                    <option value="basic">BASIC TIER</option>
-                    <option value="pro">PRO TIER</option>
-                    <option value="enterprise">ENTERPRISE TIER</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Subscription Status</label>
-                  <select
-                    className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none font-bold"
-                    value={editStatus}
-                    onChange={e => setEditStatus(e.target.value)}
-                  >
-                    <option value="active" className="text-emerald-500">ACTIVE</option>
-                    <option value="suspended" className="text-rose-500">SUSPENDED</option>
-                    <option value="expired" className="text-amber-500">EXPIRED</option>
-                  </select>
-                </div>
-              </div>
-
               <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Bound Store Domain / URL</label>
-                <input
-                  type="text"
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                  placeholder="e.g. store.myshop.com"
-                  value={editDomain}
-                  onChange={e => setEditDomain(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Expires At Date</label>
-                <input
-                  type="date"
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                  value={editExpires}
-                  onChange={e => setEditExpires(e.target.value)}
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-                <button
-                  type="button"
-                  onClick={() => setEditingLicense(null)}
-                  className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
+                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Subscription Status</label>
+                <select
+                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none font-bold"
+                  value={editStatus}
+                  onChange={e => setEditStatus(e.target.value)}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingEdit}
-                  className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold flex items-center gap-2"
-                >
-                  {savingEdit ? 'Saving...' : '💾 Save Changes'}
-                </button>
+                  <option value="active" className="text-emerald-500">ACTIVE</option>
+                  <option value="suspended" className="text-rose-500">SUSPENDED</option>
+                  <option value="expired" className="text-amber-500">EXPIRED</option>
+                </select>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Bound Store Domain / URL</label>
+              <input
+                type="text"
+                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                placeholder="e.g. store.myshop.com"
+                value={editDomain}
+                onChange={e => setEditDomain(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Expires At Date</label>
+              <input
+                type="date"
+                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                value={editExpires}
+                onChange={e => setEditExpires(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+              <button
+                type="button"
+                onClick={() => setEditingLicense(null)}
+                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingEdit}
+                className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold flex items-center gap-2"
+              >
+                {savingEdit ? 'Saving...' : '💾 Save Changes'}
+              </button>
+            </div>
+          </form>
+        )}
+      </BaseModal>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Activity, Lock, Cpu, AlertTriangle, CheckCircle, RefreshCw, FolderLock, GitBranch, Database, Settings } from 'lucide-react';
+import { SectionHeader } from './common/SectionHeader';
 
 interface SecurityHealthTabProps {
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
@@ -63,9 +64,11 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
     <div className="space-y-6 w-full">
       {/* Super Admin Portal System Status Card Container */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation">
-        <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2 mb-4">
-          <Settings className="w-5 h-5 text-pm-primary" /> Super Admin Portal System Status
-        </h3>
+        <SectionHeader
+          title="Super Admin Portal System Status"
+          subtitle="System health, security diagnostics, and permission integrity checks."
+          icon={Settings}
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* 1. API Security Guard */}

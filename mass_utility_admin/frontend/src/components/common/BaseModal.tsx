@@ -1,0 +1,75 @@
+import React, { useEffect } from 'react';
+import { LucideIcon } from 'lucide-react';
+
+interface BaseModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  icon?: LucideIcon;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'primary' | 'danger';
+  children: React.ReactNode;
+}
+
+export const BaseModal: React.FC<BaseModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  icon: Icon,
+  maxWidth = 'md',
+  variant = 'primary',
+  children,
+}) => {
+  // ESC key lifecycle handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const maxWidthClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+  }[maxWidth];
+
+  const borderClass = variant === 'danger' ? 'border-rose-500/30' : 'border-pm-border';
+  const iconColorClass = variant === 'danger' ? 'text-rose-500' : 'text-pm-primary';
+  const titleColorClass = variant === 'danger' ? 'text-rose-500' : 'text-pm-text';
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div
+        className={`bg-pm-card border ${borderClass} rounded-xl ${maxWidthClasses} w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200`}
+      >
+        {/* Modal Header */}
+        <div className="flex justify-between items-center pb-3 border-b border-pm-border">
+          <h3 className={`text-base font-bold ${titleColorClass} flex items-center gap-2`}>
+            {Icon && <Icon className={`w-5 h-5 ${iconColorClass}`} />}
+            {title}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1 transition"
+            title="Close Modal (ESC)"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div>{children}</div>
+      </div>
+    </div>
+  );
+};

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Settings, ShieldCheck, Database, HardDrive, Lock } from 'lucide-react';
+import { SectionHeader } from './common/SectionHeader';
 
 interface SettingsTabProps {
   showAlert: (msg: string, type?: 'success' | 'error') => void;
@@ -52,9 +53,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
     <div className="space-y-6 w-full max-w-2xl">
 
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
-        <h3 className="text-base font-bold text-pm-text border-l-4 border-rose-500 pl-3 flex items-center gap-2 mb-4">
-          <Lock className="w-5 h-5 text-rose-500" /> Change Admin Password
-        </h3>
+        <SectionHeader
+          title="Change Admin Password"
+          subtitle="Update primary administrative access credentials for Mass Utility Admin."
+          icon={Lock}
+        />
         <form onSubmit={handlePasswordUpdate} className="space-y-4 max-w-md mt-4">
           <div>
             <label className="block text-xs font-bold text-pm-secondary uppercase mb-1">Current Password</label>

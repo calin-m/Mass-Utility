@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw } from 'lucide-react';
 import { License, UserAccount } from './LicensesTab';
+import { BaseModal } from './common/BaseModal';
+import { SectionHeader } from './common/SectionHeader';
+import { StatCard } from './common/StatCard';
 
 interface ClientsTabProps {
   users: UserAccount[];
@@ -223,80 +226,40 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
     <div className="space-y-6 w-full">
       {/* Top Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 bg-pm-card border border-pm-border rounded-xl shadow-sm pm-card-elevation flex items-center justify-between">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-pm-secondary">Total Clients</div>
-            <div className="text-2xl font-black text-pm-text mt-1">{totalClients}</div>
-          </div>
-          <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl">
-            <Users className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="p-4 bg-pm-card border border-pm-border rounded-xl shadow-sm pm-card-elevation flex items-center justify-between">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-pm-secondary">Active Accounts</div>
-            <div className="text-2xl font-black text-emerald-500 mt-1">{activeClients}</div>
-          </div>
-          <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl">
-            <CheckCircle className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="p-4 bg-pm-card border border-pm-border rounded-xl shadow-sm pm-card-elevation flex items-center justify-between">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-pm-secondary">Suspended Accounts</div>
-            <div className="text-2xl font-black text-rose-500 mt-1">{suspendedClients}</div>
-          </div>
-          <div className="p-3 bg-rose-500/10 text-rose-500 rounded-xl">
-            <ShieldAlert className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="p-4 bg-pm-card border border-pm-border rounded-xl shadow-sm pm-card-elevation flex items-center justify-between">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-pm-secondary">Bound Store Domains</div>
-            <div className="text-2xl font-black text-amber-500 mt-1">{totalBoundDomains}</div>
-          </div>
-          <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl">
-            <Building className="w-6 h-6" />
-          </div>
-        </div>
+        <StatCard label="Total Clients" value={totalClients} icon={Users} color="purple" />
+        <StatCard label="Active Accounts" value={activeClients} icon={CheckCircle} color="emerald" />
+        <StatCard label="Suspended Accounts" value={suspendedClients} icon={ShieldAlert} color="rose" />
+        <StatCard label="Bound Store Domains" value={totalBoundDomains} icon={Building} color="amber" />
       </div>
 
       {/* Main Client Directory Section */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h3 className="text-base font-bold text-pm-text border-l-4 border-pm-primary pl-3 flex items-center gap-2">
-              <Users className="w-5 h-5 text-pm-primary" /> Client Accounts Directory ({filteredUsers.length})
-            </h3>
-            <p className="text-xs text-pm-secondary mt-1 pl-4">
-              Manage client credentials, company profiles, account statuses, and associated store licenses.
-            </p>
-          </div>
+        <SectionHeader
+          title={`Client Accounts Directory (${filteredUsers.length})`}
+          subtitle="Manage client credentials, company profiles, account statuses, and associated store licenses."
+          icon={Users}
+          action={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="pm-btn-primary px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1.5 transition shadow-sm"
+                title="Create New Standalone Client Account"
+              >
+                <span>✨ + Create Client Account</span>
+              </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="pm-btn-primary px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1.5 transition shadow-sm"
-              title="Create New Standalone Client Account"
-            >
-              <span>✨ + Create Client Account</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onRefresh}
-              className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Refresh Client Data"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Refresh</span>
-            </button>
-          </div>
-        </div>
+              <button
+                type="button"
+                onClick={onRefresh}
+                className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
+                title="Refresh Client Accounts List"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Refresh
+              </button>
+            </div>
+          }
+        />
 
         {/* Search & Filter Controls */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -448,173 +411,144 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
       </div>
 
       {/* Modal 1: Edit Client Account */}
-      {editingUser && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-pm-card border border-pm-border rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center pb-3 border-b border-pm-border">
-              <h3 className="text-base font-bold text-pm-text flex items-center gap-2">
-                <Edit className="w-5 h-5 text-pm-primary" /> Edit Client Account #{editingUser.id}
-              </h3>
+      <BaseModal
+        isOpen={!!editingUser}
+        onClose={() => setEditingUser(null)}
+        title={`Edit Client Account #${editingUser?.id || ''}`}
+        icon={Edit}
+      >
+        {editingUser && (
+          <form onSubmit={handleUpdateUser} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Client Email</label>
+              <input
+                type="email"
+                required
+                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                value={editEmail}
+                onChange={e => setEditEmail(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company / Store Name</label>
+              <input
+                type="text"
+                placeholder="Optional Store Name"
+                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+                value={editCompany}
+                onChange={e => setEditCompany(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Account Governance Status</label>
+              <select
+                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none font-bold"
+                value={editStatus}
+                onChange={e => setEditStatus(e.target.value as 'active' | 'suspended')}
+              >
+                <option value="active" className="text-emerald-500">ACTIVE</option>
+                <option value="suspended" className="text-rose-500">SUSPENDED</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
               <button
                 type="button"
                 onClick={() => setEditingUser(null)}
-                className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1"
+                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
               >
-                ✕
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase"
+              >
+                {loading ? 'Saving...' : '💾 Save Changes'}
               </button>
             </div>
-
-            <form onSubmit={handleUpdateUser} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Client Email</label>
-                <input
-                  type="email"
-                  required
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                  value={editEmail}
-                  onChange={e => setEditEmail(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company / Store Name</label>
-                <input
-                  type="text"
-                  placeholder="Optional Store Name"
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                  value={editCompany}
-                  onChange={e => setEditCompany(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Account Governance Status</label>
-                <select
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none font-bold"
-                  value={editStatus}
-                  onChange={e => setEditStatus(e.target.value as 'active' | 'suspended')}
-                >
-                  <option value="active" className="text-emerald-500">ACTIVE</option>
-                  <option value="suspended" className="text-rose-500">SUSPENDED</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-                <button
-                  type="button"
-                  onClick={() => setEditingUser(null)}
-                  className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase"
-                >
-                  {loading ? 'Saving...' : '💾 Save Changes'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          </form>
+        )}
+      </BaseModal>
 
       {/* Modal 2: Reset Client Password */}
-      {resetPassUser && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-pm-card border border-pm-border rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center pb-3 border-b border-pm-border">
-              <h3 className="text-base font-bold text-pm-text flex items-center gap-2">
-                <Key className="w-5 h-5 text-pm-primary" /> Reset Password for {resetPassUser.email}
-              </h3>
+      <BaseModal
+        isOpen={!!resetPassUser}
+        onClose={() => setResetPassUser(null)}
+        title={`Reset Password for ${resetPassUser?.email || ''}`}
+        icon={Key}
+      >
+        {resetPassUser && (
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">New Password</label>
+              <div className="flex gap-2">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  required
+                  minLength={8}
+                  placeholder="Minimum 8 characters or ⚡ Auto"
+                  className="flex-1 bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none min-w-0"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center transition shrink-0"
+                  title={showNewPassword ? "Hide Password" : "Show Password"}
+                >
+                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={generateRandomPassword}
+                  className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1 shrink-0"
+                  title="Generate Random Password"
+                >
+                  ⚡ Auto
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
               <button
                 type="button"
                 onClick={() => setResetPassUser(null)}
-                className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1"
+                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
               >
-                ✕
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase"
+              >
+                {loading ? 'Updating...' : '🔑 Update Password'}
               </button>
             </div>
-
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">New Password</label>
-                <div className="flex gap-2">
-                  <input
-                    type={showNewPassword ? 'text' : 'password'}
-                    required
-                    minLength={8}
-                    placeholder="Minimum 8 characters or ⚡ Auto"
-                    className="flex-1 bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none min-w-0"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center transition shrink-0"
-                    title={showNewPassword ? "Hide Password" : "Show Password"}
-                  >
-                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={generateRandomPassword}
-                    className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1 shrink-0"
-                    title="Generate Random Password"
-                  >
-                    ⚡ Auto
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-                <button
-                  type="button"
-                  onClick={() => setResetPassUser(null)}
-                  className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase"
-                >
-                  {loading ? 'Updating...' : '🔑 Update Password'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          </form>
+        )}
+      </BaseModal>
 
       {/* Modal 3: Delete Client Account Confirmation */}
-      {deletingUser && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-pm-card border border-rose-500/30 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center pb-3 border-b border-pm-border">
-              <h3 className="text-base font-bold text-rose-500 flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-rose-500" /> Delete Client Account #{deletingUser.id}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setDeletingUser(null)}
-                className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-xs text-pm-text font-semibold">
-                Are you sure you want to delete <span className="text-rose-400 font-bold">{deletingUser.email}</span>?
-              </p>
-              
-              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-[0.72rem] text-amber-500">
-                🔒 <strong>License Protection Guarantee:</strong> Any active license keys associated with this client will remain completely safe and will automatically revert to <em>Unassigned Standalone Keys</em>.
-              </div>
+      <BaseModal
+        isOpen={!!deletingUser}
+        onClose={() => setDeletingUser(null)}
+        title={`Delete Client Account #${deletingUser?.id || ''}`}
+        icon={ShieldAlert}
+        variant="danger"
+      >
+        {deletingUser && (
+          <div className="space-y-4">
+            <p className="text-xs text-pm-text font-semibold">
+              Are you sure you want to delete <span className="text-rose-400 font-bold">{deletingUser.email}</span>?
+            </p>
+            
+            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-[0.72rem] text-amber-500">
+              🔒 <strong>License Protection Guarantee:</strong> Any active license keys associated with this client will remain completely safe and will automatically revert to <em>Unassigned Standalone Keys</em>.
             </div>
 
             <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
@@ -635,101 +569,89 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </BaseModal>
 
       {/* Modal 0: Create Standalone Client Account */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-pm-card border border-pm-border rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center pb-3 border-b border-pm-border">
-              <h3 className="text-base font-bold text-pm-text flex items-center gap-2">
-                <Users className="w-5 h-5 text-pm-primary" /> Create Standalone Client Account
-              </h3>
+      <BaseModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Create Standalone Client Account"
+        icon={Users}
+      >
+        <form onSubmit={handleCreateClient} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Client Email</label>
+            <input
+              type="email"
+              required
+              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+              placeholder="merchant@email.com"
+              value={createEmail}
+              onChange={e => setCreateEmail(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Password</label>
+            <div className="flex gap-2">
+              <input
+                type={showCreatePassword ? 'text' : 'password'}
+                required
+                minLength={8}
+                placeholder="Min 8 chars or click ⚡ Auto"
+                className="flex-1 bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none min-w-0"
+                value={createPassword}
+                onChange={e => setCreatePassword(e.target.value)}
+              />
               <button
                 type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="text-pm-secondary hover:text-pm-text font-bold text-lg p-1"
+                onClick={() => setShowCreatePassword(!showCreatePassword)}
+                className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center transition shrink-0"
+                title={showCreatePassword ? "Hide Password" : "Show Password"}
               >
-                ✕
+                {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+              <button
+                type="button"
+                onClick={generateCreatePassword}
+                className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1 shrink-0"
+                title="Generate Random Password"
+              >
+                ⚡ Auto
               </button>
             </div>
-
-            <form onSubmit={handleCreateClient} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Client Email</label>
-                <input
-                  type="email"
-                  required
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                  placeholder="merchant@email.com"
-                  value={createEmail}
-                  onChange={e => setCreateEmail(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Password</label>
-                <div className="flex gap-2">
-                  <input
-                    type={showCreatePassword ? 'text' : 'password'}
-                    required
-                    minLength={8}
-                    placeholder="Min 8 chars or click ⚡ Auto"
-                    className="flex-1 bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none min-w-0"
-                    value={createPassword}
-                    onChange={e => setCreatePassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCreatePassword(!showCreatePassword)}
-                    className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center transition shrink-0"
-                    title={showCreatePassword ? "Hide Password" : "Show Password"}
-                  >
-                    {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={generateCreatePassword}
-                    className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1 shrink-0"
-                    title="Generate Random Password"
-                  >
-                    ⚡ Auto
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company / Store Name</label>
-                <input
-                  type="text"
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                  placeholder="Optional Store Name"
-                  value={createCompany}
-                  onChange={e => setCreateCompany(e.target.value)}
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase"
-                >
-                  {loading ? 'Creating...' : '✨ Create Client Account'}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company / Store Name</label>
+            <input
+              type="text"
+              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
+              placeholder="Optional Store Name"
+              value={createCompany}
+              onChange={e => setCreateCompany(e.target.value)}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(false)}
+              className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase"
+            >
+              {loading ? 'Creating...' : '✨ Create Client Account'}
+            </button>
+          </div>
+        </form>
+      </BaseModal>
     </div>
   );
 };
