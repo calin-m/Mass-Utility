@@ -518,4 +518,25 @@ class AdminApiController
 
         echo json_encode(['success' => true, 'results' => $results]);
     }
+
+    private function apply_security_headers(): void
+    {
+        $rootDir = dirname(dirname(dirname(__DIR__)));
+        $htaccessPath = $rootDir . '/.htaccess';
+        
+        $headerBlock = "\n# Mass Utility Security Headers Protection\n" .
+            "<IfModule mod_headers.c>\n" .
+            "    Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"\n" .
+            "    Header set X-Content-Type-Options \"nosniff\"\n" .
+            "    Header set X-Frame-Options \"SAMEORIGIN\"\n" .
+            "    Header set Referrer-Policy \"strict-origin-when-cross-origin\"\n" .
+            "</IfModule>\n";
+
+        $existing = file_exists($htaccessPath) ? (file_get_contents($htaccessPath) ?: '') : '';
+        if (strpos($existing, 'Mass Utility Security Headers Protection') === false) {
+            @file_put_contents($htaccessPath, $existing . $headerBlock);
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Security headers applied to root .htaccess successfully!']);
+    }
 }

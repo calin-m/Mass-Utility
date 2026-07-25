@@ -39,14 +39,31 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
       const res = await fetch(getApiUrl('api_fix_permissions'));
       const data = await res.json();
       if (data.success) {
-        if (showAlert) showAlert('Permissions automatically repaired!', 'success');
-        // Re-run diagnostics
+        if (showAlert) showAlert('File permissions automatically repaired on host!', 'success');
         runDiagnostics();
       } else {
         if (showAlert) showAlert('Failed to fix permissions: ' + (data.error || 'Unknown error'), 'error');
       }
     } catch (e: any) {
       if (showAlert) showAlert('Error fixing permissions: ' + e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applySecurityHeaders = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(getApiUrl('api_apply_security_headers'));
+      const data = await res.json();
+      if (data.success) {
+        if (showAlert) showAlert('✨ Security headers applied to .htaccess successfully!', 'success');
+        runDiagnostics();
+      } else {
+        if (showAlert) showAlert('Failed to apply headers: ' + (data.error || 'Unknown error'), 'error');
+      }
+    } catch (e: any) {
+      if (showAlert) showAlert('Error applying security headers: ' + e.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -167,20 +184,31 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
               Audits security configurations, file system access, and SSL safety of both the Admin Portal and SaaS Dashboard servers.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {diagnostics && (
-              <button 
-                onClick={fixPermissions}
-                disabled={loading}
-                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2"
-              >
-                <FolderLock className="w-4 h-4" /> Auto-Fix Permissions
-              </button>
+              <>
+                <button 
+                  onClick={applySecurityHeaders}
+                  disabled={loading}
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+                  title="Inject HSTS, nosniff, and SAMEORIGIN security headers into .htaccess"
+                >
+                  <Lock className="w-4 h-4 text-purple-400" /> Apply .htaccess Headers
+                </button>
+                <button 
+                  onClick={fixPermissions}
+                  disabled={loading}
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+                  title="Repair folder permissions to 0755 and file permissions to 0644"
+                >
+                  <FolderLock className="w-4 h-4 text-amber-400" /> Repair Permissions
+                </button>
+              </>
             )}
             <button 
               onClick={runDiagnostics}
               disabled={loading}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${loading ? 'bg-pm-border text-pm-secondary' : 'pm-btn-primary'}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${loading ? 'bg-pm-border text-pm-secondary' : 'pm-btn-primary'}`}
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
               {loading ? 'Scanning...' : 'Run System Security Audit'}

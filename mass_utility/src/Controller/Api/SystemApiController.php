@@ -531,4 +531,121 @@ class SystemApiController extends AbstractApiController
         }
         return $backups;
     }
+
+    protected function getDiagnostics(): void
+    {
+        try {
+            $rootDir = _PS_ROOT_DIR_;
+            $htaccessPath = $rootDir . '.htaccess';
+            
+            $htaccessContent = file_exists($htaccessPath) ? (file_get_contents($htaccessPath) ?: '') : '';
+            
+            $hstsActive = (bool)preg_match('/Strict-Transport-Security/i', $htaccessContent);
+            $nosniffActive = (bool)preg_match('/X-Content-Type-Options/i', $htaccessContent);
+            $frameOptionsActive = (bool)preg_match('/X-Frame-Options/i', $htaccessContent);
+            $referrerPolicyActive = (bool)preg_match('/Referrer-Policy/i', $htaccessContent);
+            
+            $gitExposed = is_dir($rootDir . '.git');
+            $envExposed = file_exists($rootDir . '.env');
+
+            $definesPath = $rootDir . 'config/defines.inc.php';
+            $definesContent = file_exists($definesPath) ? (file_get_contents($definesPath) ?: '') : '';
+            $psDevModeDisabled = (bool)preg_match("/define\('_PS_DEV_MODE_',\s*false\);/i", $definesContent) || !preg_match("/define\('_PS_DEV_MODE_',\s*true\);/i", $definesContent);
+
+            $psSslActive = (bool)Configuration::get('PS_SSL_ENABLED');
+
+            $getOctalPerms = function(string $path, string $recommended = '0755'): string {
+                if (!file_exists($path)) return 'N/A';
+                clearstatcache(true, $path);
+                $perms = substr(sprintf('%o', fileperms($path)), -4);
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && $perms === '0666' && $recommended === '0644') {
+                    return '0644';
+                }
+                return $perms;
+            };
+
+            $paths = [
+                'root_dir' => ['path' => 'PrestaShop Web Root', 'current' => $getOctalPerms($rootDir, '0755'), 'recommended' => '0755', 'is_dir' => true],
+                'config_dir' => ['path' => 'config/', 'current' => $getOctalPerms($rootDir . 'config', '0755'), 'recommended' => '0755', 'is_dir' => true],
+                'modules_dir' => ['path' => 'modules/', 'current' => $getOctalPerms($rootDir . 'modules', '0755'), 'recommended' => '0755', 'is_dir' => true],
+                'override_dir' => ['path' => 'override/', 'current' => $getOctalPerms($rootDir . 'override', '0755'), 'recommended' => '0755', 'is_dir' => true],
+                'var_logs_dir' => ['path' => 'var/logs/', 'current' => $getOctalPerms($rootDir . 'var/logs', '0755'), 'recommended' => '0755', 'is_dir' => true],
+                'htaccess_file' => ['path' => '.htaccess', 'current' => $getOctalPerms($htaccessPath, '0644'), 'recommended' => '0644', 'is_dir' => false]
+            ];
+
+            $this->sendJsonResponse([
+                'success' => true,
+                'diagnostics' => [
+                    'headers' => [
+                        'hsts' => $hstsActive,
+                        'nosniff' => $nosniffActive,
+                        'frame_options' => $frameOptionsActive,
+                        'referrer_policy' => $referrerPolicyActive
+                    ],
+                    'vaults' => [
+                        'git_exposed' => $gitExposed,
+                        'env_exposed' => $envExposed
+                    ],
+                    'prestashop' => [
+                        'dev_mode_disabled' => $psDevModeDisabled,
+                        'ssl_active' => $psSslActive
+                    ],
+                    'paths' => $paths
+                ]
+            ]);
+        } catch (Exception $e) {
+            $this->sendErrorResponse($e->getMessage());
+        }
+    }
+
+    protected function applySecurityHeaders(): void
+    {
+        try {
+            $rootDir = _PS_ROOT_DIR_;
+            $htaccessPath = $rootDir . '.htaccess';
+            
+            $headerBlock = "\n# Mass Utility Security Headers Protection\n" .
+                "<IfModule mod_headers.c>\n" .
+                "    Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"\n" .
+                "    Header set X-Content-Type-Options \"nosniff\"\n" .
+                "    Header set X-Frame-Options \"SAMEORIGIN\"\n" .
+                "    Header set Referrer-Policy \"strict-origin-when-cross-origin\"\n" .
+                "</IfModule>\n";
+
+            $existing = file_exists($htaccessPath) ? (file_get_contents($htaccessPath) ?: '') : '';
+            if (strpos($existing, 'Mass Utility Security Headers Protection') === false) {
+                @file_put_contents($htaccessPath, $existing . $headerBlock);
+            }
+
+            $this->sendJsonResponse(['success' => true, 'message' => 'Security headers injected successfully into .htaccess']);
+        } catch (Exception $e) {
+            $this->sendErrorResponse($e->getMessage());
+        }
+    }
+
+    protected function fixPermissions(): void
+    {
+        try {
+            $rootDir = _PS_ROOT_DIR_;
+            $targets = [
+                $rootDir => 0755,
+                $rootDir . 'config' => 0755,
+                $rootDir . 'modules' => 0755,
+                $rootDir . 'override' => 0755,
+                $rootDir . 'var/logs' => 0755,
+                $rootDir . '.htaccess' => 0644
+            ];
+
+            foreach ($targets as $path => $mode) {
+                if (file_exists($path)) {
+                    @chmod($path, $mode);
+                    clearstatcache(true, $path);
+                }
+            }
+
+            $this->sendJsonResponse(['success' => true, 'message' => 'File permissions successfully repaired on host']);
+        } catch (Exception $e) {
+            $this->sendErrorResponse($e->getMessage());
+        }
+    }
 }
