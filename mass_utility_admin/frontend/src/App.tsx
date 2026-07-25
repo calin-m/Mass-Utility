@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Key, Package, Settings, ShieldCheck, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users, Building2 } from 'lucide-react';
+import { Key, Package, Settings, ShieldCheck, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users, Building2, X } from 'lucide-react';
 import { LicensesTab, License, UserAccount } from './components/LicensesTab';
 import { ClientsTab } from './components/ClientsTab';
 import { CompaniesTab, Company } from './components/CompaniesTab';
@@ -124,11 +124,21 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-pm-bg text-pm-text p-4 md:p-8 transition-colors duration-200">
       {/* Toast Notification */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border text-xs font-bold flex items-center gap-2 animate-in slide-in-from-top duration-200 ${
-          toast.type === 'error' ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+        <div className={`fixed bottom-5 right-5 z-[999999] px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border text-xs font-bold flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-200 ${
+          toast.type === 'error' ? 'bg-rose-950/90 border-rose-500/30 text-rose-300 border-l-4 border-l-rose-500' : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-300 border-l-4 border-l-emerald-500'
         }`}>
-          {toast.type === 'error' ? <AlertCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-          <span>{toast.msg}</span>
+          <div className="flex items-center gap-2">
+            {toast.type === 'error' ? <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" /> : <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />}
+            <span>{toast.msg}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="p-1 rounded-lg hover:bg-white/10 text-pm-secondary hover:text-pm-text transition ml-2 shrink-0"
+            title="Dismiss Notification"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
