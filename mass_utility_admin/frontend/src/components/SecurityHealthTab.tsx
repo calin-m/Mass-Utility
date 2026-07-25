@@ -91,7 +91,26 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
     }
   };
 
-  const headers = diagnostics?.headers || { hsts: false, nosniff: false, frame_options: false, referrer_policy: false, ssl_redirect: false };
+  useEffect(() => {
+    const autoAuditOnLoad = async () => {
+      setActiveAction('audit');
+      try {
+        const res = await fetch(getApiUrl('api_get_diagnostics'));
+        const data = await res.json();
+        if (data.success) {
+          setDiagnostics(data.diagnostics);
+        }
+      } catch (e) {
+        // silent fallback on initial load
+      } finally {
+        setActiveAction(null);
+      }
+    };
+    autoAuditOnLoad();
+  }, []);
+
+  const headers = diagnostics?.headers || {};
+  const perms = diagnostics?.permissions || {};
 
   const hasIssues = diagnostics && (
     diagnostics.admin_git_exposed || 
@@ -106,12 +125,30 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
 
   return (
     <div className="space-y-6 w-full">
-      {/* Portal System Status Card Container */}
-      <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation">
+      {/* Portal System Status Card Container with Dynamic Warning Glow Aura */}
+      <div className={`bg-pm-card rounded-xl p-5 shadow-sm pm-card-elevation transition-all duration-500 border ${
+        hasIssues 
+          ? 'border-rose-500/60 shadow-[0_0_20px_rgba(244,63,94,0.25)] ring-1 ring-rose-500/40 animate-pulse' 
+          : diagnostics 
+            ? 'border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/20'
+            : 'border-pm-border'
+      }`}>
         <SectionHeader
           title={t('security_title')}
           subtitle={t('security_subtitle')}
           icon={Settings}
+          action={
+            diagnostics ? (
+              <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 border uppercase tracking-wider ${
+                hasIssues 
+                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse' 
+                  : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+              }`}>
+                {hasIssues ? <AlertTriangle className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+                <span>{hasIssues ? t('diag_vuln_detected_title') : t('diag_all_passed_title')}</span>
+              </span>
+            ) : null
+          }
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">

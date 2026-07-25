@@ -216,11 +216,6 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         subtitle={t('audit_subtitle')}
         action={
           <div className="flex items-center gap-3">
-            <a href="?action=api_export_admin_logs_csv" download className="no-underline">
-              <Button variant="primary" size="md" icon={Download}>
-                {t('btn_export_csv')}
-              </Button>
-            </a>
             <Button
               variant="danger"
               size="md"
@@ -230,6 +225,11 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
             >
               {t('btn_clear')}
             </Button>
+            <a href="?action=api_export_admin_logs_csv" download className="no-underline">
+              <Button variant="primary" size="md" icon={Download}>
+                {t('btn_export_csv')}
+              </Button>
+            </a>
             <Button
               variant="neutral"
               size="md"
