@@ -92,6 +92,16 @@ class AdminSettingsManager
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_admin_logs ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                admin_username VARCHAR(128) NOT NULL,
+                action_type VARCHAR(64) NOT NULL,
+                target_entity VARCHAR(64) NOT NULL,
+                target_id VARCHAR(64) NULL,
+                details TEXT NOT NULL,
+                ip_address VARCHAR(45) NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
 
             // Auto-migrate schema columns safely
             $userCols = $pdo->query("PRAGMA table_info(pm_users)")->fetchAll(\PDO::FETCH_ASSOC);

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Key, Package, Settings, ShieldCheck, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users, Building2, X } from 'lucide-react';
+import { Key, Package, Settings, ShieldCheck, Shield, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users, Building2, X } from 'lucide-react';
 import { LicensesTab, License, UserAccount } from './components/LicensesTab';
 import { ClientsTab } from './components/ClientsTab';
 import { CompaniesTab, Company } from './components/CompaniesTab';
 import { PackageTiersTab, PackageTier } from './components/PackageTiersTab';
 import { SettingsTab } from './components/SettingsTab';
 import { SecurityHealthTab } from './components/SecurityHealthTab';
+import { AuditLogsTab } from './components/AuditLogsTab';
 import { LoginView } from './components/LoginView';
 import { SetupView } from './components/SetupView';
 
@@ -14,7 +15,7 @@ export const App: React.FC = () => {
   const [hasAdmin, setHasAdmin] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security'>('companies');
+  const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit'>('companies');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
@@ -233,6 +234,15 @@ export const App: React.FC = () => {
           >
             <ShieldCheck className="w-4 h-4" /> Security &amp; Health
           </button>
+
+          <button
+            onClick={() => setActiveTab('audit')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'audit' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <Shield className="w-4 h-4" /> Audit Logs
+          </button>
         </div>
       </nav>
 
@@ -252,6 +262,7 @@ export const App: React.FC = () => {
         )}
         {activeTab === 'settings' && <SettingsTab showAlert={showAlert} />}
         {activeTab === 'security' && <SecurityHealthTab showAlert={showAlert} />}
+        {activeTab === 'audit' && <AuditLogsTab onNotify={showAlert} />}
       </main>
     </div>
   );

@@ -660,4 +660,128 @@ class AdminApiController
 
         echo json_encode(['success' => true, 'message' => 'HTTPS 301 redirect rule injected into root .htaccess successfully!']);
     }
+
+    private function extend_license(): void
+    {
+        if (!$this->auth->isAuthenticated()) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $addMonths = isset($_POST['months']) ? (int)$_POST['months'] : null;
+        $customDate = !empty($_POST['custom_date']) ? trim($_POST['custom_date']) : null;
+
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Valid License ID is required.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->extendLicenseExpiration($id, $addMonths, $customDate);
+            if ($success) {
+                $adminUser = $_SESSION['admin_username'] ?? 'admin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $this->repo->logAdminAction($adminUser, 'EXTEND_LICENSE', 'license', (string)$id, [
+                    'months_added' => $addMonths,
+                    'custom_date' => $customDate
+                ], $ip);
+                echo json_encode(['success' => true, 'message' => 'License expiration updated successfully!']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Failed to extend license expiration.']);
+            }
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function update_license_domains(): void
+    {
+        if (!$this->auth->isAuthenticated()) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $domainsRaw = $_POST['domains'] ?? [];
+        $domains = is_array($domainsRaw) ? $domainsRaw : (json_decode((string)$domainsRaw, true) ?: []);
+
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Valid License ID is required.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->updateLicenseDomains($id, (array)$domains);
+            if ($success) {
+                $adminUser = $_SESSION['admin_username'] ?? 'admin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $this->repo->logAdminAction($adminUser, 'UPDATE_LICENSE_DOMAINS', 'license', (string)$id, [
+                    'domains' => $domains
+                ], $ip);
+                echo json_encode(['success' => true, 'message' => 'Bound store domains updated successfully!']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Failed to update store domains.']);
+            }
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function get_admin_logs(): void
+    {
+        if (!$this->auth->isAuthenticated()) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+
+        $search = !empty($_GET['search']) ? trim($_GET['search']) : null;
+        $actionType = !empty($_GET['action_type']) ? trim($_GET['action_type']) : null;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
+        try {
+            $logs = $this->repo->getAdminLogs($search, $actionType, $limit, $offset);
+            echo json_encode(['success' => true, 'logs' => $logs]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function export_admin_logs_csv(): void
+    {
+        if (!$this->auth->isAuthenticated()) {
+            http_response_code(401);
+            echo 'Unauthorized';
+            return;
+        }
+
+        try {
+            $logs = $this->repo->getAdminLogs(null, null, 1000, 0);
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="admin_operations_audit_' . date('Y-m-d_H-i') . '.csv"');
+
+            $output = fopen('php://output', 'w');
+            fputcsv($output, ['Log ID', 'Timestamp', 'Admin User', 'Action Type', 'Target Entity', 'Target ID', 'IP Address', 'Details']);
+
+            foreach ($logs as $log) {
+                fputcsv($output, [
+                    $log['id'] ?? '',
+                    $log['created_at'] ?? '',
+                    $log['admin_username'] ?? '',
+                    $log['action_type'] ?? '',
+                    $log['target_entity'] ?? '',
+                    $log['target_id'] ?? '',
+                    $log['ip_address'] ?? '',
+                    $log['details'] ?? ''
+                ]);
+            }
+            fclose($output);
+            exit;
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo 'Error generating CSV: ' . $e->getMessage();
+            exit;
+        }
+    }
 }

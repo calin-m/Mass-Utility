@@ -322,4 +322,84 @@ class LicenseRepository
         $stmt = $this->db->prepare("DELETE FROM pm_companies WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+    public function extendLicenseExpiration(int $id, ?int $addMonths = null, ?string $customDate = null): bool
+    {
+        $stmt = $this->db->prepare("SELECT expires_at FROM pm_licenses WHERE id = ?");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            throw new \Exception("License not found.");
+        }
+
+        $newDate = null;
+        if ($customDate !== null && trim($customDate) !== '') {
+            $newDate = date('Y-m-d H:i:s', strtotime($customDate));
+        } elseif ($addMonths !== null) {
+            $baseTime = (!empty($row['expires_at']) && strtotime($row['expires_at']) > time())
+                ? strtotime($row['expires_at'])
+                : time();
+            $newDate = date('Y-m-d H:i:s', strtotime("+{$addMonths} months", $baseTime));
+        }
+
+        $updateStmt = $this->db->prepare("UPDATE pm_licenses SET expires_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        return $updateStmt->execute([$newDate, $id]);
+    }
+
+    public function updateLicenseDomains(int $id, array $domains): bool
+    {
+        $cleaned = array_values(array_unique(array_filter(array_map('trim', $domains))));
+        $encoded = !empty($cleaned) ? json_encode($cleaned, JSON_UNESCAPED_SLASHES) : null;
+        $stmt = $this->db->prepare("UPDATE pm_licenses SET store_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        return $stmt->execute([$encoded, $id]);
+    }
+
+    public function logAdminAction(string $adminUsername, string $actionType, string $targetEntity, ?string $targetId, array $details, string $ipAddress = '127.0.0.1'): bool
+    {
+        try {
+            $stmt = $this->db->prepare("INSERT INTO pm_admin_logs (admin_username, action_type, target_entity, target_id, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)");
+            return $stmt->execute([
+                $adminUsername,
+                $actionType,
+                $targetEntity,
+                $targetId,
+                json_encode($details, JSON_UNESCAPED_SLASHES),
+                $ipAddress
+            ]);
+        } catch (\Throwable $t) {
+            return false;
+        }
+    }
+
+    public function getAdminLogs(?string $search = null, ?string $actionType = null, int $limit = 100, int $offset = 0): array
+    {
+        $where = [];
+        $params = [];
+        if ($search !== null && trim($search) !== '') {
+            $where[] = "(admin_username LIKE ? OR target_id LIKE ? OR details LIKE ?)";
+            $s = '%' . trim($search) . '%';
+            $params[] = $s;
+            $params[] = $s;
+            $params[] = $s;
+        }
+        if ($actionType !== null && trim($actionType) !== '' && $actionType !== 'ALL') {
+            $where[] = "action_type = ?";
+            $params[] = trim($actionType);
+        }
+
+        $sql = "SELECT * FROM pm_admin_logs";
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(" AND ", $where);
+        }
+        $sql .= " ORDER BY id DESC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(function ($row) {
+            $row['details_parsed'] = !empty($row['details']) ? json_decode($row['details'], true) : [];
+            return $row;
+        }, is_array($rows) ? $rows : []);
+    }
 }
