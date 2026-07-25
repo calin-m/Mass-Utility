@@ -25,6 +25,12 @@ export const App: React.FC = () => {
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [inspectedClient, setInspectedClient] = useState<any | null>(null);
+
+  const handleInspectClient = (client: any) => {
+    setInspectedClient(client);
+    setActiveTab('clients');
+  };
 
   const showAlert = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -113,12 +119,6 @@ export const App: React.FC = () => {
   if (!authenticated) {
     return <LoginView onLoginSuccess={() => { setAuthenticated(true); fetchAdminData(); }} />;
   }
-  const [inspectedClient, setInspectedClient] = useState<any | null>(null);
-
-  const handleInspectClient = (client: any) => {
-    setInspectedClient(client);
-    setActiveTab('clients');
-  };
 
   return (
     <div className="min-h-screen bg-pm-bg text-pm-text p-4 md:p-8 transition-colors duration-200">
