@@ -220,10 +220,8 @@ class AdminApiController
     {
         $id = (int)($_POST['id'] ?? 0);
         $email = trim($_POST['email'] ?? '');
-        $company = trim($_POST['company'] ?? '');
-        if (empty($company)) {
-            $company = null;
-        }
+        $companyRaw = trim($_POST['company'] ?? $_POST['company_name'] ?? '');
+        $company = !empty($companyRaw) ? $companyRaw : null;
         $status = $_POST['status'] ?? 'active';
 
         if ($id <= 0 || empty($email)) {

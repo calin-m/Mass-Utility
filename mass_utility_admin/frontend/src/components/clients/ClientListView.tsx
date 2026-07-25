@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw, UserPlus, Check, Sparkles, Copy } from 'lucide-react';
+import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw, UserPlus, Check, Sparkles, Copy, PlusCircle } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
+import { DirectoryToolbar } from '../common/DirectoryToolbar';
 
 interface ClientListViewProps {
   users: UserAccount[];
@@ -193,6 +194,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     try {
       const formData = new FormData();
       formData.append('id', String(user.id));
+      formData.append('email', user.email);
       formData.append('company_name', user.company_name || '');
       formData.append('status', newStatus);
 
@@ -218,6 +220,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     try {
       const formData = new FormData();
       formData.append('id', String(editingUser.id));
+      formData.append('email', editingUser.email);
       formData.append('company_name', editCompany);
       formData.append('status', editingUser.status || 'active');
 
@@ -288,26 +291,14 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         subtitle="Manage client credentials, company profiles, account statuses, and associated store licenses."
         icon={Users}
         action={
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="group bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-400/30 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/35 active:scale-95 transition-all duration-200"
-              title="Create New Standalone Client Account"
-            >
-              <UserPlus className="w-4 h-4 text-purple-200 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
-              <span>Create Client Account</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onRefresh}
-              className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Refresh Client Accounts List"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> Refresh
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onRefresh}
+            className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+            title="Refresh Client Accounts List"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          </button>
         }
       />
 
@@ -318,6 +309,25 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         <StatCard label="Suspended Accounts" value={suspendedClients} icon={ShieldAlert} color="rose" />
         <StatCard label="Bound Store Domains" value={totalBoundDomains} icon={Building} color="amber" />
       </div>
+
+      {/* Shared Directory Toolbar */}
+      <DirectoryToolbar
+        searchPlaceholder="Search by client email or store name..."
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        statusFilters={[
+          { key: 'all', label: 'All Accounts', count: totalClients },
+          { key: 'active', label: 'Active', count: activeClients },
+          { key: 'suspended', label: 'Suspended', count: suspendedClients }
+        ]}
+        activeFilter={statusFilter}
+        onFilterChange={(key) => setStatusFilter(key as any)}
+        primaryAction={{
+          label: 'Create Client Account',
+          icon: UserPlus,
+          onClick: () => setShowCreateModal(true)
+        }}
+      />
 
       {/* Main Client Directory Section */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
@@ -367,50 +377,6 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
             </div>
           </div>
         )}
-
-        {/* Search & Filter Controls */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-pm-secondary absolute left-3 top-3" />
-            <input
-              type="text"
-              placeholder="Search by client email or store name..."
-              className="w-full bg-pm-input border border-pm-border rounded-lg pl-9 pr-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setStatusFilter('all')}
-              className={`px-3 py-2 rounded-lg text-xs font-semibold transition ${
-                statusFilter === 'all' ? 'bg-pm-input text-pm-text border border-pm-primary/50' : 'pm-btn-neutral'
-              }`}
-            >
-              All ({totalClients})
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter('active')}
-              className={`px-3 py-2 rounded-lg text-xs font-semibold transition ${
-                statusFilter === 'active' ? 'bg-pm-input text-pm-text border border-pm-primary/50' : 'pm-btn-neutral'
-              }`}
-            >
-              Active ({activeClients})
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter('suspended')}
-              className={`px-3 py-2 rounded-lg text-xs font-semibold transition ${
-                statusFilter === 'suspended' ? 'bg-pm-input text-pm-text border border-pm-primary/50' : 'pm-btn-neutral'
-              }`}
-            >
-              Suspended ({suspendedClients})
-            </button>
-          </div>
-        </div>
 
         {/* Client Accounts Table */}
         <div className="overflow-x-auto rounded-lg border border-pm-border">

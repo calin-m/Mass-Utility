@@ -42,6 +42,11 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const isFull = usedCount >= maxCount;
   const isSuspended = company.status === 'suspended';
 
+  const [onboardMode, setOnboardMode] = useState<'assign' | 'create'>('assign');
+  const [selectedUnassignedUser, setSelectedUnassignedUser] = useState<number | ''>('');
+
+  const unassignedUsers = users.filter(u => !u.company_name || u.company_name.trim() === '');
+
   const getApiUrl = (action: string) => `${window.location.pathname}?action=${action}`;
 
   const copyVatId = () => {
@@ -57,6 +62,35 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
     if (showAlert) showAlert('📋 License key copied to clipboard!', 'success');
+  };
+
+  const handleAssignExistingUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUnassignedUser) return;
+    const targetUser = users.find(u => u.id === Number(selectedUnassignedUser));
+    if (!targetUser) return;
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('id', String(targetUser.id));
+      formData.append('email', targetUser.email);
+      formData.append('company_name', company.company_name);
+      formData.append('status', targetUser.status || 'active');
+
+      const res = await fetch(getApiUrl('api_update_user'), { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        if (showAlert) showAlert(`🔗 ${targetUser.email} assigned to ${company.company_name}!`, 'success');
+        setSelectedUnassignedUser('');
+        onRefresh();
+      } else {
+        if (showAlert) showAlert('❌ Failed: ' + (data.error || 'Unknown error'), 'error');
+      }
+    } catch (err: any) {
+      if (showAlert) showAlert('❌ Request failed: ' + err.message, 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const generateMemberPass = () => {
@@ -414,55 +448,128 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
             </div>
           </div>
 
-          {/* Section 3: Inline 1-Click Team Member Onboarding Widget */}
+          {/* Section 3: Dual-Mode Team Member Onboarding Widget */}
           <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-              <UserPlus className="w-4 h-4 text-purple-400" /> Add Team Member to Organization
-            </h3>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-pm-border pb-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <UserPlus className="w-4 h-4 text-purple-400" /> Onboard Team Member to {company.company_name}
+              </h3>
 
-            <form onSubmit={handleAddTeamMember} className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Member Email Address</label>
-                  <input
-                    type="email"
-                    required
-                    value={newMemberEmail}
-                    onChange={e => setNewMemberEmail(e.target.value)}
-                    placeholder="member@company.com"
-                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-[11px] font-semibold text-pm-secondary">Account Password</label>
-                    <button type="button" onClick={generateMemberPass} className="text-[10px] text-pm-primary hover:underline">
-                      Generate Strong Pass
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    value={newMemberPassword}
-                    onChange={e => setNewMemberPassword(e.target.value)}
-                    placeholder="Set password..."
-                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-2">
+              {/* Mode Toggle Pills */}
+              <div className="flex gap-1.5 bg-pm-input/50 p-1 rounded-lg border border-pm-border">
                 <button
-                  type="submit"
-                  disabled={submitting}
-                  className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md"
+                  type="button"
+                  onClick={() => setOnboardMode('assign')}
+                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition flex items-center gap-1.5 ${
+                    onboardMode === 'assign'
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'text-pm-secondary hover:text-pm-text'
+                  }`}
                 >
-                  <UserPlus className="w-4 h-4 text-white" />
-                  <span>{submitting ? 'Adding...' : 'Add Team Member'}</span>
+                  <span>🔗 Assign Unassigned Client</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[9px] ${
+                    onboardMode === 'assign' ? 'bg-white/20 text-white' : 'bg-pm-card text-pm-secondary'
+                  }`}>
+                    {unassignedUsers.length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOnboardMode('create')}
+                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition flex items-center gap-1.5 ${
+                    onboardMode === 'create'
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'text-pm-secondary hover:text-pm-text'
+                  }`}
+                >
+                  <span>✨ Create New Account</span>
                 </button>
               </div>
-            </form>
+            </div>
+
+            {onboardMode === 'assign' ? (
+              <form onSubmit={handleAssignExistingUser} className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-pm-secondary mb-1">
+                    Select Client Account from Unassigned Pool ({unassignedUsers.length} available)
+                  </label>
+                  {unassignedUsers.length > 0 ? (
+                    <select
+                      value={selectedUnassignedUser}
+                      onChange={e => setSelectedUnassignedUser(e.target.value ? Number(e.target.value) : '')}
+                      required
+                      className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500 font-mono"
+                    >
+                      <option value="">-- Choose registered unassigned client --</option>
+                      {unassignedUsers.map(u => (
+                        <option key={u.id} value={u.id}>
+                          {u.email} (ID: #{u.id})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="p-3 bg-pm-card border border-pm-border rounded-lg text-xs text-pm-secondary italic">
+                      ℹ️ No standalone unassigned client accounts currently available. Use "Create New Account" to onboard a brand-new user.
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={submitting || !selectedUnassignedUser || unassignedUsers.length === 0}
+                    className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md disabled:opacity-50"
+                  >
+                    <UserPlus className="w-4 h-4 text-white" />
+                    <span>{submitting ? 'Assigning...' : '🔗 Assign Selected Client to Team'}</span>
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleAddTeamMember} className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Member Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={newMemberEmail}
+                      onChange={e => setNewMemberEmail(e.target.value)}
+                      placeholder="member@company.com"
+                      className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-[11px] font-semibold text-pm-secondary">Account Password</label>
+                      <button type="button" onClick={generateMemberPass} className="text-[10px] text-pm-primary hover:underline">
+                        Generate Strong Pass
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={newMemberPassword}
+                      onChange={e => setNewMemberPassword(e.target.value)}
+                      placeholder="Set password..."
+                      className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md"
+                  >
+                    <UserPlus className="w-4 h-4 text-white" />
+                    <span>{submitting ? 'Creating...' : '✨ Create & Add Team Member'}</span>
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </div>

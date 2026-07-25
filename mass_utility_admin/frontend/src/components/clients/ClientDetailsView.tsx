@@ -64,6 +64,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
     try {
       const formData = new FormData();
       formData.append('id', String(user.id));
+      formData.append('email', user.email);
       formData.append('company_name', user.company_name || '');
       formData.append('status', newStatus);
 

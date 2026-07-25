@@ -241,13 +241,32 @@ class LicenseRepository
             throw new \Exception("A company with the name '{$name}' already exists.");
         }
 
+        $oldStmt = $this->db->prepare("SELECT company_name FROM pm_companies WHERE id = ?");
+        $oldStmt->execute([$id]);
+        $oldRow = $oldStmt->fetch(PDO::FETCH_ASSOC);
+        $oldName = $oldRow['company_name'] ?? null;
+
         $stmt = $this->db->prepare("UPDATE pm_companies SET company_name = ?, tax_id = ?, max_licenses = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-        return $stmt->execute([$name, $taxId, $maxLicenses, $status, $id]);
+        $res = $stmt->execute([$name, $taxId, $maxLicenses, $status, $id]);
+
+        if ($res && $oldName && $oldName !== $name) {
+            $this->db->prepare("UPDATE pm_users SET company_name = ? WHERE company_name = ?")->execute([$name, $oldName]);
+        }
+        return $res;
     }
 
     public function deleteCompany(int $id): bool
     {
-        $this->db->prepare("UPDATE pm_users SET company_id = NULL WHERE company_id = ?")->execute([$id]);
+        $oldStmt = $this->db->prepare("SELECT company_name FROM pm_companies WHERE id = ?");
+        $oldStmt->execute([$id]);
+        $oldRow = $oldStmt->fetch(PDO::FETCH_ASSOC);
+        $oldName = $oldRow['company_name'] ?? null;
+
+        if ($oldName) {
+            $this->db->prepare("UPDATE pm_users SET company_name = NULL, company_id = NULL WHERE company_name = ? OR company_id = ?")->execute([$oldName, $id]);
+        } else {
+            $this->db->prepare("UPDATE pm_users SET company_name = NULL, company_id = NULL WHERE company_id = ?")->execute([$id]);
+        }
         $this->db->prepare("UPDATE pm_licenses SET company_id = NULL WHERE company_id = ?")->execute([$id]);
         $stmt = $this->db->prepare("DELETE FROM pm_companies WHERE id = ?");
         return $stmt->execute([$id]);

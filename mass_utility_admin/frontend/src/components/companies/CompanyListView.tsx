@@ -3,6 +3,7 @@ import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, A
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { BaseModal } from '../common/BaseModal';
+import { DirectoryToolbar } from '../common/DirectoryToolbar';
 
 export interface Company {
   id: number;
@@ -214,42 +215,21 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
         <StatCard label="Managed Licenses" value={totalCompanyLicenses} icon={Key} color="amber" />
       </div>
 
-      {/* Toolbar */}
-      <div className="bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm pm-card-elevation flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-pm-secondary" />
-            <input
-              type="text"
-              placeholder="Search by company name or VAT ID..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg pl-9 pr-3 py-1.5 text-xs text-pm-text focus:outline-none focus:border-pm-primary"
-            />
-          </div>
-
-          <div className="flex gap-1.5">
-            <button
-              onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                statusFilter === 'all' ? 'bg-pm-input text-pm-text border border-pm-primary/50 shadow-sm' : 'pm-btn-neutral'
-              }`}
-            >
-              All ({companies.length})
-            </button>
-            <button
-              onClick={() => setStatusFilter('active')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                statusFilter === 'active' ? 'bg-pm-input text-pm-text border border-pm-primary/50 shadow-sm' : 'pm-btn-neutral'
-              }`}
-            >
-              Active ({activeCount})
-            </button>
-          </div>
-        </div>
-
-        <button
-          onClick={() => {
+      {/* Shared Directory Toolbar */}
+      <DirectoryToolbar
+        searchPlaceholder="Search by company name or VAT ID..."
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        statusFilters={[
+          { key: 'all', label: 'All Companies', count: companies.length },
+          { key: 'active', label: 'Active', count: activeCount }
+        ]}
+        activeFilter={statusFilter}
+        onFilterChange={(key) => setStatusFilter(key as any)}
+        primaryAction={{
+          label: 'Add Company Profile',
+          icon: PlusCircle,
+          onClick: () => {
             setName('');
             setTaxId('');
             setMaxLicenses(10);
@@ -257,12 +237,9 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
             setOwnerPassword('');
             setCreateOwnerAccount(false);
             setIsCreateOpen(true);
-          }}
-          className="pm-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shrink-0 shadow-md"
-        >
-          <PlusCircle className="w-4 h-4" /> Add Company Profile
-        </button>
-      </div>
+          }
+        }}
+      />
 
       {/* Companies Directory Table */}
       <div className="bg-pm-card border border-pm-border rounded-xl shadow-sm overflow-hidden pm-card-elevation">
