@@ -9,6 +9,7 @@ import { SecurityHealthTab } from './components/SecurityHealthTab';
 import { AuditLogsTab } from './components/AuditLogsTab';
 import { LoginView } from './components/LoginView';
 import { SetupView } from './components/SetupView';
+import { ToastNotification } from './components/common/ToastNotification';
 
 export const App: React.FC = () => {
   const [authChecked, setAuthChecked] = useState(false);
@@ -124,24 +125,7 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-pm-bg text-pm-text p-4 md:p-8 transition-colors duration-200">
       {/* Toast Notification */}
-      {toast && (
-        <div className={`fixed bottom-5 right-5 z-[999999] px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border text-xs font-bold flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-200 ${
-          toast.type === 'error' ? 'bg-rose-950/90 border-rose-500/30 text-rose-300 border-l-4 border-l-rose-500' : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-300 border-l-4 border-l-emerald-500'
-        }`}>
-          <div className="flex items-center gap-2">
-            {toast.type === 'error' ? <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" /> : <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />}
-            <span>{toast.msg}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setToast(null)}
-            className="p-1 rounded-lg hover:bg-white/10 text-pm-secondary hover:text-pm-text transition ml-2 shrink-0"
-            title="Dismiss Notification"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
+      <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       {/* Admin Navigation Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-pm-border">

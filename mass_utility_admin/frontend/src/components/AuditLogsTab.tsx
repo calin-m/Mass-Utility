@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Search, RefreshCw, Download, Terminal, Calendar, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Building2, Key, Activity, Layers, UserCheck } from 'lucide-react';
+import { Shield, Search, RefreshCw, Download, Terminal, Calendar, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Activity, Layers, UserCheck, ShieldAlert } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 import { StatCard } from './common/StatCard';
 import { BaseModal } from './common/BaseModal';
+import { StatusBadge } from './common/StatusBadge';
 
 interface AuditLog {
   id: number;
@@ -66,42 +67,19 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   const accountCompanyActions = logs.filter(
     (l) => l.action_type.includes('COMPANY') || l.action_type.includes('USER') || l.action_type.includes('PASSWORD')
   ).length;
+  const securityEvents = logs.filter((l) => l.action_type.includes('DELETE') || l.action_type.includes('RESET')).length;
 
-  const getActionBadge = (actionType: string) => {
-    switch (actionType) {
-      case 'CREATE_COMPANY':
-      case 'UPDATE_COMPANY':
-      case 'DELETE_COMPANY':
-        return (
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30 flex items-center gap-1 w-fit">
-            <Building2 className="w-3 h-3" /> {actionType}
-          </span>
-        );
-      case 'GENERATE_LICENSE':
-      case 'ASSIGN_LICENSE':
-      case 'EXTEND_LICENSE':
-      case 'UPDATE_LICENSE_DOMAINS':
-        return (
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1 w-fit">
-            <Key className="w-3 h-3" /> {actionType}
-          </span>
-        );
-      case 'CREATE_USER':
-      case 'UPDATE_USER':
-      case 'RESET_PASSWORD':
-      case 'DELETE_USER':
-        return (
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1 w-fit">
-            <User className="w-3 h-3" /> {actionType}
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center gap-1 w-fit">
-            <Shield className="w-3 h-3" /> {actionType}
-          </span>
-        );
+  const renderBadge = (actionType: string) => {
+    if (actionType.includes('COMPANY')) {
+      return <StatusBadge label={actionType} type="company" customColor="sky" />;
     }
+    if (actionType.includes('LICENSE')) {
+      return <StatusBadge label={actionType} type="license" customColor="amber" />;
+    }
+    if (actionType.includes('USER') || actionType.includes('PASSWORD')) {
+      return <StatusBadge label={actionType} type="user" customColor="emerald" />;
+    }
+    return <StatusBadge label={actionType} type="security" customColor="purple" />;
   };
 
   const formatKeyName = (key: string): string => {
@@ -162,9 +140,9 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
             <a
               href="?action=api_export_admin_logs_csv"
               download
-              className="pm-btn-neutral text-xs py-2 px-3 flex items-center gap-2"
+              className="pm-btn-primary text-xs py-2 px-4 flex items-center gap-2 shadow-md shadow-purple-950/30 hover:scale-[1.02] transition"
             >
-              <Download className="w-3.5 h-3.5 text-purple-400" />
+              <Download className="w-3.5 h-3.5" />
               <span>Export CSV</span>
             </a>
             <button
@@ -182,28 +160,31 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         }
       />
 
-      {/* Overview Telemetry Stat Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Standardized 4-Card Overview Telemetry Stat Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Total Recorded Operations"
+          label="Total Operations"
           value={totalOperations}
-          subtext="Audit log events in active filter window"
           icon={Activity}
           color="purple"
         />
         <StatCard
           label="License Key Mutations"
           value={licenseMutations}
-          subtext="Generations, assignments & extensions"
           icon={Layers}
           color="blue"
         />
         <StatCard
-          label="Account & Company Actions"
+          label="Corporate Account Actions"
           value={accountCompanyActions}
-          subtext="User & corporate profile modifications"
           icon={UserCheck}
           color="emerald"
+        />
+        <StatCard
+          label="Security Events"
+          value={securityEvents}
+          icon={ShieldAlert}
+          color="amber"
         />
       </div>
 
@@ -280,7 +261,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                       <User className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                       <span>{log.admin_username}</span>
                     </td>
-                    <td className="p-3">{getActionBadge(log.action_type)}</td>
+                    <td className="p-3">{renderBadge(log.action_type)}</td>
                     <td className="p-3 text-pm-secondary font-mono">
                       <span className="capitalize">{log.target_entity}</span> {log.target_id ? `(#${log.target_id})` : ''}
                     </td>
@@ -294,7 +275,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                           setSelectedLog(log);
                           setShowRawJson(false);
                         }}
-                        className="pm-btn-neutral text-[11px] py-1 px-3 flex items-center gap-1.5 ml-auto font-semibold"
+                        className="pm-btn-neutral text-[11px] py-1 px-3 flex items-center gap-1.5 ml-auto font-semibold hover:border-pm-primary transition"
                       >
                         <FileText className="w-3.5 h-3.5 text-purple-400" />
                         <span>Inspect Log</span>
@@ -333,7 +314,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               </div>
               <div>
                 <span className="text-pm-secondary block text-[10px] uppercase font-bold">Action Type</span>
-                <div className="mt-1">{getActionBadge(selectedLog.action_type)}</div>
+                <div className="mt-1">{renderBadge(selectedLog.action_type)}</div>
               </div>
               <div>
                 <span className="text-pm-secondary block text-[10px] uppercase font-bold">Timestamp</span>
