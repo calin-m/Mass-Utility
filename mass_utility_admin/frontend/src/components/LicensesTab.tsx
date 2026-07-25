@@ -252,19 +252,19 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             </div>
             <div>
               <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Password</label>
-              <div className="flex rounded-lg overflow-hidden border border-pm-border focus-within:border-pm-primary bg-pm-input transition-colors">
+              <div className="flex gap-2">
                 <input
                   type={showAccountPassword ? 'text' : 'password'}
                   required
                   placeholder="Min 8 chars or click ⚡ Auto"
-                  className="flex-1 bg-transparent px-3 py-2 text-sm text-pm-text outline-none min-w-0"
+                  className="flex-1 bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none min-w-0"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
                   onClick={() => setShowAccountPassword(!showAccountPassword)}
-                  className="px-2.5 text-pm-secondary hover:text-pm-text border-l border-pm-border/50 hover:bg-pm-border/20 transition-colors flex items-center justify-center shrink-0"
+                  className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center transition shrink-0"
                   title={showAccountPassword ? "Hide Password" : "Show Password"}
                 >
                   {showAccountPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -272,7 +272,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                 <button
                   type="button"
                   onClick={generateRandomPassword}
-                  className="bg-pm-primary/10 hover:bg-pm-primary/20 text-pm-primary border-l border-pm-border text-xs font-semibold px-3 py-2 transition-colors flex items-center gap-1 shrink-0"
+                  className="pm-btn-neutral px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1 shrink-0"
                   title="Generate Random Password"
                 >
                   ⚡ Auto
