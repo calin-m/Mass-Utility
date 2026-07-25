@@ -4,6 +4,9 @@ import { BaseModal } from './common/BaseModal';
 import { ConfirmModal } from './common/ConfirmModal';
 import { SectionHeader } from './common/SectionHeader';
 import { StatCard } from './common/StatCard';
+import { Button } from './common/Button';
+import { FormInput } from './common/FormInput';
+import { FormSelect } from './common/FormSelect';
 
 export interface License {
   id: number;
@@ -144,6 +147,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
       showAlert('❌ Request failed: ' + err.message, 'error');
     }
   };
+
   const openEditModal = (lic: License) => {
     setEditingLicense(lic);
     setEditUserId(lic.user_id || 0);
@@ -152,6 +156,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     setEditDomain(lic.store_url || '');
     setEditExpires(lic.expires_at || '');
   };
+
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingLicense) return;
@@ -208,58 +213,54 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     }
   };
 
-  const maskKey = (key: string) => {
-    if (!key || key.length < 8) return '****';
-    return key.substring(0, 4) + ' - **** - **** - ' + key.substring(key.length - 4);
-  };
-
-  const parseDomains = (raw: string | null): string[] => {
-    if (!raw) return [];
-    try {
-      if (raw.trim().startsWith('[')) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed.map(d => String(d).trim()).filter(Boolean);
-      }
-    } catch (e) {}
-    return raw.split(',').map(d => d.trim()).filter(Boolean);
-  };
-
   const openDomainModal = (lic: License) => {
     setDomainLicense(lic);
-    setDomainList(parseDomains(lic.store_url));
+    if (lic.store_url) {
+      const parsed = lic.store_url.split(',').map(s => s.trim()).filter(Boolean);
+      setDomainList(parsed);
+    } else {
+      setDomainList([]);
+    }
     setNewDomainInput('');
   };
 
   const handleAddDomain = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDomainInput.trim()) return;
-    const clean = newDomainInput.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-    if (!domainList.includes(clean)) {
-      setDomainList([...domainList, clean]);
+    const clean = newDomainInput.trim().toLowerCase().replace(/^https?:\/\//, '');
+    if (domainList.includes(clean)) {
+      showAlert('⚠️ Domain already added to authorization list.', 'error');
+      return;
     }
+    setDomainList([...domainList, clean]);
     setNewDomainInput('');
   };
 
-  const handleRemoveDomain = (domain: string) => {
-    setDomainList(domainList.filter(d => d !== domain));
+  const handleRemoveDomain = (domainToRemove: string) => {
+    setDomainList(domainList.filter(d => d !== domainToRemove));
   };
 
   const handleSaveDomains = async () => {
     if (!domainLicense) return;
     setSavingDomains(true);
     try {
+      const joinedDomains = domainList.join(',');
       const formData = new FormData();
       formData.append('id', String(domainLicense.id));
-      domainList.forEach(d => formData.append('domains[]', d));
+      formData.append('user_id', String(domainLicense.user_id || 0));
+      formData.append('package_tier', domainLicense.package_tier);
+      formData.append('status', domainLicense.status);
+      formData.append('store_url', joinedDomains);
+      formData.append('expires_at', domainLicense.expires_at || '');
 
-      const res = await fetch('index.php?action=api_update_license_domains', { method: 'POST', body: formData });
+      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        showAlert('🌐 Authorized store domains updated successfully!', 'success');
+        showAlert(`🌐 Authorized domains updated for License #${domainLicense.id}!`, 'success');
         setDomainLicense(null);
         onRefresh();
       } else {
-        showAlert('❌ Error: ' + (data.error || 'Failed to update store domains'), 'error');
+        showAlert('❌ Error: ' + (data.error || 'Failed to update domains'), 'error');
       }
     } catch (err: any) {
       showAlert('❌ Request failed: ' + err.message, 'error');
@@ -299,7 +300,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
   const getExpirationBadge = (expiresAt: string | null) => {
     if (!expiresAt) {
-      return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-slate-500/10 text-slate-400 border border-slate-500/30">Never (Lifetime)</span>;
+      return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/30">Never (Lifetime)</span>;
     }
 
     const now = new Date();
@@ -307,21 +308,50 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 3600 * 24));
 
     if (diffDays <= 0) {
-      return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 font-mono">🔴 Expired ({Math.abs(diffDays)}d ago)</span>;
+      return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/30 font-mono">🔴 Expired ({Math.abs(diffDays)}d ago)</span>;
     } else if (diffDays <= 30) {
-      return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-mono">🟠 Expiring in {diffDays}d</span>;
+      return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-mono">🟠 Expiring in {diffDays}d</span>;
     } else {
       const months = Math.round(diffDays / 30);
-      return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono">🟢 Active ({months}m left)</span>;
+      return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-mono">🟢 Active ({months}m left)</span>;
     }
   };
+
+  const filteredLicenses = licenses.filter(lic => {
+    if (filterMode === 'ALL') return true;
+    if (filterMode === 'ACTIVE') return lic.status === 'active';
+    if (filterMode === 'EXPIRING') {
+      if (!lic.expires_at) return false;
+      const diffDays = Math.ceil((new Date(lic.expires_at).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+      return diffDays > 0 && diffDays <= 30;
+    }
+    if (filterMode === 'EXPIRED') {
+      if (!lic.expires_at) return false;
+      return new Date(lic.expires_at).getTime() < new Date().getTime();
+    }
+    return true;
+  });
+
+  const clientOptions = [
+    { value: '0', label: '-- Unassigned License (Standalone Key) --' },
+    ...users.map(u => ({
+      value: String(u.id),
+      label: `👤 ${u.email} ${u.company_name ? `(${u.company_name})` : ''}`,
+    })),
+  ];
+
+  const tierOptions = [
+    { value: 'basic', label: 'BASIC TIER' },
+    { value: 'pro', label: 'PRO TIER' },
+    { value: 'enterprise', label: 'ENTERPRISE TIER' },
+  ];
 
   return (
     <div className="space-y-6">
       {/* 2-Column Form Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Subscription Inventory Overview */}
-        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation flex flex-col justify-between">
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm flex flex-col justify-between">
           <SectionHeader
             title="Active Subscriptions Inventory"
             subtitle="Real-time breakdown of store license keys, package tier allocations, and unassigned standalone keys."
@@ -334,107 +364,92 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             <StatCard label="Unassigned" value={licenses.filter(l => !l.user_id).length} icon={Unlock} color="amber" />
           </div>
 
-          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-[0.72rem] text-purple-300">
+          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-[0.72rem] text-purple-700 dark:text-purple-300">
             💡 <strong>Need a new client profile?</strong> Create and manage standalone client credentials under the <strong>👥 Clients Directory</strong> tab.
           </div>
         </div>
 
-        {/* Generate License Key Card */}
-        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
+        {/* Issue & Assign License Key Form with Master Form Primitives */}
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm">
           <SectionHeader
             title="Issue & Assign License Key"
             subtitle="Issue license keys and assign to client accounts."
             icon={Key}
           />
           <form onSubmit={handleGenerateKey} className="mt-4 space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Target Client Account</label>
-              <select
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                value={genUserId}
-                onChange={e => setGenUserId(Number(e.target.value))}
-              >
-                <option value={0}>-- Unassigned License (Standalone Key) --</option>
-                {users.map(u => (
-                  <option key={u.id} value={u.id}>
-                    👤 {u.email} {u.company_name ? `(${u.company_name})` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Package Tier</label>
-              <select
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                value={genTier}
-                onChange={e => setGenTier(e.target.value)}
-              >
-                <option value="basic">BASIC TIER</option>
-                <option value="pro">PRO TIER</option>
-                <option value="enterprise">ENTERPRISE TIER</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Optional Expiry Date</label>
-              <input
-                type="date"
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                value={genExpires}
-                onChange={e => setGenExpires(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Pre-Bound Store URL (Optional)</label>
-              <input
-                type="text"
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                placeholder="e.g. store.myshop.com"
-                value={genDomain}
-                onChange={e => setGenDomain(e.target.value)}
-              />
-            </div>
-            <button
+            <FormSelect
+              label="Target Client Account"
+              value={genUserId}
+              onChange={e => setGenUserId(Number(e.target.value))}
+              options={clientOptions}
+            />
+
+            <FormSelect
+              label="Package Tier"
+              value={genTier}
+              onChange={e => setGenTier(e.target.value)}
+              options={tierOptions}
+            />
+
+            <FormInput
+              label="Optional Expiry Date"
+              type="date"
+              value={genExpires}
+              onChange={e => setGenExpires(e.target.value)}
+            />
+
+            <FormInput
+              label="Pre-Bound Store URL (Optional)"
+              type="text"
+              placeholder="e.g. store.myshop.com"
+              value={genDomain}
+              onChange={e => setGenDomain(e.target.value)}
+            />
+
+            <Button
               type="submit"
-              disabled={generatingKey}
-              className={`w-full pm-btn-primary py-2.5 rounded-lg text-xs font-bold uppercase transition flex items-center justify-center gap-2 ${generatingKey ? 'opacity-85 cursor-wait' : ''}`}
+              variant="primary"
+              size="lg"
+              className="w-full uppercase"
+              loading={generatingKey}
             >
-              {generatingKey && <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />}
-              <span>Issue License Key</span>
-            </button>
+              Issue License Key
+            </Button>
           </form>
         </div>
       </div>
 
       {/* Active License Registry Table */}
-      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <SectionHeader
-            title={`Active License Registry & Subscriptions (${licenses.length})`}
+            title={`Active License Registry & Subscriptions (${filteredLicenses.length})`}
             subtitle="Complete audit ledger of active, suspended, and standalone license keys."
             icon={KeyRound}
             action={
-              <button
-                type="button"
+              <Button
+                variant="neutral"
+                size="sm"
+                icon={RefreshCw}
+                loading={isRefreshing}
                 onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
-                title="Refresh License Registry"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} /> Refresh
-              </button>
+                Refresh
+              </Button>
             }
           />
 
-          {/* Expiration Radar Filter Pills */}
-          <div className="flex items-center gap-1.5 bg-pm-input/60 p-1 rounded-xl border border-pm-border/60 self-start md:self-auto">
+          {/* Cleaned Status Filter Tab Pills (Zero Double Outline Stacking) */}
+          <div className="flex items-center gap-1 bg-pm-input p-1 rounded-xl shrink-0 self-start md:self-auto">
             {(['ALL', 'ACTIVE', 'EXPIRING', 'EXPIRED'] as const).map(mode => (
               <button
                 key={mode}
+                type="button"
                 onClick={() => setFilterMode(mode)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ${
                   filterMode === mode
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/80'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'text-pm-secondary hover:text-pm-text hover:bg-pm-card/60'
                 }`}
               >
                 {mode === 'ALL' && 'All Keys'}
@@ -446,170 +461,166 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-pm-border">
+        <div className="overflow-x-auto rounded-xl border border-pm-border">
           <table className="w-full text-left text-xs">
-            <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
-              <tr>
-                <th className="p-3">ID</th>
-                <th className="p-3">Company Owner</th>
-                <th className="p-3">Assigned Employee</th>
+            <thead>
+              <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
                 <th className="p-3">License Key</th>
-                <th className="p-3">Bound Store Domains</th>
+                <th className="p-3">Assigned Client / Company</th>
                 <th className="p-3">Tier</th>
                 <th className="p-3">Status</th>
-                <th className="p-3">Expires At</th>
+                <th className="p-3">Authorized Domain</th>
+                <th className="p-3">Expiration Radar</th>
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
-              {licenses.length === 0 ? (
+              {filteredLicenses.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-6 text-center text-pm-secondary">
-                    No active licenses registered yet.
+                  <td colSpan={7} className="p-6 text-center text-pm-secondary italic">
+                    No license keys found matching the active filter view.
                   </td>
                 </tr>
               ) : (
-                licenses
-                  .filter(lic => {
-                    if (filterMode === 'ACTIVE') return lic.status === 'active';
-                    if (filterMode === 'EXPIRED') {
-                      if (lic.status === 'expired') return true;
-                      if (lic.expires_at) {
-                        return new Date(lic.expires_at).getTime() <= new Date().getTime();
-                      }
-                      return false;
-                    }
-                    if (filterMode === 'EXPIRING') {
-                      if (!lic.expires_at) return false;
-                      const diffDays = Math.ceil((new Date(lic.expires_at).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-                      return diffDays > 0 && diffDays <= 30;
-                    }
-                    return true;
-                  })
-                  .map(lic => {
-                    const isRevealed = revealedKeys[lic.id];
-                    const displayedKey = isRevealed ? lic.license_key : maskKey(lic.license_key);
-                    const domains = parseDomains(lic.store_url);
-                    return (
-                      <tr key={lic.id} className="hover:bg-pm-input/50 transition">
-                        <td className="p-3 font-mono font-semibold text-pm-secondary">#{lic.id}</td>
-                        <td className="p-3 font-bold text-pm-text">
-                          {lic.company_name ? (
-                            <span className="text-purple-400 font-bold flex items-center gap-1">
-                              🏢 {lic.company_name}
-                            </span>
-                          ) : (
-                            <span className="italic text-pm-secondary/60">Standalone / Direct</span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          {lic.user_email ? (
-                            <div className="flex flex-col">
-                              {lic.user_name ? <span className="font-semibold text-pm-text">{lic.user_name}</span> : null}
-                              <span className="text-[11px] font-mono text-pm-secondary">{lic.user_email}</span>
-                            </div>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                              Available in Pool
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2 font-mono">
-                            <span className="text-amber-400 font-bold">{displayedKey}</span>
-                            <button
-                              type="button"
-                              onClick={() => toggleKeyMask(lic.id)}
-                              className="text-pm-secondary hover:text-pm-primary p-1 rounded"
-                              title={isRevealed ? 'Hide Key' : 'Reveal Key'}
-                            >
-                              {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => copyKey(lic.license_key)}
-                              className="text-pm-secondary hover:text-pm-primary p-1 rounded"
-                              title="Copy License Key"
-                            >
-                              <Copy className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <button
-                            onClick={() => openDomainModal(lic)}
-                            className="flex flex-wrap gap-1 items-center hover:opacity-80 transition text-left"
-                            title="Manage Authorized Store Domains"
-                          >
-                            {domains.length === 0 ? (
-                              <span className="text-pm-secondary italic text-xs">🌐 Not bound yet</span>
-                            ) : (
-                              domains.map(d => (
-                                <span key={d} className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/30">
-                                  {d}
-                                </span>
-                              ))
-                            )}
-                          </button>
-                        </td>
-                        <td className="p-3 font-bold uppercase text-pm-primary">{lic.package_tier}</td>
-                        <td className="p-3">
-                          <span
-                            className={`px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full border ${
-                              lic.status === 'active'
-                                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
-                                : lic.status === 'suspended'
-                                ? 'bg-rose-500/10 text-rose-500 border-rose-500/30'
-                                : 'bg-amber-500/10 text-amber-500 border-amber-500/30'
-                            }`}
-                          >
-                            {lic.status}
+                filteredLicenses.map(lic => {
+                  const isRevealed = revealedKeys[lic.id];
+                  const maskedKey = lic.license_key ? `${lic.license_key.substring(0, 8)}-****-****-****` : '';
+                  const boundDomains = lic.store_url ? lic.store_url.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+                  return (
+                    <tr key={lic.id} className="hover:bg-pm-input/50 transition">
+                      <td className="p-3 font-mono font-bold">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-purple-600 dark:text-purple-400">
+                            {isRevealed ? lic.license_key : maskedKey}
                           </span>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex flex-col gap-1 items-start">
-                            {getExpirationBadge(lic.expires_at)}
-                            <button
-                              onClick={() => {
-                                setExtendingLicense(lic);
-                                setExtMonths(6);
-                                setExtCustomDate('');
-                              }}
-                              className="text-[10px] text-purple-400 hover:text-purple-300 font-bold hover:underline"
-                            >
-                              ⚡ Extend / Renew
-                            </button>
+                          <button
+                            onClick={() => toggleKeyMask(lic.id)}
+                            className="p-1 text-pm-secondary hover:text-pm-text rounded transition"
+                            title={isRevealed ? 'Mask Key' : 'Reveal Key'}
+                          >
+                            {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            onClick={() => copyKey(lic.license_key)}
+                            className="p-1 text-pm-secondary hover:text-pm-text rounded transition ml-0.5"
+                            title="Copy License Key"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+
+                      <td className="p-3">
+                        {lic.user_id ? (
+                          <div>
+                            <div className="font-semibold text-pm-text">{lic.user_email}</div>
+                            {lic.company_name && (
+                              <div className="text-[0.68rem] text-pm-secondary">🏢 {lic.company_name}</div>
+                            )}
                           </div>
-                        </td>
-                        <td className="p-3 flex items-center justify-end gap-2">
-                          <button
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                            Standalone / Unassigned
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="p-3 uppercase font-extrabold text-[0.68rem]">
+                        <span className="px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                          {lic.package_tier}
+                        </span>
+                      </td>
+
+                      <td className="p-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[0.65rem] font-extrabold uppercase border ${
+                            lic.status === 'active'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
+                          }`}
+                        >
+                          {lic.status}
+                        </span>
+                      </td>
+
+                      <td className="p-3 font-mono text-[0.72rem]">
+                        {boundDomains.length === 0 ? (
+                          <span className="italic text-pm-secondary">Unbound (Any Domain)</span>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <span className="text-pm-text font-bold">{boundDomains[0]}</span>
+                            {boundDomains.length > 1 && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">
+                                +{boundDomains.length - 1} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </td>
+
+                      <td className="p-3">{getExpirationBadge(lic.expires_at)}</td>
+
+                      <td className="p-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={KeyRound}
+                            onClick={() => openDomainModal(lic)}
+                            title="Manage Authorized Domains"
+                          >
+                            Domains
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={RefreshCw}
+                            onClick={() => setExtendingLicense(lic)}
+                            title="Quick Extend Expiration"
+                          >
+                            Extend
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={Edit}
                             onClick={() => openEditModal(lic)}
-                            className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                            title="Edit License & Subscription"
+                            title="Edit License Settings"
                           >
-                            <Edit className="w-3.5 h-3.5" /> Edit
-                          </button>
-                          <button
-                            onClick={() => handleToggleStatus(lic.id, lic.status, lic.package_tier, lic.expires_at || '', lic.store_url || '')}
-                            className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                              lic.status === 'active'
-                                ? 'pm-btn-danger-outline'
-                                : 'pm-btn-neutral'
-                            }`}
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={lic.status === 'active' ? ShieldAlert : CheckCircle}
+                            onClick={() =>
+                              handleToggleStatus(
+                                lic.id,
+                                lic.status,
+                                lic.package_tier,
+                                lic.expires_at || '',
+                                lic.store_url || ''
+                              )
+                            }
+                            title={lic.status === 'active' ? 'Suspend License Key' : 'Activate License Key'}
                           >
-                            {lic.status === 'active' ? '🛑 Suspend' : '✅ Activate'}
-                          </button>
-                          <button
+                            {lic.status === 'active' ? 'Suspend' : 'Activate'}
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            icon={Trash2}
                             onClick={() => setDeleteConfirmLicense(lic)}
-                            className="pm-btn-danger-outline px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                            title="Delete License Key"
+                            title="Permanently Delete License Key"
                           >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -620,120 +631,77 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
       <BaseModal
         isOpen={!!editingLicense}
         onClose={() => setEditingLicense(null)}
-        title={`Edit License & Subscription #${editingLicense?.id || ''}`}
+        title={`Edit License Key #${editingLicense?.id || ''}`}
         icon={Edit}
         maxWidth="lg"
       >
         {editingLicense && (
           <form onSubmit={handleSaveEdit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">License Key (Read-Only)</label>
-              <input
-                type="text"
-                readOnly
-                className="w-full bg-pm-input/50 border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-amber-500 cursor-not-allowed"
-                value={editingLicense.license_key}
-              />
-            </div>
+            <FormSelect
+              label="Assigned Client Account"
+              value={editUserId}
+              onChange={e => setEditUserId(Number(e.target.value))}
+              options={clientOptions}
+            />
 
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Assigned Client Email / Account</label>
-              <select
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                value={editUserId}
-                onChange={e => setEditUserId(Number(e.target.value))}
-              >
-                <option value={0}>-- Unassigned License (Standalone Key) --</option>
-                {users.map(u => (
-                  <option key={u.id} value={u.id}>
-                    👤 {u.email} {u.company_name ? `(${u.company_name})` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FormSelect
+              label="Package Tier"
+              value={editTier}
+              onChange={e => setEditTier(e.target.value)}
+              options={tierOptions}
+            />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Package Tier</label>
-                <select
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                  value={editTier}
-                  onChange={e => setEditTier(e.target.value)}
-                >
-                  <option value="basic">BASIC TIER</option>
-                  <option value="pro">PRO TIER</option>
-                  <option value="enterprise">ENTERPRISE TIER</option>
-                </select>
-              </div>
+            <FormSelect
+              label="License Status"
+              value={editStatus}
+              onChange={e => setEditStatus(e.target.value)}
+              options={[
+                { value: 'active', label: 'ACTIVE' },
+                { value: 'suspended', label: 'SUSPENDED' },
+                { value: 'expired', label: 'EXPIRED' },
+              ]}
+            />
 
-              <div>
-                <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Subscription Status</label>
-                <select
-                  className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none font-bold"
-                  value={editStatus}
-                  onChange={e => setEditStatus(e.target.value)}
-                >
-                  <option value="active" className="text-emerald-500">ACTIVE</option>
-                  <option value="suspended" className="text-rose-500">SUSPENDED</option>
-                  <option value="expired" className="text-amber-500">EXPIRED</option>
-                </select>
-              </div>
-            </div>
+            <FormInput
+              label="Authorized Store Domain URL"
+              type="text"
+              placeholder="e.g. store.myshop.com"
+              value={editDomain}
+              onChange={e => setEditDomain(e.target.value)}
+            />
 
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Bound Store Domain / URL</label>
-              <input
-                type="text"
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                placeholder="e.g. store.myshop.com"
-                value={editDomain}
-                onChange={e => setEditDomain(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Expires At Date</label>
-              <input
-                type="date"
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                value={editExpires}
-                onChange={e => setEditExpires(e.target.value)}
-              />
-            </div>
+            <FormInput
+              label="Expiry Date (Leave empty for Lifetime)"
+              type="date"
+              value={editExpires}
+              onChange={e => setEditExpires(e.target.value)}
+            />
 
             <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-              <button
-                type="button"
-                onClick={() => setEditingLicense(null)}
-                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
-              >
+              <Button variant="neutral" size="md" onClick={() => setEditingLicense(null)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={savingEdit}
-                className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold flex items-center gap-2"
-              >
-                {savingEdit ? 'Saving...' : '💾 Save Changes'}
-              </button>
+              </Button>
+              <Button variant="primary" size="md" type="submit" loading={savingEdit}>
+                Save License Changes
+              </Button>
             </div>
           </form>
         )}
       </BaseModal>
 
-      {/* Extension & Renewal Modal Dialog */}
+      {/* Quick Expiration Extension Modal Dialog */}
       <BaseModal
         isOpen={!!extendingLicense}
         onClose={() => setExtendingLicense(null)}
-        title={`⚡ Extend License Expiration #${extendingLicense?.id || ''}`}
-        icon={KeyRound}
+        title={`⚡ Quick Extend License #${extendingLicense?.id || ''}`}
+        icon={RefreshCw}
         maxWidth="md"
       >
         {extendingLicense && (
           <form onSubmit={handleSaveExtension} className="space-y-4">
-            <div className="bg-pm-input/50 p-3 rounded-xl border border-pm-border/50 text-xs">
+            <div className="bg-pm-input p-3 rounded-xl border border-pm-border text-xs">
               <span className="text-pm-secondary block text-[10px] uppercase font-bold">Target License Key</span>
-              <span className="font-mono font-bold text-amber-400">{extendingLicense.license_key}</span>
+              <span className="font-mono font-bold text-amber-500 dark:text-amber-400">{extendingLicense.license_key}</span>
               <div className="mt-1 text-pm-secondary text-[11px]">
                 Current Expiration: <span className="text-pm-text font-semibold">{extendingLicense.expires_at || 'Never (Lifetime)'}</span>
               </div>
@@ -762,31 +730,20 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Or Set Exact Expiration Date</label>
-              <input
-                type="date"
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                value={extCustomDate}
-                onChange={e => setExtCustomDate(e.target.value)}
-              />
-            </div>
+            <FormInput
+              label="Or Set Exact Expiration Date"
+              type="date"
+              value={extCustomDate}
+              onChange={e => setExtCustomDate(e.target.value)}
+            />
 
             <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-              <button
-                type="button"
-                onClick={() => setExtendingLicense(null)}
-                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
-              >
+              <Button variant="neutral" size="md" onClick={() => setExtendingLicense(null)}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={savingExtension}
-                className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold flex items-center gap-2"
-              >
-                {savingExtension ? 'Extending...' : '⚡ Apply Expiration Extension'}
-              </button>
+              </Button>
+              <Button variant="primary" size="md" type="submit" loading={savingExtension}>
+                Apply Extension
+              </Button>
             </div>
           </form>
         )}
@@ -802,11 +759,11 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
       >
         {domainLicense && (
           <div className="space-y-4">
-            <div className="bg-pm-input/50 p-3 rounded-xl border border-pm-border/50 text-xs">
+            <div className="bg-pm-input p-3 rounded-xl border border-pm-border text-xs">
               <span className="text-pm-secondary block text-[10px] uppercase font-bold">Package Tier Domain Limit</span>
               <span className="font-bold text-pm-text uppercase">{domainLicense.package_tier} Tier</span>
               <span className="text-pm-secondary text-[11px] block mt-0.5">
-                Authorized domains: <strong className="text-purple-400 font-mono">{domainList.length} bound</strong>
+                Authorized domains: <strong className="text-purple-600 dark:text-purple-400 font-mono">{domainList.length} bound</strong>
               </span>
             </div>
 
@@ -814,7 +771,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             <div>
               <label className="block text-xs font-semibold uppercase text-pm-secondary mb-2">Bound Store Domains</label>
               {domainList.length === 0 ? (
-                <p className="text-xs text-pm-secondary italic bg-pm-input/30 p-3 rounded-lg border border-pm-border/40">
+                <p className="text-xs text-pm-secondary italic bg-pm-input p-3 rounded-lg border border-pm-border">
                   No domains bound yet. Add your first authorized domain below.
                 </p>
               ) : (
@@ -822,13 +779,13 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                   {domainList.map(d => (
                     <span
                       key={d}
-                      className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-purple-950/80 text-purple-300 border border-purple-500/40 flex items-center gap-2"
+                      className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/40 flex items-center gap-2"
                     >
                       <span>{d}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveDomain(d)}
-                        className="text-purple-400 hover:text-rose-400 transition"
+                        className="text-purple-500 hover:text-rose-500 transition font-bold"
                         title="Remove Domain"
                       >
                         ×
@@ -840,38 +797,26 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             </div>
 
             {/* Add Domain Input Form */}
-            <form onSubmit={handleAddDomain} className="flex gap-2">
-              <input
-                type="text"
-                value={newDomainInput}
-                onChange={e => setNewDomainInput(e.target.value)}
-                placeholder="e.g. staging.myshop.com"
-                className="flex-1 bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:border-pm-primary focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1 shrink-0"
-              >
+            <form onSubmit={handleAddDomain} className="flex items-end gap-2">
+              <div className="flex-1">
+                <FormInput
+                  placeholder="e.g. staging.myshop.com"
+                  value={newDomainInput}
+                  onChange={e => setNewDomainInput(e.target.value)}
+                />
+              </div>
+              <Button type="submit" variant="neutral" size="md">
                 + Add Domain
-              </button>
+              </Button>
             </form>
 
             <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-              <button
-                type="button"
-                onClick={() => setDomainLicense(null)}
-                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
-              >
+              <Button variant="neutral" size="md" onClick={() => setDomainLicense(null)}>
                 Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveDomains}
-                disabled={savingDomains}
-                className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold flex items-center gap-2"
-              >
-                {savingDomains ? 'Saving...' : '💾 Save Domain Binding'}
-              </button>
+              </Button>
+              <Button variant="primary" size="md" onClick={handleSaveDomains} loading={savingDomains}>
+                Save Domain Binding
+              </Button>
             </div>
           </div>
         )}

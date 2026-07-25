@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Search, RefreshCw, Download, Terminal, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Activity, Layers, UserCheck, ShieldAlert, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Shield, Search, RefreshCw, Download, Terminal, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Activity, Layers, UserCheck, ShieldAlert, Eye, EyeOff, CheckCircle2, Code2 } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 import { StatCard } from './common/StatCard';
 import { BaseModal } from './common/BaseModal';
@@ -111,9 +111,9 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     }
     if (typeof value === 'boolean') {
       return value ? (
-        <span className="text-emerald-500 dark:text-emerald-400 font-bold uppercase">Enabled</span>
+        <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase">Enabled</span>
       ) : (
-        <span className="text-rose-500 dark:text-rose-400 font-bold uppercase">Disabled</span>
+        <span className="text-rose-600 dark:text-rose-400 font-bold uppercase">Disabled</span>
       );
     }
     if (Array.isArray(value)) {
@@ -133,7 +133,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     }
     if (typeof value === 'object') {
       return (
-        <pre className="bg-slate-900 dark:bg-slate-950 p-3 rounded-lg font-mono text-[10px] text-emerald-400 border border-pm-border overflow-x-auto">
+        <pre className="bg-slate-100 dark:bg-slate-950 p-3 rounded-lg font-mono text-[10px] text-slate-800 dark:text-emerald-400 border border-pm-border overflow-x-auto">
           {JSON.stringify(value, null, 2)}
         </pre>
       );
@@ -373,16 +373,25 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                 className="flex items-center justify-between w-full p-2.5 bg-pm-input/30 hover:bg-pm-input/60 rounded-xl border border-pm-border text-xs font-bold text-pm-secondary transition"
               >
                 <span className="flex items-center gap-2">
-                  <FileText className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Raw JSON Payload Data</span>
+                  <Code2 className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Developer JSON Payload Data</span>
                 </span>
                 {showRawJson ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
 
               {showRawJson && (
-                <pre className="mt-2 bg-slate-900 dark:bg-slate-950 p-4 rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto border border-pm-border shadow-inner">
-                  {JSON.stringify(selectedLog.details_parsed || {}, null, 2)}
-                </pre>
+                <div className="mt-2 rounded-xl overflow-hidden border border-pm-border shadow-inner">
+                  <div className="bg-slate-200 dark:bg-slate-900 px-3 py-1.5 border-b border-pm-border flex items-center justify-between text-[10px] font-mono text-pm-secondary font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <Code2 className="w-3 h-3 text-purple-500" />
+                      <span>payload.json</span>
+                    </span>
+                    <span>application/json</span>
+                  </div>
+                  <pre className="bg-slate-100 dark:bg-slate-950 p-4 font-mono text-[11px] text-slate-800 dark:text-emerald-400 overflow-x-auto">
+                    {JSON.stringify(selectedLog.details_parsed || {}, null, 2)}
+                  </pre>
+                </div>
               )}
             </div>
 
