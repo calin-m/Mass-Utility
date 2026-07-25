@@ -115,6 +115,13 @@ class AdminApiController
 
         try {
             $cId = $this->repo->createCompany($name, $taxId, $maxLicenses);
+            $adminUser = $_SESSION['admin_username'] ?? 'admin';
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $this->repo->logAdminAction($adminUser, 'CREATE_COMPANY', 'company', (string)$cId, [
+                'company_name' => $name,
+                'tax_id' => $taxId,
+                'max_licenses' => $maxLicenses
+            ], $ip);
             echo json_encode(['success' => true, 'company_id' => $cId, 'companies' => $this->repo->getAllCompanies()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -136,6 +143,16 @@ class AdminApiController
 
         try {
             $success = $this->repo->updateCompany($id, $name, $taxId, $maxLicenses, $status);
+            if ($success) {
+                $adminUser = $_SESSION['admin_username'] ?? 'admin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $this->repo->logAdminAction($adminUser, 'UPDATE_COMPANY', 'company', (string)$id, [
+                    'company_name' => $name,
+                    'tax_id' => $taxId,
+                    'max_licenses' => $maxLicenses,
+                    'status' => $status
+                ], $ip);
+            }
             echo json_encode(['success' => $success, 'companies' => $this->repo->getAllCompanies()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -152,6 +169,11 @@ class AdminApiController
 
         try {
             $success = $this->repo->deleteCompany($id);
+            if ($success) {
+                $adminUser = $_SESSION['admin_username'] ?? 'admin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $this->repo->logAdminAction($adminUser, 'DELETE_COMPANY', 'company', (string)$id, [], $ip);
+            }
             echo json_encode(['success' => $success, 'companies' => $this->repo->getAllCompanies()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -213,6 +235,14 @@ class AdminApiController
 
         try {
             $userId = $this->repo->createUser($email, $password, $company, $name, $role);
+            $adminUser = $_SESSION['admin_username'] ?? 'admin';
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $this->repo->logAdminAction($adminUser, 'CREATE_USER', 'user', (string)$userId, [
+                'email' => $email,
+                'name' => $name,
+                'company' => $company,
+                'role' => $role
+            ], $ip);
             echo json_encode(['success' => true, 'user_id' => $userId, 'users' => $this->repo->getAllUsers()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -236,6 +266,15 @@ class AdminApiController
 
         try {
             $this->repo->updateUser($id, $email, $company, $status, $name, $role);
+            $adminUser = $_SESSION['admin_username'] ?? 'admin';
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $this->repo->logAdminAction($adminUser, 'UPDATE_USER', 'user', (string)$id, [
+                'email' => $email,
+                'name' => $name,
+                'company' => $company,
+                'role' => $role,
+                'status' => $status
+            ], $ip);
             echo json_encode(['success' => true, 'users' => $this->repo->getAllUsers(), 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -254,6 +293,9 @@ class AdminApiController
 
         try {
             $this->repo->resetUserPassword($id, $password);
+            $adminUser = $_SESSION['admin_username'] ?? 'admin';
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $this->repo->logAdminAction($adminUser, 'RESET_PASSWORD', 'user', (string)$id, [], $ip);
             echo json_encode(['success' => true]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -270,6 +312,9 @@ class AdminApiController
 
         try {
             $this->repo->deleteUser($id);
+            $adminUser = $_SESSION['admin_username'] ?? 'admin';
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $this->repo->logAdminAction($adminUser, 'DELETE_USER', 'user', (string)$id, [], $ip);
             echo json_encode(['success' => true, 'users' => $this->repo->getAllUsers(), 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -291,6 +336,14 @@ class AdminApiController
 
         try {
             $key = $this->repo->createLicense($companyId, $userId, $tier, $expiry);
+            $adminUser = $_SESSION['admin_username'] ?? 'admin';
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $this->repo->logAdminAction($adminUser, 'GENERATE_LICENSE', 'license', $key, [
+                'company_id' => $companyId,
+                'user_id' => $userId,
+                'tier' => $tier,
+                'expires_at' => $expiry
+            ], $ip);
             echo json_encode(['success' => true, 'key' => $key, 'licenses' => $this->repo->getAllLicenses(), 'companies' => $this->repo->getAllCompanies()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -311,6 +364,14 @@ class AdminApiController
 
         try {
             $success = $this->repo->assignLicense($licenseId, $userId, $storeUrl);
+            if ($success) {
+                $adminUser = $_SESSION['admin_username'] ?? 'admin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $this->repo->logAdminAction($adminUser, 'ASSIGN_LICENSE', 'license', (string)$licenseId, [
+                    'user_id' => $userId,
+                    'store_url' => $storeUrl
+                ], $ip);
+            }
             echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses(), 'companies' => $this->repo->getAllCompanies()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -339,6 +400,17 @@ class AdminApiController
 
         try {
             $success = $this->repo->updateLicense($id, $status, $tier, $expiry, $storeUrl, $userId);
+            if ($success) {
+                $adminUser = $_SESSION['admin_username'] ?? 'admin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $this->repo->logAdminAction($adminUser, 'UPDATE_LICENSE', 'license', (string)$id, [
+                    'user_id' => $userId,
+                    'status' => $status,
+                    'package_tier' => $tier,
+                    'expires_at' => $expiry,
+                    'store_url' => $storeUrl
+                ], $ip);
+            }
             echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -355,6 +427,11 @@ class AdminApiController
 
         try {
             $success = $this->repo->deleteLicense($id);
+            if ($success) {
+                $adminUser = $_SESSION['admin_username'] ?? 'admin';
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $this->repo->logAdminAction($adminUser, 'DELETE_LICENSE', 'license', (string)$id, [], $ip);
+            }
             echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);

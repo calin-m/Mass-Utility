@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, KeyRound, Unlock, RefreshCw } from 'lucide-react';
 import { BaseModal } from './common/BaseModal';
+import { ConfirmModal } from './common/ConfirmModal';
 import { SectionHeader } from './common/SectionHeader';
 import { StatCard } from './common/StatCard';
 
@@ -180,25 +181,30 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     }
   };
 
-  const handleDeleteLicense = async (id: number, key: string) => {
-    if (!window.confirm(`Are you sure you want to delete license key "${key}" (ID #${id})?\n\nThis action is permanent and cannot be undone.`)) {
-      return;
-    }
+  // Delete Confirmation Modal State
+  const [deleteConfirmLicense, setDeleteConfirmLicense] = useState<License | null>(null);
+  const [deletingLicense, setDeletingLicense] = useState<boolean>(false);
 
+  const handleExecuteDeleteLicense = async () => {
+    if (!deleteConfirmLicense) return;
+    setDeletingLicense(true);
     try {
       const formData = new FormData();
-      formData.append('id', String(id));
+      formData.append('id', String(deleteConfirmLicense.id));
 
       const res = await fetch('index.php?action=api_delete_license', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        showAlert(`🗑️ License Key #${id} deleted successfully.`, 'success');
+        showAlert(`🗑️ License Key #${deleteConfirmLicense.id} deleted successfully.`, 'success');
+        setDeleteConfirmLicense(null);
         onRefresh();
       } else {
         showAlert('❌ Error: ' + (data.error || 'Failed to delete license'), 'error');
       }
     } catch (err: any) {
       showAlert('❌ Request failed: ' + err.message, 'error');
+    } finally {
+      setDeletingLicense(false);
     }
   };
 
@@ -594,7 +600,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                             {lic.status === 'active' ? '🛑 Suspend' : '✅ Activate'}
                           </button>
                           <button
-                            onClick={() => handleDeleteLicense(lic.id, lic.license_key)}
+                            onClick={() => setDeleteConfirmLicense(lic)}
                             className="pm-btn-danger-outline px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
                             title="Delete License Key"
                           >
@@ -870,6 +876,19 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
           </div>
         )}
       </BaseModal>
+
+      {/* Delete License Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteConfirmLicense}
+        onClose={() => setDeleteConfirmLicense(null)}
+        onConfirm={handleExecuteDeleteLicense}
+        title="Permanently Delete License Key?"
+        message={`Are you sure you want to delete license key "${deleteConfirmLicense?.license_key}" (ID #${deleteConfirmLicense?.id})? This action is permanent and cannot be undone.`}
+        confirmText="Delete License Key"
+        cancelText="Cancel"
+        variant="danger"
+        loading={deletingLicense}
+      />
     </div>
   );
 };
