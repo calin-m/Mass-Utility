@@ -7,8 +7,10 @@ interface SecurityHealthTabProps {
 }
 
 export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert }) => {
-  const [loading, setLoading] = useState(false);
+  const [activeAction, setActiveAction] = useState<'headers' | 'perms' | 'ssl' | 'audit' | null>(null);
   const [diagnostics, setDiagnostics] = useState<any>(null);
+
+  const loading = activeAction !== null;
 
   const getApiUrl = (action: string) => {
     const path = window.location.pathname;
@@ -16,7 +18,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
   };
 
   const runDiagnostics = async () => {
-    setLoading(true);
+    setActiveAction('audit');
     try {
       const res = await fetch(getApiUrl('api_get_diagnostics'));
       const data = await res.json();
@@ -29,12 +31,12 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
     } catch (e: any) {
       if (showAlert) showAlert('Error running diagnostics: ' + e.message, 'error');
     } finally {
-      setLoading(false);
+      setActiveAction(null);
     }
   };
 
   const fixPermissions = async () => {
-    setLoading(true);
+    setActiveAction('perms');
     try {
       const res = await fetch(getApiUrl('api_fix_permissions'));
       const data = await res.json();
@@ -47,12 +49,12 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
     } catch (e: any) {
       if (showAlert) showAlert('Error fixing permissions: ' + e.message, 'error');
     } finally {
-      setLoading(false);
+      setActiveAction(null);
     }
   };
 
   const applySecurityHeaders = async () => {
-    setLoading(true);
+    setActiveAction('headers');
     try {
       const res = await fetch(getApiUrl('api_apply_security_headers'));
       const data = await res.json();
@@ -65,12 +67,12 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
     } catch (e: any) {
       if (showAlert) showAlert('Error applying security headers: ' + e.message, 'error');
     } finally {
-      setLoading(false);
+      setActiveAction(null);
     }
   };
 
   const enableSslRedirect = async () => {
-    setLoading(true);
+    setActiveAction('ssl');
     try {
       const res = await fetch(getApiUrl('api_enable_ssl_redirect'));
       const data = await res.json();
@@ -83,7 +85,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
     } catch (e: any) {
       if (showAlert) showAlert('Error enforcing SSL redirect: ' + e.message, 'error');
     } finally {
-      setLoading(false);
+      setActiveAction(null);
     }
   };
 
@@ -207,42 +209,45 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
               Audits security configurations, file system access, and SSL safety of both the Admin Portal and SaaS Dashboard servers.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
             {diagnostics && (
               <>
                 <button 
                   onClick={applySecurityHeaders}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[175px] shrink-0"
                   title="Inject HSTS, nosniff, and SAMEORIGIN security headers into .htaccess"
                 >
-                  <Lock className="w-4 h-4 text-purple-400" /> Apply .htaccess Headers
+                  {activeAction === 'headers' ? <RefreshCw className="w-4 h-4 animate-spin text-purple-400" /> : <Lock className="w-4 h-4 text-purple-400" />}
+                  <span>Apply .htaccess Headers</span>
                 </button>
                 <button 
                   onClick={fixPermissions}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[155px] shrink-0"
                   title="Repair folder permissions to 0755 and file permissions to 0644"
                 >
-                  <FolderLock className="w-4 h-4 text-amber-400" /> Repair Permissions
+                  {activeAction === 'perms' ? <RefreshCw className="w-4 h-4 animate-spin text-amber-400" /> : <FolderLock className="w-4 h-4 text-amber-400" />}
+                  <span>Repair Permissions</span>
                 </button>
                 <button 
                   onClick={enableSslRedirect}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-emerald-400"
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-emerald-400 min-w-[185px] shrink-0"
                   title="Inject 301 HTTPS Redirect rule into SaaS server root .htaccess"
                 >
-                  <Lock className="w-4 h-4 text-emerald-400" /> Enforce HTTPS Redirect
+                  {activeAction === 'ssl' ? <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" /> : <Lock className="w-4 h-4 text-emerald-400" />}
+                  <span>Enforce HTTPS Redirect</span>
                 </button>
               </>
             )}
             <button 
               onClick={runDiagnostics}
               disabled={loading}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${loading ? 'bg-pm-border text-pm-secondary' : 'pm-btn-primary'}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[215px] shrink-0 ${activeAction === 'audit' ? 'bg-pm-border text-pm-secondary' : 'pm-btn-primary'}`}
             >
-              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
-              {loading ? 'Scanning...' : 'Run System Security Audit'}
+              {activeAction === 'audit' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
+              <span>Run System Security Audit</span>
             </button>
           </div>
         </div>

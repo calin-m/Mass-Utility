@@ -38,11 +38,13 @@ interface DiagnosticDetails {
 
 export const MerchantSecurityTab: React.FC = () => {
   const { showAlert, showToast } = useModal();
-  const [loading, setLoading] = useState(false);
+  const [activeAction, setActiveAction] = useState<'headers' | 'perms' | 'ssl' | 'audit' | null>(null);
   const [diagnostics, setDiagnostics] = useState<DiagnosticDetails | null>(null);
 
+  const loading = activeAction !== null;
+
   const runAudit = async () => {
-    setLoading(true);
+    setActiveAction('audit');
     try {
       const response = await FetchService.post('get_diagnostics', {});
       if (response && response.success && response.diagnostics) {
@@ -55,12 +57,12 @@ export const MerchantSecurityTab: React.FC = () => {
     } catch (err: any) {
       showAlert('Audit Failed', err.message || 'Network error during diagnostics request.', 'error');
     } finally {
-      setLoading(false);
+      setActiveAction(null);
     }
   };
 
   const applySecurityHeaders = async () => {
-    setLoading(true);
+    setActiveAction('headers');
     try {
       const response = await FetchService.post('apply_security_headers', {});
       if (response && response.success) {
@@ -73,12 +75,12 @@ export const MerchantSecurityTab: React.FC = () => {
     } catch (err: any) {
       showAlert('Headers Error', 'Network error during headers application: ' + err.message, 'error');
     } finally {
-      setLoading(false);
+      setActiveAction(null);
     }
   };
 
   const fixPermissions = async () => {
-    setLoading(true);
+    setActiveAction('perms');
     try {
       const response = await FetchService.post('fix_diagnostics_permissions', {});
       if (response && response.success) {
@@ -91,12 +93,12 @@ export const MerchantSecurityTab: React.FC = () => {
     } catch (err: any) {
       showAlert('Permissions Error', 'Network error during permissions correction: ' + err.message, 'error');
     } finally {
-      setLoading(false);
+      setActiveAction(null);
     }
   };
 
   const enableSsl = async () => {
-    setLoading(true);
+    setActiveAction('ssl');
     try {
       const response = await FetchService.post('enable_ssl', {});
       if (response && response.success) {
@@ -109,7 +111,7 @@ export const MerchantSecurityTab: React.FC = () => {
     } catch (err: any) {
       showAlert('SSL Error', 'Network error during SSL enforcement: ' + err.message, 'error');
     } finally {
-      setLoading(false);
+      setActiveAction(null);
     }
   };
 
@@ -146,35 +148,38 @@ export const MerchantSecurityTab: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
             {diagnostics && (
               <>
                 <button
                   type="button"
                   onClick={applySecurityHeaders}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[175px] shrink-0"
                   title="Inject HSTS, nosniff, and SAMEORIGIN security headers into .htaccess"
                 >
-                  🔒 Apply .htaccess Headers
+                  {activeAction === 'headers' ? <span className="animate-spin">🔄</span> : <span>🔒</span>}
+                  <span>Apply .htaccess Headers</span>
                 </button>
                 <button
                   type="button"
                   onClick={fixPermissions}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[155px] shrink-0"
                   title="Repair folder permissions to 0755 and file permissions to 0644"
                 >
-                  📁 Repair Permissions
+                  {activeAction === 'perms' ? <span className="animate-spin">🔄</span> : <span>📁</span>}
+                  <span>Repair Permissions</span>
                 </button>
                 <button
                   type="button"
                   onClick={enableSsl}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-emerald-400"
+                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-emerald-400 min-w-[165px] shrink-0"
                   title="Enforce SSL/HTTPS across all store pages in PrestaShop Configuration"
                 >
-                  ⚡ Enforce Store SSL
+                  {activeAction === 'ssl' ? <span className="animate-spin">🔄</span> : <span>⚡</span>}
+                  <span>Enforce Store SSL</span>
                 </button>
               </>
             )}
@@ -182,9 +187,10 @@ export const MerchantSecurityTab: React.FC = () => {
               type="button"
               onClick={runAudit}
               disabled={loading}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${loading ? 'bg-pm-border text-pm-secondary' : 'pm-btn-primary'}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[175px] shrink-0 ${activeAction === 'audit' ? 'bg-pm-border text-pm-secondary' : 'pm-btn-primary'}`}
             >
-              {loading ? '⚡ Scanning...' : '🔄 Run Security Audit'}
+              {activeAction === 'audit' ? <span className="animate-spin">🔄</span> : <span>🔄</span>}
+              <span>Run Security Audit</span>
             </button>
           </div>
         </div>
