@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Search, RefreshCw, Download, Terminal, Calendar, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Building2, Key } from 'lucide-react';
+import { Shield, Search, RefreshCw, Download, Terminal, Calendar, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Building2, Key, Activity, Layers, UserCheck } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
+import { StatCard } from './common/StatCard';
+import { BaseModal } from './common/BaseModal';
 
 interface AuditLog {
   id: number;
@@ -58,24 +60,47 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     fetchLogs();
   };
 
+  // Calculated Telemetry Metrics
+  const totalOperations = logs.length;
+  const licenseMutations = logs.filter((l) => l.action_type.includes('LICENSE')).length;
+  const accountCompanyActions = logs.filter(
+    (l) => l.action_type.includes('COMPANY') || l.action_type.includes('USER') || l.action_type.includes('PASSWORD')
+  ).length;
+
   const getActionBadge = (actionType: string) => {
     switch (actionType) {
       case 'CREATE_COMPANY':
       case 'UPDATE_COMPANY':
       case 'DELETE_COMPANY':
-        return <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-sky-500/10 text-sky-400 border border-sky-500/30 flex items-center gap-1 w-fit"><Building2 className="w-3 h-3" /> {actionType}</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30 flex items-center gap-1 w-fit">
+            <Building2 className="w-3 h-3" /> {actionType}
+          </span>
+        );
       case 'GENERATE_LICENSE':
       case 'ASSIGN_LICENSE':
       case 'EXTEND_LICENSE':
       case 'UPDATE_LICENSE_DOMAINS':
-        return <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1 w-fit"><Key className="w-3 h-3" /> {actionType}</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1 w-fit">
+            <Key className="w-3 h-3" /> {actionType}
+          </span>
+        );
       case 'CREATE_USER':
       case 'UPDATE_USER':
       case 'RESET_PASSWORD':
       case 'DELETE_USER':
-        return <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 w-fit"><User className="w-3 h-3" /> {actionType}</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1 w-fit">
+            <User className="w-3 h-3" /> {actionType}
+          </span>
+        );
       default:
-        return <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/30 flex items-center gap-1 w-fit"><Shield className="w-3 h-3" /> {actionType}</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center gap-1 w-fit">
+            <Shield className="w-3 h-3" /> {actionType}
+          </span>
+        );
     }
   };
 
@@ -91,9 +116,9 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     }
     if (typeof value === 'boolean') {
       return value ? (
-        <span className="text-emerald-400 font-bold uppercase">Enabled</span>
+        <span className="text-emerald-500 dark:text-emerald-400 font-bold uppercase">Enabled</span>
       ) : (
-        <span className="text-rose-400 font-bold uppercase">Disabled</span>
+        <span className="text-rose-500 dark:text-rose-400 font-bold uppercase">Disabled</span>
       );
     }
     if (Array.isArray(value)) {
@@ -101,7 +126,10 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
       return (
         <div className="flex flex-wrap gap-1.5 mt-1">
           {value.map((v, idx) => (
-            <span key={idx} className="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-300 border border-purple-500/30">
+            <span
+              key={idx}
+              className="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/30"
+            >
               {String(v)}
             </span>
           ))}
@@ -109,13 +137,17 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
       );
     }
     if (typeof value === 'object') {
-      return <pre className="font-mono text-[10px] text-emerald-400">{JSON.stringify(value, null, 2)}</pre>;
+      return (
+        <pre className="bg-slate-950 p-3 rounded-lg font-mono text-[10px] text-emerald-400 border border-slate-800 overflow-x-auto">
+          {JSON.stringify(value, null, 2)}
+        </pre>
+      );
     }
     if (key === 'months_added') {
-      return <span className="font-bold text-emerald-400">+{value} Months</span>;
+      return <span className="font-bold text-emerald-600 dark:text-emerald-400">+{value} Months</span>;
     }
     if (key === 'status') {
-      return <span className="font-bold uppercase text-purple-400">{String(value)}</span>;
+      return <span className="font-bold uppercase text-purple-600 dark:text-purple-400">{String(value)}</span>;
     }
     return <span className="font-semibold text-pm-text">{String(value)}</span>;
   };
@@ -150,6 +182,31 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         }
       />
 
+      {/* Overview Telemetry Stat Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard
+          label="Total Recorded Operations"
+          value={totalOperations}
+          subtext="Audit log events in active filter window"
+          icon={Activity}
+          color="purple"
+        />
+        <StatCard
+          label="License Key Mutations"
+          value={licenseMutations}
+          subtext="Generations, assignments & extensions"
+          icon={Layers}
+          color="blue"
+        />
+        <StatCard
+          label="Account & Company Actions"
+          value={accountCompanyActions}
+          subtext="User & corporate profile modifications"
+          icon={UserCheck}
+          color="emerald"
+        />
+      </div>
+
       {/* Filter Toolbar */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
         <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
@@ -159,7 +216,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search logs by admin username, target ID, or payload details..."
-            className="w-full bg-pm-input border border-pm-border rounded-xl pl-9 pr-4 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500 transition"
+            className="w-full bg-pm-input border border-pm-border rounded-xl pl-9 pr-4 py-2 text-xs text-pm-text focus:outline-none focus:border-pm-primary transition"
           />
         </form>
 
@@ -167,7 +224,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="bg-pm-input border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500 transition cursor-pointer"
+            className="bg-pm-input border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-pm-primary transition cursor-pointer"
           >
             <option value="ALL">All Action Types</option>
             <option value="GENERATE_LICENSE">GENERATE_LICENSE</option>
@@ -251,111 +308,98 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         </div>
       </div>
 
-      {/* Expanded Opaque Inspect Log Modal */}
-      {selectedLog && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999999] flex items-center justify-center p-4">
-          <div className="bg-pm-card border border-pm-border rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-pm-border flex items-center justify-between bg-pm-input/50">
-              <div className="flex items-center gap-2.5">
-                <Terminal className="w-5 h-5 text-purple-400" />
-                <div>
-                  <h3 className="font-extrabold text-sm text-pm-text">Audit Log Entry #${selectedLog.id}</h3>
-                  <p className="text-[11px] text-pm-secondary">{selectedLog.action_type} on {selectedLog.target_entity} target #{selectedLog.target_id || 'N/A'}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="text-pm-secondary hover:text-pm-text transition p-1.5 rounded-lg hover:bg-pm-input text-lg font-bold"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
-              {/* Operator Telemetry Hero Card */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-pm-input p-4 rounded-xl border border-pm-border">
-                <div>
-                  <span className="text-pm-secondary block text-[10px] uppercase font-bold">Admin Operator</span>
-                  <span className="font-semibold text-pm-text flex items-center gap-1 mt-0.5">
-                    <User className="w-3.5 h-3.5 text-purple-400" />
-                    {selectedLog.admin_username}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-pm-secondary block text-[10px] uppercase font-bold">IP Address</span>
-                  <span className="font-mono text-pm-text block mt-0.5">{selectedLog.ip_address}</span>
-                </div>
-                <div>
-                  <span className="text-pm-secondary block text-[10px] uppercase font-bold">Action Type</span>
-                  <div className="mt-0.5">{getActionBadge(selectedLog.action_type)}</div>
-                </div>
-                <div>
-                  <span className="text-pm-secondary block text-[10px] uppercase font-bold">Timestamp</span>
-                  <span className="font-mono text-pm-text block mt-0.5">{selectedLog.created_at}</span>
-                </div>
-              </div>
-
-              {/* Human-Readable Change Payload Breakdown */}
+      {/* Componentized BaseModal Inspector Dialog */}
+      <BaseModal
+        isOpen={!!selectedLog}
+        onClose={() => setSelectedLog(null)}
+        title={`Audit Log Entry #${selectedLog?.id || ''}`}
+        icon={Terminal}
+        maxWidth="xl"
+      >
+        {selectedLog && (
+          <div className="space-y-5 text-xs">
+            {/* Operator Telemetry Hero Card */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-pm-input/50 p-4 rounded-xl border border-pm-border">
               <div>
-                <h4 className="font-extrabold text-xs text-pm-text uppercase mb-2 flex items-center gap-1.5">
-                  <CheckCircle className="w-4 h-4 text-purple-400" />
-                  <span>Recorded Operation Payload</span>
-                </h4>
-
-                {Object.keys(selectedLog.details_parsed || {}).length === 0 ? (
-                  <div className="p-4 bg-pm-input/50 border border-pm-border rounded-xl text-center text-pm-secondary italic">
-                    No additional metadata parameters recorded for this operation.
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {Object.entries(selectedLog.details_parsed).map(([key, val]) => (
-                      <div key={key} className="bg-pm-input/40 p-3 rounded-xl border border-pm-border/60">
-                        <span className="text-pm-secondary block text-[10px] uppercase font-bold mb-1">
-                          {formatKeyName(key)}
-                        </span>
-                        <div className="text-xs">{formatValue(key, val)}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <span className="text-pm-secondary block text-[10px] uppercase font-bold">Admin Operator</span>
+                <span className="font-semibold text-pm-text flex items-center gap-1 mt-1">
+                  <User className="w-3.5 h-3.5 text-purple-400" />
+                  {selectedLog.admin_username}
+                </span>
               </div>
-
-              {/* Collapsible Raw JSON Accordion */}
-              <div className="border-t border-pm-border pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowRawJson(!showRawJson)}
-                  className="flex items-center justify-between w-full p-2.5 bg-pm-input/30 hover:bg-pm-input/60 rounded-xl border border-pm-border/50 text-xs font-bold text-pm-secondary transition"
-                >
-                  <span className="flex items-center gap-2">
-                    <FileText className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Raw JSON Payload Data</span>
-                  </span>
-                  {showRawJson ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-
-                {showRawJson && (
-                  <pre className="mt-2 bg-pm-input p-4 rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto border border-pm-border animate-in fade-in duration-150">
-                    {JSON.stringify(selectedLog.details_parsed || {}, null, 2)}
-                  </pre>
-                )}
+              <div>
+                <span className="text-pm-secondary block text-[10px] uppercase font-bold">IP Address</span>
+                <span className="font-mono text-pm-text block mt-1">{selectedLog.ip_address}</span>
+              </div>
+              <div>
+                <span className="text-pm-secondary block text-[10px] uppercase font-bold">Action Type</span>
+                <div className="mt-1">{getActionBadge(selectedLog.action_type)}</div>
+              </div>
+              <div>
+                <span className="text-pm-secondary block text-[10px] uppercase font-bold">Timestamp</span>
+                <span className="font-mono text-pm-text block mt-1">{selectedLog.created_at}</span>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="px-6 py-3.5 bg-pm-input/40 border-t border-pm-border text-right">
+            {/* Human-Readable Change Payload Breakdown */}
+            <div>
+              <h4 className="font-extrabold text-xs text-pm-text uppercase mb-2 flex items-center gap-1.5">
+                <CheckCircle className="w-4 h-4 text-purple-400" />
+                <span>Recorded Operation Payload</span>
+              </h4>
+
+              {Object.keys(selectedLog.details_parsed || {}).length === 0 ? (
+                <div className="p-4 bg-pm-input/30 border border-pm-border rounded-xl text-center text-pm-secondary italic">
+                  No additional metadata parameters recorded for this operation.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Object.entries(selectedLog.details_parsed).map(([key, val]) => (
+                    <div key={key} className="bg-pm-input/40 p-3 rounded-xl border border-pm-border/60">
+                      <span className="text-pm-secondary block text-[10px] uppercase font-bold mb-1">
+                        {formatKeyName(key)}
+                      </span>
+                      <div className="text-xs">{formatValue(key, val)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Collapsible Raw JSON Accordion */}
+            <div className="border-t border-pm-border pt-4">
               <button
+                type="button"
+                onClick={() => setShowRawJson(!showRawJson)}
+                className="flex items-center justify-between w-full p-2.5 bg-pm-input/30 hover:bg-pm-input/60 rounded-xl border border-pm-border/50 text-xs font-bold text-pm-secondary transition"
+              >
+                <span className="flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Raw JSON Payload Data</span>
+                </span>
+                {showRawJson ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {showRawJson && (
+                <pre className="mt-2 bg-slate-950 p-4 rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto border border-slate-800 shadow-inner">
+                  {JSON.stringify(selectedLog.details_parsed || {}, null, 2)}
+                </pre>
+              )}
+            </div>
+
+            {/* Modal Footer Action */}
+            <div className="flex justify-end pt-3 border-t border-pm-border">
+              <button
+                type="button"
                 onClick={() => setSelectedLog(null)}
-                className="pm-btn-primary text-xs py-2 px-5 rounded-xl font-bold"
+                className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold"
               >
                 Close Inspector
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </BaseModal>
     </div>
   );
 };
