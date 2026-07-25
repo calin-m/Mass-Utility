@@ -122,12 +122,12 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/30">
-                HEALTHY
+                {t('status_healthy')}
               </span>
             </div>
             <div>
-              <div className="text-xs font-bold text-pm-text">API Security Guard</div>
-              <div className="text-[0.68rem] text-pm-secondary truncate mt-0.5">Request Validation</div>
+              <div className="text-xs font-bold text-pm-text">{t('diag_api_guard_name')}</div>
+              <div className="text-[0.68rem] text-pm-secondary truncate mt-0.5">{t('diag_api_guard_desc')}</div>
             </div>
           </div>
 
@@ -142,8 +142,8 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
               </span>
             </div>
             <div>
-              <div className="text-xs font-bold text-pm-text">Token Cryptography</div>
-              <div className="text-[0.68rem] text-pm-secondary truncate mt-0.5">Payload Encryption</div>
+              <div className="text-xs font-bold text-pm-text">{t('diag_token_crypto_name')}</div>
+              <div className="text-[0.68rem] text-pm-secondary truncate mt-0.5">{t('diag_token_crypto_desc')}</div>
             </div>
           </div>
 
@@ -158,8 +158,8 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
               </span>
             </div>
             <div>
-              <div className="text-xs font-bold text-pm-text">Session Integrity</div>
-              <div className="text-[0.68rem] text-pm-secondary truncate mt-0.5">OTT Anti-Replay</div>
+              <div className="text-xs font-bold text-pm-text">{t('diag_session_integ_name')}</div>
+              <div className="text-[0.68rem] text-pm-secondary truncate mt-0.5">{t('diag_session_integ_desc')}</div>
             </div>
           </div>
 
@@ -174,7 +174,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
               </span>
             </div>
             <div>
-              <div className="text-xs font-bold text-pm-text">SQLite Database Path</div>
+              <div className="text-xs font-bold text-pm-text">{t('diag_sqlite_db_name')}</div>
               <div className="text-[0.65rem] text-pm-secondary font-mono truncate mt-0.5" title="mass_utility_dashboard/data/pm_cloud_backups.db">
                 pm_cloud_backups.db
               </div>
@@ -188,11 +188,11 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
                 <Cpu className="w-4 h-4" />
               </div>
               <span className="px-2 py-0.5 text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/30">
-                ACTIVE
+                {t('status_active')}
               </span>
             </div>
             <div>
-              <div className="text-xs font-bold text-pm-text">Licensing Gateway Engine</div>
+              <div className="text-xs font-bold text-pm-text">{t('diag_gateway_name')}</div>
               <div className="text-[0.68rem] text-pm-secondary font-mono truncate mt-0.5" title="PHP Runtime Engine (PDO SQLite & cURL Synchronized)">
                 PHP {diagnostics?.php_version || '8.x'} (PDO / cURL)
               </div>
@@ -205,10 +205,10 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h3 className="text-base font-bold text-pm-text flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-pm-primary" /> Multi-Server Security & Health Diagnostics
+              <ShieldCheck className="w-5 h-5 text-pm-primary" /> {t('security_title')}
             </h3>
             <p className="text-xs text-pm-secondary mt-1">
-              Audits security configurations, file system access, and SSL safety of both the Admin Portal and SaaS Dashboard servers.
+              {t('security_subtitle')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
@@ -221,7 +221,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
                   title="Inject HSTS, nosniff, and SAMEORIGIN security headers into .htaccess"
                 >
                   {activeAction === 'headers' ? <RefreshCw className="w-4 h-4 animate-spin text-purple-400" /> : <Lock className="w-4 h-4 text-purple-400" />}
-                  <span>Apply .htaccess Headers</span>
+                  <span>{t('diag_btn_apply_headers')}</span>
                 </button>
                 <button 
                   onClick={fixPermissions}
@@ -230,7 +230,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
                   title="Repair folder permissions to 0755 and file permissions to 0644"
                 >
                   {activeAction === 'perms' ? <RefreshCw className="w-4 h-4 animate-spin text-amber-400" /> : <FolderLock className="w-4 h-4 text-amber-400" />}
-                  <span>Repair Permissions</span>
+                  <span>{t('diag_btn_repair_perms')}</span>
                 </button>
                 <button 
                   onClick={enableSslRedirect}
@@ -239,7 +239,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
                   title="Inject 301 HTTPS Redirect rule into SaaS server root .htaccess"
                 >
                   {activeAction === 'ssl' ? <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" /> : <Lock className="w-4 h-4 text-emerald-400" />}
-                  <span>Enforce HTTPS Redirect</span>
+                  <span>{t('diag_btn_enforce_https')}</span>
                 </button>
               </>
             )}
@@ -249,7 +249,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
               className={`pm-btn-primary px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[215px] shrink-0 ${activeAction === 'audit' ? 'opacity-85 cursor-wait' : ''}`}
             >
               {activeAction === 'audit' ? <RefreshCw className="w-4 h-4 animate-spin text-white" /> : <Activity className="w-4 h-4 text-white" />}
-              <span>Run System Security Audit</span>
+              <span>{t('diag_btn_run_audit')}</span>
             </button>
           </div>
         </div>
@@ -257,7 +257,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
         {!diagnostics ? (
           <div className="flex flex-col items-center justify-center py-12 text-pm-secondary bg-pm-input/50 rounded-lg border border-pm-border border-dashed">
             <ShieldCheck className="w-12 h-12 mb-3 opacity-20" />
-            <p className="text-sm font-medium">Click "Run System Security Audit" above to scan the decoupled server environment.</p>
+            <p className="text-sm font-medium">{t('diag_audit_prompt')}</p>
           </div>
         ) : (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -265,8 +265,8 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
               <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-lg flex items-start gap-3 text-rose-500">
                 <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-bold">Security Vulnerabilities Detected</h4>
-                  <p className="text-xs mt-1 opacity-90">Please review the exposed endpoints below and use the Auto-Fix tool or configure your web server.</p>
+                  <h4 className="text-sm font-bold">{t('diag_vuln_detected_title')}</h4>
+                  <p className="text-xs mt-1 opacity-90">{t('diag_vuln_detected_desc')}</p>
                 </div>
               </div>
             )}
@@ -275,7 +275,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-start gap-3 text-emerald-500">
                 <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-bold">All Security Checks Passed</h4>
+                  <h4 className="text-sm font-bold">{t('diag_all_passed_title')}</h4>
                   <p className="text-xs mt-1 opacity-90">No critical exposures detected in the current environment configuration.</p>
                 </div>
               </div>

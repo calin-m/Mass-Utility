@@ -155,17 +155,17 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
 
   const formatValue = (key: string, value: any): React.ReactNode => {
     if (value === null || value === undefined || value === '') {
-      return <span className="italic text-pm-secondary/60">Not Specified / Unset</span>;
+      return <span className="italic text-pm-secondary/60">{t('val_unset')}</span>;
     }
     if (typeof value === 'boolean') {
       return value ? (
-        <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase">Enabled</span>
+        <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase">{t('val_enabled')}</span>
       ) : (
-        <span className="text-rose-600 dark:text-rose-400 font-bold uppercase">Disabled</span>
+        <span className="text-rose-600 dark:text-rose-400 font-bold uppercase">{t('val_disabled')}</span>
       );
     }
     if (Array.isArray(value)) {
-      if (value.length === 0) return <span className="italic text-pm-secondary/60">None</span>;
+      if (value.length === 0) return <span className="italic text-pm-secondary/60">{t('lbl_none')}</span>;
       return (
         <div className="flex flex-wrap gap-1.5 mt-1">
           {value.map((v, idx) => (
@@ -433,12 +433,12 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-pm-text flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-purple-400" />
-                <span>Structured Mutation Parameters</span>
+                <span>{t('audit_struct_params')}</span>
               </h4>
 
               {Object.keys(selectedLog.details_parsed || {}).length === 0 ? (
                 <div className="p-4 bg-pm-input/30 rounded-xl border border-pm-border text-pm-secondary italic text-center">
-                  No additional structured parameters associated with this operation payload.
+                  {t('audit_no_params')}
                 </div>
               ) : (
                 <div className="bg-pm-input/40 rounded-xl border border-pm-border divide-y divide-pm-border">

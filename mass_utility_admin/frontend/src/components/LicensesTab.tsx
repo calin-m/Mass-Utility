@@ -340,8 +340,8 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
         {/* Normalized 4-Card Overview Inventory */}
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm flex flex-col justify-between space-y-4">
           <SectionHeader
-            title="Active Subscriptions Inventory"
-            subtitle="Real-time breakdown of store license keys, package tier allocations, and unassigned standalone keys."
+            title={t('inventory_title')}
+            subtitle={t('inventory_subtitle')}
             icon={CheckCircle}
           />
 
@@ -349,12 +349,12 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             <StatCard label={t('stat_total_keys')} value={licenses.length} icon={Key} color="purple" />
             <StatCard label={t('stat_active_keys')} value={licenses.filter(l => l.status === 'active').length} icon={CheckCircle} color="emerald" />
             <StatCard label={t('stat_expiring_soon')} value={expiringSoonCount} icon={Clock} color="amber" />
-            <StatCard label="Unassigned" value={licenses.filter(l => !l.user_id).length} icon={Unlock} color="blue" />
+            <StatCard label={t('stat_unassigned_keys')} value={licenses.filter(l => !l.user_id).length} icon={Unlock} color="blue" />
           </div>
 
           <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-[0.72rem] text-purple-700 dark:text-purple-300 flex items-center gap-2">
             <span className="shrink-0">💡</span>
-            <span>Need a new client profile? Manage client credentials under <strong>👥 Clients Directory</strong>.</span>
+            <span>{t('lic_inventory_tip')}</span>
           </div>
         </div>
 
@@ -528,7 +528,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                             )}
                           </div>
                         ) : (
-                          <span className="italic text-pm-secondary">Unassigned Standalone</span>
+                          <span className="italic text-pm-secondary">{t('lic_standalone')}</span>
                         )}
                       </td>
 
@@ -552,7 +552,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                         {lic.store_url ? (
                           <span className="text-pm-text font-bold">{lic.store_url}</span>
                         ) : (
-                          <span className="italic text-pm-secondary">Unbound</span>
+                          <span className="italic text-pm-secondary">{t('lic_unbound')}</span>
                         )}
                       </td>
 
