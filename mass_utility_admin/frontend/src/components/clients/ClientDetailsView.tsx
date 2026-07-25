@@ -475,10 +475,20 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                               {copiedKey === l.license_key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                             </button>
                           </div>
-                          <div className="text-[11px] text-pm-secondary flex items-center gap-2">
+                          <div className="text-[11px] text-pm-secondary flex flex-wrap items-center gap-2">
                             <span className="uppercase font-bold text-purple-400 px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">
                               {l.package_tier} Tier
                             </span>
+                            <span>•</span>
+                            {user.company_name ? (
+                              <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20" title="Key is owned by company pool and remains with company if employee transfers">
+                                🏢 Owned by {user.company_name} Pool
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                Direct Standalone Key
+                              </span>
+                            )}
                             <span>•</span>
                             <span>Issued: {l.created_at ? new Date(l.created_at).toLocaleDateString() : 'N/A'}</span>
                           </div>

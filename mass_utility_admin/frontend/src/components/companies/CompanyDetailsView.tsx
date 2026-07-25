@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle } from 'lucide-react';
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
 
@@ -19,6 +19,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [submitting, setSubmitting] = useState(false);
   const [copiedVat, setCopiedVat] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [poolTier, setPoolTier] = useState('pro');
 
   // Edit Form State
   const [editName, setEditName] = useState(company.company_name);
@@ -34,14 +35,59 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [newMemberPassword, setNewMemberPassword] = useState('');
   const [showMemberPassword, setShowMemberPassword] = useState(false);
 
-  const companyMembers = users.filter(u => u.company_name?.toLowerCase() === company.company_name.toLowerCase());
-  const companyLicenses = licenses.filter(l => l.user_email && companyMembers.some(m => m.email.toLowerCase() === l.user_email.toLowerCase()));
+  const companyMembers = users.filter(u => u.company_name && u.company_name.trim().toLowerCase() === company.company_name.trim().toLowerCase());
+  const companyLicenses = licenses.filter(l => (l.company_id && l.company_id === company.id) || (l.company_name && l.company_name.trim().toLowerCase() === company.company_name.trim().toLowerCase()) || (l.user_email && companyMembers.some(m => m.email.toLowerCase() === l.user_email.toLowerCase())));
 
   const usedCount = companyLicenses.length;
   const maxCount = company.max_licenses || 10;
   const pct = Math.min(100, Math.round((usedCount / maxCount) * 100));
   const isFull = usedCount >= maxCount;
   const isSuspended = company.status === 'suspended';
+
+  const handleAssignEmployee = async (licenseId: number, userIdStr: string) => {
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('license_id', String(licenseId));
+      formData.append('user_id', userIdStr);
+
+      const res = await fetch('index.php?action=api_assign_license', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        if (showAlert) showAlert('🔑 License key assigned to team member!', 'success');
+        onRefresh();
+      } else {
+        if (showAlert) showAlert('❌ Failed: ' + (data.error || 'Unknown error'), 'error');
+      }
+    } catch (err: any) {
+      if (showAlert) showAlert('❌ Request failed: ' + err.message, 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleIssuePoolLicense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('company_id', String(company.id));
+      formData.append('package_tier', poolTier);
+
+      const res = await fetch(getApiUrl('api_generate'), { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        if (showAlert) showAlert(`✨ ${poolTier.toUpperCase()} license key issued to ${company.company_name} pool!`, 'success');
+        onRefresh();
+      } else {
+        if (showAlert) showAlert('❌ Failed: ' + (data.error || 'Unknown error'), 'error');
+      }
+    } catch (err: any) {
+      if (showAlert) showAlert('❌ Request failed: ' + err.message, 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const [onboardMode, setOnboardMode] = useState<'assign' | 'create'>('assign');
   const [selectedUnassignedUser, setSelectedUnassignedUser] = useState<number | ''>('');
@@ -525,21 +571,21 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
               </div>
             </div>
 
-            {/* Section 2: Issued License Keys Table */}
+            {/* Section 2: Company License Keys Pool & Assignment Workspace */}
             <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                  <Key className="w-4 h-4 text-amber-400" /> Company Issued License Keys ({companyLicenses.length})
+                  <Key className="w-4 h-4 text-amber-400" /> Company License Pool ({companyLicenses.length})
                 </h3>
               </div>
 
               <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
                 {companyLicenses.length === 0 ? (
-                  <p className="p-8 text-center text-pm-secondary">No active store licenses issued to company members yet.</p>
+                  <p className="p-8 text-center text-pm-secondary">No active store licenses issued to company pool yet.</p>
                 ) : (
                   <div className="divide-y divide-pm-border">
                     {companyLicenses.map(l => (
-                      <div key={l.id} className="p-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
+                      <div key={l.id} className="p-3.5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
                         <div className="space-y-1">
                           <div className="font-mono text-amber-400 font-bold flex items-center gap-2 text-sm">
                             <span>{l.license_key}</span>
@@ -553,35 +599,80 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                             </button>
                           </div>
                           <div className="text-[11px] text-pm-secondary flex items-center gap-2">
-                            <span className="font-bold text-pm-text">{l.user_email}</span>
-                            <span>•</span>
                             <span className="uppercase font-bold text-purple-400 px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">
                               {l.package_tier} Tier
                             </span>
+                            <span>•</span>
+                            <span>Issued: {l.created_at ? new Date(l.created_at).toLocaleDateString() : 'N/A'}</span>
                           </div>
                         </div>
 
-                        {l.store_url ? (
-                          <a
-                            href={l.store_url.startsWith('http') ? l.store_url : `https://${l.store_url}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs hover:bg-emerald-500/20 transition"
-                          >
-                            <Globe className="w-3.5 h-3.5" />
-                            <span>{l.store_url}</span>
-                            <ExternalLink className="w-3 h-3 ml-0.5" />
-                          </a>
-                        ) : (
-                          <span className="px-3 py-1.5 rounded-lg bg-pm-input/80 text-pm-secondary font-mono text-xs border border-pm-border">
-                            Unbound Key
-                          </span>
-                        )}
+                        <div className="flex flex-wrap items-center gap-2 shrink-0">
+                          {/* Employee Assignment Dropdown */}
+                          <div className="flex items-center gap-1.5">
+                            <label className="text-[10px] font-semibold text-pm-secondary uppercase">Assigned To:</label>
+                            <select
+                              value={l.user_id || ''}
+                              onChange={e => handleAssignEmployee(l.id, e.target.value)}
+                              className="bg-pm-input border border-pm-border rounded-lg px-2.5 py-1 text-xs font-semibold text-pm-text focus:border-purple-500 focus:outline-none"
+                            >
+                              <option value="">-- Unassigned (Available in Pool) --</option>
+                              {companyMembers.map(m => (
+                                <option key={m.id} value={m.id}>
+                                  👤 {m.name ? `${m.name} (${m.email})` : m.email}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Bound Domain Badge */}
+                          {l.store_url ? (
+                            <a
+                              href={l.store_url.startsWith('http') ? l.store_url : `https://${l.store_url}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs hover:bg-emerald-500/20 transition"
+                            >
+                              <Globe className="w-3.5 h-3.5" />
+                              <span>{l.store_url}</span>
+                              <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
+                            </a>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-lg bg-pm-input/80 text-pm-secondary font-mono text-[11px] border border-pm-border italic">
+                              Unbound Store Domain
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
+              {/* 1-Click Pool Key Generator */}
+              <form onSubmit={handleIssuePoolLicense} className="flex flex-col sm:flex-row items-center gap-3 p-3.5 bg-pm-input/40 border border-pm-border rounded-xl">
+                <div className="flex-1 w-full">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-pm-secondary mb-1">Issue New Key to {company.company_name} Pool</label>
+                  <select
+                    value={poolTier}
+                    onChange={e => setPoolTier(e.target.value)}
+                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-1.5 text-xs font-bold text-pm-text focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="basic">BASIC TIER (Standard Feature Suite)</option>
+                    <option value="pro">PRO TIER (Advanced Automation &amp; Backups)</option>
+                    <option value="enterprise">ENTERPRISE TIER (Unlimited Multi-Store Pools)</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting || isFull}
+                  className="w-full sm:w-auto pm-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shrink-0 mt-auto shadow-md disabled:opacity-50"
+                >
+                  <PlusCircle className="w-4 h-4 text-white" />
+                  <span>{submitting ? 'Generating...' : isFull ? 'License Limit Reached' : 'Issue Pool Key'}</span>
+                </button>
+              </form>
             </div>
 
             {/* Section 3: Dual-Mode Team Member Onboarding Panel */}

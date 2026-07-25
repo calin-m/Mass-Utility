@@ -145,6 +145,9 @@ class AdminSettingsManager
                     $upL->execute([$cId, $u['id']]);
                 }
             }
+
+            // Sync any remaining unlinked licenses with their user's company_id
+            $pdo->exec("UPDATE pm_licenses SET company_id = (SELECT company_id FROM pm_users WHERE pm_users.id = pm_licenses.user_id) WHERE company_id IS NULL AND user_id IS NOT NULL AND (SELECT company_id FROM pm_users WHERE pm_users.id = pm_licenses.user_id) IS NOT NULL"); /* nosec */
         } catch (\Throwable $t) {}
         return $pdo;
     }

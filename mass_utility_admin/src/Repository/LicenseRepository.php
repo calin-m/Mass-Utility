@@ -14,8 +14,13 @@ class LicenseRepository
 
     public function getAllLicenses(): array
     {
-        $sql = "SELECT l.*, u.email as user_email 
+        $sql = "SELECT l.*, 
+                COALESCE(l.company_id, u.company_id) as company_id_resolved,
+                c.company_name as company_name,
+                u.email as user_email,
+                u.name as user_name
                 FROM pm_licenses l
+                LEFT JOIN pm_companies c ON (l.company_id = c.id OR (l.company_id IS NULL AND l.user_id IS NOT NULL AND c.id = (SELECT company_id FROM pm_users WHERE id = l.user_id)))
                 LEFT JOIN pm_users u ON l.user_id = u.id
                 ORDER BY l.id DESC";
         $stmt = $this->db->query($sql);
@@ -25,7 +30,7 @@ class LicenseRepository
 
     public function getAllUsers(): array
     {
-        $stmt = $this->db->query("SELECT id, name, email, company_name, role, status, created_at FROM pm_users ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT id, name, email, company_name, company_id, role, status, created_at FROM pm_users ORDER BY id DESC");
         $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return is_array($res) ? $res : [];
     }
@@ -38,9 +43,17 @@ class LicenseRepository
             throw new \Exception("A client account with this email address already exists.");
         }
 
+        $companyId = null;
+        if (!empty($company)) {
+            $cStmt = $this->db->prepare("SELECT id FROM pm_companies WHERE company_name = ?");
+            $cStmt->execute([$company]);
+            $cRow = $cStmt->fetch(PDO::FETCH_ASSOC);
+            if ($cRow) $companyId = (int)$cRow['id'];
+        }
+
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $this->db->prepare("INSERT INTO pm_users (name, email, password_hash, company_name, role) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$name, $email, $hash, $company, $role]);
+        $stmt = $this->db->prepare("INSERT INTO pm_users (name, email, password_hash, company_name, company_id, role) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $email, $hash, $company, $companyId, $role]);
         return (int)$this->db->lastInsertId();
     }
 
@@ -52,8 +65,29 @@ class LicenseRepository
             throw new \Exception("The email address '{$email}' is already registered to another client account.");
         }
 
-        $stmt = $this->db->prepare("UPDATE pm_users SET name = COALESCE(?, name), email = ?, company_name = ?, status = ?, role = COALESCE(?, role) WHERE id = ?");
-        return $stmt->execute([$name, $email, $company, $status, $role, $id]);
+        // Fetch current user details to check for company transfer
+        $currStmt = $this->db->prepare("SELECT company_name, company_id FROM pm_users WHERE id = ?");
+        $currStmt->execute([$id]);
+        $currUser = $currStmt->fetch(PDO::FETCH_ASSOC);
+
+        $newCompanyId = null;
+        if (!empty($company)) {
+            $cStmt = $this->db->prepare("SELECT id FROM pm_companies WHERE company_name = ?");
+            $cStmt->execute([$company]);
+            $cRow = $cStmt->fetch(PDO::FETCH_ASSOC);
+            if ($cRow) {
+                $newCompanyId = (int)$cRow['id'];
+            }
+        }
+
+        // If user is transferring companies, unbind keys from user so keys STAY with old company pool
+        if ($currUser && !empty($currUser['company_id']) && $newCompanyId !== (int)$currUser['company_id']) {
+            $unbindStmt = $this->db->prepare("UPDATE pm_licenses SET user_id = NULL WHERE user_id = ? AND company_id = ?");
+            $unbindStmt->execute([$id, $currUser['company_id']]);
+        }
+
+        $stmt = $this->db->prepare("UPDATE pm_users SET name = COALESCE(?, name), email = ?, company_name = ?, company_id = ?, status = ?, role = COALESCE(?, role) WHERE id = ?");
+        return $stmt->execute([$name, $email, $company, $newCompanyId, $status, $role, $id]);
     }
 
     public function resetUserPassword(int $id, string $newPassword): bool
@@ -74,12 +108,27 @@ class LicenseRepository
         return $stmt->execute([$id]);
     }
 
-    public function createLicense(int $userId, string $tier, ?string $expiry): string
+    public function createLicense(?int $companyId, ?int $userId, string $tier, ?string $expiry): string
     {
+        if ($companyId === null && $userId !== null) {
+            $stmtUser = $this->db->prepare("SELECT company_id FROM pm_users WHERE id = ?");
+            $stmtUser->execute([$userId]);
+            $uRow = $stmtUser->fetch(PDO::FETCH_ASSOC);
+            if ($uRow && !empty($uRow['company_id'])) {
+                $companyId = (int)$uRow['company_id'];
+            }
+        }
+
         $key = 'MASS-' . strtoupper(bin2hex(random_bytes(8))) . '-' . strtoupper(bin2hex(random_bytes(8)));
-        $stmt = $this->db->prepare("INSERT INTO pm_licenses (user_id, license_key, package_tier, expires_at, status) VALUES (?, ?, ?, ?, 'active')");
-        $stmt->execute([$userId, $key, $tier, $expiry]);
+        $stmt = $this->db->prepare("INSERT INTO pm_licenses (company_id, user_id, license_key, package_tier, expires_at, status) VALUES (?, ?, ?, ?, ?, 'active')");
+        $stmt->execute([$companyId, $userId, $key, $tier, $expiry]);
         return $key;
+    }
+
+    public function assignLicense(int $licenseId, ?int $userId, ?string $storeUrl = null): bool
+    {
+        $stmt = $this->db->prepare("UPDATE pm_licenses SET user_id = ?, store_url = COALESCE(?, store_url), updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        return $stmt->execute([$userId, $storeUrl, $licenseId]);
     }
 
     public function updateLicense(int $id, string $status, string $tier, ?string $expiry, ?string $storeUrl = null, ?int $userId = null): bool

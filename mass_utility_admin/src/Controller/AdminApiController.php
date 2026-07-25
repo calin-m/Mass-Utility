@@ -278,7 +278,11 @@ class AdminApiController
 
     private function generate(): void
     {
-        $userId = (int)($_POST['user_id'] ?? 0);
+        $companyId = isset($_POST['company_id']) && $_POST['company_id'] !== '' ? (int)$_POST['company_id'] : null;
+        if ($companyId === 0) $companyId = null;
+        $userId = isset($_POST['user_id']) && $_POST['user_id'] !== '' ? (int)$_POST['user_id'] : null;
+        if ($userId === 0) $userId = null;
+
         $tier = $_POST['package_tier'] ?? $_POST['tier'] ?? 'basic';
         $expiry = $_POST['expires_at'] ?? $_POST['expiry'] ?? null;
         if (empty($expiry)) {
@@ -286,8 +290,28 @@ class AdminApiController
         }
 
         try {
-            $key = $this->repo->createLicense($userId, $tier, $expiry);
-            echo json_encode(['success' => true, 'key' => $key, 'licenses' => $this->repo->getAllLicenses()]);
+            $key = $this->repo->createLicense($companyId, $userId, $tier, $expiry);
+            echo json_encode(['success' => true, 'key' => $key, 'licenses' => $this->repo->getAllLicenses(), 'companies' => $this->repo->getAllCompanies()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function assign_license(): void
+    {
+        $licenseId = (int)($_POST['license_id'] ?? $_POST['id'] ?? 0);
+        $userId = isset($_POST['user_id']) && $_POST['user_id'] !== '' ? (int)$_POST['user_id'] : null;
+        if ($userId === 0) $userId = null;
+        $storeUrl = isset($_POST['store_url']) ? trim($_POST['store_url']) : null;
+
+        if ($licenseId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Valid license ID is required.']);
+            return;
+        }
+
+        try {
+            $success = $this->repo->assignLicense($licenseId, $userId, $storeUrl);
+            echo json_encode(['success' => $success, 'licenses' => $this->repo->getAllLicenses(), 'companies' => $this->repo->getAllCompanies()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }

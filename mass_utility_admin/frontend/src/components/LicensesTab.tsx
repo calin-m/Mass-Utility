@@ -6,8 +6,11 @@ import { StatCard } from './common/StatCard';
 
 export interface License {
   id: number;
-  user_id?: number;
-  user_email: string;
+  company_id?: number | null;
+  company_name?: string | null;
+  user_id?: number | null;
+  user_email?: string | null;
+  user_name?: string | null;
   license_key: string;
   store_url: string | null;
   package_tier: string;
@@ -278,13 +281,13 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
               <tr>
                 <th className="p-3">ID</th>
-                <th className="p-3">Client Email</th>
+                <th className="p-3">Company Owner</th>
+                <th className="p-3">Assigned Employee</th>
                 <th className="p-3">License Key</th>
                 <th className="p-3">Bound Store Domain</th>
                 <th className="p-3">Tier</th>
                 <th className="p-3">Status</th>
-                <th className="p-3">Expires At</th>
-                <th className="p-3">Actions</th>
+                <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
@@ -300,11 +303,31 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                   const displayedKey = isRevealed ? lic.license_key : maskKey(lic.license_key);
                   return (
                     <tr key={lic.id} className="hover:bg-pm-input/50 transition">
-                      <td className="p-3 font-semibold">{lic.id}</td>
-                      <td className="p-3">{lic.user_email || 'Unassigned'}</td>
+                      <td className="p-3 font-mono font-semibold text-pm-secondary">#{lic.id}</td>
+                      <td className="p-3 font-bold text-pm-text">
+                        {lic.company_name ? (
+                          <span className="text-purple-400 font-bold flex items-center gap-1">
+                            🏢 {lic.company_name}
+                          </span>
+                        ) : (
+                          <span className="italic text-pm-secondary/60">Standalone / Direct</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        {lic.user_email ? (
+                          <div className="flex flex-col">
+                            {lic.user_name ? <span className="font-semibold text-pm-text">{lic.user_name}</span> : null}
+                            <span className="text-[11px] font-mono text-pm-secondary">{lic.user_email}</span>
+                          </div>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            Available in Pool
+                          </span>
+                        )}
+                      </td>
                       <td className="p-3">
                         <div className="flex items-center gap-2 font-mono">
-                          <span className="text-amber-500 font-bold">{displayedKey}</span>
+                          <span className="text-amber-400 font-bold">{displayedKey}</span>
                           <button
                             type="button"
                             onClick={() => toggleKeyMask(lic.id)}
