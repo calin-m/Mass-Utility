@@ -47,12 +47,14 @@ For specific PHP/JS coding rules, use the following directory manifest to dispat
 
 ### 🔑 Super Admin Portal Docs (`.bench/docs/admin/`)
 *   `.bench/docs/admin/architecture/00_auto_generated_oop_map.md`: Mathematically accurate mapping of Super-Admin OOP controllers, repositories, and licensing services.
+*   `.bench/docs/admin/architecture/06_i18n_localization_map.md`: Componentized multi-language localization subsystem, locale dictionaries (`en`, `ro`, `de`, `fr`, `es`), `TranslationSchema` typing, and fallback inheritance rules.
 
 ### 🛡️ Mandatory Reverse-Dependency Documentation Sync Map
 When modifying physical code files, you are **legally bound** to verify and sync the following architectural dictionaries to prevent documentation drift:
 *   `mass_utility/api.php` -> REQUIRED: `.bench/docs/bridge/architecture/01_backend_pipeline.md`, `.bench/docs/bridge/architecture/00_auto_generated_oop_map.md`.
 *   `mass_utility_dashboard/src/*` -> REQUIRED: `.bench/docs/dashboard/architecture/01_backend_pipeline.md`, `.bench/docs/dashboard/architecture/00_auto_generated_oop_map.md`.
 *   `mass_utility_admin/src/*` -> REQUIRED: `.bench/docs/admin/architecture/00_auto_generated_oop_map.md`.
+*   `mass_utility_admin/frontend/src/i18n/*` -> REQUIRED: `.bench/docs/admin/architecture/06_i18n_localization_map.md`.
 *   `mass_utility_admin/frontend/src/*` -> REQUIRED: `.bench/docs/dashboard/frontend/05_v2_react_component_map.md`, `.bench/docs/dashboard/frontend/06_design_system_component_catalog.md`.
 
 ## 🤖 AI Tooling Architecture & Custom Commands
