@@ -1701,6 +1701,36 @@ if (strpos($path, '/api/v1/') === 0) {
             exit;
         }
 
+        if ($action === 'apply_security_headers') {
+            // Relay to PrestaShop Bridge module via HTTP Client if configured
+            try {
+                $res = $client->request('apply_security_headers', 'POST', []);
+                if (isset($res['success']) && $res['success']) {
+                    echo json_encode(['success' => true, 'message' => 'Security headers applied via bridge']);
+                    exit;
+                }
+            } catch (\Throwable $e) {
+                // Fallthrough to local htaccess write if bridge client is local/direct
+            }
+
+            $htaccessFile = dirname(__DIR__) . '/.htaccess';
+            $headerBlock = "\n# Mass Utility Security Headers Protection\n" .
+                "<IfModule mod_headers.c>\n" .
+                "    Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"\n" .
+                "    Header set X-Content-Type-Options \"nosniff\"\n" .
+                "    Header set X-Frame-Options \"SAMEORIGIN\"\n" .
+                "    Header set Referrer-Policy \"strict-origin-when-cross-origin\"\n" .
+                "</IfModule>\n";
+
+            $existing = file_exists($htaccessFile) ? (file_get_contents($htaccessFile) ?: '') : '';
+            if (strpos($existing, 'Strict-Transport-Security') === false) {
+                @file_put_contents($htaccessFile, $existing . $headerBlock);
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Security headers written to root .htaccess']);
+            exit;
+        }
+
         if ($action === 'fix_diagnostics_permissions') {
             $dataDir = dirname(__DIR__) . '/data';
             $backupsDir = dirname(__DIR__) . '/backups';
