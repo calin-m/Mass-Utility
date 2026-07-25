@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Settings, ShieldCheck, Database, HardDrive, Lock, RefreshCw } from 'lucide-react';
+import { Lock, RefreshCw, KeyRound, ShieldCheck } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
+import { Button } from './common/Button';
+import { FormInput } from './common/FormInput';
 
 interface SettingsTabProps {
   showAlert: (msg: string, type?: 'success' | 'error') => void;
@@ -50,45 +52,52 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
   };
 
   return (
-    <div className="space-y-6 w-full max-w-2xl">
-
-      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation">
+    <div className="space-y-6 w-full">
+      {/* Full Width Settings Card */}
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm">
         <SectionHeader
           title="Change Admin Password"
           subtitle="Update primary administrative access credentials for Mass Utility Admin."
           icon={Lock}
         />
-        <form onSubmit={handlePasswordUpdate} className="space-y-4 max-w-md mt-4">
-          <div>
-            <label className="block text-xs font-bold text-pm-secondary uppercase mb-1">Current Password</label>
-            <input 
-              type="password" 
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:outline-none focus:border-pm-primary"
+
+        <form onSubmit={handlePasswordUpdate} className="mt-6 space-y-6">
+          {/* Side-by-Side 2-Column Password Input Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormInput
+              label="Current Password"
+              icon={KeyRound}
+              type="password"
+              placeholder="Enter current password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
               autoComplete="current-password"
             />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-pm-secondary uppercase mb-1">New Password</label>
-            <input 
-              type="password" 
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:outline-none focus:border-pm-primary"
+
+            <FormInput
+              label="New Password"
+              icon={ShieldCheck}
+              type="password"
+              placeholder="Enter new password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
               autoComplete="new-password"
             />
           </div>
-          <button 
-            type="submit" 
-            disabled={loading}
-            className={`w-full pm-btn-danger py-2.5 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition ${loading ? 'opacity-80 cursor-wait' : ''}`}
-          >
-            {loading && <RefreshCw className="w-4 h-4 animate-spin text-white" />}
-            <span>Update Admin Password</span>
-          </button>
+
+          <div className="flex justify-end pt-2 border-t border-pm-border">
+            <Button
+              type="submit"
+              variant="danger"
+              size="md"
+              icon={Lock}
+              loading={loading}
+            >
+              Update Admin Password
+            </Button>
+          </div>
         </form>
       </div>
     </div>

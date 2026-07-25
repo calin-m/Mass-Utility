@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw, UserPlus, Check, Sparkles, Copy, PlusCircle } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
-import { DirectoryCardTable } from '../common/DirectoryCardTable';
 import { StatusBadge } from '../common/StatusBadge';
+import { Button } from '../common/Button';
+import { FormInput } from '../common/FormInput';
+import { FormSelect } from '../common/FormSelect';
+import { PaginationBar } from '../common/PaginationBar';
 
 interface ClientListViewProps {
   users: UserAccount[];
@@ -20,6 +23,10 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -80,8 +87,8 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     } catch (e) {}
   };
 
-  const generateCreatePassword = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+=-';
+  const generateRandomPassword = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
     let pass = '';
     for (let i = 0; i < 16; i++) {
       pass += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -89,64 +96,63 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     setCreatePassword(pass);
   };
 
-  const generateResetPassword = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+=-';
-    let pass = '';
-    for (let i = 0; i < 16; i++) {
-      pass += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setResetPassword(pass);
-  };
-
-  const handleCreateClient = async (e: React.FormEvent) => {
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!createEmail || !createPassword) return;
+    if (!createEmail || !createPassword) {
+      showAlert('Email and password are required', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('email', createEmail);
+      formData.append('email', createEmail.trim());
       formData.append('password', createPassword);
-      formData.append('company_name', createCompany);
+      formData.append('company_name', createCompany.trim());
+      formData.append('role', 'client');
+      formData.append('status', 'active');
 
       const res = await fetch('index.php?action=api_create_user', { method: 'POST', body: formData });
       const data = await res.json();
+
       if (data.success) {
-        let generatedKey: string | undefined = undefined;
+        let generatedKey: string | undefined;
 
-        if (issueKeyImmediately) {
-          const newUser = data.users ? data.users.find((u: UserAccount) => u.email.toLowerCase() === createEmail.toLowerCase()) : null;
-          const newUserId = newUser ? newUser.id : 0;
+        if (issueKeyImmediately && data.user && data.user.id) {
+          try {
+            const genData = new FormData();
+            genData.append('user_id', String(data.user.id));
+            genData.append('package_tier', selectedIssueTier);
+            genData.append('store_url', '');
+            genData.append('expires_at', '');
 
-          if (newUserId > 0) {
-            try {
-              const genData = new FormData();
-              genData.append('user_id', String(newUserId));
-              genData.append('package_tier', selectedIssueTier);
-              const genRes = await fetch('index.php?action=api_generate', { method: 'POST', body: genData });
-              const genResult = await genRes.json();
-              if (genResult.success) {
-                generatedKey = genResult.key;
-                showAlert(`✨ Client Account & ${selectedIssueTier.toUpperCase()} License Key issued successfully!`, 'success');
-              } else {
-                showAlert(`⚠️ Client created, but key issue failed: ${genResult.error}`, 'error');
-              }
-            } catch (genErr: any) {
-              showAlert(`⚠️ Client created, but key issue failed: ${genErr.message}`, 'error');
+            const genRes = await fetch('index.php?action=api_generate', { method: 'POST', body: genData });
+            const genJson = await genRes.json();
+            if (genJson.success && genJson.license_key) {
+              generatedKey = genJson.license_key;
             }
-          }
-        } else {
-          showAlert('✨ Client Account created successfully!', 'success');
+          } catch (e) {}
         }
 
-        setLastCreatedCreds({ email: createEmail, pass: createPassword, key: generatedKey });
+        setLastCreatedCreds({
+          email: createEmail.trim(),
+          pass: createPassword,
+          key: generatedKey
+        });
+
         clearDraftMemory();
         setShowCreateModal(false);
+
+        showAlert(
+          `🎉 Client account ${createEmail} created successfully! ${generatedKey ? '🔑 License Key issued!' : ''}`,
+          'success'
+        );
         onRefresh();
       } else {
         showAlert(data.error || 'Failed to create client account', 'error');
       }
     } catch (err: any) {
-      showAlert('Failed to create client account: ' + err.message, 'error');
+      showAlert('Failed to create account: ' + err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -155,19 +161,20 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetUser || !resetPassword) return;
+
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('id', String(resetUser.id));
-      formData.append('password', resetPassword);
+      formData.append('user_id', String(resetUser.id));
+      formData.append('new_password', resetPassword);
 
-      const res = await fetch('index.php?action=api_reset_password', { method: 'POST', body: formData });
+      const res = await fetch('index.php?action=api_reset_user_password', { method: 'POST', body: formData });
       const data = await res.json();
+
       if (data.success) {
-        showAlert(`Password reset for ${resetUser.email} successfully!`, 'success');
+        showAlert(`Password reset successfully for ${resetUser.email}`, 'success');
         setResetUser(null);
         setResetPassword('');
-        onRefresh();
       } else {
         showAlert(data.error || 'Failed to reset password', 'error');
       }
@@ -180,6 +187,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
   const handleDeleteUser = async () => {
     if (!deletingUser) return;
+
     setLoading(true);
     try {
       const formData = new FormData();
@@ -187,15 +195,16 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
       const res = await fetch('index.php?action=api_delete_user', { method: 'POST', body: formData });
       const data = await res.json();
+
       if (data.success) {
-        showAlert(`Client account ${deletingUser.email} deleted`, 'success');
+        showAlert(`Client account ${deletingUser.email} deleted successfully`, 'success');
         setDeletingUser(null);
         onRefresh();
       } else {
-        showAlert(data.error || 'Failed to delete client account', 'error');
+        showAlert(data.error || 'Failed to delete account', 'error');
       }
     } catch (err: any) {
-      showAlert('Failed to delete client account: ' + err.message, 'error');
+      showAlert('Failed to delete account: ' + err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -272,16 +281,32 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     showAlert('📋 Client Login Credentials copied to clipboard!', 'success');
   };
 
-  const filteredUsers = users.filter(u => {
-    const matchesSearch = u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (u.company_name && u.company_name.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === 'all' ||
-                          (statusFilter === 'suspended' && u.status === 'suspended') ||
-                          (statusFilter === 'active' && u.status !== 'suspended');
-    return matchesSearch && matchesStatus;
-  });
+  const filteredUsers = useMemo(() => {
+    return users.filter(u => {
+      const matchesSearch = u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (u.company_name && u.company_name.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesStatus = statusFilter === 'all' ||
+                            (statusFilter === 'suspended' && u.status === 'suspended') ||
+                            (statusFilter === 'active' && u.status !== 'suspended');
+      return matchesSearch && matchesStatus;
+    });
+  }, [users, searchTerm, statusFilter]);
 
-  const getClientStats = (userId: number) => {
+  // Pagination calculation
+  const totalItems = filteredUsers.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredUsers.slice(start, start + pageSize);
+  }, [filteredUsers, currentPage, pageSize]);
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setCurrentPage(1);
+  };
+
+  const getUserLicenseMetrics = (userId: number) => {
     const userLics = licenses.filter(l => l.user_id === userId);
     const activeLics = userLics.filter(l => l.status === 'active');
     const boundDomains = userLics.map(l => l.store_url).filter(Boolean);
@@ -298,21 +323,21 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   const totalBoundDomains = Array.from(new Set(licenses.map(l => l.store_url).filter(Boolean))).length;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6">
       <SectionHeader
-        title="Client Accounts Directory"
+        title="Clients Directory"
         subtitle="Manage client credentials, company profiles, account statuses, and associated store licenses."
         icon={Users}
         action={
-          <button
-            type="button"
+          <Button
+            variant="neutral"
+            size="sm"
+            icon={RefreshCw}
+            loading={isRefreshing}
             onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
-            title="Refresh Client Accounts List"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} /> Refresh
-          </button>
+            Refresh
+          </Button>
         }
       />
 
@@ -328,14 +353,21 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
       <DirectoryToolbar
         searchPlaceholder="Search by client email or store name..."
         searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
+        onSearchChange={(val) => {
+          setSearchTerm(val);
+          setCurrentPage(1);
+        }}
         statusFilters={[
           { key: 'all', label: 'All Accounts', count: totalClients },
           { key: 'active', label: 'Active', count: activeClients },
           { key: 'suspended', label: 'Suspended', count: suspendedClients }
         ]}
         activeFilter={statusFilter}
-        onFilterChange={(key) => setStatusFilter(key as any)}
+        onFilterChange={(key) => {
+          setStatusFilter(key as any);
+          setCurrentPage(1);
+        }}
+        onClearFilters={handleClearFilters}
         primaryAction={{
           label: 'Create Client Account',
           icon: UserPlus,
@@ -345,44 +377,40 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
       {/* Post-Creation Quick Credentials Banner */}
       {lastCreatedCreds && (
-        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
           <div className="space-y-1">
-            <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-emerald-400" /> Merchant Credentials Onboarded Successfully
+            <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Newly Provisioned Client Credentials for <strong>{lastCreatedCreds.email}</strong></span>
             </div>
-            <div className="text-xs text-pm-text font-mono flex flex-wrap items-center gap-x-4 gap-y-1">
-              <span><strong>Email:</strong> {lastCreatedCreds.email}</span>
-              <span className="flex items-center gap-1.5 bg-pm-input/60 px-2 py-0.5 rounded border border-pm-border">
-                <strong>Password:</strong> {showBannerPass ? lastCreatedCreds.pass : '••••••••••••'}
-                <button
-                  type="button"
-                  onClick={() => setShowBannerPass(!showBannerPass)}
-                  className="text-pm-secondary hover:text-pm-primary p-0.5 rounded transition"
-                  title={showBannerPass ? "Hide Password" : "Reveal Password"}
-                >
-                  {showBannerPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
-              </span>
+            <div className="text-[11px] font-mono text-pm-secondary flex flex-wrap items-center gap-4 pt-1">
+              <span>Email: <strong className="text-pm-text">{lastCreatedCreds.email}</strong></span>
+              <span>Password: <strong className="text-pm-text font-bold">{showBannerPass ? lastCreatedCreds.pass : '••••••••••••'}</strong></span>
+              <button
+                type="button"
+                onClick={() => setShowBannerPass(!showBannerPass)}
+                className="text-purple-600 dark:text-purple-400 hover:underline font-bold text-[10px]"
+              >
+                {showBannerPass ? 'Hide' : 'Show'} Password
+              </button>
               {lastCreatedCreds.key && (
-                <span className="text-amber-400 font-bold"><strong>Issued Key:</strong> {lastCreatedCreds.key}</span>
+                <span>Issued Key: <strong className="text-purple-600 dark:text-purple-400">{lastCreatedCreds.key}</strong></span>
               )}
             </div>
           </div>
-
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
+            <Button
+              variant="success"
+              size="sm"
+              icon={copiedCreds ? Check : Copy}
               onClick={copyCreatedCredentials}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
             >
-              {copiedCreds ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedCreds ? 'Copied to Clipboard!' : '📋 Copy Login Info'}</span>
-            </button>
+              {copiedCreds ? 'Copied!' : 'Copy Credentials'}
+            </Button>
             <button
               type="button"
               onClick={() => setLastCreatedCreds(null)}
-              className="text-pm-secondary hover:text-pm-text text-xs p-1 rounded transition"
-              title="Dismiss Banner"
+              className="text-pm-secondary hover:text-pm-text text-xs p-1"
             >
               ✕
             </button>
@@ -390,315 +418,343 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         </div>
       )}
 
-      {/* Client Accounts Table */}
-      <DirectoryCardTable
-        emptyState={{
-          isMessageVisible: filteredUsers.length === 0,
-          message: 'No client accounts match your current filter.'
-        }}
-      >
-        <table className="w-full text-left text-xs">
-          <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
-            <tr>
-              <th className="p-3">ID</th>
-              <th className="p-3">Client Name / Email</th>
-              <th className="p-3">Company / Store Name</th>
-              <th className="p-3">Assigned Licenses &amp; Stores</th>
-              <th className="p-3">Account Status</th>
-              <th className="p-3">Registered At</th>
-              <th className="p-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-pm-border">
-            {filteredUsers.map(u => {
-              const stats = getClientStats(u.id);
-              return (
-                <tr key={u.id} className="hover:bg-pm-input/50 transition">
-                  <td className="p-3 font-mono font-semibold text-pm-secondary">#{u.id}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-purple-400 shrink-0" />
-                      <div className="flex flex-col">
-                        {u.name ? <span className="font-bold text-pm-text">{u.name}</span> : null}
-                        <span className={u.name ? "text-[11px] font-mono text-pm-secondary" : "font-bold text-pm-text font-mono"}>{u.email}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-3 text-pm-secondary">
-                    {u.company_name ? (
-                      <span className="flex items-center gap-1.5">
-                        <Building className="w-3.5 h-3.5 text-pm-primary shrink-0" />
-                        {u.company_name}
-                      </span>
-                    ) : (
-                      <span className="italic text-pm-secondary/60">Not specified</span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-pm-primary">
-                        🔑 {stats.total} {stats.total === 1 ? 'License' : 'Licenses'} ({stats.active} Active)
-                      </span>
-                      {stats.boundDomains.length > 0 && (
-                        <span className="text-[0.65rem] text-pm-secondary font-mono truncate max-w-[200px]" title={stats.boundDomains.join(', ')}>
-                          🌐 {stats.boundDomains.join(', ')}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <StatusBadge status={u.status} />
-                  </td>
-                  <td className="p-3 text-pm-secondary">
-                    {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
-                  </td>
-                  <td className="p-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => onSelectClient(u, 'overview')}
-                        className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                        title="Inspect Client 360° Details View"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-purple-400" /> View
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onSelectClient(u, 'edit')}
-                        className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                        title="Edit Client Profile Details"
-                      >
-                        <Edit className="w-3.5 h-3.5 text-indigo-400" /> Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openResetModal(u)}
-                        className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                        title="Reset Password"
-                      >
-                        <Key className="w-3.5 h-3.5" /> Pass
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeletingUser(u)}
-                        className="pm-btn-danger-outline px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                        title="Delete Account"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+      {/* Clients Directory Table */}
+      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
+                <th className="p-3">Client Account</th>
+                <th className="p-3">Company Profile</th>
+                <th className="p-3">Active Licenses</th>
+                <th className="p-3">Authorized Store Domains</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-pm-border">
+              {paginatedUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-pm-secondary italic">
+                    No client accounts match the active search or filter view.
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </DirectoryCardTable>
+              ) : (
+                paginatedUsers.map(user => {
+                  const metrics = getUserLicenseMetrics(user.id);
+                  const isSuspended = user.status === 'suspended';
 
-      {/* Edit Profile Modal */}
-      {editingUser && (
-        <BaseModal isOpen={true} onClose={() => setEditingUser(null)} title="Edit Company / Store Profile">
-          <form onSubmit={handleEditProfile} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Client Email (Read Only)</label>
-              <input type="text" disabled value={editingUser.email} className="w-full bg-pm-input/50 border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-secondary" />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company / Store Name</label>
-              <input
-                type="text"
-                value={editCompany}
-                onChange={e => setEditCompany(e.target.value)}
-                placeholder="e.g. Acme Fashion Store"
-                className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-              />
-            </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-              <button type="button" onClick={() => setEditingUser(null)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
-                Cancel
-              </button>
-              <button type="submit" disabled={loading} className="pm-btn-primary px-4 py-2 rounded-lg text-xs font-bold">
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </form>
-        </BaseModal>
-      )}
+                  return (
+                    <tr key={user.id} className="hover:bg-pm-input/50 transition">
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                            <Mail className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <button
+                              onClick={() => onSelectClient(user, 'overview')}
+                              className="font-bold text-pm-text hover:text-purple-500 transition text-left block"
+                            >
+                              {user.email}
+                            </button>
+                            <div className="text-[10px] text-pm-secondary font-mono">ID #{user.id} • Joined {user.created_at}</div>
+                          </div>
+                        </div>
+                      </td>
 
-      {/* Password Reset Modal */}
-      {resetUser && (
-        <BaseModal isOpen={true} onClose={() => setResetUser(null)} title={`Reset Password for ${resetUser.email}`}>
-          <form onSubmit={handleResetPassword} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">New Password</label>
-              <div className="relative">
-                <input
-                  type={showResetPassword ? "text" : "password"}
+                      <td className="p-3 font-semibold text-pm-text">
+                        {user.company_name ? (
+                          <div className="flex items-center gap-1">
+                            <Building className="w-3.5 h-3.5 text-purple-400" />
+                            <span>{user.company_name}</span>
+                          </div>
+                        ) : (
+                          <span className="italic text-pm-secondary">Individual Client</span>
+                        )}
+                      </td>
+
+                      <td className="p-3 font-mono font-semibold text-pm-text">
+                        {metrics.total === 0 ? (
+                          <span className="italic text-pm-secondary">No Licenses</span>
+                        ) : (
+                          <span className="text-purple-600 dark:text-purple-400 font-bold">{metrics.active} Active</span>
+                        )}
+                      </td>
+
+                      <td className="p-3 font-mono text-[0.72rem]">
+                        {metrics.boundDomains.length === 0 ? (
+                          <span className="italic text-pm-secondary">None</span>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <span className="text-pm-text font-bold">{metrics.boundDomains[0]}</span>
+                            {metrics.boundDomains.length > 1 && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">
+                                +{metrics.boundDomains.length - 1} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </td>
+
+                      <td className="p-3">
+                        <StatusBadge status={user.status} />
+                      </td>
+
+                      <td className="p-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={Edit}
+                            onClick={() => openEditModal(user)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={Key}
+                            onClick={() => openResetModal(user)}
+                          >
+                            Reset Pass
+                          </Button>
+                          <Button
+                            variant={isSuspended ? 'success' : 'danger'}
+                            size="sm"
+                            icon={isSuspended ? CheckCircle : ShieldAlert}
+                            onClick={() => handleToggleStatus(user)}
+                          >
+                            {isSuspended ? 'Activate' : 'Suspend'}
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            icon={Trash2}
+                            onClick={() => setDeletingUser(user)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Master PaginationBar Component Primitive */}
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+        />
+      </div>
+
+      {/* Provision New Client Account Modal */}
+      <BaseModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Provision New Client Account"
+        icon={UserPlus}
+        maxWidth="lg"
+      >
+        <form onSubmit={handleCreateUser} className="space-y-4">
+          <FormInput
+            label="Client Email Address"
+            type="email"
+            required
+            placeholder="client@company.com"
+            value={createEmail}
+            onChange={e => setCreateEmail(e.target.value)}
+          />
+
+          <div>
+            <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">Account Password</label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <FormInput
+                  type={showCreatePassword ? 'text' : 'password'}
                   required
-                  value={resetPassword}
-                  onChange={e => setResetPassword(e.target.value)}
-                  placeholder="Set strong password..."
-                  className="w-full bg-pm-input border border-pm-border rounded-lg pl-3 pr-10 py-2 text-sm font-mono text-pm-text focus:border-pm-primary focus:outline-none"
+                  placeholder="Enter or generate password"
+                  value={createPassword}
+                  onChange={e => setCreatePassword(e.target.value)}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowResetPassword(!showResetPassword)}
-                  className="absolute right-3 top-2.5 text-pm-secondary hover:text-pm-text transition"
+                  onClick={() => setShowCreatePassword(!showCreatePassword)}
+                  className="absolute right-3 top-2.5 text-pm-secondary hover:text-pm-text"
                 >
-                  {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <button
-                type="button"
-                onClick={generateResetPassword}
-                className="mt-1 text-[0.7rem] text-pm-primary hover:underline font-medium"
-              >
-                ✨ Auto-Generate Strong 16-Char Password
-              </button>
-            </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-              <button type="button" onClick={() => setResetUser(null)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
-                Cancel
-              </button>
-              <button type="submit" disabled={loading} className="pm-btn-primary px-4 py-2 rounded-lg text-xs font-bold">
-                {loading ? 'Resetting...' : 'Update Password'}
-              </button>
-            </div>
-          </form>
-        </BaseModal>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deletingUser && (
-        <BaseModal isOpen={true} onClose={() => setDeletingUser(null)} title="Confirm Account Deletion">
-          <div className="space-y-4">
-            <p className="text-xs text-pm-text">
-              Are you sure you want to permanently delete client account <strong>{deletingUser.email}</strong>?
-            </p>
-            <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-              <button type="button" onClick={() => setDeletingUser(null)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
-                Cancel
-              </button>
-              <button type="button" onClick={handleDeleteUser} disabled={loading} className="pm-btn-danger px-4 py-2 rounded-lg text-xs font-bold">
-                {loading ? 'Deleting...' : 'Confirm Delete'}
-              </button>
-            </div>
-          </div>
-        </BaseModal>
-      )}
-
-      {/* Create Standalone Client Account Modal */}
-      <BaseModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create New Client Account">
-        <form onSubmit={handleCreateClient} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Client Email Address</label>
-            <input
-              type="email"
-              required
-              value={createEmail}
-              onChange={e => setCreateEmail(e.target.value)}
-              placeholder="merchant@store.com"
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-semibold uppercase text-pm-secondary">Account Password</label>
-              <button
-                type="button"
-                onClick={generateCreatePassword}
-                className="text-[0.7rem] text-pm-primary hover:underline font-semibold"
-              >
-                ✨ Auto-Generate Password
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                type={showCreatePassword ? "text" : "password"}
-                required
-                value={createPassword}
-                onChange={e => setCreatePassword(e.target.value)}
-                placeholder="Enter password..."
-                className="w-full bg-pm-input border border-pm-border rounded-lg pl-3 pr-10 py-2 text-sm font-mono text-pm-text focus:border-pm-primary focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCreatePassword(!showCreatePassword)}
-                className="absolute right-3 top-2.5 text-pm-secondary hover:text-pm-text transition"
-              >
-                {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+              <Button type="button" variant="neutral" size="md" onClick={generateRandomPassword}>
+                Generate
+              </Button>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company / Store Name (Optional)</label>
-            <input
-              type="text"
-              value={createCompany}
-              onChange={e => setCreateCompany(e.target.value)}
-              placeholder="e.g. Acme Commerce Inc."
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
+          <FormInput
+            label="Company / Organization Name (Optional)"
+            type="text"
+            placeholder="e.g. Acme Stores Inc."
+            value={createCompany}
+            onChange={e => setCreateCompany(e.target.value)}
+          />
 
-          {/* 1-Click License Key Provisioning Checkbox */}
-          <div className="p-3 bg-pm-input/50 border border-pm-border rounded-xl space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
+          <div className="pt-2 border-t border-pm-border space-y-3">
+            <label className="flex items-center gap-2 text-xs font-semibold text-pm-text cursor-pointer">
               <input
                 type="checkbox"
                 checked={issueKeyImmediately}
                 onChange={e => setIssueKeyImmediately(e.target.checked)}
-                className="rounded border-pm-border bg-pm-input text-purple-600 focus:ring-purple-500"
+                className="rounded border-pm-border text-purple-600 focus:ring-purple-500"
               />
-              <span className="text-xs font-bold text-pm-text">⚡ Issue License Key Immediately on Creation</span>
+              <span>1-Click Provision: Issue license key immediately upon account creation</span>
             </label>
 
             {issueKeyImmediately && (
-              <div className="pt-2 flex items-center gap-3 animate-in fade-in duration-200">
-                <span className="text-xs font-semibold text-pm-secondary shrink-0">Target Package Tier:</span>
-                <select
+              <div className="p-3 bg-pm-input/50 rounded-xl border border-pm-border space-y-2">
+                <FormSelect
+                  label="Package Tier for Issued Key"
                   value={selectedIssueTier}
                   onChange={e => setSelectedIssueTier(e.target.value)}
-                  className="bg-pm-card border border-pm-border rounded-lg px-3 py-1.5 text-xs text-pm-text font-bold focus:outline-none focus:border-purple-500"
-                >
-                  <option value="basic">BASIC TIER</option>
-                  <option value="pro">PRO TIER</option>
-                  <option value="enterprise">ENTERPRISE TIER</option>
-                </select>
+                  options={[
+                    { value: 'basic', label: 'BASIC TIER' },
+                    { value: 'pro', label: 'PRO TIER' },
+                    { value: 'enterprise', label: 'ENTERPRISE TIER' },
+                  ]}
+                />
               </div>
             )}
           </div>
 
-          <div className="flex justify-between items-center pt-4 border-t border-pm-border">
-            <button
-              type="button"
-              onClick={clearDraftMemory}
-              className="text-[0.7rem] text-pm-secondary hover:text-rose-400 transition"
-              title="Clear Saved Input Memory"
-            >
-              Clear Form Memory
-            </button>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="pm-btn-primary px-5 py-2 rounded-lg text-xs font-bold uppercase flex items-center gap-1.5"
-              >
-                <UserPlus className="w-4 h-4 text-white" />
-                <span>{loading ? 'Creating...' : 'Create Account'}</span>
-              </button>
-            </div>
+          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+            <Button variant="neutral" size="md" onClick={() => setShowCreateModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="md" type="submit" loading={loading}>
+              Create Client Account
+            </Button>
           </div>
         </form>
+      </BaseModal>
+
+      {/* Edit Client Profile Modal */}
+      <BaseModal
+        isOpen={!!editingUser}
+        onClose={() => setEditingUser(null)}
+        title={`Edit Profile: ${editingUser?.email || ''}`}
+        icon={Edit}
+        maxWidth="md"
+      >
+        {editingUser && (
+          <form onSubmit={handleEditProfile} className="space-y-4">
+            <FormInput
+              label="Company / Organization Name"
+              type="text"
+              placeholder="e.g. Acme Stores Ltd."
+              value={editCompany}
+              onChange={e => setEditCompany(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+              <Button variant="neutral" size="md" onClick={() => setEditingUser(null)}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="md" type="submit" loading={loading}>
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        )}
+      </BaseModal>
+
+      {/* Password Reset Modal */}
+      <BaseModal
+        isOpen={!!resetUser}
+        onClose={() => setResetUser(null)}
+        title={`Reset Password: ${resetUser?.email || ''}`}
+        icon={Key}
+        maxWidth="md"
+      >
+        {resetUser && (
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">New Password</label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <FormInput
+                    type={showResetPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Enter new password"
+                    value={resetPassword}
+                    onChange={e => setResetPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword(!showResetPassword)}
+                    className="absolute right-3 top-2.5 text-pm-secondary hover:text-pm-text"
+                  >
+                    {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <Button
+                  type="button"
+                  variant="neutral"
+                  size="md"
+                  onClick={() => {
+                    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+                    let pass = '';
+                    for (let i = 0; i < 16; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+                    setResetPassword(pass);
+                  }}
+                >
+                  Generate
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+              <Button variant="neutral" size="md" onClick={() => setResetUser(null)}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="md" type="submit" loading={loading}>
+                Reset Password
+              </Button>
+            </div>
+          </form>
+        )}
+      </BaseModal>
+
+      {/* Delete Confirmation Modal */}
+      <BaseModal
+        isOpen={!!deletingUser}
+        onClose={() => setDeletingUser(null)}
+        title="Delete Client Account?"
+        icon={ShieldAlert}
+        variant="danger"
+        maxWidth="md"
+      >
+        <div className="space-y-4 text-xs">
+          <p className="text-pm-secondary leading-relaxed">
+            Are you sure you want to delete client account <strong>{deletingUser?.email}</strong>?
+            Associated license keys will become unassigned.
+          </p>
+          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+            <Button variant="neutral" size="md" onClick={() => setDeletingUser(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" size="md" onClick={handleDeleteUser} loading={loading}>
+              Delete Account
+            </Button>
+          </div>
+        </div>
       </BaseModal>
     </div>
   );

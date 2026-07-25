@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, KeyRound, Unlock, RefreshCw, Clock, User, Package, Calendar, Globe } from 'lucide-react';
 import { BaseModal } from './common/BaseModal';
 import { ConfirmModal } from './common/ConfirmModal';
@@ -7,6 +7,7 @@ import { StatCard } from './common/StatCard';
 import { Button } from './common/Button';
 import { FormInput } from './common/FormInput';
 import { FormSelect } from './common/FormSelect';
+import { PaginationBar } from './common/PaginationBar';
 
 export interface License {
   id: number;
@@ -79,6 +80,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
   // Filter & Expiration Radar State
   const [filterMode, setFilterMode] = useState<'ALL' | 'ACTIVE' | 'EXPIRING' | 'EXPIRED'>('ALL');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
 
   // Extension Modal State
   const [extendingLicense, setExtendingLicense] = useState<License | null>(null);
@@ -332,20 +337,30 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     return diffDays > 0 && diffDays <= 30;
   }).length;
 
-  const filteredLicenses = licenses.filter(lic => {
-    if (filterMode === 'ALL') return true;
-    if (filterMode === 'ACTIVE') return lic.status === 'active';
-    if (filterMode === 'EXPIRING') {
-      if (!lic.expires_at) return false;
-      const diffDays = Math.ceil((new Date(lic.expires_at).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-      return diffDays > 0 && diffDays <= 30;
-    }
-    if (filterMode === 'EXPIRED') {
-      if (!lic.expires_at) return false;
-      return new Date(lic.expires_at).getTime() < new Date().getTime();
-    }
-    return true;
-  });
+  const filteredLicenses = useMemo(() => {
+    return licenses.filter(lic => {
+      if (filterMode === 'ALL') return true;
+      if (filterMode === 'ACTIVE') return lic.status === 'active';
+      if (filterMode === 'EXPIRING') {
+        if (!lic.expires_at) return false;
+        const diffDays = Math.ceil((new Date(lic.expires_at).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+        return diffDays > 0 && diffDays <= 30;
+      }
+      if (filterMode === 'EXPIRED') {
+        if (!lic.expires_at) return false;
+        return new Date(lic.expires_at).getTime() < new Date().getTime();
+      }
+      return true;
+    });
+  }, [licenses, filterMode]);
+
+  // Pagination calculation
+  const totalItems = filteredLicenses.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const paginatedLicenses = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredLicenses.slice(start, start + pageSize);
+  }, [filteredLicenses, currentPage, pageSize]);
 
   const clientOptions = [
     { value: '0', label: '-- Unassigned License (Standalone Key) --' },
@@ -386,7 +401,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
           </div>
         </div>
 
-        {/* Issue & Assign License Key Form with Master Primitives & Visual Field Guidance */}
+        {/* Issue & Assign License Key Form */}
         <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm">
           <SectionHeader
             title="Issue & Assign License Key"
@@ -440,11 +455,11 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
         </div>
       </div>
 
-      {/* Active License Registry Table */}
-      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm">
+      {/* License Registry Table with PaginationBar */}
+      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm flex flex-col justify-between">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <SectionHeader
-            title={`Active License Registry & Subscriptions (${filteredLicenses.length})`}
+            title={`License Registry & Subscriptions (${filteredLicenses.length})`}
             subtitle="Complete audit ledger of active, suspended, and standalone license keys."
             icon={KeyRound}
             action={
@@ -466,7 +481,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
               <button
                 key={mode}
                 type="button"
-                onClick={() => setFilterMode(mode)}
+                onClick={() => {
+                  setFilterMode(mode);
+                  setCurrentPage(1);
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ${
                   filterMode === mode
                     ? 'bg-purple-600 text-white shadow-sm'
@@ -496,14 +514,14 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
-              {filteredLicenses.length === 0 ? (
+              {paginatedLicenses.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-6 text-center text-pm-secondary italic">
                     No license keys found matching the active filter view.
                   </td>
                 </tr>
               ) : (
-                filteredLicenses.map(lic => {
+                paginatedLicenses.map(lic => {
                   const isRevealed = revealedKeys[lic.id];
                   const maskedKey = lic.license_key ? `${lic.license_key.substring(0, 8)}-****-****-****` : '';
                   const boundDomains = lic.store_url ? lic.store_url.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -612,7 +630,6 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                             Edit
                           </Button>
 
-                          {/* Semantic UX Variants for Suspend (Danger) & Activate (Success) */}
                           {lic.status === 'active' ? (
                             <Button
                               variant="danger"
@@ -653,6 +670,16 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             </tbody>
           </table>
         </div>
+
+        {/* Master PaginationBar Component Primitive */}
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+        />
       </div>
 
       {/* Edit License Modal Dialog */}

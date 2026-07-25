@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Search, RefreshCw, Download, Terminal, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Activity, Layers, UserCheck, ShieldAlert, Eye, EyeOff, CheckCircle2, Code2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Shield, Search, RefreshCw, Download, Terminal, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Activity, Layers, UserCheck, ShieldAlert, Eye, EyeOff, CheckCircle2, Code2, X } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 import { StatCard } from './common/StatCard';
 import { BaseModal } from './common/BaseModal';
@@ -7,6 +7,7 @@ import { StatusBadge } from './common/StatusBadge';
 import { Button } from './common/Button';
 import { FormInput } from './common/FormInput';
 import { FormSelect } from './common/FormSelect';
+import { PaginationBar } from './common/PaginationBar';
 
 interface AuditLog {
   id: number;
@@ -34,6 +35,10 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   const [showRawJson, setShowRawJson] = useState<boolean>(false);
   const [unmaskedIps, setUnmaskedIps] = useState<Record<number, boolean>>({});
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
   const fetchLogs = async () => {
     setIsRefreshing(true);
     try {
@@ -45,6 +50,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
       const data = await res.json();
       if (data.success) {
         setLogs(data.logs || []);
+        setCurrentPage(1);
       } else {
         onNotify(data.error || 'Failed to fetch admin audit logs.', 'error');
       }
@@ -65,6 +71,13 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     fetchLogs();
   };
 
+  const handleClearFilters = () => {
+    setSearch('');
+    setActionFilter('ALL');
+    setCurrentPage(1);
+    fetchLogs();
+  };
+
   const toggleIpVisibility = (id: number) => {
     setUnmaskedIps((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -77,6 +90,14 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     }
     return `${ip.substring(0, 3)}***`;
   };
+
+  // Pagination calculation
+  const totalItems = logs.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const paginatedLogs = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return logs.slice(start, start + pageSize);
+  }, [logs, currentPage, pageSize]);
 
   // Calculated Telemetry Metrics
   const totalOperations = logs.length;
@@ -164,7 +185,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Super Admin Operations Audit Trail"
+        title="Operations Audit Trail"
         subtitle="Security event ledger tracking administrative operations, license updates, and authentication events."
         action={
           <div className="flex items-center gap-3">
@@ -197,20 +218,34 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         <StatCard label="Security Events" value={securityEvents} icon={ShieldAlert} color="amber" />
       </div>
 
-      {/* Filter Toolbar using Master Form Primitives */}
+      {/* Filter Toolbar with Clear Button */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-        <form onSubmit={handleSearchSubmit} className="flex-1 w-full">
-          <FormInput
-            type="text"
-            icon={Search}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClear={() => {
-              setSearch('');
-              fetchLogs();
-            }}
-            placeholder="Search logs by admin username, target ID, or payload details..."
-          />
+        <form onSubmit={handleSearchSubmit} className="flex-1 w-full flex items-center gap-2">
+          <div className="flex-1">
+            <FormInput
+              type="text"
+              icon={Search}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => {
+                setSearch('');
+                fetchLogs();
+              }}
+              placeholder="Search logs by admin username, target ID, or payload details..."
+            />
+          </div>
+          {(search || actionFilter !== 'ALL') && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              icon={X}
+              onClick={handleClearFilters}
+              title="Clear all active search and action filters"
+            >
+              Clear
+            </Button>
+          )}
         </form>
 
         <div className="w-full md:w-64 shrink-0">
@@ -222,8 +257,8 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         </div>
       </div>
 
-      {/* Audit Log Table */}
-      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm">
+      {/* Audit Log Table with PaginationBar */}
+      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -246,7 +281,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                     Loading audit trail logs...
                   </td>
                 </tr>
-              ) : logs.length === 0 ? (
+              ) : paginatedLogs.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-pm-secondary">
                     <Shield className="w-8 h-8 mx-auto text-pm-secondary/40 mb-2" />
@@ -254,7 +289,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                   </td>
                 </tr>
               ) : (
-                logs.map((log) => (
+                paginatedLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-pm-input/50 transition">
                     <td className="p-3 font-mono font-bold text-pm-secondary">#{log.id}</td>
                     <td className="p-3 text-pm-secondary font-mono text-[11px]">{log.created_at}</td>
@@ -305,6 +340,16 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
             </tbody>
           </table>
         </div>
+
+        {/* Master PaginationBar Component Primitive */}
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+        />
       </div>
 
       {/* Componentized BaseModal Inspector Dialog */}

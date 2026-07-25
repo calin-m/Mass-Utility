@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { BaseModal } from '../common/BaseModal';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
-import { DirectoryCardTable } from '../common/DirectoryCardTable';
 import { StatusBadge } from '../common/StatusBadge';
+import { Button } from '../common/Button';
+import { FormInput } from '../common/FormInput';
+import { FormSelect } from '../common/FormSelect';
+import { PaginationBar } from '../common/PaginationBar';
 
 export interface Company {
   id: number;
@@ -32,6 +35,10 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -65,12 +72,22 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
   const [copiedVatId, setCopiedVatId] = useState<number | null>(null);
 
   // Filter Logic
-  const filteredCompanies = companies.filter(c => {
-    const matchesSearch = c.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (c.tax_id && c.tax_id.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredCompanies = useMemo(() => {
+    return companies.filter(c => {
+      const matchesSearch = c.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (c.tax_id && c.tax_id.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [companies, searchTerm, statusFilter]);
+
+  // Pagination calculation
+  const totalItems = filteredCompanies.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const paginatedCompanies = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredCompanies.slice(start, start + pageSize);
+  }, [filteredCompanies, currentPage, pageSize]);
 
   const activeCount = companies.filter(c => c.status === 'active').length;
   const totalMembers = companies.reduce((acc, c) => acc + (c.user_count || 0), 0);
@@ -92,6 +109,12 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
     setOwnerPassword(pass);
   };
 
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setCurrentPage(1);
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -101,31 +124,23 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       formData.append('company_name', name.trim());
       formData.append('tax_id', taxId.trim());
       formData.append('max_licenses', String(maxLicenses));
+      if (createOwnerAccount && ownerEmail.trim()) {
+        formData.append('create_owner', '1');
+        formData.append('owner_email', ownerEmail.trim());
+        formData.append('owner_password', ownerPassword);
+      }
 
       const res = await fetch(getApiUrl('api_create_company'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        let ownerMsg = '';
-        if (createOwnerAccount && ownerEmail.trim() && ownerPassword.trim()) {
-          try {
-            const userForm = new FormData();
-            userForm.append('email', ownerEmail.trim());
-            userForm.append('password', ownerPassword.trim());
-            userForm.append('company', name.trim());
-            userForm.append('company_name', name.trim());
-            await fetch(getApiUrl('api_create_user'), { method: 'POST', body: userForm });
-            ownerMsg = ' & Primary Owner Account created!';
-          } catch (e) {}
-        }
-
-        if (showAlert) showAlert(`🏢 Company profile${ownerMsg} created successfully!`, 'success');
+        if (showAlert) showAlert(`🏢 Company '${name}' created successfully!`, 'success');
+        setIsCreateOpen(false);
         setName('');
         setTaxId('');
         setMaxLicenses(10);
         setOwnerEmail('');
         setOwnerPassword('');
         setCreateOwnerAccount(false);
-        setIsCreateOpen(false);
         onRefresh();
       } else {
         if (showAlert) showAlert('❌ Failed: ' + (data.error || 'Unknown error'), 'error');
@@ -137,7 +152,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
     }
   };
 
-  const handleEdit = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCompany || !name.trim()) return;
     setSubmitting(true);
@@ -152,7 +167,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       const res = await fetch(getApiUrl('api_update_company'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        if (showAlert) showAlert('🏢 Company profile updated successfully!', 'success');
+        if (showAlert) showAlert(`🏢 Company '${name}' updated successfully!`, 'success');
         setIsEditOpen(false);
         setSelectedCompany(null);
         onRefresh();
@@ -176,7 +191,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       const res = await fetch(getApiUrl('api_delete_company'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        if (showAlert) showAlert('🗑️ Company profile deleted and unlinked!', 'success');
+        if (showAlert) showAlert(`🏢 Company '${selectedCompany.company_name}' deleted successfully!`, 'success');
         setIsDeleteOpen(false);
         setSelectedCompany(null);
         onRefresh();
@@ -205,21 +220,21 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6">
       <SectionHeader
-        title="B2B Company Directory"
+        title="Companies Directory"
         subtitle="Manage B2B organizations, multi-user team access, and shared store license pools across tenant clients."
         icon={Building2}
         action={
-          <button
-            type="button"
+          <Button
+            variant="neutral"
+            size="sm"
+            icon={RefreshCw}
+            loading={isRefreshing}
             onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
-            title="Refresh Companies Directory"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-purple-400' : ''}`} /> Refresh
-          </button>
+            Refresh
+          </Button>
         }
       />
 
@@ -235,13 +250,20 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       <DirectoryToolbar
         searchPlaceholder="Search by company name or VAT ID..."
         searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
+        onSearchChange={(val) => {
+          setSearchTerm(val);
+          setCurrentPage(1);
+        }}
         statusFilters={[
           { key: 'all', label: 'All Companies', count: companies.length },
           { key: 'active', label: 'Active', count: activeCount }
         ]}
         activeFilter={statusFilter}
-        onFilterChange={(key) => setStatusFilter(key as any)}
+        onFilterChange={(key) => {
+          setStatusFilter(key as any);
+          setCurrentPage(1);
+        }}
+        onClearFilters={handleClearFilters}
         primaryAction={{
           label: 'Add Company Profile',
           icon: PlusCircle,
@@ -258,299 +280,284 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       />
 
       {/* Companies Directory Table */}
-      <DirectoryCardTable
-        emptyState={{
-          isMessageVisible: filteredCompanies.length === 0,
-          message: 'No company profiles match your search criteria.'
-        }}
-      >
-        <table className="w-full text-left text-xs">
-          <thead className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border">
-            <tr>
-              <th className="p-3">ID</th>
-              <th className="p-3">Company Name</th>
-              <th className="p-3">Tax / VAT ID</th>
-              <th className="p-3">Team Members</th>
-              <th className="p-3">License Utilization</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Created At</th>
-              <th className="p-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-pm-border">
-            {filteredCompanies.map(c => {
-              const companyMembers = users.filter(u => u.company_name && u.company_name.trim().toLowerCase() === c.company_name.trim().toLowerCase());
-              const companyLicenses = licenses.filter(l => l.user_email && companyMembers.some(m => m.email.toLowerCase() === l.user_email.toLowerCase()));
-              const usedCount = companyLicenses.length > 0 ? companyLicenses.length : (c.license_count || 0);
-              const memberCount = companyMembers.length > 0 ? companyMembers.length : (c.user_count || 0);
-              const maxCount = c.max_licenses || 10;
-              const pct = Math.min(100, Math.round((usedCount / maxCount) * 100));
-              const isFull = usedCount >= maxCount;
-
-              return (
-                <tr key={c.id} className="hover:bg-pm-input/50 transition">
-                  <td className="p-3 font-mono font-semibold text-pm-secondary">#{c.id}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-purple-400 shrink-0" />
-                      <span className="font-bold text-pm-text">{c.company_name}</span>
-                    </div>
+      <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
+                <th className="p-3">Company Details</th>
+                <th className="p-3">Tax / VAT ID</th>
+                <th className="p-3">Users</th>
+                <th className="p-3">License Pool</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-pm-border">
+              {paginatedCompanies.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-pm-secondary italic">
+                    No company profiles match the active search or filter view.
                   </td>
-                  <td className="p-3">
-                    {c.tax_id ? (
-                      <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-pm-input border border-pm-border font-mono text-[11px] text-pm-text">
-                        <span>{c.tax_id}</span>
-                        <button
-                          type="button"
-                          onClick={() => copyVat(c.tax_id!, c.id)}
-                          className="text-pm-secondary hover:text-pm-primary transition"
-                          title="Copy Tax / VAT ID"
-                        >
-                          {copiedVatId === c.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="italic text-pm-secondary/60">Not specified</span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/20">
-                      <Users className="w-3.5 h-3.5" /> {memberCount} Members
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <div className="w-36 space-y-1">
-                      <div className="flex justify-between items-center text-[10px] font-bold">
-                        <span className={isFull ? 'text-rose-400' : 'text-pm-text'}>
-                          {usedCount} / {maxCount} Keys
-                        </span>
-                        <span className="text-pm-secondary">{pct}%</span>
-                      </div>
-                      <div className="w-full bg-pm-input rounded-full h-1.5 overflow-hidden border border-pm-border">
-                        <div
-                          className={`h-full transition-all duration-300 ${
-                            pct >= 100 ? 'bg-rose-500' : pct >= 75 ? 'bg-amber-500' : 'bg-gradient-to-r from-purple-500 to-emerald-500'
-                          }`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <StatusBadge status={c.status} />
-                  </td>
-                      <td className="p-3 text-pm-secondary">{new Date(c.created_at).toLocaleDateString()}</td>
-                      <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                </tr>
+              ) : (
+                paginatedCompanies.map(c => (
+                  <tr key={c.id} className="hover:bg-pm-input/50 transition">
+                    <td className="p-3 font-semibold text-pm-text">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                          <Building2 className="w-4 h-4" />
+                        </div>
+                        <div>
                           <button
-                            type="button"
                             onClick={() => onSelectCompany(c, 'overview')}
-                            className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                            title="Inspect Company 360° Details View"
+                            className="font-bold text-pm-text hover:text-purple-500 transition text-left"
                           >
-                            <Eye className="w-3.5 h-3.5 text-purple-400" /> View
+                            {c.company_name}
                           </button>
+                          <div className="text-[10px] text-pm-secondary font-mono">ID #{c.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-3 font-mono">
+                      {c.tax_id ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-pm-text">{c.tax_id}</span>
                           <button
-                            type="button"
-                            onClick={() => onSelectCompany(c, 'edit')}
-                            className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                            title="Edit Company Profile Details"
+                            onClick={() => copyVat(c.tax_id!, c.id)}
+                            className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
+                            title="Copy Tax / VAT ID"
                           >
-                            <Edit className="w-3.5 h-3.5 text-indigo-400" /> Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openDeleteModal(c)}
-                            className="pm-btn-danger-outline p-1.5 rounded text-xs font-semibold flex items-center gap-1 transition"
-                            title="Delete Company"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            {copiedVatId === c.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                           </button>
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                      ) : (
+                        <span className="italic text-pm-secondary">Unspecified</span>
+                      )}
+                    </td>
+                    <td className="p-3 font-bold text-pm-text">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5 text-purple-400" />
+                        <span>{c.user_count || 0} Members</span>
+                      </div>
+                    </td>
+                    <td className="p-3 font-mono font-semibold text-pm-text">
+                      <span className="text-purple-600 dark:text-purple-400">{c.license_count || 0}</span> / {c.max_licenses} Allocated
+                    </td>
+                    <td className="p-3">
+                      <StatusBadge status={c.status} />
+                    </td>
+                    <td className="p-3 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={Edit}
+                          onClick={() => openEditModal(c)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          icon={Trash2}
+                          onClick={() => openDeleteModal(c)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-      </DirectoryCardTable>
+        </div>
 
-      {/* Create Modal */}
-      <BaseModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Add New Company Profile">
+        {/* Master PaginationBar Component Primitive */}
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+        />
+      </div>
+
+      {/* Create Company Modal */}
+      <BaseModal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        title="Register New B2B Company"
+        icon={Building2}
+        maxWidth="lg"
+      >
         <form onSubmit={handleCreate} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="e.g. Acme Commerce Inc."
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Tax / VAT Registration ID (Optional)</label>
-            <input
-              type="text"
-              value={taxId}
-              onChange={e => setTaxId(e.target.value)}
-              placeholder="e.g. US987654321 or DE123456789"
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Max Allowed Store Licenses</label>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={maxLicenses}
-              onChange={e => setMaxLicenses(parseInt(e.target.value) || 10)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
+          <FormInput
+            label="Company / Organization Name"
+            type="text"
+            required
+            placeholder="e.g. Acme Retail Solutions Ltd."
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
 
-          {/* 1-Click Owner Account Provisioning Toggle */}
+          <FormInput
+            label="Tax / VAT Identification Number (Optional)"
+            type="text"
+            placeholder="e.g. US987654321 or DE123456789"
+            value={taxId}
+            onChange={e => setTaxId(e.target.value)}
+          />
+
+          <FormInput
+            label="Maximum License Key Pool Allocation"
+            type="number"
+            min={1}
+            max={500}
+            value={maxLicenses}
+            onChange={e => setMaxLicenses(Number(e.target.value))}
+          />
+
           <div className="pt-2 border-t border-pm-border">
-            <label className="flex items-center gap-2 text-xs font-bold text-pm-text cursor-pointer select-none">
+            <label className="flex items-center gap-2 text-xs font-semibold text-pm-text cursor-pointer">
               <input
                 type="checkbox"
                 checked={createOwnerAccount}
-                onChange={e => setCreateOwnerAccount(e.target.checked)}
-                className="rounded border-pm-border bg-pm-input text-pm-primary focus:ring-pm-primary"
+                onChange={e => {
+                  setCreateOwnerAccount(e.target.checked);
+                  if (e.target.checked && !ownerPassword) generateOwnerPass();
+                }}
+                className="rounded border-pm-border text-purple-600 focus:ring-purple-500"
               />
-              <span>Create Primary Owner Account Simultaneously</span>
+              <span>Automatically provision initial Company Owner Admin account</span>
             </label>
+          </div>
 
-            {createOwnerAccount && (
-              <div className="mt-3 p-3 bg-pm-input/60 border border-pm-border rounded-xl space-y-3 animate-in fade-in duration-200">
-                <div>
-                  <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Owner Email Address</label>
-                  <input
-                    type="email"
-                    required={createOwnerAccount}
-                    value={ownerEmail}
-                    onChange={e => setOwnerEmail(e.target.value)}
-                    placeholder="owner@acme.com"
-                    className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 text-xs text-pm-text focus:border-pm-primary focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-[11px] font-semibold text-pm-secondary">Owner Password</label>
-                    <button type="button" onClick={generateOwnerPass} className="text-[10px] text-pm-primary hover:underline">
-                      Generate Strong Pass
-                    </button>
-                  </div>
-                  <div className="relative">
+          {createOwnerAccount && (
+            <div className="space-y-3 p-3 bg-pm-input/50 rounded-xl border border-pm-border text-xs">
+              <FormInput
+                label="Owner Email Address"
+                type="email"
+                required={createOwnerAccount}
+                placeholder="owner@company.com"
+                value={ownerEmail}
+                onChange={e => setOwnerEmail(e.target.value)}
+              />
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">Generated Password</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
                     <input
-                      type={showOwnerPassword ? "text" : "password"}
-                      required={createOwnerAccount}
+                      type={showOwnerPassword ? 'text' : 'password'}
                       value={ownerPassword}
                       onChange={e => setOwnerPassword(e.target.value)}
-                      placeholder="Set strong password..."
-                      className="w-full bg-pm-input border border-pm-border rounded-lg pl-3 pr-9 py-1.5 text-xs font-mono text-pm-text focus:border-pm-primary focus:outline-none"
+                      className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 font-mono text-xs text-pm-text"
                     />
                     <button
                       type="button"
                       onClick={() => setShowOwnerPassword(!showOwnerPassword)}
-                      className="absolute right-2.5 top-2 text-pm-secondary hover:text-pm-text transition"
-                      title={showOwnerPassword ? "Hide Password" : "Show Password"}
+                      className="absolute right-2 top-2 text-pm-secondary hover:text-pm-text"
                     >
                       {showOwnerPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                   </div>
+                  <Button type="button" variant="neutral" size="sm" onClick={generateOwnerPass}>
+                    Regenerate
+                  </Button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-            <button type="button" onClick={() => setIsCreateOpen(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
+          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+            <Button variant="neutral" size="md" onClick={() => setIsCreateOpen(false)}>
               Cancel
-            </button>
-            <button type="submit" disabled={submitting} className="pm-btn-primary px-4 py-2 rounded-lg text-xs font-bold min-w-[140px] flex justify-center items-center">
-              {submitting ? 'Creating...' : 'Create Profile'}
-            </button>
+            </Button>
+            <Button variant="primary" size="md" type="submit" loading={submitting}>
+              Create Company Profile
+            </Button>
           </div>
         </form>
       </BaseModal>
 
-      {/* Edit Modal */}
-      <BaseModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Company Profile">
-        <form onSubmit={handleEdit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={e => setName(e.target.value)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Tax / VAT Registration ID</label>
-            <input
-              type="text"
-              value={taxId}
-              onChange={e => setTaxId(e.target.value)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Max Allowed Store Licenses</label>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={maxLicenses}
-              onChange={e => setMaxLicenses(parseInt(e.target.value) || 10)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Status</label>
-            <select
-              value={editStatus}
-              onChange={e => setEditStatus(e.target.value)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            >
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
-            </select>
-          </div>
-          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-            <button type="button" onClick={() => setIsEditOpen(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
+      {/* Edit Company Modal */}
+      <BaseModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        title={`Edit Company #${selectedCompany?.id || ''}`}
+        icon={Edit}
+        maxWidth="md"
+      >
+        <form onSubmit={handleUpdate} className="space-y-4">
+          <FormInput
+            label="Company Name"
+            type="text"
+            required
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+
+          <FormInput
+            label="Tax / VAT ID"
+            type="text"
+            value={taxId}
+            onChange={e => setTaxId(e.target.value)}
+          />
+
+          <FormInput
+            label="Max License Pool"
+            type="number"
+            min={1}
+            max={500}
+            value={maxLicenses}
+            onChange={e => setMaxLicenses(Number(e.target.value))}
+          />
+
+          <FormSelect
+            label="Status"
+            value={editStatus}
+            onChange={e => setEditStatus(e.target.value)}
+            options={[
+              { value: 'active', label: 'ACTIVE' },
+              { value: 'suspended', label: 'SUSPENDED' },
+            ]}
+          />
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+            <Button variant="neutral" size="md" onClick={() => setIsEditOpen(false)}>
               Cancel
-            </button>
-            <button type="submit" disabled={submitting} className="pm-btn-primary px-4 py-2 rounded-lg text-xs font-bold min-w-[140px] flex justify-center items-center">
-              {submitting ? 'Saving...' : 'Save Changes'}
-            </button>
+            </Button>
+            <Button variant="primary" size="md" type="submit" loading={submitting}>
+              Save Changes
+            </Button>
           </div>
         </form>
       </BaseModal>
 
       {/* Delete Confirmation Modal */}
-      <BaseModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Company Profile">
-        <div className="space-y-4">
-          <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-rose-400">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-            <div className="text-xs">
-              <p className="font-bold">Warning: Permanent Deletion</p>
-              <p className="mt-1">
-                Deleting company profile <strong>"{selectedCompany?.company_name}"</strong> will unlink all associated team member client accounts and store licenses.
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-            <button type="button" onClick={() => setIsDeleteOpen(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
+      <BaseModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        title="Delete Company Profile?"
+        icon={AlertTriangle}
+        variant="danger"
+        maxWidth="md"
+      >
+        <div className="space-y-4 text-xs">
+          <p className="text-pm-secondary leading-relaxed">
+            Are you sure you want to delete company profile <strong>{selectedCompany?.company_name}</strong>?
+            Linked user accounts will be unassigned from this organization.
+          </p>
+          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+            <Button variant="neutral" size="md" onClick={() => setIsDeleteOpen(false)}>
               Cancel
-            </button>
-            <button type="button" onClick={handleDelete} disabled={submitting} className="pm-btn-danger px-4 py-2 rounded-lg text-xs font-bold min-w-[140px] flex justify-center items-center">
-              {submitting ? 'Deleting...' : 'Confirm Delete'}
-            </button>
+            </Button>
+            <Button variant="danger" size="md" onClick={handleDelete} loading={submitting}>
+              Delete Company
+            </Button>
           </div>
         </div>
       </BaseModal>
