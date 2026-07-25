@@ -5,6 +5,8 @@ import { StatCard } from './common/StatCard';
 import { BaseModal } from './common/BaseModal';
 import { StatusBadge } from './common/StatusBadge';
 import { Button } from './common/Button';
+import { FormInput } from './common/FormInput';
+import { FormSelect } from './common/FormSelect';
 
 interface AuditLog {
   id: number;
@@ -131,7 +133,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     }
     if (typeof value === 'object') {
       return (
-        <pre className="bg-slate-950 p-3 rounded-lg font-mono text-[10px] text-emerald-400 border border-slate-800 overflow-x-auto">
+        <pre className="bg-slate-900 dark:bg-slate-950 p-3 rounded-lg font-mono text-[10px] text-emerald-400 border border-pm-border overflow-x-auto">
           {JSON.stringify(value, null, 2)}
         </pre>
       );
@@ -144,6 +146,20 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     }
     return <span className="font-semibold text-pm-text">{String(value)}</span>;
   };
+
+  const filterOptions = [
+    { value: 'ALL', label: 'All Action Types' },
+    { value: 'GENERATE_LICENSE', label: 'GENERATE_LICENSE' },
+    { value: 'ASSIGN_LICENSE', label: 'ASSIGN_LICENSE' },
+    { value: 'EXTEND_LICENSE', label: 'EXTEND_LICENSE' },
+    { value: 'UPDATE_LICENSE', label: 'UPDATE_LICENSE' },
+    { value: 'UPDATE_LICENSE_DOMAINS', label: 'UPDATE_LICENSE_DOMAINS' },
+    { value: 'CREATE_COMPANY', label: 'CREATE_COMPANY' },
+    { value: 'UPDATE_COMPANY', label: 'UPDATE_COMPANY' },
+    { value: 'CREATE_USER', label: 'CREATE_USER' },
+    { value: 'UPDATE_USER', label: 'UPDATE_USER' },
+    { value: 'RESET_PASSWORD', label: 'RESET_PASSWORD' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -181,37 +197,28 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         <StatCard label="Security Events" value={securityEvents} icon={ShieldAlert} color="amber" />
       </div>
 
-      {/* Filter Toolbar */}
+      {/* Filter Toolbar using Master Form Primitives */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-        <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-pm-secondary" />
-          <input
+        <form onSubmit={handleSearchSubmit} className="flex-1 w-full">
+          <FormInput
             type="text"
+            icon={Search}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onClear={() => {
+              setSearch('');
+              fetchLogs();
+            }}
             placeholder="Search logs by admin username, target ID, or payload details..."
-            className="w-full bg-pm-input border border-pm-border rounded-xl pl-9 pr-4 py-2 text-xs text-pm-text focus:outline-none focus:border-pm-primary transition"
           />
         </form>
 
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <select
+        <div className="w-full md:w-64 shrink-0">
+          <FormSelect
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="bg-pm-input border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-pm-primary transition cursor-pointer"
-          >
-            <option value="ALL">All Action Types</option>
-            <option value="GENERATE_LICENSE">GENERATE_LICENSE</option>
-            <option value="ASSIGN_LICENSE">ASSIGN_LICENSE</option>
-            <option value="EXTEND_LICENSE">EXTEND_LICENSE</option>
-            <option value="UPDATE_LICENSE">UPDATE_LICENSE</option>
-            <option value="UPDATE_LICENSE_DOMAINS">UPDATE_LICENSE_DOMAINS</option>
-            <option value="CREATE_COMPANY">CREATE_COMPANY</option>
-            <option value="UPDATE_COMPANY">UPDATE_COMPANY</option>
-            <option value="CREATE_USER">CREATE_USER</option>
-            <option value="UPDATE_USER">UPDATE_USER</option>
-            <option value="RESET_PASSWORD">RESET_PASSWORD</option>
-          </select>
+            options={filterOptions}
+          />
         </div>
       </div>
 
@@ -347,7 +354,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {Object.entries(selectedLog.details_parsed).map(([key, val]) => (
-                    <div key={key} className="bg-pm-input/40 p-3 rounded-xl border border-pm-border/60">
+                    <div key={key} className="bg-pm-input/40 p-3 rounded-xl border border-pm-border">
                       <span className="text-pm-secondary block text-[10px] uppercase font-bold mb-1">
                         {formatKeyName(key)}
                       </span>
@@ -358,12 +365,12 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               )}
             </div>
 
-            {/* Collapsible Raw JSON Accordion */}
+            {/* Collapsible Raw JSON Accordion with Theme-Adaptive Code Terminal */}
             <div className="border-t border-pm-border pt-4">
               <button
                 type="button"
                 onClick={() => setShowRawJson(!showRawJson)}
-                className="flex items-center justify-between w-full p-2.5 bg-pm-input/30 hover:bg-pm-input/60 rounded-xl border border-pm-border/50 text-xs font-bold text-pm-secondary transition"
+                className="flex items-center justify-between w-full p-2.5 bg-pm-input/30 hover:bg-pm-input/60 rounded-xl border border-pm-border text-xs font-bold text-pm-secondary transition"
               >
                 <span className="flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5 text-purple-400" />
@@ -373,7 +380,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               </button>
 
               {showRawJson && (
-                <pre className="mt-2 bg-slate-950 p-4 rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto border border-slate-800 shadow-inner">
+                <pre className="mt-2 bg-slate-900 dark:bg-slate-950 p-4 rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto border border-pm-border shadow-inner">
                   {JSON.stringify(selectedLog.details_parsed || {}, null, 2)}
                 </pre>
               )}
