@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Key, Package, Settings, ShieldCheck, Sun, Moon, LogOut, AlertCircle, CheckCircle } from 'lucide-react';
+import { Key, Package, Settings, ShieldCheck, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users } from 'lucide-react';
 import { LicensesTab, License, UserAccount } from './components/LicensesTab';
+import { ClientsTab } from './components/ClientsTab';
 import { PackageTiersTab, PackageTier } from './components/PackageTiersTab';
 import { SettingsTab } from './components/SettingsTab';
 import { SecurityHealthTab } from './components/SecurityHealthTab';
@@ -12,7 +13,7 @@ export const App: React.FC = () => {
   const [hasAdmin, setHasAdmin] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'licenses' | 'tiers' | 'settings' | 'security'>('licenses');
+  const [activeTab, setActiveTab] = useState<'licenses' | 'clients' | 'tiers' | 'settings' | 'security'>('licenses');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
@@ -165,7 +166,16 @@ export const App: React.FC = () => {
               activeTab === 'licenses' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <Key className="w-4 h-4" /> Licenses & Clients
+            <Key className="w-4 h-4" /> Licenses &amp; Subscriptions
+          </button>
+
+          <button
+            onClick={() => setActiveTab('clients')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'clients' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <Users className="w-4 h-4" /> Clients Directory
           </button>
 
           <button
@@ -194,7 +204,7 @@ export const App: React.FC = () => {
               activeTab === 'security' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
-            <ShieldCheck className="w-4 h-4" /> Security & Health
+            <ShieldCheck className="w-4 h-4" /> Security &amp; Health
           </button>
         </div>
       </nav>
@@ -203,6 +213,9 @@ export const App: React.FC = () => {
       <main>
         {activeTab === 'licenses' && (
           <LicensesTab licenses={licenses} users={users} onRefresh={fetchAdminData} showAlert={showAlert} />
+        )}
+        {activeTab === 'clients' && (
+          <ClientsTab users={users} licenses={licenses} onRefresh={fetchAdminData} showAlert={showAlert} />
         )}
         {activeTab === 'tiers' && (
           <PackageTiersTab tiers={tiers} onRefresh={fetchAdminData} showAlert={showAlert} />

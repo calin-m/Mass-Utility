@@ -159,6 +159,63 @@ class AdminApiController
         }
     }
 
+    private function update_user(): void
+    {
+        $id = (int)($_POST['id'] ?? 0);
+        $email = trim($_POST['email'] ?? '');
+        $company = trim($_POST['company'] ?? '');
+        if (empty($company)) {
+            $company = null;
+        }
+        $status = $_POST['status'] ?? 'active';
+
+        if ($id <= 0 || empty($email)) {
+            echo json_encode(['success' => false, 'error' => 'Valid user ID and email are required.']);
+            return;
+        }
+
+        try {
+            $this->repo->updateUser($id, $email, $company, $status);
+            echo json_encode(['success' => true, 'users' => $this->repo->getAllUsers(), 'licenses' => $this->repo->getAllLicenses()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function reset_user_password(): void
+    {
+        $id = (int)($_POST['id'] ?? 0);
+        $password = $_POST['password'] ?? '';
+
+        if ($id <= 0 || empty($password)) {
+            echo json_encode(['success' => false, 'error' => 'Valid user ID and new password are required.']);
+            return;
+        }
+
+        try {
+            $this->repo->resetUserPassword($id, $password);
+            echo json_encode(['success' => true]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function delete_user(): void
+    {
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Valid user ID is required.']);
+            return;
+        }
+
+        try {
+            $this->repo->deleteUser($id);
+            echo json_encode(['success' => true, 'users' => $this->repo->getAllUsers(), 'licenses' => $this->repo->getAllLicenses()]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
     private function generate(): void
     {
         $userId = (int)($_POST['user_id'] ?? 0);

@@ -31,6 +31,11 @@ class LicenseVerifyController
                 exit;
             }
 
+            if (isset($user['status']) && $user['status'] === 'suspended') {
+                echo json_encode(['success' => false, 'error' => 'Client account is suspended. Please contact portal administrator.']);
+                exit;
+            }
+
             // 2. Get active license for user and bind domain
             $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE user_id = ? AND (store_url = ? OR store_url IS NULL)");
             $stmt->execute([$user['id'], $storeUrl]);

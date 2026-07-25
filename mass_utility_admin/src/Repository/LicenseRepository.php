@@ -44,6 +44,36 @@ class LicenseRepository
         return (int)$this->db->lastInsertId();
     }
 
+    public function updateUser(int $id, string $email, ?string $company, string $status): bool
+    {
+        $checkStmt = $this->db->prepare("SELECT id FROM pm_users WHERE email = ? AND id != ?");
+        $checkStmt->execute([$email, $id]);
+        if ($checkStmt->fetch()) {
+            throw new \Exception("The email address '{$email}' is already registered to another client account.");
+        }
+
+        $stmt = $this->db->prepare("UPDATE pm_users SET email = ?, company_name = ?, status = ? WHERE id = ?");
+        return $stmt->execute([$email, $company, $status, $id]);
+    }
+
+    public function resetUserPassword(int $id, string $newPassword): bool
+    {
+        if (strlen($newPassword) < 8) {
+            throw new \Exception("Password must be at least 8 characters long.");
+        }
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $this->db->prepare("UPDATE pm_users SET password_hash = ? WHERE id = ?");
+        return $stmt->execute([$hash, $id]);
+    }
+
+    public function deleteUser(int $id): bool
+    {
+        // Safe 2-step unbind transaction: preserve licenses as standalone unassigned keys
+        $this->db->prepare("UPDATE pm_licenses SET user_id = NULL WHERE user_id = ?")->execute([$id]);
+        $stmt = $this->db->prepare("DELETE FROM pm_users WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+
     public function createLicense(int $userId, string $tier, ?string $expiry): string
     {
         $key = 'MASS-' . strtoupper(bin2hex(random_bytes(8))) . '-' . strtoupper(bin2hex(random_bytes(8)));
