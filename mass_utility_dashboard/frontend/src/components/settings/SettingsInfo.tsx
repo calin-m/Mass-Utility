@@ -102,6 +102,15 @@ export const SettingsInfo: React.FC = () => {
         'Old File Pruning: Checks directory archives during database/file backups or CLI cron runs.',
         'Pruning Executions: Prunes the oldest SQL and TAR archives to automatically keep host storage clean.'
       ]
+    },
+    {
+      title: 'Store Security & Health Hardening Inspector',
+      icon: '🛡️',
+      content: [
+        'Decoupled Bridge Relay: Queries PrestaShop host diagnostics remotely via HttpClient without requiring central server database access.',
+        'HTTP Security Headers: Analyzes and injects HSTS, X-Content-Type-Options (nosniff), X-Frame-Options (SAMEORIGIN), and Referrer-Policy headers into store .htaccess.',
+        '1-Click Store Hardening: Provides single-click automated permission repair (0755/0644) and 1-click Store SSL Enforcement (PS_SSL_ENABLED).'
+      ]
     }
   ];
 

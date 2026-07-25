@@ -126,11 +126,19 @@ The Mass Utility Dashboard enforces a **Unified V2 React 18 SPA Architecture Pol
 
 
 ### 2.2 V2 React Component Architecture (`src/components/`)
-- `<QueryWizardTab>`: Visual AST builder with live preview, domain preset selection, and execution simulation mode.
+- `<QueryWizardTab>` (`🛒 Mass Updates`): Visual AST builder with live preview, domain preset selection, and execution simulation mode.
+- `<MutationHistoryTab>` (`🕒 Mutation History`): Historical execution ledger featuring the **MariaDB SQL Reconstruction Engine** (`sqlReconstructor.ts`) and 1-click copy utilities.
+- `<MerchantSecurityTab>` (`🛡️ Security & Health`): Top-level merchant security inspector featuring 4 diagnostic cards (HTTP Headers, PrestaShop Core & SSL, Filesystem Permissions, Executive System Health) with 1-click repairs (**`[🔒 Apply .htaccess Headers]`**, **`[📁 Repair Permissions]`**, **`[⚡ Enforce Store SSL]`**).
+- `<EventLogsTab>` (`📜 Event Logs`): Searchable audit trail for system operations and Bridge API communication logs.
+- `<SettingsTab>` (`⚙️ Settings`): Dashboard configuration, license key details, and connection status settings.
 - `<DatabaseToolsTab>`: Schema inspection, direct query runner, and Database Diff drift analysis modal.
-- `<MutationHistoryTab>`: Historical execution ledger featuring the **MariaDB SQL Reconstruction Engine** (`sqlReconstructor.ts`) and 1-click copy utilities.
 - `<BackupsGrid>` & `<BackupSubTab>`: Time-resilient backup management featuring the **`.pinned` Sidecar Metadata Subsystem**.
 - `<GovernorTab>`: Real-time CloudLinux LVE telemetry dashboard featuring **Zero-CLS Instant Skeleton Frame Architecture**.
+
+### 2.3 Super Admin React Component Architecture (`mass_utility_admin/frontend/src/components/`)
+- `<SecurityHealthTab>`: Super Admin 4-Card Security Grid auditing SaaS server infrastructure (HSTS, SSL 301 Redirect Enforcer, Vault Isolation `pm_cloud_backups.db` 403, SaaS Server Filesystem Permissions).
+- `<ClientsTab>`: Client accounts directory featuring BCRYPT password hashing and client password masking (`••••••••••••` with `<Eye />` / `<EyeOff />` toggle).
+- `<LicensesTab>`: Active License Registry & Subscriptions table with key masking (`maskKey()`), tier capability management, and unassigned key handling.
 
 ### 2.3 Design System & System Tokens (`src/index.css`)
 All V2 React components inherit from unified CSS design tokens (`var(--pm-*)`):
@@ -383,11 +391,15 @@ CREATE TABLE pm_admins (
 
 ## 🔌 9. Complete API Endpoint Reference Matrix
 
-### 9.1 Standalone SaaS Dashboard Routes (`public/index.php`)
+### 9.1 Standalone SaaS Dashboard & Bridge Relay Routes (`public/index.php`)
 
 | Action Key | HTTP Method | Auth Required | Description |
 | :--- | :--- | :--- | :--- |
 | `get_auth_status` | `POST` | Yes | Asserts session authentication and checks Google Drive OAuth status. |
+| `get_diagnostics` | `POST` / `GET` | Yes | Relays security diagnostics request to merchant PrestaShop host (`SystemApiController`). |
+| `apply_security_headers` | `POST` | Yes | Relays `.htaccess` security headers injection request to remote merchant host. |
+| `fix_diagnostics_permissions` | `POST` | Yes | Relays filesystem permissions repair (`0755`/`0644`) to remote merchant host. |
+| `enable_ssl` | `POST` | Yes | Relays 1-click store SSL enforcement (`PS_SSL_ENABLED = 1`) to remote merchant host. |
 | `download_backup` | `GET` | Yes (Session) | Intercepts direct database backup Gzip file downloads. |
 | `download_file_backup` | `GET` | Yes (Session) | Intercepts direct filesystem backup archive downloads. |
 | `download_file_backup_log` | `GET` | Yes (Session) | Intercepts direct file backup log file downloads. |
@@ -399,11 +411,29 @@ CREATE TABLE pm_admins (
 | Action Key | HTTP Method | Header Token | Description |
 | :--- | :--- | :--- | :--- |
 | `ping` | `GET` | Required | System diagnostics ping returning CPU load, memory, and probe status. |
+| `get_diagnostics` | `GET` | Required | Audits HTTP headers, `.git` config, debug mode, SSL, and filesystem perms on merchant host. |
+| `apply_security_headers` | `POST` | Required | Injects HSTS, `nosniff`, `SAMEORIGIN`, and `Referrer-Policy` headers into store `.htaccess`. |
+| `fix_permissions` | `POST` | Required | Auto-repairs store root, `config/`, `modules/`, `override/`, `var/logs/` perms to `0755`/`0644`. |
+| `enable_ssl` | `POST` | Required | Sets `PS_SSL_ENABLED = 1` and `PS_SSL_ENABLED_EVERYWHERE = 1` in PrestaShop configuration. |
 | `get_catalog_stats` | `GET` | Required | Returns product, category, and order counts. |
 | `query_products` | `POST` | Required | Translates JSON AST criteria and returns matching product IDs. |
 | `db_query` | `POST` | Required | Safe execution gateway for schema inspection queries. |
 | `execute_query_ast` | `POST` | Required | Executes transactional AST query and records rollback snapshot. |
 | `revert_mutation` | `POST` | Required | Executes counter-query to restore original row states from snapshot. |
+
+### 9.3 Super Admin Licensing Portal API Routes (`mass_utility_admin/public/index.php`)
+
+| Action Key | HTTP Method | Auth Required | Description |
+| :--- | :--- | :--- | :--- |
+| `api_status` | `GET` | No | Returns admin account setup status and authentication state. |
+| `api_login` | `POST` | No | Authenticates Super Admin credentials against `pm_admins` table. |
+| `api_list` | `GET` | Yes | Returns all clients, active licenses, package tiers, and system diagnostics. |
+| `api_create_user` | `POST` | Yes | Creates new client account with BCRYPT password hashing. |
+| `api_generate` | `POST` | Yes | Issues new license key linked to client account or unassigned. |
+| `api_get_diagnostics` | `GET` | Yes | Runs 4-Card SaaS Server Infrastructure Security Audit. |
+| `api_apply_security_headers` | `POST` | Yes | Injects HSTS, `nosniff`, and `SAMEORIGIN` headers into SaaS server root `.htaccess`. |
+| `api_enable_ssl_redirect` | `POST` | Yes | Injects 301 HTTPS Rewrite Rule into SaaS server root `.htaccess`. |
+| `api_fix_permissions` | `POST` | Yes | Repairs SaaS server directory (`0755`) and file (`0644`) permissions. |
 
 ---
 
