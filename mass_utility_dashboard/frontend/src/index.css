@@ -32,6 +32,12 @@ body {
   --pm-purple: #7c3aed;
   --pm-input-bg: #f1f5f9;
   --pm-terminal-bg: #f8fafc;
+  --pm-scrollbar-thumb: #cbd5e1;
+  /* 🌟 Option A: Ultra-Soft Slate Ambient Shadow System for Crisp Light Mode */
+  --pm-card-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+  --pm-card-shadow-hover: 0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --pm-btn-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+  --pm-modal-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
 }
 
 :root.dark, :root .dark, .dark {
@@ -44,29 +50,22 @@ body {
   --pm-text-muted: #94a3b8;
   --pm-primary: #a78bfa;
   --pm-success: #10b981;
-  --pm-scrollbar-thumb: #cbd5e1;
-}
-
-/* WCAG 2.1 AA Contrast Normalization */
-.text-gray-400, .text-slate-400 {
-  color: var(--pm-text-muted, #475569) !important;
-}
-
-:root.dark, :root .dark, .dark {
-  color-scheme: dark;
-  --pm-body-bg: #09090e;
-  --pm-card-bg: #12121a;
-  --pm-border-color: #262638;
-  --pm-text-primary: #e2e8f0;
-  --pm-text-secondary: #94a3b8;
-  --pm-primary: #a78bfa;
-  --pm-success: #10b981;
   --pm-warning: #f59e0b;
   --pm-danger: #ef4444;
   --pm-purple: #a78bfa;
   --pm-input-bg: #171725;
   --pm-terminal-bg: #05070f;
   --pm-scrollbar-thumb: #3a3a54;
+  /* Deep Spatial Dark Mode Elevation */
+  --pm-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --pm-card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.45);
+  --pm-btn-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  --pm-modal-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.7);
+}
+
+/* WCAG 2.1 AA Contrast Normalization */
+.text-gray-400, .text-slate-400 {
+  color: var(--pm-text-muted, #475569) !important;
 }
 
 /* Cross-Browser Firefox Standard Scrollbars */
@@ -113,27 +112,44 @@ body {
 
 /* 🌟 Refined Subtle Shadow Elevation UX System */
 
-/* Tier 1: Page Cards & Panels (Ultra-Subtle Ambient Elevation) */
+/* Tier 1: Page Cards & Panels (Theme-Aware Elevation) */
 .pm-card-elevation {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--pm-card-shadow);
   transition: box-shadow 0.25s ease, border-color 0.2s ease;
 }
 .pm-card-elevation:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--pm-card-shadow-hover);
 }
 
 /* Tier 2: Interactive Controls & Buttons (Micro-Tactile Depth) */
 .pm-btn-elevation {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--pm-btn-shadow);
   transition: box-shadow 0.2s ease, transform 0.15s ease;
 }
 .pm-btn-elevation:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--pm-card-shadow);
 }
 
 /* Tier 3: Floating Modals & Overlays (Refined Soft Z-Elevation) */
 .pm-modal-elevation {
-  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--pm-modal-shadow);
+}
+
+/* Soft Slate Light Mode Overrides for Tailwind Shadow Classes */
+html:not(.dark) .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08) !important;
+}
+html:not(.dark) .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04) !important;
+}
+html:not(.dark) .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.03) !important;
+}
+html:not(.dark) .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.02) !important;
+}
+html:not(.dark) .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03) !important;
 }
 
 /* Proximity spotlight background fill & 1px dynamic border tracing glow */
