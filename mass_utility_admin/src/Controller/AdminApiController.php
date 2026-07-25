@@ -376,9 +376,9 @@ class AdminApiController
             if (!file_exists($path)) return 'N/A';
             clearstatcache(true, $path);
             $perms = substr(sprintf('%o', fileperms($path)), -4);
-            // On Windows OS, NTFS maps writable files to 0666 (no POSIX group/other masks)
-            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && $perms === '0666' && $recommended === '0644') {
-                return '0644';
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                if ($perms === '0666' && $recommended === '0644') return '0644';
+                if ($perms === '0777' && $recommended === '0755') return '0755';
             }
             return $perms;
         };
