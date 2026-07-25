@@ -314,6 +314,10 @@ const fr: TranslationSchema = {
   modal_raw_json_show: 'Inspecter les Données JSON Brut',
   modal_raw_json_hide: 'Masquer les Données JSON Brut',
   err_invalid_email: 'Veuillez saisir une adresse e-mail valide (ex: utilisateur@domaine.com)',
+  modal_confirm_pass_placeholder: 'Saisissez à nouveau le mot de passe pour confirmer',
+  err_password_mismatch: 'Les mots de passe ne correspondent pas. Veuillez vérifier les deux champs.',
+  modal_suspend_client_confirm: 'Êtes-vous sûr de vouloir suspendre l\'accès pour le compte client',
+  modal_activate_client_confirm: 'Êtes-vous sûr de vouloir réactiver l\'accès pour le compte client',
 };
 
 export default fr;

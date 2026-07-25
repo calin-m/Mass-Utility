@@ -7,7 +7,7 @@ const en = {
   nav_clients: 'Clients',
   nav_licenses: 'License Registry',
   nav_package_tiers: 'Package Tiers',
-  nav_audit_logs: 'Operations Audit',
+  nav_audit_logs: 'Audit Logs',
   nav_security: 'System Status',
   nav_settings: 'Settings',
   logout: 'Sign Out',
@@ -89,7 +89,7 @@ const en = {
   licenses_subtitle: 'Issue, inspect, extend, and bind store domains to active PrestaShop module software licenses.',
   inventory_title: 'Active Subscriptions Inventory',
   inventory_subtitle: 'Real-time breakdown of store license keys, package tier allocations, and unassigned standalone keys.',
-  audit_title: 'Operations Audit Trail',
+  audit_title: 'Audit Logs',
   audit_subtitle: 'Security event ledger tracking administrative operations, license updates, and authentication events.',
   tiers_title: 'Package Tiers & Quotas',
   tiers_subtitle: 'Configure feature unlock flags, module quotas, and capability matrices across Basic, Pro, and Enterprise tiers.',
@@ -312,6 +312,10 @@ const en = {
   modal_raw_json_show: 'Inspect Raw JSON Payload Data',
   modal_raw_json_hide: 'Hide Raw JSON Payload Data',
   err_invalid_email: 'Please enter a valid email address (e.g. user@domain.com)',
+  modal_confirm_pass_placeholder: 'Re-enter new password to confirm',
+  err_password_mismatch: 'Passwords do not match. Please verify both input fields.',
+  modal_suspend_client_confirm: 'Are you sure you want to suspend access for client account',
+  modal_activate_client_confirm: 'Are you sure you want to re-activate access for client account',
 };
 
 export type TranslationSchema = typeof en;

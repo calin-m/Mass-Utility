@@ -314,6 +314,10 @@ const de: TranslationSchema = {
   modal_raw_json_show: 'Roh-JSON-Payload-Daten Prüfen',
   modal_raw_json_hide: 'Roh-JSON-Payload-Daten Verbergen',
   err_invalid_email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein (z. B. benutzer@domain.com)',
+  modal_confirm_pass_placeholder: 'Neues Passwort zur Bestätigung erneut eingeben',
+  err_password_mismatch: 'Passwörter stimmen nicht überein. Bitte überprüfen Sie beide Felder.',
+  modal_suspend_client_confirm: 'Sind Sie sicher, dass Sie den Zugriff für das Kundenkonto sperren möchten:',
+  modal_activate_client_confirm: 'Sind Sie sicher, dass Sie den Zugriff für das Kundenkonto reaktivieren möchten:',
 };
 
 export default de;

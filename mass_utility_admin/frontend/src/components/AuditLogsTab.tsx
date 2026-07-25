@@ -226,7 +226,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
               {t('btn_clear')}
             </Button>
             <a href="?action=api_export_admin_logs_csv" download className="no-underline">
-              <Button variant="primary" size="md" icon={Download}>
+              <Button variant="neutral" size="md" icon={Download}>
                 {t('btn_export_csv')}
               </Button>
             </a>

@@ -60,7 +60,11 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   // Password Reset Modal State
   const [resetUser, setResetUser] = useState<UserAccount | null>(null);
   const [resetPassword, setResetPassword] = useState('');
+  const [confirmResetPassword, setConfirmResetPassword] = useState('');
   const [showResetPassword, setShowResetPassword] = useState(false);
+
+  // Status Confirmation Modal State (Suspend / Activate)
+  const [statusUser, setStatusUser] = useState<UserAccount | null>(null);
 
   // Delete Confirmation Modal State
   const [deletingUser, setDeletingUser] = useState<UserAccount | null>(null);
@@ -272,6 +276,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   const openResetModal = (user: UserAccount) => {
     setResetUser(user);
     setResetPassword('');
+    setConfirmResetPassword('');
   };
 
   const copyCreatedCredentials = () => {
@@ -533,7 +538,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                             variant={isSuspended ? 'success' : 'danger'}
                             size="sm"
                             icon={isSuspended ? CheckCircle : ShieldAlert}
-                            onClick={() => handleToggleStatus(user)}
+                            onClick={() => setStatusUser(user)}
                           >
                             {isSuspended ? t('btn_activate') : t('btn_suspend')}
                           </Button>
@@ -723,6 +728,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                     let pass = '';
                     for (let i = 0; i < 16; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
                     setResetPassword(pass);
+                    setConfirmResetPassword(pass);
                   }}
                 >
                   Generate
@@ -730,15 +736,70 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
               </div>
             </div>
 
+            <div>
+              <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">Confirm New Password</label>
+              <FormInput
+                type={showResetPassword ? 'text' : 'password'}
+                required
+                placeholder={t('modal_confirm_pass_placeholder')}
+                value={confirmResetPassword}
+                onChange={e => setConfirmResetPassword(e.target.value)}
+                error={confirmResetPassword.length > 0 && confirmResetPassword !== resetPassword ? t('err_password_mismatch') : undefined}
+              />
+            </div>
+
             <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
               <Button variant="neutral" size="md" onClick={() => setResetUser(null)}>
                 {t('btn_cancel')}
               </Button>
-              <Button variant="primary" size="md" type="submit" loading={loading}>
+              <Button
+                variant="primary"
+                size="md"
+                type="submit"
+                loading={loading}
+                disabled={!resetPassword || resetPassword.length < 6 || resetPassword !== confirmResetPassword}
+              >
                 Reset Password
               </Button>
             </div>
           </form>
+        )}
+      </BaseModal>
+
+      {/* Suspend / Activate Confirmation Modal */}
+      <BaseModal
+        isOpen={!!statusUser}
+        onClose={() => setStatusUser(null)}
+        title={statusUser?.status === 'suspended' ? 'Re-Activate Client Account?' : 'Suspend Client Account Access?'}
+        icon={statusUser?.status === 'suspended' ? CheckCircle : ShieldAlert}
+        variant={statusUser?.status === 'suspended' ? 'primary' : 'danger'}
+        maxWidth="md"
+      >
+        {statusUser && (
+          <div className="space-y-4 text-xs">
+            <p className="text-pm-secondary leading-relaxed">
+              {statusUser.status === 'suspended' 
+                ? `${t('modal_activate_client_confirm')} ${statusUser.email}?` 
+                : `${t('modal_suspend_client_confirm')} ${statusUser.email}?`}
+            </p>
+            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
+              <Button variant="neutral" size="md" onClick={() => setStatusUser(null)}>
+                {t('btn_cancel')}
+              </Button>
+              <Button
+                variant={statusUser.status === 'suspended' ? 'success' : 'danger'}
+                size="md"
+                loading={loading}
+                onClick={async () => {
+                  const target = statusUser;
+                  setStatusUser(null);
+                  await handleToggleStatus(target);
+                }}
+              >
+                {statusUser.status === 'suspended' ? t('btn_activate') : t('btn_suspend')}
+              </Button>
+            </div>
+          </div>
         )}
       </BaseModal>
 

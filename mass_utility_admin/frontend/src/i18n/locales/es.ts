@@ -314,6 +314,10 @@ const es: TranslationSchema = {
   modal_raw_json_show: 'Inspeccionar Datos JSON sin Procesar',
   modal_raw_json_hide: 'Ocultar Datos JSON sin Procesar',
   err_invalid_email: 'Por favor, ingrese un correo electrónico válido (ej: usuario@dominio.com)',
+  modal_confirm_pass_placeholder: 'Ingrese nuevamente la contraseña para confirmar',
+  err_password_mismatch: 'Las contraseñas no coinciden. Por favor, verifique ambos campos.',
+  modal_suspend_client_confirm: '¿Está seguro de que desea suspender el acceso a la cuenta del cliente',
+  modal_activate_client_confirm: '¿Está seguro de que desea reactivar el acceso a la cuenta del cliente',
 };
 
 export default es;

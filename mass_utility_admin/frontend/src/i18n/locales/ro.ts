@@ -91,8 +91,8 @@ const ro: TranslationSchema = {
   licenses_subtitle: 'Emite, inspectează, prelungește și leagă domeniile magazinelor de licențele software active PrestaShop.',
   inventory_title: 'Inventar Abonamente Active',
   inventory_subtitle: 'Centralizare în timp real a cheilor de licență, alocarea pachetelor și cheile neasignate.',
-  audit_title: 'Jurnal Audit Operațiuni',
-  audit_subtitle: 'Registrul evenimentelor de securitate ce urmărește operațiunile administrative și actualizările de licență.',
+  audit_title: 'Jurnale Audit',
+  audit_subtitle: 'Registru de evenimente de securitate care urmărește operațiunile administrative și autentificările.',
   tiers_title: 'Pachete & Cote Licență',
   tiers_subtitle: 'Configurează permisiunile funcționalităților, cotele de module și matricea de capabilități pentru pachetele Basic, Pro și Enterprise.',
   security_title: 'Stare Sistem Portal',
@@ -314,6 +314,10 @@ const ro: TranslationSchema = {
   modal_raw_json_show: 'Inspectează Datele Raw JSON Payload',
   modal_raw_json_hide: 'Ascunde Datele Raw JSON Payload',
   err_invalid_email: 'Vă rugăm să introduceți o adresă de email validă (ex: utilizator@domeniu.com)',
+  modal_confirm_pass_placeholder: 'Re-introduceți noua parolă pentru confirmare',
+  err_password_mismatch: 'Parolele nu se potrivesc. Vă rugăm să verificați ambele câmpuri.',
+  modal_suspend_client_confirm: 'Sunteți sigur că doriți să suspendați accesul pentru contul client',
+  modal_activate_client_confirm: 'Sunteți sigur că doriți să reactivați accesul pentru contul client',
 };
 
 export default ro;
