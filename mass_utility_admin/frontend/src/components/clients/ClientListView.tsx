@@ -394,7 +394,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
               <th className="p-3">Assigned Licenses &amp; Stores</th>
               <th className="p-3">Account Status</th>
               <th className="p-3">Registered At</th>
-              <th className="p-3">Actions</th>
+              <th className="p-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-pm-border">
@@ -402,11 +402,11 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
               const stats = getClientStats(u.id);
               return (
                 <tr key={u.id} className="hover:bg-pm-input/50 transition">
-                  <td className="p-3 font-semibold">{u.id}</td>
+                  <td className="p-3 font-mono font-semibold text-pm-secondary">#{u.id}</td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 text-pm-secondary shrink-0" />
-                      <span className="font-semibold text-pm-text">{u.email}</span>
+                      <Mail className="w-4 h-4 text-purple-400 shrink-0" />
+                      <span className="font-bold text-pm-text">{u.email}</span>
                     </div>
                   </td>
                   <td className="p-3 text-pm-secondary">
@@ -437,39 +437,41 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                   <td className="p-3 text-pm-secondary">
                     {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
                   </td>
-                  <td className="p-3 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onSelectClient(u)}
-                      className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                      title="Inspect Client 360° Details View"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-purple-400" /> View
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onSelectClient(u)}
-                      className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                      title="Edit Client Profile Details"
-                    >
-                      <Edit className="w-3.5 h-3.5 text-indigo-400" /> Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openResetModal(u)}
-                      className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                      title="Reset Password"
-                    >
-                      <Key className="w-3.5 h-3.5" /> Pass
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeletingUser(u)}
-                      className="pm-btn-danger-outline px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                      title="Delete Account"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                  <td className="p-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onSelectClient(u)}
+                        className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                        title="Inspect Client 360° Details View"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-purple-400" /> View
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onSelectClient(u)}
+                        className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                        title="Edit Client Profile Details"
+                      >
+                        <Edit className="w-3.5 h-3.5 text-indigo-400" /> Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openResetModal(u)}
+                        className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                        title="Reset Password"
+                      >
+                        <Key className="w-3.5 h-3.5" /> Pass
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeletingUser(u)}
+                        className="pm-btn-danger-outline px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                        title="Delete Account"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
