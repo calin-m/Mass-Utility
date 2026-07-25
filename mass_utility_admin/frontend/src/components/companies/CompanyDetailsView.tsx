@@ -7,19 +7,20 @@ interface CompanyDetailsViewProps {
   company: Company;
   users: any[];
   licenses: any[];
+  initialTab?: 'overview' | 'edit';
   onBack: () => void;
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (user: any) => void;
 }
 
-export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, onBack, onRefresh, showAlert, onInspectClient }) => {
+export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient }) => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
   const [copiedVat, setCopiedVat] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  // Edit Modal State
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  // Edit Form State
   const [editName, setEditName] = useState(company.company_name);
   const [editTaxId, setEditTaxId] = useState(company.tax_id || '');
   const [editMaxLicenses, setEditMaxLicenses] = useState(company.max_licenses || 10);
@@ -143,7 +144,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert('🏢 Company profile updated successfully!', 'success');
-        setIsEditOpen(false);
+        setActiveTab('overview');
         onRefresh();
       } else {
         if (showAlert) showAlert('❌ Failed: ' + (data.error || 'Unknown error'), 'error');
@@ -235,27 +236,43 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => setIsEditOpen(true)}
-            className="pm-btn-neutral px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5"
-          >
-            <Edit className="w-3.5 h-3.5 text-purple-400" /> Edit Profile
-          </button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1 p-1 bg-pm-input/60 border border-pm-border rounded-xl">
+            <button
+              type="button"
+              onClick={() => setActiveTab('overview')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
+                activeTab === 'overview'
+                  ? 'bg-pm-primary text-white shadow-sm'
+                  : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" /> Overview
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('edit')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
+                activeTab === 'edit'
+                  ? 'bg-pm-primary text-white shadow-sm'
+                  : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
+              }`}
+            >
+              <Edit className="w-3.5 h-3.5" /> Edit Profile &amp; Settings
+            </button>
+          </div>
 
           <button
             type="button"
             onClick={handleToggleStatus}
             disabled={submitting}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border ${
-              isSuspended
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
-                : 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'
+            className={`pm-btn-neutral px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
+              isSuspended ? 'hover:bg-emerald-500/20 hover:text-emerald-400' : 'hover:bg-rose-500/20 hover:text-rose-400'
             }`}
+            title={isSuspended ? 'Re-Activate Company Account' : 'Suspend Company Account'}
           >
-            {isSuspended ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
-            <span>{isSuspended ? 'Re-Activate Company' : 'Suspend Company'}</span>
+            {isSuspended ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> : <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />}
+            <span>{isSuspended ? 'Re-Activate' : 'Suspend'}</span>
           </button>
 
           <button
@@ -269,375 +286,428 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
         </div>
       </div>
 
-      {/* Main 2-Column Workspace Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Organization Overview & License Capacity Meter */}
-        <div className="space-y-6">
-          {/* Company Profile Overview Card */}
-          <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-              <Building2 className="w-4 h-4 text-purple-400" /> Organization Profile Overview
-            </h3>
-
-            <div className="space-y-3 text-xs">
-              <div className="flex justify-between items-center pb-2 border-b border-pm-border">
-                <span className="text-pm-secondary">Company ID</span>
-                <span className="font-mono font-bold text-pm-text">#{company.id}</span>
-              </div>
-              <div className="flex justify-between items-center pb-2 border-b border-pm-border">
-                <span className="text-pm-secondary">Company Name</span>
-                <span className="font-semibold text-pm-text">{company.company_name}</span>
-              </div>
-              <div className="flex justify-between items-center pb-2 border-b border-pm-border">
-                <span className="text-pm-secondary">Tax / VAT ID</span>
-                {company.tax_id ? (
-                  <span className="font-mono text-pm-text flex items-center gap-1 bg-pm-input px-2 py-0.5 rounded border border-pm-border">
-                    {company.tax_id}
-                    <button type="button" onClick={copyVatId} className="text-pm-secondary hover:text-pm-primary transition p-0.5">
-                      {copiedVat ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                    </button>
-                  </span>
-                ) : (
-                  <span className="italic text-pm-secondary/60">Not specified</span>
-                )}
-              </div>
-              <div className="flex justify-between items-center pb-2 border-b border-pm-border">
-                <span className="text-pm-secondary">Registration Date</span>
-                <span className="text-pm-text">{company.created_at ? new Date(company.created_at).toLocaleDateString() : 'N/A'}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-pm-secondary">Team Size</span>
-                <span className="font-bold text-indigo-400">{companyMembers.length} Accounts</span>
-              </div>
-            </div>
-          </div>
-
-          {/* License Pool Capacity Utilization Card */}
-          <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-              <Key className="w-4 h-4 text-amber-400" /> License Pool Capacity
-            </h3>
-
-            <div className="space-y-3 text-xs">
-              <div className="flex justify-between items-center font-bold">
-                <span className={isFull ? 'text-rose-400' : 'text-pm-text'}>
-                  {usedCount} / {maxCount} Licenses Allocated
-                </span>
-                <span className="text-purple-400">{pct}% Utilization</span>
-              </div>
-
-              <div className="w-full bg-pm-input rounded-full h-2.5 overflow-hidden border border-pm-border">
-                <div
-                  className={`h-full transition-all duration-300 ${
-                    pct >= 100 ? 'bg-rose-500' : pct >= 75 ? 'bg-amber-500' : 'bg-gradient-to-r from-purple-500 to-emerald-500'
-                  }`}
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-
-              <p className="text-[11px] text-pm-secondary">
-                {isFull
-                  ? '⚠️ Company has reached maximum allowed store license capacity.'
-                  : `Remaining capacity for ${maxCount - usedCount} additional store licenses.`}
+      {/* Dynamic Tab Content */}
+      {activeTab === 'edit' ? (
+        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation space-y-6 animate-in fade-in duration-200">
+          <div className="flex justify-between items-center pb-4 border-b border-pm-border">
+            <div>
+              <h3 className="text-sm font-extrabold text-pm-text flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-purple-400" /> Comprehensive Company Profile Settings
+              </h3>
+              <p className="text-xs text-pm-secondary mt-0.5">
+                Update organization profile details, tax identifiers, store license allocation limits, and account status governance.
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('overview')}
+              className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold"
+            >
+              ✕ Cancel
+            </button>
           </div>
-        </div>
 
-        {/* Right Workspace Area */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Section 1: Linked Team Members Directory Table */}
-          <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-indigo-400" /> Linked Team Members ({companyMembers.length})
-              </h3>
+          <form onSubmit={handleEditProfile} className="space-y-6">
+            {/* Section 1: General Company Information */}
+            <div className="p-4 bg-pm-input/40 border border-pm-border rounded-xl space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5 text-purple-400" /> General Company Information
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Company Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:border-pm-primary focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Tax / VAT Registration ID</label>
+                  <input
+                    type="text"
+                    value={editTaxId}
+                    onChange={e => setEditTaxId(e.target.value)}
+                    placeholder="e.g. US987654321 or DE123456789"
+                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-pm-primary focus:outline-none"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
-              {companyMembers.length === 0 ? (
-                <p className="p-8 text-center text-pm-secondary">No user accounts linked to this company profile yet.</p>
-              ) : (
-                <div className="divide-y divide-pm-border">
-                  {companyMembers.map(m => (
-                    <div key={m.id} className="p-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-3.5 h-3.5 text-pm-secondary shrink-0" />
-                          <span className="font-bold text-pm-text">{m.email}</span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                            {m.role || 'Owner'}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-pm-secondary">
-                          Registered: {m.created_at ? new Date(m.created_at).toLocaleDateString() : 'N/A'}
-                        </div>
-                      </div>
+            {/* Section 2: License Capacity Settings */}
+            <div className="p-4 bg-pm-input/40 border border-pm-border rounded-xl space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-amber-400" /> License Capacity Settings
+              </h4>
 
-                      <div className="flex items-center gap-2">
+              <div>
+                <label className="block text-xs font-semibold text-pm-secondary mb-1">Max Allowed Store Licenses</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={editMaxLicenses}
+                  onChange={e => setEditMaxLicenses(parseInt(e.target.value) || 10)}
+                  className="w-full max-w-xs bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-pm-primary focus:outline-none"
+                />
+                <p className="text-[11px] text-pm-secondary mt-1">
+                  Currently <strong>{usedCount}</strong> of <strong>{editMaxLicenses}</strong> licenses allocated.
+                </p>
+              </div>
+            </div>
+
+            {/* Section 3: Status & Governance */}
+            <div className="p-4 bg-pm-input/40 border border-pm-border rounded-xl space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Governance &amp; Account Status
+              </h4>
+
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card p-3 rounded-lg border border-pm-border">
+                <div>
+                  <div className="text-xs font-bold text-pm-text">Account Status: <span className={isSuspended ? 'text-rose-400' : 'text-emerald-400'}>{company.status.toUpperCase()}</span></div>
+                  <p className="text-[11px] text-pm-secondary">
+                    {isSuspended ? 'This organization is currently suspended. Re-activate to restore store license operations.' : 'This organization is active and operational.'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleToggleStatus}
+                  disabled={submitting}
+                  className={`pm-btn-neutral px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
+                    isSuspended ? 'hover:bg-emerald-500/20 hover:text-emerald-400' : 'hover:bg-rose-500/20 hover:text-rose-400'
+                  }`}
+                >
+                  {isSuspended ? <ShieldCheck className="w-4 h-4 text-emerald-400" /> : <ShieldAlert className="w-4 h-4 text-amber-400" />}
+                  <span>{isSuspended ? 'Re-Activate Account' : 'Suspend Account'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Form Action Controls */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-pm-border">
+              <button
+                type="button"
+                onClick={() => setActiveTab('overview')}
+                className="pm-btn-neutral px-4 py-2 rounded-xl text-xs font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="pm-btn-primary px-6 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md"
+              >
+                <Check className="w-4 h-4" />
+                <span>{submitting ? 'Saving Changes...' : 'Save Profile Settings'}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : (
+        /* Main 2-Column Workspace Layout (Overview Tab) */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column: Organization Overview & License Capacity Meter */}
+          <div className="space-y-6">
+            {/* Company Profile Overview Card */}
+            <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-purple-400" /> Organization Profile Overview
+              </h3>
+
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
+                  <span className="text-pm-secondary">Company ID</span>
+                  <span className="font-mono font-bold text-pm-text">#{company.id}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
+                  <span className="text-pm-secondary">Company Name</span>
+                  <span className="font-semibold text-pm-text">{company.company_name}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
+                  <span className="text-pm-secondary">Tax / VAT ID</span>
+                  {company.tax_id ? (
+                    <span className="font-mono text-pm-text flex items-center gap-1 bg-pm-input px-2 py-0.5 rounded border border-pm-border">
+                      {company.tax_id}
+                      <button type="button" onClick={copyVatId} className="text-pm-secondary hover:text-pm-primary transition p-0.5">
+                        {copiedVat ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    </span>
+                  ) : (
+                    <span className="italic text-pm-secondary/60">Not specified</span>
+                  )}
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
+                  <span className="text-pm-secondary">Registration Date</span>
+                  <span className="text-pm-text">{company.created_at ? new Date(company.created_at).toLocaleDateString() : 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-pm-secondary">Team Size</span>
+                  <span className="font-bold text-indigo-400">{companyMembers.length} Accounts</span>
+                </div>
+              </div>
+            </div>
+
+            {/* License Pool Capacity Utilization Card */}
+            <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Key className="w-4 h-4 text-amber-400" /> License Pool Capacity
+              </h3>
+
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between items-center font-bold">
+                  <span className={isFull ? 'text-rose-400' : 'text-pm-text'}>
+                    {usedCount} / {maxCount} Licenses Allocated
+                  </span>
+                  <span className="text-purple-400">{pct}% Utilization</span>
+                </div>
+
+                <div className="w-full bg-pm-input rounded-full h-2.5 overflow-hidden border border-pm-border">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      pct >= 100 ? 'bg-rose-500' : pct >= 80 ? 'bg-amber-500' : 'bg-purple-500'
+                    }`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Workspace Area */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Section 1: Linked Team Members Directory Table */}
+            <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-indigo-400" /> Linked Team Members ({companyMembers.length})
+                </h3>
+              </div>
+
+              <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
+                {companyMembers.length === 0 ? (
+                  <p className="p-8 text-center text-pm-secondary">No user accounts linked to this company profile yet.</p>
+                ) : (
+                  <div className="divide-y divide-pm-border">
+                    {companyMembers.map(m => (
+                      <div key={m.id} className="p-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-3.5 h-3.5 text-pm-secondary shrink-0" />
+                            <span className="font-bold text-pm-text">{m.email}</span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                              {m.role || 'Owner'}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-pm-secondary font-mono">ID: #{m.id} • Registered: {m.created_at ? new Date(m.created_at).toLocaleDateString() : 'N/A'}</div>
+                        </div>
+
                         {onInspectClient && (
                           <button
                             type="button"
                             onClick={() => onInspectClient(m)}
-                            className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
-                            title="Open Client Profile"
+                            className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition text-purple-400 shrink-0"
+                            title="Inspect Client Account Details"
                           >
-                            <Eye className="w-3.5 h-3.5 text-purple-400" /> Inspect Client
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Inspect Client</span>
                           </button>
                         )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Section 2: Owned Store Licenses & Bound PrestaShop Domains Table */}
-          <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-              <Key className="w-4 h-4 text-amber-400" /> Owned Store Licenses &amp; Bound Domains ({companyLicenses.length})
-            </h3>
-
-            <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
-              {companyLicenses.length === 0 ? (
-                <p className="p-8 text-center text-pm-secondary">No active store licenses owned by this organization.</p>
-              ) : (
-                <div className="divide-y divide-pm-border">
-                  {companyLicenses.map(l => (
-                    <div key={l.id} className="p-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
-                      <div className="space-y-1">
-                        <div className="font-mono text-amber-400 font-bold flex items-center gap-2 text-sm">
-                          <span>{l.license_key}</span>
-                          <button
-                            type="button"
-                            onClick={() => copyLicenseKey(l.license_key)}
-                            className="text-pm-secondary hover:text-pm-primary transition p-1"
-                            title="Copy License Key"
-                          >
-                            {copiedKey === l.license_key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </div>
-                        <div className="text-[11px] text-pm-secondary flex items-center gap-2">
-                          <span className="uppercase font-bold text-purple-400 px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">
-                            {l.package_tier} Tier
-                          </span>
-                          <span>•</span>
-                          <span>User: {l.user_email}</span>
-                        </div>
-                      </div>
-
-                      <div>
-                        {l.store_url ? (
-                          <a
-                            href={`https://${l.store_url.replace(/^https?:\/\//, '')}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 font-mono text-[11px] text-emerald-400 hover:underline bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20"
-                          >
-                            <Globe className="w-3.5 h-3.5" /> {l.store_url} <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
-                          </a>
-                        ) : (
-                          <span className="italic text-pm-secondary/60 bg-pm-input px-2.5 py-1 rounded text-[11px]">Unbound Store Domain</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Section 3: Dual-Mode Team Member Onboarding Widget */}
-          <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-pm-border pb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                <UserPlus className="w-4 h-4 text-purple-400" /> Onboard Team Member to {company.company_name}
-              </h3>
-
-              {/* Mode Toggle Pills */}
-              <div className="flex gap-1.5 bg-pm-input/50 p-1 rounded-lg border border-pm-border">
-                <button
-                  type="button"
-                  onClick={() => setOnboardMode('assign')}
-                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition flex items-center gap-1.5 ${
-                    onboardMode === 'assign'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-pm-secondary hover:text-pm-text'
-                  }`}
-                >
-                  <span>🔗 Assign Unassigned Client</span>
-                  <span className={`px-1.5 py-0.2 rounded-full text-[9px] ${
-                    onboardMode === 'assign' ? 'bg-white/20 text-white' : 'bg-pm-card text-pm-secondary'
-                  }`}>
-                    {unassignedUsers.length}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOnboardMode('create')}
-                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition flex items-center gap-1.5 ${
-                    onboardMode === 'create'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-pm-secondary hover:text-pm-text'
-                  }`}
-                >
-                  <span>✨ Create New Account</span>
-                </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {onboardMode === 'assign' ? (
-              <form onSubmit={handleAssignExistingUser} className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-3">
-                <div>
-                  <label className="block text-[11px] font-semibold text-pm-secondary mb-1">
-                    Select Client Account from Unassigned Pool ({unassignedUsers.length} available)
-                  </label>
-                  {unassignedUsers.length > 0 ? (
-                    <select
-                      value={selectedUnassignedUser}
-                      onChange={e => setSelectedUnassignedUser(e.target.value ? Number(e.target.value) : '')}
-                      required
-                      className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500 font-mono"
-                    >
-                      <option value="">-- Choose registered unassigned client --</option>
-                      {unassignedUsers.map(u => (
-                        <option key={u.id} value={u.id}>
-                          {u.email} (ID: #{u.id})
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="p-3 bg-pm-card border border-pm-border rounded-lg text-xs text-pm-secondary italic">
-                      ℹ️ No standalone unassigned client accounts currently available. Use "Create New Account" to onboard a brand-new user.
-                    </div>
-                  )}
-                </div>
+            {/* Section 2: Issued License Keys Table */}
+            <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                  <Key className="w-4 h-4 text-amber-400" /> Company Issued License Keys ({companyLicenses.length})
+                </h3>
+              </div>
 
-                <div className="flex justify-end pt-2">
+              <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
+                {companyLicenses.length === 0 ? (
+                  <p className="p-8 text-center text-pm-secondary">No active store licenses issued to company members yet.</p>
+                ) : (
+                  <div className="divide-y divide-pm-border">
+                    {companyLicenses.map(l => (
+                      <div key={l.id} className="p-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
+                        <div className="space-y-1">
+                          <div className="font-mono text-amber-400 font-bold flex items-center gap-2 text-sm">
+                            <span>{l.license_key}</span>
+                            <button
+                              type="button"
+                              onClick={() => copyLicenseKey(l.license_key)}
+                              className="text-pm-secondary hover:text-pm-primary transition p-1"
+                              title="Copy License Key"
+                            >
+                              {copiedKey === l.license_key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                          <div className="text-[11px] text-pm-secondary flex items-center gap-2">
+                            <span className="font-bold text-pm-text">{l.user_email}</span>
+                            <span>•</span>
+                            <span className="uppercase font-bold text-purple-400 px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">
+                              {l.package_tier} Tier
+                            </span>
+                          </div>
+                        </div>
+
+                        {l.store_url ? (
+                          <a
+                            href={l.store_url.startsWith('http') ? l.store_url : `https://${l.store_url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs hover:bg-emerald-500/20 transition"
+                          >
+                            <Globe className="w-3.5 h-3.5" />
+                            <span>{l.store_url}</span>
+                            <ExternalLink className="w-3 h-3 ml-0.5" />
+                          </a>
+                        ) : (
+                          <span className="px-3 py-1.5 rounded-lg bg-pm-input/80 text-pm-secondary font-mono text-xs border border-pm-border">
+                            Unbound Key
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Section 3: Dual-Mode Team Member Onboarding Panel */}
+            <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b border-pm-border">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                  <UserPlus className="w-4 h-4 text-purple-400" /> Onboard Team Member to Company
+                </h3>
+
+                <div className="flex items-center gap-1 p-1 bg-pm-input/60 border border-pm-border rounded-lg text-xs">
                   <button
-                    type="submit"
-                    disabled={submitting || !selectedUnassignedUser || unassignedUsers.length === 0}
-                    className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md disabled:opacity-50"
+                    type="button"
+                    onClick={() => setOnboardMode('assign')}
+                    className={`px-2.5 py-1 rounded-md font-semibold transition ${
+                      onboardMode === 'assign' ? 'bg-purple-600 text-white shadow-sm' : 'text-pm-secondary hover:text-pm-text'
+                    }`}
                   >
-                    <UserPlus className="w-4 h-4 text-white" />
-                    <span>{submitting ? 'Assigning...' : '🔗 Assign Selected Client to Team'}</span>
+                    🔗 Assign Unassigned Client ({unassignedUsers.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOnboardMode('create')}
+                    className={`px-2.5 py-1 rounded-md font-semibold transition ${
+                      onboardMode === 'create' ? 'bg-purple-600 text-white shadow-sm' : 'text-pm-secondary hover:text-pm-text'
+                    }`}
+                  >
+                    ✨ Create New Account
                   </button>
                 </div>
-              </form>
-            ) : (
-              <form onSubmit={handleAddTeamMember} className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Member Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={newMemberEmail}
-                      onChange={e => setNewMemberEmail(e.target.value)}
-                      placeholder="member@company.com"
-                      className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500"
-                    />
-                  </div>
+              </div>
 
+              {onboardMode === 'assign' ? (
+                <form onSubmit={handleAssignExistingUser} className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-3">
                   <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="block text-[11px] font-semibold text-pm-secondary">Account Password</label>
-                      <button type="button" onClick={generateMemberPass} className="text-[10px] text-pm-primary hover:underline">
-                        Generate Strong Pass
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type={showMemberPassword ? "text" : "password"}
+                    <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Select Registered Unassigned Client Account</label>
+                    {unassignedUsers.length > 0 ? (
+                      <select
+                        value={selectedUnassignedUser}
+                        onChange={e => setSelectedUnassignedUser(Number(e.target.value))}
                         required
-                        value={newMemberPassword}
-                        onChange={e => setNewMemberPassword(e.target.value)}
-                        placeholder="Set password..."
-                        className="w-full bg-pm-card border border-pm-border rounded-lg pl-3 pr-9 py-2 text-xs font-mono text-pm-text focus:outline-none focus:border-purple-500"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowMemberPassword(!showMemberPassword)}
-                        className="absolute right-2.5 top-2.5 text-pm-secondary hover:text-pm-text transition"
-                        title={showMemberPassword ? "Hide Password" : "Show Password"}
+                        className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500 font-mono"
                       >
-                        {showMemberPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      </button>
+                        <option value="">-- Choose registered unassigned client --</option>
+                        {unassignedUsers.map(u => (
+                          <option key={u.id} value={u.id}>
+                            {u.email} (ID: #{u.id})
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="p-3 bg-pm-card border border-pm-border rounded-lg text-xs text-pm-secondary italic">
+                        ℹ️ No standalone unassigned client accounts currently available. Use "Create New Account" to onboard a brand-new user.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      disabled={submitting || !selectedUnassignedUser || unassignedUsers.length === 0}
+                      className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md disabled:opacity-50"
+                    >
+                      <UserPlus className="w-4 h-4 text-white" />
+                      <span>{submitting ? 'Assigning...' : '🔗 Assign Selected Client to Team'}</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleAddTeamMember} className="p-4 bg-pm-input/50 border border-pm-border rounded-xl space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Member Email Address</label>
+                      <input
+                        type="email"
+                        required
+                        value={newMemberEmail}
+                        onChange={e => setNewMemberEmail(e.target.value)}
+                        placeholder="member@company.com"
+                        className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:outline-none focus:border-purple-500"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-[11px] font-semibold text-pm-secondary">Account Password</label>
+                        <button type="button" onClick={generateMemberPass} className="text-[10px] text-pm-primary hover:underline">
+                          Generate Strong Pass
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type={showMemberPassword ? "text" : "password"}
+                          required
+                          value={newMemberPassword}
+                          onChange={e => setNewMemberPassword(e.target.value)}
+                          placeholder="Set password..."
+                          className="w-full bg-pm-card border border-pm-border rounded-lg pl-3 pr-9 py-2 text-xs font-mono text-pm-text focus:outline-none focus:border-purple-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowMemberPassword(!showMemberPassword)}
+                          className="absolute right-2.5 top-2.5 text-pm-secondary hover:text-pm-text transition"
+                          title={showMemberPassword ? "Hide Password" : "Show Password"}
+                        >
+                          {showMemberPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md"
-                  >
-                    <UserPlus className="w-4 h-4 text-white" />
-                    <span>{submitting ? 'Creating...' : '✨ Create & Add Team Member'}</span>
-                  </button>
-                </div>
-              </form>
-            )}
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md"
+                    >
+                      <UserPlus className="w-4 h-4 text-white" />
+                      <span>{submitting ? 'Creating...' : '✨ Create & Add Team Member'}</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Edit Profile Modal */}
-      <BaseModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Company Profile">
-        <form onSubmit={handleEditProfile} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Company Name</label>
-            <input
-              type="text"
-              required
-              value={editName}
-              onChange={e => setEditName(e.target.value)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Tax / VAT Registration ID</label>
-            <input
-              type="text"
-              value={editTaxId}
-              onChange={e => setEditTaxId(e.target.value)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Max Allowed Store Licenses</label>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={editMaxLicenses}
-              onChange={e => setEditMaxLicenses(parseInt(e.target.value) || 10)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Status</label>
-            <select
-              value={editStatus}
-              onChange={e => setEditStatus(e.target.value)}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-            >
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
-            </select>
-          </div>
-          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-            <button type="button" onClick={() => setIsEditOpen(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
-              Cancel
-            </button>
-            <button type="submit" disabled={submitting} className="pm-btn-primary px-4 py-2 rounded-lg text-xs font-bold min-w-[140px] flex justify-center items-center">
-              {submitting ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
-      </BaseModal>
+      )}
 
       {/* Delete Confirmation Modal */}
       <BaseModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Company Profile">

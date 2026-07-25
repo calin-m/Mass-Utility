@@ -16,15 +16,18 @@ interface CompaniesTabProps {
 export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, licenses, onRefresh, showAlert, onInspectClient }) => {
   const [activeSubView, setActiveSubView] = useState<'list' | 'details'>('list');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'edit'>('overview');
 
-  const handleSelectCompany = (company: Company) => {
+  const handleSelectCompany = (company: Company, tab: 'overview' | 'edit' = 'overview') => {
     setSelectedCompany(company);
+    setSelectedTab(tab);
     setActiveSubView('details');
   };
 
   const handleBackToList = () => {
     setActiveSubView('list');
     setSelectedCompany(null);
+    setSelectedTab('overview');
   };
 
   // Keep selectedCompany synchronized with refreshed companies array
@@ -39,6 +42,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
           company={currentCompany}
           users={users}
           licenses={licenses}
+          initialTab={selectedTab}
           onBack={handleBackToList}
           onRefresh={onRefresh}
           showAlert={showAlert}

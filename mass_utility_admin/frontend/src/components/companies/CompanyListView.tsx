@@ -25,7 +25,7 @@ interface CompanyListViewProps {
   licenses: any[];
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
-  onSelectCompany: (company: Company) => void;
+  onSelectCompany: (company: Company, tab?: 'overview' | 'edit') => void;
 }
 
 export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, users, licenses, onRefresh, showAlert, onSelectCompany }) => {
@@ -329,7 +329,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
-                            onClick={() => onSelectCompany(c)}
+                            onClick={() => onSelectCompany(c, 'overview')}
                             className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
                             title="Inspect Company 360° Details View"
                           >
@@ -337,7 +337,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                           </button>
                           <button
                             type="button"
-                            onClick={() => onSelectCompany(c)}
+                            onClick={() => onSelectCompany(c, 'edit')}
                             className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
                             title="Edit Company Profile Details"
                           >

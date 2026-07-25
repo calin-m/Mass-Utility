@@ -14,15 +14,18 @@ interface ClientsTabProps {
 export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefresh, showAlert, initialSelectedUser }) => {
   const [activeSubView, setActiveSubView] = useState<'list' | 'details'>(initialSelectedUser ? 'details' : 'list');
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(initialSelectedUser || null);
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'edit'>('overview');
 
-  const handleSelectClient = (user: UserAccount) => {
+  const handleSelectClient = (user: UserAccount, tab: 'overview' | 'edit' = 'overview') => {
     setSelectedUser(user);
+    setSelectedTab(tab);
     setActiveSubView('details');
   };
 
   const handleBackToList = () => {
     setActiveSubView('list');
     setSelectedUser(null);
+    setSelectedTab('overview');
   };
 
   // If viewing details and selectedUser exists, render ClientDetailsView
@@ -34,6 +37,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, onRefre
       <ClientDetailsView
         user={currentActiveUser}
         licenses={licenses}
+        initialTab={selectedTab}
         onBack={handleBackToList}
         onRefresh={onRefresh}
         showAlert={showAlert}
