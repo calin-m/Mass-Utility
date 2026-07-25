@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-slate-100">Super Admin Portal - Runtime Notice</h2>
-                <p className="text-xs text-slate-400">An unexpected execution boundary condition occurred.</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">An unexpected execution boundary condition occurred.</p>
               </div>
             </div>
 
@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   {this.state.error.name}: {this.state.error.message}
                 </div>
                 {this.state.errorInfo && (
-                  <pre className="text-[0.7rem] font-mono text-slate-400 whitespace-pre-wrap mt-2">
+                  <pre className="text-[0.7rem] font-mono text-slate-600 dark:text-slate-400 whitespace-pre-wrap mt-2">
                     {this.state.errorInfo.componentStack}
                   </pre>
                 )}

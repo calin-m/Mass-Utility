@@ -164,16 +164,57 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+// Telemetry helper for authentication audit
+function logAuthTelemetry(string $status, array $context = []): void {
+    try {
+        $logDir = dirname(__DIR__) . '/data';
+        if (!file_exists($logDir)) {
+            @mkdir($logDir, 0755, true);
+        }
+        $file = $logDir . '/auth_telemetry.log';
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        $entry = sprintf("[%s] [%s] IP: %s | %s\n", date('Y-m-d H:i:s'), $status, $ip, json_encode($context));
+        @file_put_contents($file, $entry, FILE_APPEND | LOCK_EX);
+    } catch (\Throwable $e) {}
+}
+
 // Process OTT (One-Time Token) from Bridge if present
-if (isset($_GET['ott']) && !empty($bridgeToken)) {
+if (isset($_GET['ott'])) {
     $ott = $_GET['ott'];
     $data = base64_decode($ott);
     $ivLength = openssl_cipher_iv_length('aes-256-cbc');
+
     if (is_string($data) && strlen($data) > $ivLength) {
         $iv = substr($data, 0, $ivLength);
         $ciphertext = substr($data, $ivLength);
-        $key = hash('sha256', $bridgeToken, true);
-        $decrypted = openssl_decrypt($ciphertext, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+        
+        // Active key attempt
+        $tokensToTry = array_filter(array_unique([
+            $bridgeToken,
+            getBridgeToken($settingsRepo, dirname(__DIR__)) // Direct DB probe bypass
+        ]));
+
+        $decrypted = false;
+        $activeToken = '';
+
+        foreach ($tokensToTry as $candidateToken) {
+            if (empty($candidateToken)) {
+                continue;
+            }
+            $key = hash('sha256', $candidateToken, true);
+            $dec = openssl_decrypt($ciphertext, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+            if ($dec !== false) {
+                $decrypted = $dec;
+                $activeToken = $candidateToken;
+                if ($candidateToken !== $bridgeToken) {
+                    $settingsRepo->set('PM_BRIDGE_TOKEN', $candidateToken);
+                    $bridgeToken = $candidateToken;
+                    logAuthTelemetry('AUTO_HEAL_KEY_SYNC', ['message' => 'Resynchronized stale bridge token from MariaDB']);
+                }
+                break;
+            }
+        }
+
         if ($decrypted !== false) {
             $payload = json_decode($decrypted, true);
             if (isset($payload['id_employee'], $payload['expiry']) && $payload['expiry'] >= time()) {
@@ -185,6 +226,7 @@ if (isset($_GET['ott']) && !empty($bridgeToken)) {
                     $settingsRepo->set('PM_BRIDGE_URL', $payload['bridge_url']);
                 }
                 
+                logAuthTelemetry('DEC_SUCCESS', ['employee_id' => $payload['id_employee']]);
                 @session_write_close();
                 
                 // Strip the OTT from URL parameters and redirect to avoid token leakage
@@ -197,7 +239,11 @@ if (isset($_GET['ott']) && !empty($bridgeToken)) {
                 }
                 header("Location: " . $requestUri);
                 exit;
+            } else {
+                logAuthTelemetry('DEC_EXPIRED', ['expiry' => $payload['expiry'] ?? 0, 'now' => time()]);
             }
+        } else {
+            logAuthTelemetry('DEC_FAIL_KEY_MISMATCH', ['ott_length' => strlen($ott)]);
         }
     }
 }

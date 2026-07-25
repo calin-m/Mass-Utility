@@ -383,7 +383,7 @@ class Mass_Utility extends Module
         // Convert relative SaaS URL to absolute URL for cURL
         $curlSaaSUrl = $standaloneUrl;
         if (strpos($curlSaaSUrl, 'http') !== 0) {
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+            $protocol = $this->getPreferredScheme();
             $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
             $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
             $curlSaaSUrl = $protocol . $host . rtrim($basePath, '/\\') . '/../mass_utility_dashboard/';
@@ -480,9 +480,25 @@ class Mass_Utility extends Module
         return rtrim($url, '/') . '/';
     }
 
+    private function getPreferredScheme(): string
+    {
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+            || (isset($_SERVER['HTTP_X_FORWARDED_SSL']) && strtolower($_SERVER['HTTP_X_FORWARDED_SSL']) === 'on');
+
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $isLocalhost = ($host === 'localhost' || strpos($host, '127.0.0.1') === 0 || strpos($host, '::1') === 0);
+
+        if ($isHttps || !$isLocalhost) {
+            return 'https://';
+        }
+
+        return 'http://';
+    }
+
     private function getApiEndpoint(): string
     {
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+        $protocol = $this->getPreferredScheme();
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         return $protocol . $host . $this->_path . 'api.php';
     }
