@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle, Eye, Copy, Check, Mail, Globe, UserPlus, RefreshCw } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 import { StatCard } from './common/StatCard';
 import { BaseModal } from './common/BaseModal';
@@ -32,6 +32,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   // Form States
@@ -39,7 +40,14 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
   const [taxId, setTaxId] = useState('');
   const [maxLicenses, setMaxLicenses] = useState(10);
   const [editStatus, setEditStatus] = useState('active');
+
+  // 1-Click Owner Creation State
+  const [createOwnerAccount, setCreateOwnerAccount] = useState(false);
+  const [ownerEmail, setOwnerEmail] = useState('');
+  const [ownerPassword, setOwnerPassword] = useState('');
+
   const [submitting, setSubmitting] = useState(false);
+  const [copiedVatId, setCopiedVatId] = useState<number | null>(null);
 
   // Filter Logic
   const filteredCompanies = companies.filter(c => {
@@ -55,6 +63,20 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
 
   const getApiUrl = (action: string) => `${window.location.pathname}?action=${action}`;
 
+  const copyVat = (vat: string, id: number) => {
+    navigator.clipboard.writeText(vat);
+    setCopiedVatId(id);
+    setTimeout(() => setCopiedVatId(null), 2000);
+    if (showAlert) showAlert('📋 Tax / VAT ID copied to clipboard!', 'success');
+  };
+
+  const generateOwnerPass = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+    let pass = '';
+    for (let i = 0; i < 16; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    setOwnerPassword(pass);
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -68,10 +90,25 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
       const res = await fetch(getApiUrl('api_create_company'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        if (showAlert) showAlert('🏢 Company profile created successfully!', 'success');
+        let ownerMsg = '';
+        if (createOwnerAccount && ownerEmail.trim() && ownerPassword.trim()) {
+          try {
+            const userForm = new FormData();
+            userForm.append('email', ownerEmail.trim());
+            userForm.append('password', ownerPassword.trim());
+            userForm.append('company_name', name.trim());
+            await fetch(getApiUrl('api_create_user'), { method: 'POST', body: userForm });
+            ownerMsg = ' & Primary Owner Account created!';
+          } catch (e) {}
+        }
+
+        if (showAlert) showAlert(`🏢 Company profile${ownerMsg} created successfully!`, 'success');
         setName('');
         setTaxId('');
         setMaxLicenses(10);
+        setOwnerEmail('');
+        setOwnerPassword('');
+        setCreateOwnerAccount(false);
         setIsCreateOpen(false);
         onRefresh();
       } else {
@@ -137,6 +174,11 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
     }
   };
 
+  const openDetailsModal = (c: Company) => {
+    setSelectedCompany(c);
+    setIsDetailsOpen(true);
+  };
+
   const openEditModal = (c: Company) => {
     setSelectedCompany(c);
     setName(c.company_name);
@@ -151,17 +193,31 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
     setIsDeleteOpen(true);
   };
 
+  // Details Modal Computations
+  const companyMembers = selectedCompany ? users.filter(u => u.company_name?.toLowerCase() === selectedCompany.company_name.toLowerCase()) : [];
+  const companyLicensesList = selectedCompany ? licenses.filter(l => l.user_email && companyMembers.some(m => m.email.toLowerCase() === l.user_email.toLowerCase())) : [];
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <SectionHeader
         title="B2B Company Directory"
         subtitle="Manage B2B organizations, multi-user team access, and shared store license pools across tenant clients."
         icon={Building2}
+        action={
+          <button
+            type="button"
+            onClick={onRefresh}
+            className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+            title="Refresh Companies Directory"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          </button>
+        }
       />
 
-      {/* Overview Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard label="Total Companies" value={companies.length} icon={Building2} />
+      {/* Horizontal Overview Stat Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Total Companies" value={companies.length} icon={Building2} color="purple" />
         <StatCard label="Active Organizations" value={activeCount} icon={ShieldCheck} color="emerald" />
         <StatCard label="Linked Team Members" value={totalMembers} icon={Users} color="blue" />
         <StatCard label="Managed Licenses" value={totalCompanyLicenses} icon={Key} color="amber" />
@@ -174,7 +230,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-pm-secondary" />
             <input
               type="text"
-              placeholder="Search companies..."
+              placeholder="Search by company name or VAT ID..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="w-full bg-pm-input border border-pm-border rounded-lg pl-9 pr-3 py-1.5 text-xs text-pm-text focus:outline-none focus:border-pm-primary"
@@ -185,7 +241,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
             <button
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                statusFilter === 'all' ? 'bg-pm-input text-pm-text border border-pm-primary/50' : 'pm-btn-neutral'
+                statusFilter === 'all' ? 'bg-pm-input text-pm-text border border-pm-primary/50 shadow-sm' : 'pm-btn-neutral'
               }`}
             >
               All ({companies.length})
@@ -193,7 +249,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
             <button
               onClick={() => setStatusFilter('active')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                statusFilter === 'active' ? 'bg-pm-input text-pm-text border border-pm-primary/50' : 'pm-btn-neutral'
+                statusFilter === 'active' ? 'bg-pm-input text-pm-text border border-pm-primary/50 shadow-sm' : 'pm-btn-neutral'
               }`}
             >
               Active ({activeCount})
@@ -206,9 +262,12 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
             setName('');
             setTaxId('');
             setMaxLicenses(10);
+            setOwnerEmail('');
+            setOwnerPassword('');
+            setCreateOwnerAccount(false);
             setIsCreateOpen(true);
           }}
-          className="pm-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shrink-0"
+          className="pm-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shrink-0 shadow-md"
         >
           <PlusCircle className="w-4 h-4" /> Add Company Profile
         </button>
@@ -224,7 +283,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
                 <th className="p-3">Company Name</th>
                 <th className="p-3">Tax / VAT ID</th>
                 <th className="p-3">Team Members</th>
-                <th className="p-3">Owned Licenses</th>
+                <th className="p-3">License Utilization</th>
                 <th className="p-3">Status</th>
                 <th className="p-3">Created At</th>
                 <th className="p-3 text-right">Actions</th>
@@ -238,56 +297,190 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
                   </td>
                 </tr>
               ) : (
-                filteredCompanies.map(c => (
-                  <tr key={c.id} className="hover:bg-pm-input/50 transition">
-                    <td className="p-3 font-mono font-semibold">#{c.id}</td>
-                    <td className="p-3 font-bold text-pm-text">{c.company_name}</td>
-                    <td className="p-3 font-mono text-pm-secondary">{c.tax_id || 'N/A'}</td>
-                    <td className="p-3">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-bold">
-                        <Users className="w-3 h-3" /> {c.user_count || 0} Members
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 font-bold">
-                        <Key className="w-3 h-3" /> {c.license_count || 0} / {c.max_licenses} Licenses
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${
-                        c.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                      }`}>
-                        {c.status}
-                      </span>
-                    </td>
-                    <td className="p-3 text-pm-secondary">{new Date(c.created_at).toLocaleDateString()}</td>
-                    <td className="p-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => openEditModal(c)}
-                          className="p-1.5 rounded-lg text-pm-secondary hover:text-pm-primary hover:bg-pm-input transition"
-                          title="Edit Company Profile"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(c)}
-                          className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition"
-                          title="Delete Company Profile"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                filteredCompanies.map(c => {
+                  const usedCount = c.license_count || 0;
+                  const maxCount = c.max_licenses || 10;
+                  const pct = Math.min(100, Math.round((usedCount / maxCount) * 100));
+                  const isFull = usedCount >= maxCount;
+
+                  return (
+                    <tr key={c.id} className="hover:bg-pm-input/50 transition">
+                      <td className="p-3 font-mono font-semibold text-pm-secondary">#{c.id}</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-purple-400 shrink-0" />
+                          <span className="font-bold text-pm-text">{c.company_name}</span>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        {c.tax_id ? (
+                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-pm-input border border-pm-border font-mono text-[11px] text-pm-text">
+                            <span>{c.tax_id}</span>
+                            <button
+                              type="button"
+                              onClick={() => copyVat(c.tax_id!, c.id)}
+                              className="text-pm-secondary hover:text-pm-primary transition"
+                              title="Copy Tax / VAT ID"
+                            >
+                              {copiedVatId === c.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="italic text-pm-secondary/60">Not specified</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/20">
+                          <Users className="w-3.5 h-3.5" /> {c.user_count || 0} Members
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <div className="w-36 space-y-1">
+                          <div className="flex justify-between items-center text-[10px] font-bold">
+                            <span className={isFull ? 'text-rose-400' : 'text-pm-text'}>
+                              {usedCount} / {maxCount} Keys
+                            </span>
+                            <span className="text-pm-secondary">{pct}%</span>
+                          </div>
+                          <div className="w-full bg-pm-input rounded-full h-1.5 overflow-hidden border border-pm-border">
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                pct >= 100 ? 'bg-rose-500' : pct >= 75 ? 'bg-amber-500' : 'bg-gradient-to-r from-purple-500 to-emerald-500'
+                              }`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] border ${
+                          c.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                        }`}>
+                          {c.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-pm-secondary">{new Date(c.created_at).toLocaleDateString()}</td>
+                      <td className="p-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => openDetailsModal(c)}
+                            className="pm-btn-neutral px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition"
+                            title="Inspect Team & Licenses"
+                          >
+                            <Eye className="w-3.5 h-3.5" /> Team
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(c)}
+                            className="pm-btn-neutral p-1.5 rounded text-xs font-semibold flex items-center gap-1 transition"
+                            title="Edit Profile"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openDeleteModal(c)}
+                            className="pm-btn-danger-outline p-1.5 rounded text-xs font-semibold flex items-center gap-1 transition"
+                            title="Delete Company"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Create Modal */}
+      {/* Company Team & Stores Details Inspection Modal */}
+      {selectedCompany && (
+        <BaseModal isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} title={`Company Details: ${selectedCompany.company_name}`}>
+          <div className="space-y-6">
+            <div className="p-4 bg-pm-input/60 border border-pm-border rounded-xl flex items-center justify-between text-xs">
+              <div>
+                <p className="font-bold text-pm-text flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-purple-400" /> {selectedCompany.company_name}
+                </p>
+                <p className="text-pm-secondary mt-0.5">Tax / VAT ID: {selectedCompany.tax_id || 'Unregistered'}</p>
+              </div>
+              <div className="text-right">
+                <span className="px-2 py-0.5 rounded-full font-bold uppercase text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                  Capacity: {selectedCompany.license_count || 0} / {selectedCompany.max_licenses} Licenses
+                </span>
+              </div>
+            </div>
+
+            {/* Linked Team Members Section */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-indigo-400" /> Linked Team Members ({companyMembers.length})
+              </h4>
+              <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
+                {companyMembers.length === 0 ? (
+                  <p className="p-4 text-center text-pm-secondary">No user accounts linked to this company profile yet.</p>
+                ) : (
+                  <div className="divide-y divide-pm-border">
+                    {companyMembers.map(m => (
+                      <div key={m.id} className="p-2.5 flex justify-between items-center bg-pm-card">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3.5 h-3.5 text-pm-secondary" />
+                          <span className="font-semibold text-pm-text">{m.email}</span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400">
+                          {m.role || 'Owner'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Owned Store Licenses Section */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-amber-400" /> Owned Store Licenses ({companyLicensesList.length})
+              </h4>
+              <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
+                {companyLicensesList.length === 0 ? (
+                  <p className="p-4 text-center text-pm-secondary">No active store licenses owned by this company.</p>
+                ) : (
+                  <div className="divide-y divide-pm-border">
+                    {companyLicensesList.map(l => (
+                      <div key={l.id} className="p-2.5 flex justify-between items-center bg-pm-card">
+                        <div className="font-mono text-amber-400 font-bold">{l.license_key}</div>
+                        <div className="flex items-center gap-3">
+                          <span className="uppercase text-[10px] font-bold text-pm-secondary">{l.package_tier}</span>
+                          {l.store_url ? (
+                            <span className="flex items-center gap-1 font-mono text-[11px] text-emerald-400">
+                              <Globe className="w-3 h-3" /> {l.store_url}
+                            </span>
+                          ) : (
+                            <span className="italic text-pm-secondary">Unbound</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-pm-border">
+              <button type="button" onClick={() => setIsDetailsOpen(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
+                Close Inspection Window
+              </button>
+            </div>
+          </div>
+        </BaseModal>
+      )}
+
+      {/* Create Modal (with 1-Click Owner Account option) */}
       <BaseModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Add New Company Profile">
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
@@ -322,6 +515,52 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
               className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
             />
           </div>
+
+          {/* 1-Click Owner Account Provisioning Toggle */}
+          <div className="pt-2 border-t border-pm-border">
+            <label className="flex items-center gap-2 text-xs font-bold text-pm-text cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={createOwnerAccount}
+                onChange={e => setCreateOwnerAccount(e.target.checked)}
+                className="rounded border-pm-border bg-pm-input text-pm-primary focus:ring-pm-primary"
+              />
+              <span>Create Primary Owner Account Simultaneously</span>
+            </label>
+
+            {createOwnerAccount && (
+              <div className="mt-3 p-3 bg-pm-input/60 border border-pm-border rounded-xl space-y-3 animate-in fade-in duration-200">
+                <div>
+                  <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Owner Email Address</label>
+                  <input
+                    type="email"
+                    required={createOwnerAccount}
+                    value={ownerEmail}
+                    onChange={e => setOwnerEmail(e.target.value)}
+                    placeholder="owner@acme.com"
+                    className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 text-xs text-pm-text focus:border-pm-primary focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-[11px] font-semibold text-pm-secondary">Owner Password</label>
+                    <button type="button" onClick={generateOwnerPass} className="text-[10px] text-pm-primary hover:underline">
+                      Generate Strong Pass
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    required={createOwnerAccount}
+                    value={ownerPassword}
+                    onChange={e => setOwnerPassword(e.target.value)}
+                    placeholder="Set strong password..."
+                    className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-1.5 text-xs font-mono text-pm-text focus:border-pm-primary focus:outline-none"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
             <button type="button" onClick={() => setIsCreateOpen(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
               Cancel
