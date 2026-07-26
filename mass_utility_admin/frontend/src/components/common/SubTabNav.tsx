@@ -12,6 +12,7 @@ export interface SubTabNavProps<T extends string = string> {
   activeTab: T;
   onTabChange: (tabId: T) => void;
   className?: string;
+  rightContent?: React.ReactNode;
 }
 
 export function SubTabNav<T extends string = string>({
@@ -19,6 +20,7 @@ export function SubTabNav<T extends string = string>({
   activeTab,
   onTabChange,
   className = '',
+  rightContent,
 }: SubTabNavProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pillStyle, setPillStyle] = useState<{
@@ -119,6 +121,12 @@ export function SubTabNav<T extends string = string>({
           </button>
         );
       })}
+
+      {rightContent && (
+        <div className="ml-auto flex items-center gap-2 z-10 shrink-0 pl-2">
+          {rightContent}
+        </div>
+      )}
     </div>
   );
 }

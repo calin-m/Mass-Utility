@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PackageCheck, RefreshCw, Plus, Edit } from 'lucide-react';
+import { PackageCheck, RefreshCw, Plus, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
 import { Button } from './common/Button';
 import { ConfirmModal } from './common/ConfirmModal';
@@ -386,6 +386,47 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     { id: 'editor', label: 'Capability Editor', icon: Edit },
   ];
 
+  const currentTierIdx = displayTiers.findIndex(t => t.name.toLowerCase() === selectedTier.toLowerCase());
+  const prevTier = currentTierIdx > 0 ? displayTiers[currentTierIdx - 1] : null;
+  const nextTier = currentTierIdx < displayTiers.length - 1 ? displayTiers[currentTierIdx + 1] : null;
+
+  const editorSwitcherContent = (
+    <div className="flex items-center gap-1.5 bg-pm-input/40 border border-pm-border rounded-lg p-1">
+      <Button
+        variant="neutral"
+        size="sm"
+        icon={ChevronLeft}
+        disabled={!prevTier}
+        onClick={() => prevTier && handleTierChange(prevTier.name)}
+        title={prevTier ? `Previous Tier: ${prevTier.name.toUpperCase()}` : 'First Tier'}
+        className="!p-1.5 !h-7"
+      />
+      <div className="flex items-center gap-1.5 px-2">
+        <span className="text-[10px] uppercase font-bold text-pm-secondary hidden sm:inline">Editing Tier:</span>
+        <select
+          value={selectedTier.toLowerCase()}
+          onChange={(e) => handleTierChange(e.target.value)}
+          className="bg-pm-card text-pm-text border border-pm-border rounded-md px-2 py-0.5 text-xs font-bold font-mono focus:outline-none focus:border-purple-500 cursor-pointer"
+        >
+          {displayTiers.map((t) => (
+            <option key={t.name} value={t.name.toLowerCase()} className="bg-pm-card text-pm-text font-mono font-bold">
+              {t.name.toUpperCase()}
+            </option>
+          ))}
+        </select>
+      </div>
+      <Button
+        variant="neutral"
+        size="sm"
+        icon={ChevronRight}
+        disabled={!nextTier}
+        onClick={() => nextTier && handleTierChange(nextTier.name)}
+        title={nextTier ? `Next Tier: ${nextTier.name.toUpperCase()}` : 'Last Tier'}
+        className="!p-1.5 !h-7"
+      />
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Shared Page Header */}
@@ -422,6 +463,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         tabs={subTabs}
         activeTab={subTab}
         onTabChange={setSubTab}
+        rightContent={subTab === 'editor' ? editorSwitcherContent : undefined}
       />
 
       {/* Sub-Tab 1: Package Catalog & Preset Selector Grid */}
