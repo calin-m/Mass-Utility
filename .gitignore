@@ -32,6 +32,10 @@
 !/.orchestra/.conductor/docs/templates/**
 
 # Ignore build and runtime junk inside whitelisted folders
+**/node_modules/
+node_modules/
+**/.cache/
+**/dist/
 **/__pycache__/
 **/*.pyc
 **/.sandbox/*.sqlite
