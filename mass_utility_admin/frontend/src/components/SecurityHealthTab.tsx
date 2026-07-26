@@ -138,16 +138,20 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
           subtitle={t('security_subtitle')}
           icon={Settings}
           action={
-            diagnostics ? (
-              <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 border uppercase tracking-wider ${
-                hasIssues 
-                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse' 
-                  : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-              }`}>
-                {hasIssues ? <AlertTriangle className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-                <span>{hasIssues ? t('diag_vuln_detected_title') : t('diag_all_passed_title')}</span>
-              </span>
-            ) : null
+            <div className="min-w-[170px] h-7 flex items-center justify-end">
+              {diagnostics ? (
+                <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 border uppercase tracking-wider ${
+                  hasIssues 
+                    ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse' 
+                    : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                }`}>
+                  {hasIssues ? <AlertTriangle className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+                  <span>{hasIssues ? t('diag_vuln_detected_title') : t('diag_all_passed_title')}</span>
+                </span>
+              ) : (
+                <div className="w-32 h-6 rounded-full bg-pm-input/40 animate-pulse" />
+              )}
+            </div>
           }
         />
 
@@ -292,9 +296,17 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
         </div>
 
         {!diagnostics ? (
-          <div className="flex flex-col items-center justify-center py-12 text-pm-secondary bg-pm-input/50 rounded-lg border border-pm-border border-dashed">
-            <ShieldCheck className="w-12 h-12 mb-3 opacity-20" />
-            <p className="text-sm font-medium">{t('diag_audit_prompt')}</p>
+          <div className="min-h-[460px] space-y-6 animate-pulse">
+            <div className="h-16 rounded-lg bg-pm-input/40 border border-pm-border flex items-center justify-center text-pm-secondary text-xs font-mono">
+              <RefreshCw className="w-4 h-4 animate-spin mr-2 text-purple-400" />
+              Executing live system diagnostics audit...
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="h-44 rounded-lg bg-pm-input/40 border border-pm-border" />
+              <div className="h-44 rounded-lg bg-pm-input/40 border border-pm-border" />
+              <div className="h-44 rounded-lg bg-pm-input/40 border border-pm-border" />
+              <div className="h-44 rounded-lg bg-pm-input/40 border border-pm-border" />
+            </div>
           </div>
         ) : (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">

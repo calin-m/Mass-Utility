@@ -5,6 +5,7 @@ import { BaseModal } from '../common/BaseModal';
 import { ConfirmModal } from '../common/ConfirmModal';
 import { TableCellIdentity } from '../common/TableCellIdentity';
 import { TableCellActions } from '../common/TableCellActions';
+import { TableCellCompany } from '../common/TableCellCompany';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { StatSummaryGrid } from '../common/StatSummaryGrid';
@@ -20,13 +21,15 @@ import { getSortedTierOptions } from '../../utils/tierUtils';
 interface ClientListViewProps {
   users: UserAccount[];
   licenses: License[];
+  companies?: any[];
   tiers?: any[];
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   onSelectClient: (user: UserAccount, tab?: 'profile' | 'licenses' | 'governance') => void;
+  onInspectCompany?: (company: any) => void;
 }
 
-export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, tiers = [], onRefresh, showAlert, onSelectClient }) => {
+export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, companies = [], tiers = [], onRefresh, showAlert, onSelectClient, onInspectCompany }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
@@ -475,15 +478,17 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         />
                       </td>
 
-                      <td className="p-3 font-semibold text-xs text-pm-text">
-                        {user.company_name ? (
-                          <div className="flex items-center gap-1.5">
-                            <Building className="w-3.5 h-3.5 text-purple-400" />
-                            <span>{user.company_name}</span>
-                          </div>
-                        ) : (
-                          <span className="italic text-pm-secondary/70">{t('lbl_individual_client')}</span>
-                        )}
+                      <td className="p-3">
+                        <TableCellCompany
+                          companyName={user.company_name}
+                          onClick={onInspectCompany && user.company_name ? () => {
+                            const assignedComp = user.company_id 
+                              ? companies.find(c => c.id === user.company_id) 
+                              : companies.find(c => c.company_name?.toLowerCase() === user.company_name?.toLowerCase());
+                            onInspectCompany(assignedComp || { id: user.company_id, company_name: user.company_name });
+                          } : undefined}
+                          fallbackText={t('lbl_individual_client')}
+                        />
                       </td>
 
                       <td className="p-3 font-mono font-semibold text-xs text-pm-text">

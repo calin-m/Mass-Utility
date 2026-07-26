@@ -58,10 +58,12 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, compani
     <ClientListView
       users={users}
       licenses={licenses}
+      companies={companies}
       tiers={tiers}
       onRefresh={onRefresh}
       showAlert={showAlert}
       onSelectClient={handleSelectClient}
+      onInspectCompany={onInspectCompany}
     />
   );
 };

@@ -4,6 +4,7 @@ import { BaseModal } from './common/BaseModal';
 import { ConfirmModal } from './common/ConfirmModal';
 import { TableCellIdentity } from './common/TableCellIdentity';
 import { TableCellActions } from './common/TableCellActions';
+import { TableCellCompany } from './common/TableCellCompany';
 import { StatCard } from './common/StatCard';
 import { StatSummaryGrid } from './common/StatSummaryGrid';
 import { DirectoryCardTable } from './common/DirectoryCardTable';
@@ -502,25 +503,12 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             <span className="text-pm-secondary italic">{t('lbl_unassigned') || 'Unassigned'}</span>
                           )}
                         </td>
-                        <td className="p-3 font-bold">
-                          {companyName ? (
-                            <div className="flex items-center gap-1.5 text-purple-400">
-                              <Building2 className="w-3.5 h-3.5 shrink-0" />
-                              {onInspectCompany && assignedComp ? (
-                                <button
-                                  type="button"
-                                  onClick={() => onInspectCompany(assignedComp)}
-                                  className="hover:underline font-bold text-purple-400 text-left truncate max-w-[140px]"
-                                >
-                                  {companyName}
-                                </button>
-                              ) : (
-                                <span className="truncate max-w-[140px]">{companyName}</span>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-pm-secondary/70 italic text-[11px] font-mono">{t('lbl_standalone') || 'Standalone'}</span>
-                          )}
+                        <td className="p-3">
+                          <TableCellCompany
+                            companyName={companyName}
+                            onClick={onInspectCompany && assignedComp ? () => onInspectCompany(assignedComp) : undefined}
+                            fallbackText={t('lbl_standalone') || 'Standalone'}
+                          />
                         </td>
                         <td className="p-3">
                           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/30">
