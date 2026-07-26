@@ -55,7 +55,9 @@ export const CreateTierModal: React.FC<CreateTierModalProps> = ({
             <option value="basic">Basic Preset (Essential)</option>
             <option value="pro">Pro Preset (Growth & Automation)</option>
             <option value="enterprise">Enterprise Preset (Full Autopilot)</option>
+            <option value="developer">Developer Preset (High-Capacity Multi-Store & Full AST)</option>
           </select>
+
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">

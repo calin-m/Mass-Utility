@@ -150,12 +150,36 @@ class AdminSettingsManager
                         'max_daily_sweeper_runs' => 24,
                         'backup_destinations' => ['local', 'gdrive'],
                     ]),
+                    'developer' => array_merge($baseCaps, [
+                        'PM_ENABLE_DB_TOOLS' => true,
+                        'PM_ENABLE_FILE_TOOLS' => true,
+                        'query_visual_filter' => true,
+                        'query_visual_compile' => true,
+                        'query_visual_mutate' => true,
+                        'db_tools_export' => true,
+                        'db_tools_backup' => true,
+                        'db_diff_inspector' => true,
+                        'db_tools_restore' => true,
+                        'file_tools_browse' => true,
+                        'file_tools_backup' => true,
+                        'file_diff_inspector' => true,
+                        'backup_automation' => true,
+                        'governor_telemetry' => true,
+                        'governor_autopilot' => true,
+                        'sweeper_execution' => true,
+                        'rollback_history_limit' => 250,
+                        'max_bound_domains' => 50,
+                        'max_cloud_backups' => 100,
+                        'max_daily_sweeper_runs' => 48,
+                        'backup_destinations' => ['local', 'gdrive'],
+                    ]),
                 ];
 
                 $insStmt = $pdo->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
                 foreach ($defaultTiers as $tName => $tCaps) {
                     $insStmt->execute([$tName, json_encode($tCaps)]);
                 }
+
             }
             $pdo->exec('CREATE TABLE IF NOT EXISTS pm_licenses ( /* nosec */
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

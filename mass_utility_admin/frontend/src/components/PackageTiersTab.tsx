@@ -120,6 +120,32 @@ const getDefaultCapsForTier = (tierName: string): PackageTierCapabilities => {
     };
   }
 
+  if (name === 'developer' || name === 'agency') {
+    return {
+      ...base,
+      PM_ENABLE_DB_TOOLS: true,
+      PM_ENABLE_FILE_TOOLS: true,
+      query_visual_filter: true,
+      query_visual_compile: true,
+      query_visual_mutate: true,
+      db_tools_export: true,
+      db_tools_backup: true,
+      db_diff_inspector: true,
+      db_tools_restore: true,
+      file_tools_browse: true,
+      file_tools_backup: true,
+      file_diff_inspector: true,
+      backup_automation: true,
+      governor_autopilot: true,
+      sweeper_execution: true,
+      rollback_history_limit: 250,
+      max_bound_domains: 50,
+      max_cloud_backups: 100,
+      max_daily_sweeper_runs: 48,
+      backup_destinations: ['local', 'gdrive'],
+    };
+  }
+
   // Enterprise Tier
   return {
     ...base,
@@ -144,6 +170,18 @@ const getDefaultCapsForTier = (tierName: string): PackageTierCapabilities => {
     max_daily_sweeper_runs: 24,
     backup_destinations: ['local', 'gdrive'],
   };
+};
+
+const TIER_RANK: Record<string, number> = {
+  basic: 10,
+  essential: 10,
+  pro: 20,
+  growth: 20,
+  enterprise: 30,
+  autopilot: 30,
+  developer: 40,
+  agency: 50,
+  vip: 60,
 };
 
 export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefresh, showAlert }) => {
@@ -172,6 +210,13 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         active_licenses: 0
       });
     }
+  });
+
+  // Sort deterministically from lowest to highest capability rank
+  displayTiers.sort((a, b) => {
+    const rankA = TIER_RANK[a.name.toLowerCase()] ?? 99;
+    const rankB = TIER_RANK[b.name.toLowerCase()] ?? 99;
+    return rankA - rankB;
   });
 
   const activeTierObj = displayTiers.find(t => t.name.toLowerCase() === selectedTier.toLowerCase());
