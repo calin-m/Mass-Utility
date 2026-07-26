@@ -79,7 +79,7 @@ export function SubTabNav<T extends string = string>({
     >
       {/* Sliding GPU-Accelerated Purple Active Pill */}
       <div
-        className="absolute bg-purple-500 rounded-lg shadow-md shadow-purple-500/25 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none z-0"
+        className="absolute top-0 left-0 bg-purple-500 rounded-lg shadow-md shadow-purple-500/25 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none z-0"
         style={{
           transform: `translate3d(${pillStyle.left}px, ${pillStyle.top}px, 0)`,
           width: `${pillStyle.width}px`,
