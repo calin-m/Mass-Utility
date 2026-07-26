@@ -6,6 +6,11 @@ export interface ToastAlert {
   type: 'success' | 'error';
 }
 
+const getApiUrl = (action: string) => {
+  const path = window.location.pathname;
+  return `${path}?action=${action}`;
+};
+
 export const useAdminData = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAdmin, setHasAdmin] = useState(true);
@@ -25,10 +30,14 @@ export const useAdminData = () => {
 
   const checkAuth = useCallback(async () => {
     try {
-      const res = await fetch('index.php?action=check_auth');
+      const res = await fetch(getApiUrl('api_status'));
       const data = await res.json();
-      setHasAdmin(data.has_admin);
-      setAuthenticated(data.authenticated);
+      if (data.success) {
+        setHasAdmin(data.has_admin);
+        setAuthenticated(data.authenticated);
+      } else {
+        setAuthenticated(false);
+      }
     } catch {
       setAuthenticated(false);
     } finally {
@@ -39,7 +48,7 @@ export const useAdminData = () => {
   const fetchAdminData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('index.php?action=api_data');
+      const res = await fetch(getApiUrl('api_list'));
       const data = await res.json();
       if (data.success) {
         setLicenses(data.licenses || []);
@@ -79,5 +88,6 @@ export const useAdminData = () => {
     showAlert,
     checkAuth,
     fetchAdminData,
+    getApiUrl,
   };
 };

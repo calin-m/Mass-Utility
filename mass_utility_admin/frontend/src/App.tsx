@@ -31,6 +31,7 @@ export const App: React.FC = () => {
     showAlert,
     fetchAdminData,
     checkAuth,
+    getApiUrl,
   } = useAdminData();
 
   const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit'>('companies');
@@ -66,10 +67,11 @@ export const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('index.php?action=api_logout');
+      await fetch(getApiUrl('api_logout'));
       setAuthenticated(false);
     } catch (e) {}
   };
+
 
 
   if (!authChecked) {
