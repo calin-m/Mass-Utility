@@ -349,24 +349,22 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           <Button
             variant="neutral"
             size="sm"
+            icon={RefreshCw}
+            loading={isRefreshing}
             onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-1.5 text-xs"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             Reload Matrix
           </Button>
           <Button
             variant="primary"
             size="sm"
+            icon={Plus}
             onClick={() => {
               setNewTierName('');
               setCloneFromTier('basic');
               setIsCreateModalOpen(true);
             }}
-            className="flex items-center gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
           >
-            <Plus className="w-4 h-4" />
             Add Custom Tier
           </Button>
         </div>
@@ -454,44 +452,47 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                     type="button"
                     variant="ghost"
                     size="sm"
+                    icon={Copy}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleCloneClick(tier);
                     }}
-                    className="p-1 text-pm-secondary hover:text-pm-primary h-7 w-7"
+                    className="p-1 h-7 w-7"
                     title="Clone Tier Settings"
                   >
-                    <Copy className="w-3.5 h-3.5" />
+                    {''}
                   </Button>
 
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
+                    icon={Edit3}
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingName(tier.name);
                       setSelectedTier(tier.name);
                       setIsRenaming(true);
                     }}
-                    className="p-1 text-pm-secondary hover:text-pm-primary h-7 w-7"
+                    className="p-1 h-7 w-7"
                     title="Rename Tier"
                   >
-                    <Edit3 className="w-3.5 h-3.5" />
+                    {''}
                   </Button>
 
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="danger"
                     size="sm"
+                    icon={Trash2}
                     onClick={(e) => {
                       e.stopPropagation();
                       setTierToDelete(tier);
                     }}
-                    className="p-1 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 h-7 w-7"
+                    className="p-1 h-7 w-7"
                     title="Delete Tier"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    {''}
                   </Button>
                 </div>
               </div>
@@ -531,14 +532,15 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                     type="button"
                     variant="ghost"
                     size="sm"
+                    icon={Edit3}
                     onClick={() => {
                       setEditingName(selectedTier);
                       setIsRenaming(true);
                     }}
-                    className="p-1 text-pm-secondary hover:text-pm-primary h-7 w-7"
+                    className="p-1 h-7 w-7"
                     title="Rename Tier"
                   >
-                    <Edit3 className="w-4 h-4" />
+                    {''}
                   </Button>
                 </div>
               )}
@@ -551,11 +553,11 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           <Button
             type="submit"
             variant="primary"
-            disabled={loading}
-            className="flex items-center gap-2 text-xs px-5 py-2.5 shadow-md"
+            size="md"
+            icon={Save}
+            loading={loading}
           >
-            <Save className="w-4 h-4" />
-            {loading ? 'Saving Matrix...' : `Save ${selectedTier.toUpperCase()} Capabilities`}
+            Save {selectedTier.toUpperCase()} Capabilities
           </Button>
         </div>
 
@@ -884,11 +886,11 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           <Button
             type="submit"
             variant="primary"
-            disabled={loading}
-            className="flex items-center gap-2 text-xs px-6 py-2.5 shadow-md"
+            size="md"
+            icon={Save}
+            loading={loading}
           >
-            <Save className="w-4 h-4" />
-            {loading ? 'Saving Matrix...' : `Save ${selectedTier.toUpperCase()} Capabilities`}
+            Save {selectedTier.toUpperCase()} Capabilities
           </Button>
         </div>
       </form>
@@ -937,11 +939,11 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             <Button
               variant="primary"
               size="sm"
+              icon={Plus}
               onClick={handleCreateTier}
-              disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              loading={loading}
             >
-              {loading ? 'Creating...' : 'Create Tier'}
+              Create Tier
             </Button>
           </div>
         </div>
