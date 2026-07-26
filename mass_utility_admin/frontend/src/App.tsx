@@ -251,6 +251,7 @@ export const App: React.FC = () => {
             companies={companies}
             users={users}
             licenses={licenses}
+            tiers={tiers}
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             onInspectClient={handleInspectClient}
@@ -258,6 +259,7 @@ export const App: React.FC = () => {
             highlightedLicenseKey={highlightedLicenseKey}
           />
         )}
+
 
         {activeTab === 'clients' && (
           <ClientsTab

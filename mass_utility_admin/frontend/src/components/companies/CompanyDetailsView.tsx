@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+
 import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle } from 'lucide-react';
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
@@ -27,16 +28,27 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
   const [poolTier, setPoolTier] = useState('pro');
 
-  const tierOptions = (tiers && tiers.length > 0)
-    ? tiers.map((t: any) => ({
-        value: (t.name || '').toLowerCase(),
-        label: `${(t.name || '').toUpperCase()} TIER`
-      }))
-    : [
-        { value: 'basic', label: 'BASIC TIER' },
-        { value: 'pro', label: 'PRO TIER' },
-        { value: 'enterprise', label: 'ENTERPRISE TIER' },
-      ];
+  const TIER_RANK: Record<string, number> = {
+    basic: 10, essential: 10, pro: 20, growth: 20, enterprise: 30, autopilot: 30, developer: 40, agency: 50, vip: 60
+  };
+
+  const tierOptions = useMemo(() => {
+    const rawTiers = (tiers && tiers.length > 0)
+      ? tiers
+      : [{ name: 'basic' }, { name: 'pro' }, { name: 'enterprise' }];
+
+    const sorted = [...rawTiers].sort((a: any, b: any) => {
+      const rA = TIER_RANK[(a.name || '').toLowerCase()] ?? 99;
+      const rB = TIER_RANK[(b.name || '').toLowerCase()] ?? 99;
+      return rA - rB;
+    });
+
+    return sorted.map((t: any) => ({
+      value: (t.name || '').toLowerCase(),
+      label: `${(t.name || '').toUpperCase()} TIER`
+    }));
+  }, [tiers]);
+
 
 
   const toggleKeyVisibility = (id: number) => {
@@ -709,11 +721,12 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                     onChange={e => setPoolTier(e.target.value)}
                     className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-1.5 text-xs font-bold text-pm-text focus:outline-none focus:border-purple-500"
                   >
-                    {tierOptions.map(opt => (
+                    {tierOptions.map((opt: any) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
                       </option>
                     ))}
+
                   </select>
 
                 </div>
