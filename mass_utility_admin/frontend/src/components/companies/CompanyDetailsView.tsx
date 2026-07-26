@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Link as LinkIcon, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle, LayoutDashboard } from 'lucide-react';
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
 import { ConfirmModal } from '../common/ConfirmModal';
@@ -7,7 +7,7 @@ import { Button } from '../common/Button';
 import { FormSelect } from '../common/FormSelect';
 import { FormInput } from '../common/FormInput';
 import { LicenseRowCard } from '../common/LicenseRowCard';
-import { SubTabItem } from '../common/SubTabNav';
+import { SubTabNav, SubTabItem } from '../common/SubTabNav';
 import { StatusBadge } from '../common/StatusBadge';
 import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { EditLicenseModal, EditLicenseData } from '../common/EditLicenseModal';
@@ -322,6 +322,11 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
     { id: 'settings', label: 'Settings & Quotas', icon: Edit },
   ];
 
+  const onboardTabs: SubTabItem<'assign' | 'create'>[] = [
+    { id: 'assign', label: 'Assign Registered Client', icon: LinkIcon, badge: unassignedUsers.length },
+    { id: 'create', label: 'Create Brand-New Account', icon: UserPlus },
+  ];
+
   return (
     <DetailSubViewLayout
       backLabel="Back to Companies Directory"
@@ -626,38 +631,12 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
               <UserPlus className="w-4 h-4 text-purple-400" /> Onboard Team Member to Company
             </h3>
 
-            {/* Standardized Animated Segmented Pill Mode Switcher */}
-            <div className="relative flex items-center bg-pm-input/50 border border-pm-border rounded-xl p-1 h-9">
-              {/* Sliding Background Pill */}
-              <div
-                className={`absolute top-1 bottom-1 rounded-lg bg-purple-500 shadow-sm transition-all duration-300 ease-out ${
-                  onboardMode === 'assign' ? 'left-1 w-[calc(50%-4px)]' : 'left-[calc(50%+2px)] w-[calc(50%-4px)]'
-                }`}
-              />
-
-              <button
-                type="button"
-                onClick={() => setOnboardMode('assign')}
-                className={`relative z-10 flex-1 h-7 rounded-lg text-xs font-extrabold transition-colors flex items-center justify-center gap-1.5 ${
-                  onboardMode === 'assign' ? 'text-white' : 'text-pm-secondary hover:text-pm-text'
-                }`}
-              >
-                <span>🔗 Assign Registered Client</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${onboardMode === 'assign' ? 'bg-white/20 text-white' : 'bg-pm-card text-pm-secondary'}`}>
-                  {unassignedUsers.length}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setOnboardMode('create')}
-                className={`relative z-10 flex-1 h-7 rounded-lg text-xs font-extrabold transition-colors flex items-center justify-center gap-1.5 ${
-                  onboardMode === 'create' ? 'text-white' : 'text-pm-secondary hover:text-pm-text'
-                }`}
-              >
-                <span>✨ Create Brand-New Account</span>
-              </button>
-            </div>
+            {/* Standardized SubTabNav Primitive for Onboard Mode */}
+            <SubTabNav
+              tabs={onboardTabs}
+              activeTab={onboardMode}
+              onTabChange={setOnboardMode}
+            />
 
             {onboardMode === 'assign' ? (
               <form onSubmit={handleAssignExistingUser} className="p-4 bg-pm-input/30 border border-pm-border rounded-xl space-y-3">
