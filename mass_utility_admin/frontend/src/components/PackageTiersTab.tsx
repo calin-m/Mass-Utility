@@ -476,7 +476,6 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         tabs={subTabs}
         activeTab={subTab}
         onTabChange={setSubTab}
-        rightContent={subTab === 'editor' ? editorSwitcherContent : undefined}
       />
 
       {/* Sub-Tab 1: Package Catalog & Compact Feature Matrix */}
@@ -613,6 +612,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             isRenaming={isRenaming}
             editingName={editingName}
             loading={loading}
+            switcherControl={editorSwitcherContent}
             onSetEditingName={setEditingName}
             onSetIsRenaming={setIsRenaming}
             onToggle={handleToggle}

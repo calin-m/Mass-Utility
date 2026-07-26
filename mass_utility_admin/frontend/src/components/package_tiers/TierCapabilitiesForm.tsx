@@ -11,6 +11,7 @@ export interface TierCapabilitiesFormProps {
   isRenaming: boolean;
   editingName: string;
   loading: boolean;
+  switcherControl?: React.ReactNode;
   onSetEditingName: (name: string) => void;
   onSetIsRenaming: (val: boolean) => void;
   onToggle: (key: keyof PackageTierCapabilities) => void;
@@ -25,6 +26,7 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
   isRenaming,
   editingName,
   loading,
+  switcherControl,
   onSetEditingName,
   onSetIsRenaming,
   onToggle,
@@ -55,9 +57,10 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-pm-text uppercase">
-                  Configuring Tier: <span className="text-pm-primary">{selectedTier}</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-pm-text uppercase flex items-center gap-1.5">
+                  <span>Configuring Tier:</span>
+                  <span className="text-pm-primary font-extrabold inline-block">{selectedTier}</span>
                 </h3>
                 <Button
                   type="button"
@@ -81,15 +84,18 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
           </div>
         </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="md"
-          icon={Save}
-          loading={loading}
-        >
-          Save
-        </Button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {switcherControl}
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            icon={Save}
+            loading={loading}
+          >
+            Save Capabilities
+          </Button>
+        </div>
       </div>
 
       {/* Section 1: AST Query Engine */}
