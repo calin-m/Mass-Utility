@@ -239,10 +239,15 @@ class LicenseRepository
 
     public function getAllTiers(): array
     {
-        $stmt = $this->db->query("SELECT * FROM pm_package_tiers ORDER BY name ASC");
+        $sql = "SELECT t.*, 
+                (SELECT COUNT(*) FROM pm_licenses l WHERE LOWER(l.package_tier) = LOWER(t.name)) as active_licenses 
+                FROM pm_package_tiers t 
+                ORDER BY t.name ASC";
+        $stmt = $this->db->query($sql);
         $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (is_array($res)) {
             foreach ($res as &$row) {
+                $row['active_licenses'] = (int)($row['active_licenses'] ?? 0);
                 if (isset($row['capabilities']) && is_string($row['capabilities'])) {
                     $decoded = json_decode($row['capabilities'], true);
                     $row['capabilities'] = is_array($decoded) ? $decoded : [];
@@ -255,6 +260,15 @@ class LicenseRepository
     public function saveTier(string $name, array $capabilities, ?int $id = null): bool
     {
         if ($id && $id > 0) {
+            // Update tier name on bound licenses if tier name changes
+            $stmtOld = $this->db->prepare("SELECT name FROM pm_package_tiers WHERE id = ?");
+            $stmtOld->execute([$id]);
+            $oldName = trim((string)$stmtOld->fetchColumn());
+            if (!empty($oldName) && strtolower($oldName) !== strtolower($name)) {
+                $stmtMigrate = $this->db->prepare("UPDATE pm_licenses SET package_tier = ? WHERE LOWER(package_tier) = LOWER(?)");
+                $stmtMigrate->execute([$name, $oldName]);
+            }
+
             $stmt = $this->db->prepare("UPDATE pm_package_tiers SET name = ?, capabilities = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
             return $stmt->execute([$name, json_encode($capabilities), $id]);
         }
@@ -266,12 +280,14 @@ class LicenseRepository
 
     public function deleteTier(int $id): bool
     {
-        // Protect system default tiers from deletion
         $stmtCheck = $this->db->prepare("SELECT name FROM pm_package_tiers WHERE id = ?");
         $stmtCheck->execute([$id]);
-        $tierName = strtolower(trim((string)$stmtCheck->fetchColumn()));
-        if (in_array($tierName, ['basic', 'pro', 'enterprise'])) {
-            throw new \InvalidArgumentException("System default tier '{$tierName}' cannot be deleted.");
+        $tierName = trim((string)$stmtCheck->fetchColumn());
+
+        if (!empty($tierName)) {
+            // Auto-migrate any active assigned licenses to basic fallback before deletion
+            $stmtMigrate = $this->db->prepare("UPDATE pm_licenses SET package_tier = 'basic' WHERE LOWER(package_tier) = LOWER(?)");
+            $stmtMigrate->execute([$tierName]);
         }
 
         $stmt = $this->db->prepare("DELETE FROM pm_package_tiers WHERE id = ?");

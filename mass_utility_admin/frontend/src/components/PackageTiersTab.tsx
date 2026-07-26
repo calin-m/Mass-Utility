@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PackageCheck, Save, RefreshCw, CheckCircle2, ShieldCheck, Zap, Crown, HardDrive, Cloud, Sliders, Database, Layers, FileCode, Clock, ShieldAlert, Key, Plus, Trash2, Edit3, Sparkles } from 'lucide-react';
+import { PackageCheck, Save, RefreshCw, CheckCircle2, ShieldCheck, Zap, Crown, HardDrive, Cloud, Sliders, Database, Layers, FileCode, Clock, ShieldAlert, Key, Plus, Trash2, Edit3, Sparkles, Copy, Tag } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 import { Button } from './common/Button';
 import { FormInput } from './common/FormInput';
@@ -49,6 +49,7 @@ export interface PackageTier {
   id?: number;
   name: string;
   capabilities: PackageTierCapabilities;
+  active_licenses?: number;
 }
 
 interface PackageTiersTabProps {
@@ -168,7 +169,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     if (!displayTiers.some(t => t.name.toLowerCase() === defName)) {
       displayTiers.push({
         name: defName,
-        capabilities: getDefaultCapsForTier(defName)
+        capabilities: getDefaultCapsForTier(defName),
+        active_licenses: 0
       });
     }
   });
@@ -277,14 +279,14 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
       const data = await res.json();
       if (data.success) {
-        showAlert(`🎉 Custom package tier '${name}' created successfully!`, 'success');
+        showAlert(`🎉 Package tier '${name}' created successfully!`, 'success');
         setIsCreateModalOpen(false);
         setNewTierName('');
         setSelectedTier(name);
         setCapabilities(clonedCaps);
         onRefresh();
       } else {
-        showAlert(data.error || 'Failed to create custom package tier', 'error');
+        showAlert(data.error || 'Failed to create package tier', 'error');
       }
     } catch (err: any) {
       showAlert('Failed to create tier: ' + err.message, 'error');
@@ -293,13 +295,21 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     }
   };
 
+  const handleCloneClick = (tier: PackageTier) => {
+    setNewTierName(`${tier.name}_Copy`);
+    setCloneFromTier(tier.name.toLowerCase());
+    setIsCreateModalOpen(true);
+  };
+
   const handleDeleteTier = async () => {
-    if (!tierToDelete || !tierToDelete.id) return;
+    if (!tierToDelete) return;
 
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('id', String(tierToDelete.id));
+      if (tierToDelete.id) {
+        formData.append('id', String(tierToDelete.id));
+      }
 
       const res = await fetch('index.php?action=api_delete_tier', {
         method: 'POST',
@@ -308,7 +318,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
       const data = await res.json();
       if (data.success) {
-        showAlert(`🗑️ Package tier '${tierToDelete.name}' deleted successfully!`, 'success');
+        showAlert(`🗑️ Package tier '${tierToDelete.name}' deleted! Active licenses migrated to Basic.`, 'success');
         setTierToDelete(null);
         setSelectedTier('basic');
         onRefresh();
@@ -349,7 +359,11 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           <Button
             variant="primary"
             size="sm"
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => {
+              setNewTierName('');
+              setCloneFromTier('basic');
+              setIsCreateModalOpen(true);
+            }}
             className="flex items-center gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
           >
             <Plus className="w-4 h-4" />
@@ -363,10 +377,9 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         {displayTiers.map((tier) => {
           const lowerName = tier.name.toLowerCase();
           const isSelected = selectedTier.toLowerCase() === lowerName;
-          const isSystemDefault = defaultTierNames.includes(lowerName);
 
           let Icon = Sparkles;
-          let badgeText = 'Custom Tier';
+          let badgeText = 'Tier';
           let badgeColor = 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
           let iconColor = 'text-blue-500';
 
@@ -382,10 +395,12 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             iconColor = 'text-amber-500';
           } else if (lowerName === 'enterprise') {
             Icon = Crown;
-            badgeText = 'Full Autopilot';
+            badgeText = 'Autopilot';
             badgeColor = 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400';
             iconColor = 'text-indigo-500';
           }
+
+          const activeCount = tier.active_licenses || 0;
 
           return (
             <div
@@ -410,33 +425,75 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                   </span>
                 </div>
 
-                <div className="text-[11px] text-pm-secondary space-y-1 my-3">
+                <div className="text-[11px] text-pm-secondary space-y-1.5 my-3">
                   <div className="flex items-center justify-between">
-                    <span>Rollback Limit:</span>
+                    <span>Active Keys:</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded text-[10px]">
+                      {activeCount} {activeCount === 1 ? 'Key' : 'Keys'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Rollbacks:</span>
                     <span className="font-bold text-pm-text">{tier.capabilities?.rollback_history_limit ?? 5}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>Domain Limit:</span>
+                    <span>Max Domains:</span>
                     <span className="font-bold text-pm-text">{tier.capabilities?.max_bound_domains ?? 1}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-pm-border/50 text-[10px] font-bold text-pm-primary uppercase flex items-center justify-between">
-                <span>{isSelected ? '● Active' : 'Select'}</span>
-                {!isSystemDefault && tier.id && (
-                  <button
+              {/* Action Bar with Standardized Buttons */}
+              <div className="pt-2 border-t border-pm-border/50 flex items-center justify-between gap-1">
+                <span className="text-[10px] font-bold text-pm-primary uppercase">
+                  {isSelected ? '● Active' : 'Select'}
+                </span>
+                
+                <div className="flex items-center gap-1">
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCloneClick(tier);
+                    }}
+                    className="p-1 text-pm-secondary hover:text-pm-primary h-7 w-7"
+                    title="Clone Tier Settings"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingName(tier.name);
+                      setSelectedTier(tier.name);
+                      setIsRenaming(true);
+                    }}
+                    className="p-1 text-pm-secondary hover:text-pm-primary h-7 w-7"
+                    title="Rename Tier"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       setTierToDelete(tier);
                     }}
-                    className="p-1 text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded transition-colors"
-                    title="Delete Custom Tier"
+                    className="p-1 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 h-7 w-7"
+                    title="Delete Tier"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                  </Button>
+                </div>
               </div>
             </div>
           );
@@ -470,19 +527,19 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                   <h3 className="text-base font-bold text-pm-text uppercase">
                     Configuring Tier: <span className="text-pm-primary">{selectedTier}</span>
                   </h3>
-                  {!defaultTierNames.includes(selectedTier.toLowerCase()) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingName(selectedTier);
-                        setIsRenaming(true);
-                      }}
-                      className="p-1 text-pm-secondary hover:text-pm-primary rounded transition-colors"
-                      title="Rename Tier"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingName(selectedTier);
+                      setIsRenaming(true);
+                    }}
+                    className="p-1 text-pm-secondary hover:text-pm-primary h-7 w-7"
+                    title="Rename Tier"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </Button>
                 </div>
               )}
               <p className="text-xs text-pm-secondary mt-0.5">
@@ -840,11 +897,11 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
       <BaseModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Create Custom Package Tier"
+        title="Create Package Tier"
       >
         <div className="space-y-4">
           <p className="text-xs text-pm-secondary">
-            Create a new package tier preset with custom capabilities and quotas.
+            Create or clone a package tier preset with custom capabilities and quotas.
           </p>
 
           <FormInput
@@ -896,7 +953,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         onClose={() => setTierToDelete(null)}
         onConfirm={handleDeleteTier}
         title="Delete Package Tier"
-        message={`Are you sure you want to delete the custom package tier '${tierToDelete?.name}'? Software licenses bound to this tier will fallback to Basic.`}
+        message={`Are you sure you want to delete the package tier '${tierToDelete?.name}'? Active client licenses currently assigned to this tier will automatically migrate to Basic.`}
         confirmText="Delete Tier"
         variant="danger"
       />
