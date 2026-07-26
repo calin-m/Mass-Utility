@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ChevronLeft,
   Key,
@@ -23,10 +23,12 @@ import {
 } from 'lucide-react';
 import { License, UserAccount } from '../../types/adminApi';
 import { Button } from '../common/Button';
+import { FormSelect } from '../common/FormSelect';
 import { StatusBadge } from '../common/StatusBadge';
 import { SubTabItem } from '../common/SubTabNav';
 import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { maskLicenseKey, copyLicenseKeyToClipboard } from '../../utils/licenseUtils';
+import { getSortedTierOptions } from '../../utils/tierUtils';
 
 export interface LicenseDetailsViewProps {
   license: License;
@@ -41,7 +43,7 @@ export interface LicenseDetailsViewProps {
   onEditLicense?: (license: License) => void;
 }
 
-export type LicenseDetailSubTab = 'overview' | 'owner' | 'domains' | 'governance';
+export type LicenseDetailSubTab = 'overview' | 'owner' | 'domains' | 'governance' | 'edit';
 
 export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
   license,
@@ -128,11 +130,59 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
     }
   };
 
+  // Inline Full Edit State
+  const [editTier, setEditTier] = useState<string>(license.package_tier || 'basic');
+  const [editStatus, setEditStatus] = useState<string>(license.status || 'active');
+  const [editStoreUrl, setEditStoreUrl] = useState<string>(license.store_url || '');
+  const [editExpiresAt, setEditExpiresAt] = useState<string>(
+    license.expires_at ? license.expires_at.split(' ')[0] : ''
+  );
+  const [editCompanyId, setEditCompanyId] = useState<string>(
+    license.company_id ? String(license.company_id) : (assignedComp ? String(assignedComp.id) : '')
+  );
+  const [editUserId, setEditUserId] = useState<string>(
+    license.user_id ? String(license.user_id) : (assignedUser ? String(assignedUser.id) : '')
+  );
+  const [savingFullEdit, setSavingFullEdit] = useState<boolean>(false);
+
+  const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
+  const selectedTierObj = useMemo(() => tiers.find(t => (t.name || '').toLowerCase() === editTier.toLowerCase()), [tiers, editTier]);
+
+  const handleSaveFullEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingFullEdit(true);
+    try {
+      const formData = new FormData();
+      formData.append('id', String(license.id));
+      formData.append('package_tier', editTier);
+      formData.append('status', editStatus);
+      formData.append('store_url', editStoreUrl.trim());
+      formData.append('expires_at', editExpiresAt || '');
+      formData.append('company_id', editCompanyId || '');
+      formData.append('user_id', editUserId || '');
+
+      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        showAlert('✨ License key details updated successfully!', 'success');
+        onRefresh();
+        setActiveTab('overview');
+      } else {
+        showAlert(data.error || 'Failed to update license key details', 'error');
+      }
+    } catch (err: any) {
+      showAlert('Error updating license details: ' + err.message, 'error');
+    } finally {
+      setSavingFullEdit(false);
+    }
+  };
+
   const subTabs: SubTabItem<LicenseDetailSubTab>[] = [
     { id: 'overview', label: 'Overview & Expiry', icon: Package },
     { id: 'owner', label: 'Owner & Affiliation', icon: User },
     { id: 'domains', label: 'Allowed Store Domains', icon: Globe },
     { id: 'governance', label: 'Governance & Activity', icon: ShieldCheck },
+    { id: 'edit', label: 'Edit Details', icon: Edit },
   ];
 
   return (
@@ -168,11 +218,9 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
             {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedKey ? 'Copied' : 'Copy'}</span>
           </button>
-          {onEditLicense && (
-            <Button variant="neutral" size="sm" icon={Edit} onClick={() => onEditLicense(license)}>
-              Edit Key Details
-            </Button>
-          )}
+          <Button variant="neutral" size="sm" icon={Edit} onClick={() => setActiveTab('edit')}>
+            Edit Key Details
+          </Button>
         </div>
       }
       tabs={subTabs}
@@ -379,6 +427,137 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Sub-Tab 5: Edit Details */}
+      {activeTab === 'edit' && (
+        <form onSubmit={handleSaveFullEdit} className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b border-pm-border pb-4">
+            <div>
+              <h3 className="text-sm font-bold text-pm-text flex items-center gap-2">
+                <Edit className="w-4 h-4 text-purple-400" />
+                Edit License Key Configuration
+              </h3>
+              <p className="text-xs text-pm-secondary mt-0.5">
+                Modify software package tier, license status, company affiliation, client assignment, whitelisted store domain URLs, and expiration date.
+              </p>
+            </div>
+            <StatusBadge status={editStatus} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Column (5 Cols): Tier Selector & Feature Matrix Card */}
+            <div className="lg:col-span-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-pm-secondary mb-1.5">Package Tier</label>
+                <FormSelect
+                  value={editTier}
+                  onChange={(e) => setEditTier(e.target.value)}
+                  options={tierOptions.length > 0 ? tierOptions : [
+                    { value: 'basic', label: 'Basic' },
+                    { value: 'pro', label: 'Pro' },
+                    { value: 'enterprise', label: 'Enterprise' },
+                    { value: 'ultimate', label: 'Ultimate' },
+                  ]}
+                />
+              </div>
+
+              {/* Live Tier Matrix Preview Card */}
+              {selectedTierObj && (
+                <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase text-purple-400">{selectedTierObj.name} Tier Matrix</span>
+                    <span className="text-xs font-mono font-bold text-pm-text">${selectedTierObj.price || 0}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px] text-pm-secondary font-mono">
+                    <div className="bg-pm-card/60 p-2 rounded-lg border border-pm-border">
+                      <span className="block text-[10px] text-pm-secondary">Database Limit</span>
+                      <strong className="text-pm-text">{selectedTierObj.max_databases || 'Unlimited'}</strong>
+                    </div>
+                    <div className="bg-pm-card/60 p-2 rounded-lg border border-pm-border">
+                      <span className="block text-[10px] text-pm-secondary">Tables / DB</span>
+                      <strong className="text-pm-text">{selectedTierObj.max_tables_per_db || 'Unlimited'}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Column (7 Cols): Configuration Form Controls */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1.5">License Status</label>
+                  <FormSelect
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value)}
+                    options={[
+                      { value: 'active', label: '🟢 Active' },
+                      { value: 'suspended', label: '🟠 Suspended' },
+                      { value: 'expired', label: '🔴 Expired' },
+                    ]}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1.5">Expiration Date</label>
+                  <input
+                    type="date"
+                    value={editExpiresAt}
+                    onChange={(e) => setEditExpiresAt(e.target.value)}
+                    className="w-full h-10 bg-pm-input border border-pm-border rounded-xl px-3 text-xs text-pm-text focus:outline-none focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1.5">Company Affiliation</label>
+                  <FormSelect
+                    value={editCompanyId}
+                    onChange={(e) => setEditCompanyId(e.target.value)}
+                    options={[
+                      { value: '', label: 'Unassigned (Standalone Key)' },
+                      ...companies.map((c) => ({ value: String(c.id), label: c.company_name })),
+                    ]}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1.5">Assigned Client Account</label>
+                  <FormSelect
+                    value={editUserId}
+                    onChange={(e) => setEditUserId(e.target.value)}
+                    options={[
+                      { value: '', label: 'Unassigned Key' },
+                      ...users.map((u) => ({ value: String(u.id), label: `${u.email} (${u.name || 'Client'})` })),
+                    ]}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-pm-secondary mb-1.5">Whitelisted Store Domain URLs</label>
+                <textarea
+                  rows={3}
+                  value={editStoreUrl}
+                  onChange={(e) => setEditStoreUrl(e.target.value)}
+                  placeholder="https://myshop.com (One URL per line)"
+                  className="w-full bg-pm-input border border-pm-border rounded-xl p-3 text-xs font-mono text-pm-text focus:outline-none focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2 border-t border-pm-border">
+                <Button type="button" variant="neutral" size="md" onClick={() => setActiveTab('overview')}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" size="md" icon={Save} loading={savingFullEdit}>
+                  Save License Changes
+                </Button>
+              </div>
+            </div>
+          </div>
+        </form>
       )}
     </DetailSubViewLayout>
   );
