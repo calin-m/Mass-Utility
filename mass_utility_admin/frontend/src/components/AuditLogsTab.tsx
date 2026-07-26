@@ -303,12 +303,12 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3">{t('th_log_id')}</th>
-                <th className="p-3">{t('th_admin_op')}</th>
-                <th className="p-3">{t('th_action_type')}</th>
-                <th className="p-3">{t('th_target')}</th>
-                <th className="p-3">{t('th_ip')}</th>
-                <th className="p-3 text-right">{t('th_details')}</th>
+                <th className="p-3 w-[15%]">{t('th_log_id')}</th>
+                <th className="p-3 w-[18%]">{t('th_admin_op')}</th>
+                <th className="p-3 w-[22%]">{t('th_action_type')}</th>
+                <th className="p-3 w-[17%]">{t('th_target')}</th>
+                <th className="p-3 w-[16%]">{t('th_ip')}</th>
+                <th className="p-3 text-right w-[12%]">{t('th_details')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
@@ -326,29 +326,29 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                 </tr>
               ) : (
                 paginatedLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-pm-input/50 transition">
-                    <td className="p-3 font-mono">
+                  <tr key={log.id} className="h-[49px] align-middle hover:bg-pm-input/50 transition">
+                    <td className="p-3 font-mono align-middle whitespace-nowrap">
                       <div className="font-bold text-pm-text">#{log.id}</div>
                       <div className="text-[10px] text-pm-secondary">{log.created_at}</div>
                     </td>
 
-                    <td className="p-3 font-semibold text-pm-text">
+                    <td className="p-3 font-semibold text-pm-text align-middle whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <User className="w-3.5 h-3.5 text-purple-400" />
                         <span>{log.admin_username || 'system'}</span>
                       </div>
                     </td>
 
-                    <td className="p-3">{renderBadge(log.action_type)}</td>
+                    <td className="p-3 align-middle whitespace-nowrap">{renderBadge(log.action_type)}</td>
 
-                    <td className="p-3 font-mono text-[11px]">
+                    <td className="p-3 font-mono text-[11px] align-middle whitespace-nowrap">
                       <span className="text-pm-text uppercase font-bold">{log.target_entity}</span>
                       {log.target_id && (
                         <span className="text-purple-600 dark:text-purple-400 font-bold ml-1">#{log.target_id}</span>
                       )}
                     </td>
 
-                    <td className="p-3 font-mono text-[11px]">
+                    <td className="p-3 font-mono text-[11px] align-middle whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <Globe className="w-3.5 h-3.5 text-pm-secondary" />
                         <span>{formatIp(log.ip_address, log.id)}</span>
@@ -366,7 +366,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                       </div>
                     </td>
 
-                    <td className="p-3 text-right">
+                    <td className="p-3 text-right align-middle">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -472,7 +472,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
                     </span>
                     <span>{selectedLog.created_at}</span>
                   </div>
-                  <pre className="p-3 bg-pm-input font-mono text-[11px] text-pm-text overflow-x-auto">
+                  <pre className="p-3 bg-pm-input font-mono text-[11px] text-pm-text overflow-x-auto max-h-72 overflow-y-auto">
                     {JSON.stringify(selectedLog, null, 2)}
                   </pre>
                 </div>

@@ -313,12 +313,12 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3">{t('th_company')}</th>
-                <th className="p-3">{t('th_vat')}</th>
-                <th className="p-3">{t('th_users')}</th>
-                <th className="p-3">{t('th_pool')}</th>
-                <th className="p-3">{t('th_status')}</th>
-                <th className="p-3 text-right">{t('th_actions')}</th>
+                <th className="p-3 w-[28%]">{t('th_company')}</th>
+                <th className="p-3 w-[18%]">{t('th_vat')}</th>
+                <th className="p-3 w-[15%]">{t('th_users')}</th>
+                <th className="p-3 w-[17%]">{t('th_pool')}</th>
+                <th className="p-3 w-[10%]">{t('th_status')}</th>
+                <th className="p-3 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
@@ -330,8 +330,8 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                 </tr>
               ) : (
                 paginatedCompanies.map(c => (
-                  <tr key={c.id} className="hover:bg-pm-input/50 transition">
-                    <td className="p-3">
+                  <tr key={c.id} className="h-[49px] align-middle hover:bg-pm-input/50 transition">
+                    <td className="p-3 align-middle">
                       <TableCellIdentity
                         icon={Building2}
                         title={c.company_name}
@@ -339,7 +339,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                         subtitle={`ID #${c.id}${c.created_at ? ` • Joined ${c.created_at.split(' ')[0]}` : ''}`}
                       />
                     </td>
-                    <td className="p-3 font-mono text-xs">
+                    <td className="p-3 font-mono text-xs align-middle whitespace-nowrap">
                       {c.tax_id ? (
                         <div className="flex items-center gap-1.5">
                           <span className="text-pm-text font-medium">{c.tax_id}</span>
@@ -355,19 +355,19 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                         <span className="italic text-pm-secondary/70">{t('lbl_unspecified')}</span>
                       )}
                     </td>
-                    <td className="p-3 font-bold text-pm-text text-xs">
+                    <td className="p-3 font-bold text-pm-text text-xs align-middle whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-purple-400" />
                         <span>{c.user_count || 0} {t('lbl_members')}</span>
                       </div>
                     </td>
-                    <td className="p-3 font-mono font-semibold text-xs text-pm-text">
+                    <td className="p-3 font-mono font-semibold text-xs text-pm-text align-middle whitespace-nowrap">
                       <span className="text-purple-600 dark:text-purple-400 font-extrabold">{c.license_count || 0}</span> / {c.max_licenses} {t('lbl_allocated')}
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 align-middle whitespace-nowrap">
                       <StatusBadge status={c.status} />
                     </td>
-                    <td className="p-3 text-right min-w-[220px]">
+                    <td className="p-3 text-right align-middle min-w-[220px]">
                       <TableCellActions
                         onInspect={() => onSelectCompany(c, 'overview')}
                         inspectLabel="Inspect"

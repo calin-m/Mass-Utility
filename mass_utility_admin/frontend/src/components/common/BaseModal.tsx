@@ -49,10 +49,10 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   return (
     <div className="fixed inset-0 top-0 left-0 w-screen h-screen min-h-screen bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-center justify-center p-4 overflow-y-auto">
       <div
-        className={`bg-pm-card border ${borderClass} rounded-xl ${maxWidthClasses} w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 my-auto`}
+        className={`bg-pm-card border ${borderClass} rounded-xl ${maxWidthClasses} w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto max-h-[90vh] flex flex-col justify-between gap-4`}
       >
         {/* Modal Header */}
-        <div className="flex justify-between items-center pb-3 border-b border-pm-border">
+        <div className="flex justify-between items-center pb-3 border-b border-pm-border shrink-0">
           <h3 className={`text-base font-bold ${titleColorClass} flex items-center gap-2`}>
             {Icon && <Icon className={`w-5 h-5 ${iconColorClass}`} />}
             {title}
@@ -68,7 +68,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         </div>
 
         {/* Modal Body Content */}
-        <div>{children}</div>
+        <div className="overflow-y-auto flex-1 pr-1">{children}</div>
       </div>
     </div>
   );

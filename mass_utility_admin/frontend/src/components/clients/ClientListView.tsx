@@ -447,12 +447,12 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3">{t('th_client')}</th>
-                <th className="p-3">{t('th_company_profile')}</th>
-                <th className="p-3">{t('th_active_licenses')}</th>
-                <th className="p-3">{t('th_domains')}</th>
-                <th className="p-3">{t('th_status')}</th>
-                <th className="p-3 text-right">{t('th_actions')}</th>
+                <th className="p-3 w-[30%]">{t('th_client')}</th>
+                <th className="p-3 w-[22%]">{t('th_company_profile')}</th>
+                <th className="p-3 w-[14%]">{t('th_active_licenses')}</th>
+                <th className="p-3 w-[14%]">{t('th_domains')}</th>
+                <th className="p-3 w-[8%]">{t('th_status')}</th>
+                <th className="p-3 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
@@ -468,8 +468,8 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                   const isSuspended = user.status === 'suspended';
 
                   return (
-                    <tr key={user.id} className="hover:bg-pm-input/50 transition">
-                      <td className="p-3">
+                    <tr key={user.id} className="h-[49px] align-middle hover:bg-pm-input/50 transition">
+                      <td className="p-3 align-middle">
                         <TableCellIdentity
                           icon={Mail}
                           title={user.name ? `${user.name} (${user.email})` : user.email}
@@ -478,7 +478,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         />
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-3 align-middle whitespace-nowrap">
                         <TableCellCompany
                           companyName={user.company_name}
                           onClick={onInspectCompany && user.company_name ? () => {
@@ -491,7 +491,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         />
                       </td>
 
-                      <td className="p-3 font-mono font-semibold text-xs text-pm-text">
+                      <td className="p-3 font-mono font-semibold text-xs text-pm-text align-middle whitespace-nowrap">
                         {metrics.total === 0 ? (
                           <span className="italic text-pm-secondary/70">{t('lbl_no_licenses')}</span>
                         ) : (
@@ -499,7 +499,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         )}
                       </td>
 
-                      <td className="p-3 font-mono text-[0.72rem]">
+                      <td className="p-3 font-mono text-[0.72rem] align-middle whitespace-nowrap">
                         {metrics.boundDomains.length === 0 ? (
                           <span className="italic text-pm-secondary/70">{t('lbl_none')}</span>
                         ) : (
@@ -514,11 +514,11 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         )}
                       </td>
 
-                      <td className="p-3">
+                      <td className="p-3 align-middle whitespace-nowrap">
                         <StatusBadge status={user.status} />
                       </td>
 
-                      <td className="p-3 text-right min-w-[220px]">
+                      <td className="p-3 text-right align-middle min-w-[220px]">
                         <TableCellActions
                           onInspect={() => onSelectClient(user, 'profile')}
                           inspectLabel="Inspect"
