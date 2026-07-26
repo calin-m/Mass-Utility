@@ -30,11 +30,20 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [inspectedClient, setInspectedClient] = useState<any | null>(null);
+  const [inspectedCompany, setInspectedCompany] = useState<any | null>(null);
+  const [highlightedLicenseKey, setHighlightedLicenseKey] = useState<string | null>(null);
 
   const handleInspectClient = (client: any) => {
     setInspectedClient(client);
     setActiveTab('clients');
   };
+
+  const handleInspectCompany = (company: any, licenseKey?: string) => {
+    setInspectedCompany(company);
+    setHighlightedLicenseKey(licenseKey || null);
+    setActiveTab('companies');
+  };
+
 
   const showAlert = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -161,11 +170,16 @@ export const App: React.FC = () => {
       <nav className="flex w-full justify-between mb-8 border-b border-pm-border pb-4 overflow-x-auto gap-4">
         <div className="flex gap-2">
           <button
-            onClick={() => setActiveTab('companies')}
+            onClick={() => {
+              setInspectedCompany(null);
+              setHighlightedLicenseKey(null);
+              setActiveTab('companies');
+            }}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
               activeTab === 'companies' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
+
             <Building2 className="w-4 h-4" /> {t('nav_companies')}
           </button>
 
@@ -240,6 +254,8 @@ export const App: React.FC = () => {
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             onInspectClient={handleInspectClient}
+            initialSelectedCompany={inspectedCompany}
+            highlightedLicenseKey={highlightedLicenseKey}
           />
         )}
 
@@ -262,8 +278,10 @@ export const App: React.FC = () => {
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             onInspectClient={handleInspectClient}
+            onInspectCompany={handleInspectCompany}
           />
         )}
+
 
         {activeTab === 'tiers' && (
           <PackageTiersTab

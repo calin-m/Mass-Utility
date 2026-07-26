@@ -223,8 +223,9 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                   : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
               }`}
             >
-              <Edit className="w-3.5 h-3.5" /> {t('subtab_client_settings')}
+              <Edit className="w-3.5 h-3.5" /> Edit Client
             </button>
+
           </div>
 
           <button

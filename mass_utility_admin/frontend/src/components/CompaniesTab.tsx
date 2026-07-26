@@ -11,11 +11,22 @@ interface CompaniesTabProps {
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (user: any) => void;
+  initialSelectedCompany?: Company | null;
+  highlightedLicenseKey?: string | null;
 }
 
-export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, licenses, onRefresh, showAlert, onInspectClient }) => {
-  const [activeSubView, setActiveSubView] = useState<'list' | 'details'>('list');
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+export const CompaniesTab: React.FC<CompaniesTabProps> = ({
+  companies,
+  users,
+  licenses,
+  onRefresh,
+  showAlert,
+  onInspectClient,
+  initialSelectedCompany,
+  highlightedLicenseKey,
+}) => {
+  const [activeSubView, setActiveSubView] = useState<'list' | 'details'>(initialSelectedCompany ? 'details' : 'list');
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(initialSelectedCompany || null);
   const [selectedTab, setSelectedTab] = useState<'overview' | 'edit'>('overview');
 
   const handleSelectCompany = (company: Company, tab: 'overview' | 'edit' = 'overview') => {
@@ -47,7 +58,9 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({ companies, users, li
           onRefresh={onRefresh}
           showAlert={showAlert}
           onInspectClient={onInspectClient}
+          highlightedLicenseKey={highlightedLicenseKey || undefined}
         />
+
       ) : (
         <CompanyListView
           companies={companies}

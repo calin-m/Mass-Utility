@@ -14,9 +14,11 @@ interface CompanyDetailsViewProps {
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (user: any) => void;
+  highlightedLicenseKey?: string;
 }
 
-export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient }) => {
+export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, highlightedLicenseKey }) => {
+
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
@@ -321,8 +323,9 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                   : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
               }`}
             >
-              <Edit className="w-3.5 h-3.5" /> {t('subtab_settings')}
+              <Edit className="w-3.5 h-3.5" /> Edit Company
             </button>
+
           </div>
 
           <button
@@ -600,8 +603,18 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                   <p className="p-8 text-center text-pm-secondary">No active store licenses issued to company pool yet.</p>
                 ) : (
                   <div className="divide-y divide-pm-border">
-                    {companyLicenses.map(l => (
-                      <div key={l.id} className="p-3.5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
+                    {companyLicenses.map(l => {
+                      const isHighlighted = highlightedLicenseKey && l.license_key === highlightedLicenseKey;
+                      return (
+                        <div
+                          key={l.id}
+                          className={`p-3.5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 rounded-lg transition ${
+                            isHighlighted
+                              ? 'bg-purple-500/15 border-2 border-purple-500/80 ring-2 ring-purple-500/30 shadow-md'
+                              : 'bg-pm-card hover:bg-pm-input/40'
+                          }`}
+                        >
+
                         <div className="space-y-1">
                           <div className="font-mono text-amber-400 font-bold flex items-center gap-2 text-sm">
                             <span>{visibleKeys[l.id] ? l.license_key : maskKey(l.license_key)}</span>
@@ -668,8 +681,10 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                           )}
                         </div>
                       </div>
-                    ))}
+                    );
+                  })}
                   </div>
+
                 )}
               </div>
 

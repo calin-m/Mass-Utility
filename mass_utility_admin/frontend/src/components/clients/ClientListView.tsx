@@ -521,19 +521,12 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                           <Button
                             variant="ghost"
                             size="sm"
-                            icon={Edit}
-                            onClick={() => openEditModal(user)}
-                          >
-                            {t('btn_edit')}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
                             icon={Key}
                             onClick={() => openResetModal(user)}
                           >
                             Reset Pass
                           </Button>
+
                           <Button
                             variant={isSuspended ? 'success' : 'danger'}
                             size="sm"

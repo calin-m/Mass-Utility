@@ -361,14 +361,6 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                           {t('btn_inspect_company')}
                         </Button>
                         <Button
-                          variant="ghost"
-                          size="sm"
-                          icon={Edit}
-                          onClick={() => openEditModal(c)}
-                        >
-                          {t('btn_edit')}
-                        </Button>
-                        <Button
                           variant="danger"
                           size="sm"
                           icon={Trash2}
@@ -376,6 +368,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                         >
                           {t('btn_delete')}
                         </Button>
+
                       </div>
                     </td>
                   </tr>
