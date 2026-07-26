@@ -408,12 +408,12 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         <span className="hidden md:inline font-mono uppercase">{prevTier ? prevTier.name : 'First'}</span>
       </button>
 
-      {/* Active Tier Dropdown Pill */}
-      <div className="relative flex items-center">
+      {/* Active Tier Dropdown Pill (Fixed 144px Width - Zero Layout Shift) */}
+      <div className="relative flex items-center w-36 shrink-0">
         <select
           value={selectedTier.toLowerCase()}
           onChange={(e) => handleTierChange(e.target.value)}
-          className="appearance-none h-7 pl-2.5 pr-7 bg-purple-500/15 text-purple-300 dark:text-purple-200 border border-purple-500/40 rounded-lg text-xs font-extrabold font-mono focus:outline-none focus:ring-2 focus:ring-purple-500/30 cursor-pointer shadow-sm shadow-purple-500/10 hover:border-purple-400 transition-colors"
+          className="appearance-none w-full h-7 pl-2.5 pr-7 bg-purple-500/15 text-purple-300 dark:text-purple-200 border border-purple-500/40 rounded-lg text-xs font-extrabold font-mono truncate text-center focus:outline-none focus:ring-2 focus:ring-purple-500/30 cursor-pointer shadow-sm shadow-purple-500/10 hover:border-purple-400 transition-colors"
         >
           {displayTiers.map((t) => (
             <option key={t.name} value={t.name.toLowerCase()} className="bg-pm-card text-pm-text font-mono font-bold">

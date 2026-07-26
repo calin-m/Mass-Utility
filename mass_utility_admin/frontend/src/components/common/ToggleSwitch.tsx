@@ -23,21 +23,38 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
 
   return (
     <label
-      className={`flex items-start gap-3 rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-all select-none ${
-        isSmall ? 'p-3' : 'p-3.5'
+      className={`flex items-start gap-3 rounded-xl border border-pm-border cursor-pointer hover:border-purple-500/40 transition-all select-none ${
+        isSmall ? 'p-2.5' : 'p-3.5'
       } ${
         checked
-          ? 'bg-pm-primary/5 border-pm-primary/40'
-          : 'bg-pm-bg'
+          ? 'bg-purple-500/5 border-purple-500/30'
+          : 'bg-pm-card/60'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
     >
-      <input
-        type="checkbox"
-        checked={checked}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 w-4 h-4 rounded text-pm-primary focus:ring-pm-primary border-pm-border cursor-pointer"
-      />
+      {/* SaaS Animated Sliding Track Switch */}
+      <div className="relative inline-flex items-center shrink-0 mt-0.5">
+        <input
+          type="checkbox"
+          checked={checked}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.checked)}
+          className="sr-only"
+        />
+        <div
+          className={`w-9 h-5 rounded-full transition-colors duration-200 ease-in-out border ${
+            checked
+              ? 'bg-purple-600 border-purple-500 shadow-sm shadow-purple-600/30'
+              : 'bg-pm-input border-pm-border'
+          }`}
+        >
+          <div
+            className={`w-3.5 h-3.5 mt-[2px] bg-white rounded-full shadow-md transition-transform duration-200 ease-in-out ${
+              checked ? 'translate-x-[18px]' : 'translate-x-[2px]'
+            }`}
+          />
+        </div>
+      </div>
+
       <div className="space-y-0.5">
         <span className="text-xs font-bold text-pm-text block leading-snug">
           {title}
