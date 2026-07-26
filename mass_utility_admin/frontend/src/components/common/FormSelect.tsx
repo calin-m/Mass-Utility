@@ -39,7 +39,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
           {...props}
         >
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-medium py-2 px-3">
+            <option key={opt.value} value={opt.value} className="bg-pm-card text-pm-text font-medium py-2 px-3">
               {opt.label}
             </option>
           ))}

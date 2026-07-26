@@ -170,7 +170,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
         <div className="flex flex-wrap gap-1.5 mt-1">
           {value.map((v, idx) => (
             <span
-              key={idx}
+              key={v ? String(v) : idx}
               className="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/30"
             >
               {String(v)}
@@ -181,7 +181,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     }
     if (typeof value === 'object') {
       return (
-        <pre className="bg-slate-100 dark:bg-slate-950 p-3 rounded-lg font-mono text-[10px] text-slate-800 dark:text-emerald-400 border border-pm-border overflow-x-auto">
+        <pre className="bg-pm-input p-3 rounded-lg font-mono text-[10px] text-pm-text border border-pm-border overflow-x-auto">
           {JSON.stringify(value, null, 2)}
         </pre>
       );
@@ -466,13 +466,13 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
 
               {showRawJson && (
                 <div className="mt-2 rounded-xl overflow-hidden border border-pm-border shadow-inner">
-                  <div className="bg-slate-200 dark:bg-slate-900 px-3 py-1.5 flex items-center justify-between text-[10px] font-mono text-slate-700 dark:text-slate-300 border-b border-pm-border">
+                  <div className="bg-pm-card px-3 py-1.5 flex items-center justify-between text-[10px] font-mono text-pm-secondary border-b border-pm-border">
                     <span className="font-bold flex items-center gap-1">
                       <Terminal className="w-3 h-3 text-purple-500" /> payload.json
                     </span>
                     <span>{selectedLog.created_at}</span>
                   </div>
-                  <pre className="p-3 bg-slate-100 dark:bg-slate-950 font-mono text-[11px] text-slate-800 dark:text-emerald-400 overflow-x-auto">
+                  <pre className="p-3 bg-pm-input font-mono text-[11px] text-pm-text overflow-x-auto">
                     {JSON.stringify(selectedLog, null, 2)}
                   </pre>
                 </div>

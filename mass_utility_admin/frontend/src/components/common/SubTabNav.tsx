@@ -97,7 +97,7 @@ export function SubTabNav<T extends string = string>({
             data-tab-id={tab.id}
             type="button"
             onClick={() => onTabChange(tab.id)}
-            className={`relative z-10 flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 whitespace-nowrap ${
+            className={`relative z-10 h-9 inline-flex items-center gap-2 px-3.5 rounded-lg text-xs font-semibold transition-colors duration-200 whitespace-nowrap ${
               isActive
                 ? 'text-white font-bold'
                 : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/30'
@@ -107,10 +107,10 @@ export function SubTabNav<T extends string = string>({
             <span>{tab.label}</span>
             {tab.badge !== undefined && tab.badge !== null && (
               <span
-                className={`px-1.5 py-0.5 text-[10px] font-mono rounded-full transition-colors duration-200 ${
+                className={`px-1.5 py-0.5 text-[10px] font-mono rounded-full transition-colors duration-200 border ${
                   isActive
-                    ? 'bg-white/20 text-white font-bold'
-                    : 'bg-pm-input text-pm-secondary border border-pm-border'
+                    ? 'bg-white/20 text-white font-bold border-white/20'
+                    : 'bg-pm-input text-pm-secondary border-pm-border'
                 }`}
               >
                 {tab.badge}

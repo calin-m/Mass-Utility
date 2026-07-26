@@ -64,7 +64,7 @@ export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
                 onClick={() => onFilterChange(f.key)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border ${
                   isActive
-                    ? 'bg-purple-600 border-purple-500 text-white shadow-sm'
+                    ? 'bg-purple-500 border-purple-500 text-white shadow-sm'
                     : 'bg-pm-input border-pm-border text-pm-secondary hover:text-pm-text hover:bg-pm-card/60'
                 }`}
               >

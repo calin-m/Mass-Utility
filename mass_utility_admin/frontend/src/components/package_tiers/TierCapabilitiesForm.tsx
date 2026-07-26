@@ -307,7 +307,7 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
           icon={Save}
           loading={loading}
         >
-          Save {selectedTier.toUpperCase()} Capabilities
+          Save Capabilities
         </Button>
       </div>
     </form>

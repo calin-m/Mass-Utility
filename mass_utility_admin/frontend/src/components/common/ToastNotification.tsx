@@ -21,8 +21,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
       <div
         className={`px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-xl border text-xs font-bold flex items-center justify-between gap-3 min-w-[280px] max-w-md ${
           isError
-            ? 'bg-white dark:bg-slate-900 border-rose-500/40 text-rose-600 dark:text-rose-400 border-l-4 border-l-rose-500 shadow-rose-950/20'
-            : 'bg-white dark:bg-slate-900 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 border-l-4 border-l-emerald-500 shadow-emerald-950/20'
+            ? 'bg-pm-card border-rose-500/40 text-rose-500 border-l-4 border-l-rose-500 shadow-rose-950/20'
+            : 'bg-pm-card border-emerald-500/40 text-emerald-500 border-l-4 border-l-emerald-500 shadow-emerald-950/20'
         }`}
       >
         <div className="flex items-center gap-2.5">

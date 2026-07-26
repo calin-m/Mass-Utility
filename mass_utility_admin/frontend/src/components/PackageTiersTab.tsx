@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { PackageCheck, RefreshCw, Plus } from 'lucide-react';
+import { PackageCheck, RefreshCw, Plus, Edit } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
 import { Button } from './common/Button';
 import { ConfirmModal } from './common/ConfirmModal';
+import { SubTabNav, SubTabItem } from './common/SubTabNav';
 import { TierCardGrid } from './package_tiers/TierCardGrid';
 import { TierCapabilitiesForm } from './package_tiers/TierCapabilitiesForm';
 import { CreateTierModal } from './package_tiers/CreateTierModal';
@@ -186,6 +187,7 @@ const TIER_RANK: Record<string, number> = {
 };
 
 export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefresh, showAlert }) => {
+  const [subTab, setSubTab] = useState<'overview' | 'editor'>('overview');
   const [selectedTier, setSelectedTier] = useState('basic');
   const [loading, setLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -379,6 +381,11 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     }
   };
 
+  const subTabs: SubTabItem<'overview' | 'editor'>[] = [
+    { id: 'overview', label: 'Package Overview', icon: PackageCheck, badge: displayTiers.length },
+    { id: 'editor', label: 'Capability Editor', icon: Edit },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Shared Page Header */}
@@ -410,38 +417,57 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         </Button>
       </PageHeader>
 
-      {/* Preset Selector Grid */}
-      <TierCardGrid
-        displayTiers={displayTiers}
-        selectedTier={selectedTier}
-        onSelectTier={handleTierChange}
-        onCloneClick={(tier) => {
-          setNewTierName(`${tier.name}_Copy`);
-          setCloneFromTier(tier.name.toLowerCase());
-          setIsCreateModalOpen(true);
-        }}
-        onRenameClick={(tier) => {
-          setEditingName(tier.name);
-          setSelectedTier(tier.name);
-          setIsRenaming(true);
-        }}
-        onDeleteClick={(tier) => setTierToDelete(tier)}
+      {/* Sub-Tab Navigation Bar */}
+      <SubTabNav
+        tabs={subTabs}
+        activeTab={subTab}
+        onTabChange={setSubTab}
       />
 
-      {/* Capabilities Configuration Form */}
-      <TierCapabilitiesForm
-        selectedTier={selectedTier}
-        capabilities={capabilities}
-        isRenaming={isRenaming}
-        editingName={editingName}
-        loading={loading}
-        onSetEditingName={setEditingName}
-        onSetIsRenaming={setIsRenaming}
-        onToggle={handleToggle}
-        onDestinationToggle={handleDestinationToggle}
-        onChangeQuota={handleChangeQuota}
-        onSave={handleSave}
-      />
+      {/* Sub-Tab 1: Package Catalog & Preset Selector Grid */}
+      {subTab === 'overview' && (
+        <div className="animate-in fade-in duration-200 space-y-6">
+          <TierCardGrid
+            displayTiers={displayTiers}
+            selectedTier={selectedTier}
+            onSelectTier={(tierName) => {
+              handleTierChange(tierName);
+              setSubTab('editor');
+            }}
+            onCloneClick={(tier) => {
+              setNewTierName(`${tier.name}_Copy`);
+              setCloneFromTier(tier.name.toLowerCase());
+              setIsCreateModalOpen(true);
+            }}
+            onRenameClick={(tier) => {
+              setEditingName(tier.name);
+              setSelectedTier(tier.name);
+              setIsRenaming(true);
+              setSubTab('editor');
+            }}
+            onDeleteClick={(tier) => setTierToDelete(tier)}
+          />
+        </div>
+      )}
+
+      {/* Sub-Tab 2: Granular Capabilities Configuration Form */}
+      {subTab === 'editor' && (
+        <div className="animate-in fade-in duration-200 space-y-6">
+          <TierCapabilitiesForm
+            selectedTier={selectedTier}
+            capabilities={capabilities}
+            isRenaming={isRenaming}
+            editingName={editingName}
+            loading={loading}
+            onSetEditingName={setEditingName}
+            onSetIsRenaming={setIsRenaming}
+            onToggle={handleToggle}
+            onDestinationToggle={handleDestinationToggle}
+            onChangeQuota={handleChangeQuota}
+            onSave={handleSave}
+          />
+        </div>
+      )}
 
       {/* Create Custom Tier Modal */}
       <CreateTierModal

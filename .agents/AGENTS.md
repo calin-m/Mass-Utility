@@ -10,8 +10,9 @@
 > 4. **Execution Rules (Gates 3-5):** You must follow Rule 5 precisely: write to `.ai_plan.md`, Pause for the user to type "Proceed", and only then execute the code.
 
 ## Execution Protocol
-1. **Pre-Flight Impact Analysis & Granular Planning:** Before executing any code changes, refactors, or UI updates, you MUST execute `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"` to run pre-flight impact analysis and synthesize `.ai_plan.md` in the workspace root.
-   - The synthesized plan is hyper-granular, breaking the task into microscopic phases (e.g., Phase 1, Phase 2).
+1. **Pre-Flight Impact Analysis & Proportional Hybrid Planning:** Before executing any code changes, refactors, or UI updates, you MUST execute `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"` to run pre-flight impact analysis and synthesize `.ai_plan.md` in the workspace root.
+   - **Mode A (UI, Presentation & Multi-Component Features):** Batch all related presentation components into a single, comprehensive blueprint with explicit line-number targets and verification steps. Avoid unnecessary plan fragmentation so the user can review the complete feature end-to-end.
+   - **Mode B (High-Risk Backend, DB Schema & Core Security):** Slices high-risk database alterations, authentication API contracts, or core state changes into microscopic atomic phases (Phase 1, Phase 2) with verification gates between each phase.
    - Each phase strictly defines the "Target" (specific file and line numbers) and the "Action" (DOM/JS/PHP modifications).
 2. **The Zero-Draft Atomic Pipeline:**
    - **No PENDING states:** Ensure your logic is complete.
