@@ -31,16 +31,16 @@ body {
 
 :root.dark, :root .dark, .dark {
   color-scheme: dark;
-  --pm-body-bg: #09090e;
-  --pm-card-bg: #12121a;
-  --pm-border-color: #262638;
-  --pm-text-primary: #e2e8f0;
+  --pm-body-bg: #0b0c10;
+  --pm-card-bg: #12131c;
+  --pm-border-color: #242636;
+  --pm-text-primary: #f1f5f9;
   --pm-text-secondary: #94a3b8;
   --pm-text-muted: #94a3b8;
   --pm-primary: #a78bfa;
   --pm-primary-dark: #8b5cf6;
-  --pm-input-bg: #171725;
-  --pm-scrollbar-thumb: #3a3a54;
+  --pm-input-bg: #181926;
+  --pm-scrollbar-thumb: #2f3248;
   /* Deep Spatial Dark Mode Elevation */
   --pm-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
   --pm-card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.45);

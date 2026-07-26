@@ -597,21 +597,21 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
               </tbody>
             </table>
           </div>
+
+          {/* Master PaginationBar Component Primitive */}
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
+          />
         </div>
       )}
-
-      {/* Pagination Bar */}
-      <PaginationBar
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
-        pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={(size) => {
-          setPageSize(size);
-          setCurrentPage(1);
-        }}
-      />
 
       {/* Issue License Key Modal */}
       <IssueLicenseModal
