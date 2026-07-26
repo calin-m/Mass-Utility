@@ -23,6 +23,7 @@ export function SubTabNav<T extends string = string>({
   rightContent,
 }: SubTabNavProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isAnimated, setIsAnimated] = useState(false);
   const [pillStyle, setPillStyle] = useState<{
     left: number;
     top: number;
@@ -48,6 +49,13 @@ export function SubTabNav<T extends string = string>({
           height: activeRect.height,
           opacity: 1,
         });
+
+        // Enable smooth sliding transition after initial mount layout measurement
+        if (!isAnimated) {
+          requestAnimationFrame(() => {
+            setIsAnimated(true);
+          });
+        }
       }
     };
 
@@ -79,14 +87,17 @@ export function SubTabNav<T extends string = string>({
       ref={containerRef}
       className={`relative flex items-center gap-1.5 p-1.5 bg-pm-card/80 border border-pm-border rounded-xl backdrop-blur-sm overflow-x-auto ${className}`}
     >
-      {/* Sliding GPU-Accelerated Purple Active Pill */}
+      {/* Sliding GPU-Accelerated Purple Active Pill (0 CLS Initial Mount) */}
       <div
-        className="absolute top-0 left-0 bg-purple-500 rounded-lg shadow-md shadow-purple-500/25 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none z-0"
+        className="absolute top-0 left-0 bg-purple-500 rounded-lg shadow-md shadow-purple-500/25 pointer-events-none z-0"
         style={{
           transform: `translate3d(${pillStyle.left}px, ${pillStyle.top}px, 0)`,
           width: `${pillStyle.width}px`,
           height: `${pillStyle.height}px`,
           opacity: pillStyle.opacity,
+          transition: isAnimated
+            ? 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), width 300ms cubic-bezier(0.4, 0, 0.2, 1), height 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 150ms ease-out'
+            : 'none',
         }}
       />
 

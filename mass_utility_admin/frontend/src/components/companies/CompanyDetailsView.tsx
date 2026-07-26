@@ -6,8 +6,9 @@ import { Button } from '../common/Button';
 import { FormSelect } from '../common/FormSelect';
 import { FormInput } from '../common/FormInput';
 import { LicenseRowCard } from '../common/LicenseRowCard';
-import { SubTabNav, SubTabItem } from '../common/SubTabNav';
-import { DetailHeaderBanner } from '../common/DetailHeaderBanner';
+import { SubTabItem } from '../common/SubTabNav';
+import { StatusBadge } from '../common/StatusBadge';
+import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { EditLicenseModal, EditLicenseData } from '../common/EditLicenseModal';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
@@ -321,39 +322,43 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   ];
 
   return (
-    <div className="space-y-6">
-      <DetailHeaderBanner
-        title={company.company_name}
-        subtitle={`Created on ${company.created_at ? company.created_at.split(' ')[0] : 'N/A'} • Tax ID: ${company.tax_id || 'Not Set'}`}
-        icon={Building2}
-        status={company.status}
-        onBack={onBack}
-        actions={
-          <>
-            <Button
-              variant="neutral"
-              size="sm"
-              icon={isSuspended ? ShieldCheck : ShieldAlert}
-              onClick={handleToggleStatus}
-              disabled={submitting}
-            >
-              {isSuspended ? 'Re-Activate' : 'Suspend'}
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              icon={Trash2}
-              onClick={() => setIsDeleteOpen(true)}
-            />
-          </>
-        }
-      >
-        <SubTabNav
-          tabs={subTabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-      </DetailHeaderBanner>
+    <DetailSubViewLayout
+      backLabel="Back to Companies Directory"
+      onBack={onBack}
+      headerIcon={Building2}
+      headerTitle={company.company_name}
+      headerSubtitle={`Created on ${company.created_at ? company.created_at.split(' ')[0] : 'N/A'} • Tax ID: ${company.tax_id || 'Not Set'}`}
+      headerBadges={
+        <div className="flex items-center gap-2">
+          <StatusBadge status={company.status || 'active'} />
+          <span className="text-xs text-pm-secondary bg-pm-input px-2.5 py-1 rounded-lg border border-pm-border uppercase font-mono font-bold">
+            Quota: {usedCount}/{maxCount}
+          </span>
+        </div>
+      }
+      headerActions={
+        <div className="flex items-center gap-2">
+          <Button
+            variant="neutral"
+            size="sm"
+            icon={isSuspended ? ShieldCheck : ShieldAlert}
+            onClick={handleToggleStatus}
+            disabled={submitting}
+          >
+            {isSuspended ? 'Re-Activate' : 'Suspend'}
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            icon={Trash2}
+            onClick={() => setIsDeleteOpen(true)}
+          />
+        </div>
+      }
+      tabs={subTabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    >
 
       {/* Dynamic Sub-Tab Content */}
       {activeTab === 'settings' && (
@@ -802,7 +807,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
           </div>
         </div>
       </BaseModal>
-    </div>
+    </DetailSubViewLayout>
   );
 };
 

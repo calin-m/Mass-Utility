@@ -6,8 +6,9 @@ import { FormSelect } from '../common/FormSelect';
 import { FormInput } from '../common/FormInput';
 import { Button } from '../common/Button';
 import { LicenseRowCard } from '../common/LicenseRowCard';
-import { SubTabNav, SubTabItem } from '../common/SubTabNav';
-import { DetailHeaderBanner } from '../common/DetailHeaderBanner';
+import { SubTabItem } from '../common/SubTabNav';
+import { StatusBadge } from '../common/StatusBadge';
+import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { EditLicenseModal, EditLicenseData } from '../common/EditLicenseModal';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
@@ -227,49 +228,53 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
   ];
 
   return (
-    <div className="space-y-6">
-      <DetailHeaderBanner
-        title={user.name ? `${user.name} (${user.email})` : user.email}
-        subtitle={`Client ID: #${user.id} • Role: ${user.role || 'Owner'}`}
-        icon={User}
-        status={user.status || 'active'}
-        onBack={onBack}
-        actions={
-          <>
-            <Button
-              variant="neutral"
-              size="sm"
-              icon={Key}
-              onClick={() => setShowResetModal(true)}
-            >
-              Reset Password
-            </Button>
+    <DetailSubViewLayout
+      backLabel="Back to Client Accounts"
+      onBack={onBack}
+      headerIcon={User}
+      headerTitle={user.name ? `${user.name} (${user.email})` : user.email}
+      headerSubtitle={`Client ID: #${user.id} • Role: ${user.role || 'Owner'} • Affiliation: ${user.company_name || 'Standalone'}`}
+      headerBadges={
+        <div className="flex items-center gap-2">
+          <StatusBadge status={user.status || 'active'} />
+          <span className="text-xs text-pm-secondary bg-pm-input px-2.5 py-1 rounded-lg border border-pm-border uppercase font-mono font-bold">
+            {clientLicenses.length} Keys
+          </span>
+        </div>
+      }
+      headerActions={
+        <div className="flex items-center gap-2">
+          <Button
+            variant="neutral"
+            size="sm"
+            icon={Key}
+            onClick={() => setShowResetModal(true)}
+          >
+            Reset Password
+          </Button>
 
-            <Button
-              variant="neutral"
-              size="sm"
-              icon={isSuspended ? ShieldCheck : ShieldAlert}
-              onClick={handleToggleStatus}
-              disabled={submitting}
-            >
-              {isSuspended ? 'Re-Activate' : 'Suspend'}
-            </Button>
+          <Button
+            variant="neutral"
+            size="sm"
+            icon={isSuspended ? ShieldCheck : ShieldAlert}
+            onClick={handleToggleStatus}
+            disabled={submitting}
+          >
+            {isSuspended ? 'Re-Activate' : 'Suspend'}
+          </Button>
 
-            <Button
-              variant="danger"
-              size="sm"
-              icon={Trash2}
-              onClick={() => setShowDeleteModal(true)}
-            />
-          </>
-        }
-      >
-        <SubTabNav
-          tabs={subTabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-      </DetailHeaderBanner>
+          <Button
+            variant="danger"
+            size="sm"
+            icon={Trash2}
+            onClick={() => setShowDeleteModal(true)}
+          />
+        </div>
+      }
+      tabs={subTabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    >
 
 
       {/* Dynamic Sub-Tab Content */}
@@ -597,7 +602,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
           </div>
         </div>
       </BaseModal>
-    </div>
+    </DetailSubViewLayout>
   );
 };
 
