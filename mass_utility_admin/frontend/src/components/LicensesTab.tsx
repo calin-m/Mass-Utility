@@ -7,7 +7,7 @@ import { Button } from './common/Button';
 import { FormInput } from './common/FormInput';
 import { FormSelect } from './common/FormSelect';
 import { PaginationBar } from './common/PaginationBar';
-import { PageHeader } from './common/PageHeader';
+import { SectionHeader } from './common/SectionHeader';
 import { DirectoryToolbar } from './common/DirectoryToolbar';
 import { LicenseRowCard } from './common/LicenseRowCard';
 import { IssueLicenseModal } from './common/IssueLicenseModal';
@@ -344,30 +344,23 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Shared Page Header */}
-      <PageHeader
+      {/* Unified Section Header (Matches Companies & Clients 1:1) */}
+      <SectionHeader
+        title={t('licenses_title') || 'License Registry Directory'}
+        subtitle={t('licenses_subtitle') || 'Issue, inspect, extend, whitelist domain URLs, and govern active software license keys across client accounts.'}
         icon={Key}
-        title="License Registry & License Key Management"
-        description="Issue, inspect, extend, whitelist domain URLs, and govern active software license keys across client accounts."
-      >
-        <Button
-          variant="neutral"
-          size="sm"
-          icon={RefreshCw}
-          loading={isRefreshing}
-          onClick={handleRefresh}
-        >
-          Reload Registry
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          icon={PlusCircle}
-          onClick={() => setIsIssueModalOpen(true)}
-        >
-          Issue New Key
-        </Button>
-      </PageHeader>
+        action={
+          <Button
+            variant="neutral"
+            size="sm"
+            icon={RefreshCw}
+            loading={isRefreshing}
+            onClick={handleRefresh}
+          >
+            Reload Registry
+          </Button>
+        }
+      />
 
       {/* 4 Stat Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -377,63 +370,37 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
         <StatCard label={t('stat_unassigned_keys')} value={licenses.filter((l) => !l.user_id).length} icon={Unlock} color="blue" />
       </div>
 
-      {/* Main Directory Toolbar (Search, Filter Chips, Primary Action) */}
-      <div className="flex flex-col space-y-4">
-        <DirectoryToolbar
-          searchPlaceholder="Search license keys (KEY-XXXX), clients, companies, store URLs..."
-          searchTerm={searchQuery}
-          onSearchChange={(q) => {
-            setSearchQuery(q);
-            setCurrentPage(1);
-          }}
-          statusFilters={statusFilters}
-          activeFilter={filterMode}
-          onFilterChange={(mode) => {
-            setFilterMode(mode);
-            setCurrentPage(1);
-          }}
-          onClearFilters={
-            searchQuery || filterMode !== 'ALL'
-              ? () => {
-                  setSearchQuery('');
-                  setFilterMode('ALL');
-                  setCurrentPage(1);
-                }
-              : undefined
-          }
-        />
-
-        {/* Sub-Header Bar: View Mode Switcher + Pagination Context */}
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-semibold text-pm-secondary">
-            Showing <strong className="text-pm-text">{filteredLicenses.length}</strong> matching license keys
-          </span>
-          <div className="flex items-center gap-1 bg-pm-input p-1 rounded-lg border border-pm-border">
-            <button
-              type="button"
-              onClick={() => setViewMode('table')}
-              className={`p-1.5 rounded-md text-xs font-bold transition flex items-center gap-1.5 ${
-                viewMode === 'table' ? 'bg-purple-600 text-white shadow-sm' : 'text-pm-secondary hover:text-pm-text'
-              }`}
-              title="Table View"
-            >
-              <List className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Table</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-md text-xs font-bold transition flex items-center gap-1.5 ${
-                viewMode === 'grid' ? 'bg-purple-600 text-white shadow-sm' : 'text-pm-secondary hover:text-pm-text'
-              }`}
-              title="Grid Cards View"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Cards</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Unified Directory Toolbar (Search, Filters, View Mode Switcher, Primary Action) */}
+      <DirectoryToolbar
+        searchPlaceholder="Search license keys (KEY-XXXX), clients, companies, store URLs..."
+        searchTerm={searchQuery}
+        onSearchChange={(q) => {
+          setSearchQuery(q);
+          setCurrentPage(1);
+        }}
+        statusFilters={statusFilters}
+        activeFilter={filterMode}
+        onFilterChange={(mode) => {
+          setFilterMode(mode);
+          setCurrentPage(1);
+        }}
+        onClearFilters={
+          searchQuery || filterMode !== 'ALL'
+            ? () => {
+                setSearchQuery('');
+                setFilterMode('ALL');
+                setCurrentPage(1);
+              }
+            : undefined
+        }
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        primaryAction={{
+          label: 'Issue New Key',
+          icon: PlusCircle,
+          onClick: () => setIsIssueModalOpen(true),
+        }}
+      />
 
       {/* Content Rendering: Grid View vs Table View */}
       {viewMode === 'grid' ? (

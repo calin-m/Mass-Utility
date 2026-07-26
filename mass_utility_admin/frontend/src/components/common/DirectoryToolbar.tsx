@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, LucideIcon, X } from 'lucide-react';
+import { Search, LucideIcon, X, List, LayoutGrid } from 'lucide-react';
 import { Button } from './Button';
 import { FormInput } from './FormInput';
 
@@ -15,7 +15,7 @@ export interface PrimaryActionOption {
   onClick: () => void;
 }
 
-interface DirectoryToolbarProps {
+export interface DirectoryToolbarProps {
   searchPlaceholder: string;
   searchTerm: string;
   onSearchChange: (val: string) => void;
@@ -24,6 +24,8 @@ interface DirectoryToolbarProps {
   onFilterChange: (key: string) => void;
   onClearFilters?: () => void;
   primaryAction?: PrimaryActionOption;
+  viewMode?: 'grid' | 'table';
+  onViewModeChange?: (mode: 'grid' | 'table') => void;
 }
 
 export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
@@ -35,11 +37,17 @@ export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
   onFilterChange,
   onClearFilters,
   primaryAction,
+  viewMode,
+  onViewModeChange,
 }) => {
   const hasActiveFilters = Boolean(searchTerm || (activeFilter && activeFilter !== 'all' && activeFilter !== 'ALL'));
 
   return (
-    <div className="bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+    <div
+      role="toolbar"
+      aria-label="Directory search and filter controls"
+      className="bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4"
+    >
       <div className="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
         {/* Search Bar Input */}
         <div className="relative flex-1 md:w-72">
@@ -50,17 +58,19 @@ export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             onClear={searchTerm ? () => onSearchChange('') : undefined}
+            aria-label={searchPlaceholder}
           />
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto">
+        <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto" role="group" aria-label="Status filters">
           {statusFilters.map((f) => {
             const isActive = activeFilter === f.key;
             return (
               <button
                 key={f.key}
                 type="button"
+                aria-pressed={isActive}
                 onClick={() => onFilterChange(f.key)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border ${
                   isActive
@@ -96,18 +106,50 @@ export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
         )}
       </div>
 
-      {/* Primary Action Button */}
-      {primaryAction && (
-        <Button
-          variant="primary"
-          size="md"
-          icon={primaryAction.icon}
-          onClick={primaryAction.onClick}
-          className="uppercase shrink-0"
-        >
-          {primaryAction.label}
-        </Button>
-      )}
+      {/* Right Controls: View Mode Switcher + Primary Action Button */}
+      <div className="flex items-center gap-3 shrink-0 w-full md:w-auto justify-between md:justify-end">
+        {viewMode && onViewModeChange && (
+          <div className="flex items-center gap-1 bg-pm-input p-1 rounded-lg border border-pm-border" role="group" aria-label="View mode">
+            <button
+              type="button"
+              aria-pressed={viewMode === 'table'}
+              onClick={() => onViewModeChange('table')}
+              className={`p-1.5 rounded-md text-xs font-bold transition flex items-center gap-1.5 ${
+                viewMode === 'table' ? 'bg-purple-600 text-white shadow-sm' : 'text-pm-secondary hover:text-pm-text'
+              }`}
+              title="Table View"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Table</span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={viewMode === 'grid'}
+              onClick={() => onViewModeChange('grid')}
+              className={`p-1.5 rounded-md text-xs font-bold transition flex items-center gap-1.5 ${
+                viewMode === 'grid' ? 'bg-purple-600 text-white shadow-sm' : 'text-pm-secondary hover:text-pm-text'
+              }`}
+              title="Grid Cards View"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Cards</span>
+            </button>
+          </div>
+        )}
+
+        {/* Primary Action Button */}
+        {primaryAction && (
+          <Button
+            variant="primary"
+            size="md"
+            icon={primaryAction.icon}
+            onClick={primaryAction.onClick}
+            className="uppercase shrink-0"
+          >
+            {primaryAction.label}
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
