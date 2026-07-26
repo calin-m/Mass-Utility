@@ -101,18 +101,18 @@ const getDefaultCapsForTier = (tierName: string): PackageTierCapabilities => {
       query_visual_mutate: false,
       db_tools_export: true,
       db_tools_backup: true,
-      db_diff_inspector: true,
+      db_diff_inspector: false,
       db_tools_restore: true,
       file_tools_browse: true,
       file_tools_backup: true,
-      file_diff_inspector: true,
+      file_diff_inspector: false,
       backup_automation: true,
       governor_autopilot: false,
       sweeper_execution: true,
-      rollback_history_limit: 25,
-      max_bound_domains: 3,
-      max_cloud_backups: 10,
-      max_daily_sweeper_runs: 6,
+      rollback_history_limit: 15,
+      max_bound_domains: 2,
+      max_cloud_backups: 5,
+      max_daily_sweeper_runs: 2,
       backup_destinations: ['local', 'gdrive'],
     };
   }
@@ -280,8 +280,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           </p>
           <ul className="text-[11px] space-y-1.5 text-pm-secondary mb-4">
             <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Step 1 & 2 AST Filter & SQL Compile</li>
-            <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Scheduled Cron Backups & Diffing</li>
-            <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> 3 Bound Domains / 10 Cloud Backups</li>
+            <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Full DB & File Backups (1-Click Restore)</li>
+            <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> 2 Bound Domains / 5 Cloud Backups</li>
           </ul>
           <div className="pt-2 border-t border-pm-border/50 text-[10px] font-bold text-pm-primary uppercase flex items-center justify-between">
             <span>{selectedTier === 'pro' ? '● Active Preset Selected' : 'Click to Load Template'}</span>
@@ -601,10 +601,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-pm-input/30 p-4 rounded-xl border border-pm-border">
               {/* Rollback Snapshot Limit */}
               <div>
-                <label className="block text-xs font-semibold text-pm-text mb-1">
-                  Rollback Snapshot Limit
-                </label>
                 <FormInput
+                  label="Rollback Snapshot Limit"
                   type="number"
                   min="0"
                   max="1000"
@@ -621,10 +619,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
               {/* Bound Domains Limit */}
               <div>
-                <label className="block text-xs font-semibold text-pm-text mb-1">
-                  Store Domain Binding Limit
-                </label>
                 <FormInput
+                  label="Store Domain Binding Limit"
                   type="number"
                   min="1"
                   max="100"
@@ -641,10 +637,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
               {/* Max Cloud Backups */}
               <div>
-                <label className="block text-xs font-semibold text-pm-text mb-1">
-                  Google Drive Cloud Retention Quota
-                </label>
                 <FormInput
+                  label="Google Drive Cloud Retention Quota"
                   type="number"
                   min="1"
                   max="500"
@@ -661,10 +655,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
               {/* Max Daily Sweeper Runs */}
               <div>
-                <label className="block text-xs font-semibold text-pm-text mb-1">
-                  Max Daily Background Sweeper Executions
-                </label>
                 <FormInput
+                  label="Max Daily Background Sweeper Executions"
                   type="number"
                   min="1"
                   max="100"

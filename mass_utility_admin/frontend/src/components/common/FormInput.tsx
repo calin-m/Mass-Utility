@@ -26,7 +26,7 @@ export const FormInput: React.FC<FormInputProps> = ({
   const { t } = useTranslation();
   const [touched, setTouched] = useState(false);
 
-  const stringVal = String(value || '');
+  const stringVal = value !== undefined && value !== null ? String(value) : '';
   const isEmailType = type === 'email';
   const isInvalidEmail = isEmailType && touched && stringVal.length > 0 && !EMAIL_REGEX.test(stringVal.trim());
 
