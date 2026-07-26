@@ -8,6 +8,7 @@ import { FormInput } from '../common/FormInput';
 import { LicenseRowCard } from '../common/LicenseRowCard';
 import { SubTabNav, SubTabItem } from '../common/SubTabNav';
 import { DetailHeaderBanner } from '../common/DetailHeaderBanner';
+import { EditLicenseModal, EditLicenseData } from '../common/EditLicenseModal';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 
@@ -70,50 +71,28 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
 
   // Inline License Edit Modal State
   const [editingLic, setEditingLic] = useState<any | null>(null);
-  const [editLicTier, setEditLicTier] = useState('pro');
-  const [editLicExpiresAt, setEditLicExpiresAt] = useState('');
-  const [editLicStoreUrl, setEditLicStoreUrl] = useState('');
-  const [editLicUserId, setEditLicUserId] = useState<string | number>('');
-  const [editLicStatus, setEditLicStatus] = useState('active');
-  const [editLicSubmitting, setEditLicSubmitting] = useState(false);
-
   const openInlineEditModal = (lic: any) => {
     setEditingLic(lic);
-    setEditLicTier(lic.package_tier || 'basic');
-    setEditLicExpiresAt(lic.expires_at ? lic.expires_at.split(' ')[0] : '');
-    setEditLicStoreUrl(lic.store_url || '');
-    setEditLicUserId(lic.user_id || '');
-    setEditLicStatus(lic.status || 'active');
   };
 
-  const handleSaveInlineEditLicense = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingLic) return;
-    setEditLicSubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append('id', String(editingLic.id));
-      formData.append('package_tier', editLicTier);
-      formData.append('expires_at', editLicExpiresAt);
-      formData.append('store_url', editLicStoreUrl.trim());
-      formData.append('status', editLicStatus);
-      if (editLicUserId !== '') {
-        formData.append('user_id', String(editLicUserId));
-      }
+  const handleSaveInlineEditLicense = async (licenseId: number, data: EditLicenseData) => {
+    const formData = new FormData();
+    formData.append('id', String(licenseId));
+    formData.append('package_tier', data.package_tier);
+    formData.append('status', data.status);
+    formData.append('store_url', (data.store_url || '').trim());
+    formData.append('expires_at', data.expires_at || '');
+    formData.append('user_id', data.user_id !== undefined && data.user_id !== '' ? String(data.user_id) : '');
+    formData.append('company_id', data.company_id !== undefined && data.company_id !== '' ? String(data.company_id) : String(company.id));
 
-      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.success) {
-        if (showAlert) showAlert('✨ License key details updated successfully!', 'success');
-        setEditingLic(null);
-        onRefresh();
-      } else {
-        if (showAlert) showAlert(data.error || 'Failed to update license key', 'error');
-      }
-    } catch (err: any) {
-      if (showAlert) showAlert('Error updating license key: ' + err.message, 'error');
-    } finally {
-      setEditLicSubmitting(false);
+    const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+    const resData = await res.json();
+    if (resData.success) {
+      if (showAlert) showAlert('✨ License key details updated successfully!', 'success');
+      onRefresh();
+    } else {
+      if (showAlert) showAlert(resData.error || 'Failed to update license key', 'error');
+      throw new Error(resData.error || 'Failed to update license key');
     }
   };
 
@@ -790,69 +769,16 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
         </div>
       )}
 
-      {/* Inline Edit License Modal */}
-      <BaseModal isOpen={!!editingLic} onClose={() => setEditingLic(null)} title={`Edit License Key #${editingLic?.id || ''}`}>
-        <form onSubmit={handleSaveInlineEditLicense} className="space-y-4">
-          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl font-mono text-xs text-purple-400 font-bold tracking-wider select-all">
-            🔑 {editingLic?.license_key}
-          </div>
-
-          <FormSelect
-            label="Package Tier"
-            value={editLicTier}
-            onChange={e => setEditLicTier(e.target.value)}
-            options={tierOptions}
-          />
-
-          <FormInput
-            label="Bound Store Domain"
-            placeholder="e.g. mystore.com"
-            value={editLicStoreUrl}
-            onChange={e => setEditLicStoreUrl(e.target.value)}
-          />
-
-          <FormInput
-            label="Expiration Date"
-            type="date"
-            value={editLicExpiresAt}
-            onChange={e => setEditLicExpiresAt(e.target.value)}
-          />
-
-          <FormSelect
-            label="Assigned Team Member"
-            value={editLicUserId || ''}
-            onChange={e => setEditLicUserId(e.target.value)}
-            options={[
-              { value: '', label: '-- Unassigned (Available in Company Pool) --' },
-              ...companyMembers.map(m => ({
-                value: String(m.id),
-                label: `👤 ${m.name ? `${m.name} (${m.email})` : m.email}`
-              }))
-            ]}
-          />
-
-          <FormSelect
-            label="License Status"
-            value={editLicStatus}
-            onChange={e => setEditLicStatus(e.target.value)}
-            options={[
-              { value: 'active', label: '🟢 Active' },
-              { value: 'expiring', label: '🟠 Expiring Soon' },
-              { value: 'suspended', label: '🔴 Suspended' },
-              { value: 'revoked', label: '⚫ Revoked' },
-            ]}
-          />
-
-          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-            <Button type="button" variant="neutral" onClick={() => setEditingLic(null)}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" loading={editLicSubmitting}>
-              Save License Changes
-            </Button>
-          </div>
-        </form>
-      </BaseModal>
+      {/* Centralized Edit License Modal */}
+      <EditLicenseModal
+        isOpen={!!editingLic}
+        onClose={() => setEditingLic(null)}
+        license={editingLic}
+        companies={[company]}
+        users={users}
+        tiers={tiers}
+        onSave={handleSaveInlineEditLicense}
+      />
 
       {/* Delete Confirmation Modal */}
       <BaseModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Company Profile">

@@ -11,6 +11,7 @@ import { PaginationBar } from './common/PaginationBar';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getSortedTierOptions } from '../utils/tierUtils';
 
+import { EditLicenseModal, EditLicenseData } from './common/EditLicenseModal';
 import { License, UserAccount } from '../types/adminApi';
 export type { License, UserAccount };
 
@@ -88,51 +89,29 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
 
   // Unified Edit License Modal State
   const [editingLic, setEditingLic] = useState<License | null>(null);
-  const [editTier, setEditTier] = useState<string>('basic');
-  const [editExpiresAt, setEditExpiresAt] = useState<string>('');
-  const [editStoreUrl, setEditStoreUrl] = useState<string>('');
-  const [editUserId, setEditUserId] = useState<number | ''>('');
-  const [editStatus, setEditStatus] = useState<'active' | 'expiring' | 'suspended' | 'expired' | 'revoked'>('active');
-  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const openEditLicenseModal = (lic: License) => {
     setEditingLic(lic);
-    setEditTier(lic.package_tier || 'basic');
-    setEditExpiresAt(lic.expires_at ? lic.expires_at.split(' ')[0] : '');
-    setEditStoreUrl(lic.store_url || '');
-    setEditUserId(lic.user_id || '');
-    setEditStatus(lic.status || 'active');
   };
 
+  const handleSaveEditLicense = async (licenseId: number, data: EditLicenseData) => {
+    const formData = new FormData();
+    formData.append('id', String(licenseId));
+    formData.append('package_tier', data.package_tier);
+    formData.append('status', data.status);
+    formData.append('store_url', (data.store_url || '').trim());
+    formData.append('expires_at', data.expires_at || '');
+    formData.append('user_id', data.user_id !== undefined && data.user_id !== '' ? String(data.user_id) : '');
+    formData.append('company_id', data.company_id !== undefined && data.company_id !== '' ? String(data.company_id) : '');
 
-  const handleSaveEditLicense = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingLic) return;
-    setEditSubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append('id', String(editingLic.id));
-      formData.append('package_tier', editTier);
-      formData.append('expires_at', editExpiresAt);
-      formData.append('store_url', editStoreUrl.trim());
-      formData.append('status', editStatus);
-      if (editUserId !== '') {
-        formData.append('user_id', String(editUserId));
-      }
-
-      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.success) {
-        showAlert('✨ License key details updated successfully!', 'success');
-        setEditingLic(null);
-        onRefresh();
-      } else {
-        showAlert(data.error || 'Failed to update license key', 'error');
-      }
-    } catch (err: any) {
-      showAlert('Error updating license key: ' + err.message, 'error');
-    } finally {
-      setEditSubmitting(false);
+    const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+    const resData = await res.json();
+    if (resData.success) {
+      showAlert('✨ License key details updated successfully!', 'success');
+      onRefresh();
+    } else {
+      showAlert(resData.error || 'Failed to update license key', 'error');
+      throw new Error(resData.error || 'Failed to update license key');
     }
   };
 
@@ -767,81 +746,16 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
         </div>
       </BaseModal>
 
-      {/* Edit License Modal */}
-      <BaseModal
+      {/* Centralized Edit License Modal */}
+      <EditLicenseModal
         isOpen={!!editingLic}
         onClose={() => setEditingLic(null)}
-        title={`Edit License Key #${editingLic?.id || ''}`}
-        icon={Edit}
-        maxWidth="lg"
-      >
-        {editingLic && (
-          <form onSubmit={handleSaveEditLicense} className="space-y-4">
-            <div className="p-3 bg-pm-input/50 rounded-xl border border-pm-border space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-pm-secondary">License Key</label>
-              <div className="font-mono text-sm font-bold text-purple-400 select-all">{editingLic.license_key}</div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormSelect
-                label="Package Tier"
-                value={editTier}
-                onChange={e => setEditTier(e.target.value)}
-                options={tierOptions}
-              />
-
-
-              <FormSelect
-                label="License Status"
-                value={editStatus}
-                onChange={e => setEditStatus(e.target.value as any)}
-                options={[
-                  { value: 'active', label: 'ACTIVE' },
-                  { value: 'suspended', label: 'SUSPENDED' },
-                  { value: 'expired', label: 'EXPIRED' },
-                ]}
-              />
-            </div>
-
-            <FormInput
-              label="Bound Store Domain"
-              type="text"
-              placeholder="e.g. store.myshop.com"
-              value={editStoreUrl}
-              onChange={e => setEditStoreUrl(e.target.value)}
-            />
-
-            <FormInput
-              label="Expiration Date (Leave blank for Lifetime)"
-              type="date"
-              value={editExpiresAt}
-              onChange={e => setEditExpiresAt(e.target.value)}
-            />
-
-            <FormSelect
-              label="Assigned Client Account"
-              value={editUserId}
-              onChange={e => setEditUserId(e.target.value ? Number(e.target.value) : '')}
-              options={[
-                { value: '', label: '-- Unassigned (Pool Key) --' },
-                ...users.map(u => ({
-                  value: String(u.id),
-                  label: `👤 ${u.name ? `${u.name} (${u.email})` : u.email} ${u.company_name ? `• 🏢 ${u.company_name}` : ''}`
-                }))
-              ]}
-            />
-
-            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-              <Button variant="neutral" size="md" type="button" onClick={() => setEditingLic(null)}>
-                {t('btn_cancel')}
-              </Button>
-              <Button variant="primary" size="md" type="submit" loading={editSubmitting}>
-                Save License Changes
-              </Button>
-            </div>
-          </form>
-        )}
-      </BaseModal>
+        license={editingLic}
+        companies={companies}
+        users={users}
+        tiers={tiers}
+        onSave={handleSaveEditLicense}
+      />
     </div>
   );
 };

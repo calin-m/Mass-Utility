@@ -136,15 +136,22 @@ class LicenseRepository
         return $stmt->execute([$userId, $cleanStoreUrl, $licenseId]);
     }
 
-    public function updateLicense(int $id, string $status, string $tier, ?string $expiry, ?string $storeUrl = null, ?int $userId = null): bool
+    public function updateLicense(int $id, string $status, string $tier, ?string $expiry, ?string $storeUrl = null, ?int $userId = null, ?int $companyId = null): bool
     {
         $cleanStoreUrl = !empty($storeUrl) ? trim($storeUrl) : null;
-        if ($userId !== null) {
-            $stmt = $this->db->prepare("UPDATE pm_licenses SET status = ?, package_tier = ?, expires_at = ?, store_url = ?, user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-            return $stmt->execute([$status, $tier, $expiry, $cleanStoreUrl, $userId, $id]);
+
+        // If companyId is not explicitly provided but userId is given, resolve company_id from user
+        if ($companyId === null && $userId !== null) {
+            $uStmt = $this->db->prepare("SELECT company_id FROM pm_users WHERE id = ?");
+            $uStmt->execute([$userId]);
+            $cVal = $uStmt->fetchColumn();
+            if ($cVal !== false && $cVal !== null) {
+                $companyId = (int)$cVal;
+            }
         }
-        $stmt = $this->db->prepare("UPDATE pm_licenses SET status = ?, package_tier = ?, expires_at = ?, store_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-        return $stmt->execute([$status, $tier, $expiry, $cleanStoreUrl, $id]);
+
+        $stmt = $this->db->prepare("UPDATE pm_licenses SET status = ?, package_tier = ?, expires_at = ?, store_url = ?, user_id = ?, company_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        return $stmt->execute([$status, $tier, $expiry, $cleanStoreUrl, $userId, $companyId, $id]);
     }
 
     public function deleteLicense(int $id): bool

@@ -412,7 +412,12 @@ class AdminApiController
     private function update(): void
     {
         $id = (int)($_POST['id'] ?? 0);
-        $userId = isset($_POST['user_id']) ? (int)$_POST['user_id'] : null;
+        $userId = isset($_POST['user_id']) && $_POST['user_id'] !== '' ? (int)$_POST['user_id'] : null;
+        if ($userId === 0) $userId = null;
+
+        $companyId = isset($_POST['company_id']) && $_POST['company_id'] !== '' ? (int)$_POST['company_id'] : null;
+        if ($companyId === 0) $companyId = null;
+
         $status = $_POST['status'] ?? 'active';
         $tier = $_POST['package_tier'] ?? $_POST['tier'] ?? 'basic';
         $storeUrl = $_POST['store_url'] ?? null;
@@ -430,12 +435,13 @@ class AdminApiController
         }
 
         try {
-            $success = $this->repo->updateLicense($id, $status, $tier, $expiry, $storeUrl, $userId);
+            $success = $this->repo->updateLicense($id, $status, $tier, $expiry, $storeUrl, $userId, $companyId);
             if ($success) {
                 $adminUser = $_SESSION['admin_username'] ?? 'admin';
                 $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
                 $this->repo->logAdminAction($adminUser, 'UPDATE_LICENSE', 'license', (string)$id, [
                     'user_id' => $userId,
+                    'company_id' => $companyId,
                     'status' => $status,
                     'package_tier' => $tier,
                     'expires_at' => $expiry,
