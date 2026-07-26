@@ -182,7 +182,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       formData.append('id', String(user.id));
       formData.append('password', resetPassword.trim());
 
-      const res = await fetch('index.php?action=api_reset_password', { method: 'POST', body: formData });
+      const res = await fetch('index.php?action=api_reset_user_password', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`Password reset for ${user.email} successfully!`, 'success');
@@ -279,7 +279,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
           </Button>
 
           <Button
-            variant="neutral"
+            variant={isSuspended ? 'success' : 'warning'}
             size="sm"
             icon={isSuspended ? ShieldCheck : ShieldAlert}
             onClick={handleToggleStatus}
@@ -293,7 +293,9 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
             size="sm"
             icon={Trash2}
             onClick={() => setShowDeleteModal(true)}
-          />
+          >
+            {t('btn_delete') || 'Delete'}
+          </Button>
         </div>
       }
       tabs={subTabs}

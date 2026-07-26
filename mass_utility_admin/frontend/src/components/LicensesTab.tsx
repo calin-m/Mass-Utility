@@ -179,7 +179,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
       formData.append('id', String(confirmLic.id));
       formData.append('status', confirmActionType === 'suspend' ? 'suspended' : 'active');
 
-      const res = await fetch('?action=api_update_license', { method: 'POST', body: formData });
+      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`License status marked as ${confirmActionType.toUpperCase()}`, 'success');
@@ -358,7 +358,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
             loading={isRefreshing}
             onClick={handleRefresh}
           >
-            Reload Registry
+            {t('btn_refresh') || 'Refresh'}
           </Button>
         }
       />

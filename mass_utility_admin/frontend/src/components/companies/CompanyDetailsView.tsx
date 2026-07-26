@@ -345,7 +345,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
       headerActions={
         <div className="flex items-center gap-2">
           <Button
-            variant="neutral"
+            variant={isSuspended ? 'success' : 'warning'}
             size="sm"
             icon={isSuspended ? ShieldCheck : ShieldAlert}
             onClick={handleToggleStatus}
@@ -358,7 +358,9 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
             size="sm"
             icon={Trash2}
             onClick={() => setIsDeleteOpen(true)}
-          />
+          >
+            {t('btn_delete') || 'Delete'}
+          </Button>
         </div>
       }
       tabs={subTabs}
