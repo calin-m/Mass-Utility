@@ -12,16 +12,18 @@
         "auto_document": "python .orchestra/.conductor/tools/cli_auto_documenter.py",
         "build": "php .bench/scripts/build_js.php",
         "map_frontend": "php .bench/scripts/generate_frontend_map.php",
-        "map_architecture": "python .bench/scripts/generate_architecture_graph.py",
-        "design_system_map": "python .bench/scripts/generate_design_system_map.py",
-        "route_mapper": "python .bench/scripts/generate_route_contract_map.py",
+        "map_architecture": "python .orchestra/.conductor/tools/generate_architecture_graph.py",
+        "design_system_map": "python .orchestra/.conductor/tools/generate_design_system_map.py",
+        "route_mapper": "python .orchestra/.conductor/tools/generate_route_contract_map.py",
+        "component_linter": "python .orchestra/.conductor/tools/cli_componentization_linter.py",
         "security_audit": "python .orchestra/.conductor/tools/cli_security_audit.py",
         "dead_code_scanner": "python .orchestra/.conductor/tools/cli_dead_code_scanner.py",
         "api_contract_guard": "python .orchestra/.conductor/tools/cli_api_contract_guard.py",
         "architecture_linter": "python .orchestra/.conductor/tools/cli_architecture_linter.py",
         "i18n_linter": "python .orchestra/.conductor/tools/cli_i18n_linter.py",
-        "sandbox_dev": "python .bench/scripts/cli_sandbox_runner.py",
-        "sandbox_preflight": "python .bench/scripts/cli_sandbox_runner.py --dry-run"
+        "sandbox_dev": "python .orchestra/.conductor/tools/cli_sandbox_runner.py",
+        "sandbox_preflight": "python .orchestra/.conductor/tools/cli_sandbox_runner.py --dry-run"
+
     },
     "pre_commit_hooks": [
         "sandbox_preflight",
