@@ -11,6 +11,7 @@ import { PageHeader } from './common/PageHeader';
 import { DirectoryToolbar } from './common/DirectoryToolbar';
 import { LicenseRowCard } from './common/LicenseRowCard';
 import { IssueLicenseModal } from './common/IssueLicenseModal';
+import { LicenseDetailsView } from './licenses/LicenseDetailsView';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getSortedTierOptions } from '../utils/tierUtils';
 
@@ -43,7 +44,26 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 
+  // Sub-View Inspection Navigation State ('list' vs 'details')
+  const [activeSubView, setActiveSubView] = useState<'list' | 'details'>('list');
+  const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
+
   const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
+
+  const handleSelectLicense = (lic: License) => {
+    setSelectedLicense(lic);
+    setActiveSubView('details');
+  };
+
+  const handleBackToList = () => {
+    setActiveSubView('list');
+    setSelectedLicense(null);
+  };
+
+  // Keep selectedLicense synchronized with refreshed licenses array
+  const currentLicense = selectedLicense
+    ? licenses.find((l) => l.id === selectedLicense.id) || selectedLicense
+    : null;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -72,11 +92,6 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const [extendMonths, setExtendMonths] = useState<number>(12);
   const [extendCustomDate, setExtendCustomDate] = useState<string>('');
   const [extendSubmitting, setExtendSubmitting] = useState(false);
-
-  // Edit Domains Modal State
-  const [domainLic, setDomainLic] = useState<License | null>(null);
-  const [domainInput, setDomainInput] = useState<string>('');
-  const [domainSubmitting, setDomainSubmitting] = useState(false);
 
   // Reassign Client Modal State
   const [reassignLic, setReassignLic] = useState<License | null>(null);
@@ -309,6 +324,24 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
     { key: 'EXPIRED', label: '🔴 Expired', count: expiredCount },
   ];
 
+  // Render Sub-Page Details View if activeSubView === 'details'
+  if (activeSubView === 'details' && currentLicense) {
+    return (
+      <LicenseDetailsView
+        license={currentLicense}
+        users={users}
+        companies={companies}
+        tiers={tiers}
+        onBack={handleBackToList}
+        onRefresh={onRefresh}
+        showAlert={showAlert}
+        onInspectClient={onInspectClient}
+        onInspectCompany={onInspectCompany}
+        onEditLicense={openEditLicenseModal}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Shared Page Header */}
@@ -411,6 +444,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
               license={lic}
               users={users}
               companies={companies}
+              onInspectLicense={handleSelectLicense}
               onInspectClient={onInspectClient}
               onInspectCompany={onInspectCompany}
               onEditLicense={openEditLicenseModal}
@@ -449,9 +483,13 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                       <tr key={lic.id} className="hover:bg-pm-input/50 transition">
                         <td className="p-3.5 font-mono">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-pm-text text-xs">
+                            <button
+                              type="button"
+                              onClick={() => handleSelectLicense(lic)}
+                              className="font-bold text-pm-text hover:text-purple-400 transition text-xs text-left"
+                            >
                               {isVisible ? lic.license_key : '••••-••••-••••-••••'}
-                            </span>
+                            </button>
                             <button
                               type="button"
                               onClick={() => toggleKeyMask(lic.id)}
@@ -519,25 +557,26 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             <Button
                               variant="neutral"
                               size="sm"
-                              icon={Edit}
-                              onClick={() => openEditLicenseModal(lic)}
-                              className="!p-1.5 !h-7"
-                              title="Edit License Details"
-                            />
+                              icon={Eye}
+                              onClick={() => handleSelectLicense(lic)}
+                              title="Inspect Key Details Sub-Page"
+                            >
+                              Inspect
+                            </Button>
                             <Button
                               variant="neutral"
                               size="sm"
-                              icon={Clock}
-                              onClick={() => setExtendingLic(lic)}
-                              className="!p-1.5 !h-7"
-                              title="Extend Expiry"
-                            />
+                              icon={Edit}
+                              onClick={() => openEditLicenseModal(lic)}
+                              title="Edit License Details"
+                            >
+                              Edit
+                            </Button>
                             <Button
                               variant={isSuspended ? 'primary' : 'neutral'}
                               size="sm"
                               icon={isSuspended ? Unlock : ShieldAlert}
                               onClick={() => promptConfirmStatus(lic, isSuspended ? 'activate' : 'suspend')}
-                              className="!p-1.5 !h-7"
                               title={isSuspended ? 'Activate License' : 'Suspend License'}
                             />
                             <Button
@@ -545,9 +584,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                               size="sm"
                               icon={Trash2}
                               onClick={() => setDeletingLic(lic)}
-                              className="!p-1.5 !h-7"
                               title="Delete License"
-                            />
+                            >
+                              Delete
+                            </Button>
                           </div>
                         </td>
                       </tr>
