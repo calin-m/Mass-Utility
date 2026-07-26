@@ -76,3 +76,8 @@ Thumbs.db
 .clinerules
 .ai_plan.md
 # <<< END ORCHESTRA FRAMEWORK AUTO-GENERATED BLOCK <<<
+
+# Scaffolded rules
+**/build/
+**/*.pyo
+**/*.sqlite
