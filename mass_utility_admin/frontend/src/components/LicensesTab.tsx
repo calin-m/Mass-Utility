@@ -3,6 +3,7 @@ import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Tra
 import { BaseModal } from './common/BaseModal';
 import { ConfirmModal } from './common/ConfirmModal';
 import { TableCellIdentity } from './common/TableCellIdentity';
+import { TableCellActions } from './common/TableCellActions';
 import { StatCard } from './common/StatCard';
 import { StatSummaryGrid } from './common/StatSummaryGrid';
 import { DirectoryCardTable } from './common/DirectoryCardTable';
@@ -430,14 +431,14 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                  <th className="p-3.5">{t('th_license_key')}</th>
-                  <th className="p-3.5">{t('th_assigned_user')}</th>
-                  <th className="p-3.5">Company</th>
-                  <th className="p-3.5">{t('th_tier')}</th>
-                  <th className="p-3.5">{t('th_status')}</th>
-                  <th className="p-3.5">Store URL</th>
-                  <th className="p-3.5">{t('th_expires')}</th>
-                  <th className="p-3.5 text-right">{t('th_actions')}</th>
+                  <th className="p-3 px-4">{t('th_license_key')}</th>
+                  <th className="p-3">{t('th_assigned_user')}</th>
+                  <th className="p-3">Company</th>
+                  <th className="p-3">{t('th_tier')}</th>
+                  <th className="p-3">{t('th_status')}</th>
+                  <th className="p-3">Store URL</th>
+                  <th className="p-3">{t('th_expires')}</th>
+                  <th className="p-3 text-right">{t('th_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-pm-border">
@@ -460,7 +461,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
 
                     return (
                       <tr key={lic.id} className="hover:bg-pm-input/50 transition">
-                        <td className="p-3.5">
+                        <td className="p-3">
                           <TableCellIdentity
                             icon={Key}
                             title={isVisible ? lic.license_key : '••••-••••-••••-••••'}
@@ -488,7 +489,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             }
                           />
                         </td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           {lic.user_id ? (
                             <button
                               type="button"
@@ -504,7 +505,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             <span className="text-pm-secondary italic">Unassigned</span>
                           )}
                         </td>
-                        <td className="p-3.5 font-bold">
+                        <td className="p-3 font-bold">
                           {companyName ? (
                             <div className="flex items-center gap-1.5 text-purple-400">
                               <Building2 className="w-3.5 h-3.5 shrink-0" />
@@ -524,12 +525,12 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             <span className="text-pm-secondary/70 italic text-[11px] font-mono">Standalone</span>
                           )}
                         </td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/30">
                             {lic.package_tier || 'basic'}
                           </span>
                         </td>
-                        <td className="p-3.5">
+                        <td className="p-3">
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
                               isSuspended
@@ -542,53 +543,24 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             {isSuspended ? 'Suspended' : lic.status === 'active' ? 'Active' : lic.status}
                           </span>
                         </td>
-                        <td className="p-3.5 font-mono text-xs text-pm-secondary">
+                        <td className="p-3 font-mono text-xs text-pm-secondary">
                           {lic.store_url ? (
                             <span className="truncate max-w-[150px] inline-block">{lic.store_url}</span>
                           ) : (
                             <span className="italic">Any Store</span>
                           )}
                         </td>
-                        <td className="p-3.5 font-mono text-xs text-pm-secondary">
+                        <td className="p-3 font-mono text-xs text-pm-secondary">
                           {lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Lifetime'}
                         </td>
-                        <td className="p-3.5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <Button
-                              variant="neutral"
-                              size="sm"
-                              icon={Eye}
-                              onClick={() => handleSelectLicense(lic)}
-                              title="Inspect Key Details Sub-Page"
-                            >
-                              Inspect
-                            </Button>
-                            <Button
-                              variant="neutral"
-                              size="sm"
-                              icon={Edit}
-                              onClick={() => openEditLicenseModal(lic)}
-                              title="Edit License Details"
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant={isSuspended ? 'primary' : 'neutral'}
-                              size="sm"
-                              icon={isSuspended ? Unlock : ShieldAlert}
-                              onClick={() => promptConfirmStatus(lic, isSuspended ? 'activate' : 'suspend')}
-                              title={isSuspended ? 'Activate License' : 'Suspend License'}
-                            />
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              icon={Trash2}
-                              onClick={() => setDeletingLic(lic)}
-                              title="Delete License"
-                            >
-                              Delete
-                            </Button>
-                          </div>
+                        <td className="p-3 text-right">
+                          <TableCellActions
+                            onInspect={() => handleSelectLicense(lic)}
+                            inspectLabel="Inspect"
+                            isSuspended={isSuspended}
+                            onToggleSuspend={() => promptConfirmStatus(lic, isSuspended ? 'activate' : 'suspend')}
+                            onDelete={() => setDeletingLic(lic)}
+                          />
                         </td>
                       </tr>
                     );

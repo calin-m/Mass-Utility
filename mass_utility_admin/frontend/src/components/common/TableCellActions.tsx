@@ -36,7 +36,7 @@ export const TableCellActions: React.FC<TableCellActionsProps> = ({
 
       {onToggleSuspend && (
         <Button
-          variant={isSuspended ? 'primary' : 'neutral'}
+          variant={isSuspended ? 'success' : 'warning'}
           size="sm"
           icon={isSuspended ? ShieldCheck : ShieldAlert}
           onClick={onToggleSuspend}

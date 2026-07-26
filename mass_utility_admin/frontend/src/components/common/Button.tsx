@@ -2,7 +2,7 @@ import React from 'react';
 import { LucideIcon, RefreshCw } from 'lucide-react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'neutral' | 'danger' | 'success' | 'ghost';
+  variant?: 'primary' | 'neutral' | 'danger' | 'warning' | 'success' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   icon?: LucideIcon;
   loading?: boolean;
@@ -23,10 +23,12 @@ export const Button: React.FC<ButtonProps> = ({
     switch (variant) {
       case 'primary':
         return 'pm-btn-primary shadow-md shadow-purple-950/30 text-white hover:opacity-95';
+      case 'warning':
+        return 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 font-semibold';
       case 'success':
-        return 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950/30 border border-emerald-500/40';
+        return 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30 font-semibold';
       case 'danger':
-        return 'pm-btn-danger-outline hover:bg-rose-500 hover:text-white text-rose-500 border border-rose-500/30';
+        return 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 font-semibold';
       case 'ghost':
         return 'bg-transparent hover:bg-pm-input text-pm-secondary hover:text-pm-text border border-transparent';
       case 'neutral':
