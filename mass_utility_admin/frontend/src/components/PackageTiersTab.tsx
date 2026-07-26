@@ -332,6 +332,9 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     }
   };
 
+  const checkCardStyle = "flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-all has-[:checked]:bg-pm-primary/5 has-[:checked]:border-pm-primary/40";
+  const checkCardSmallStyle = "flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-all has-[:checked]:bg-pm-primary/5 has-[:checked]:border-pm-primary/40";
+
   return (
     <div className="space-y-6">
       {/* Top Header Actions */}
@@ -568,7 +571,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">1. ⚡ AST Query Engine & Visual Tools</h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.query_visual_filter}
@@ -583,7 +586,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.query_visual_compile}
@@ -598,7 +601,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.query_visual_mutate}
@@ -622,7 +625,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">2. 🗄️ Database & File Operations Suite</h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <label className="flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardSmallStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.db_tools_export}
@@ -635,7 +638,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardSmallStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.db_tools_backup}
@@ -648,7 +651,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardSmallStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.db_diff_inspector}
@@ -661,7 +664,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardSmallStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.db_tools_restore}
@@ -674,7 +677,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardSmallStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.file_tools_browse}
@@ -687,7 +690,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardSmallStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.file_tools_backup}
@@ -700,7 +703,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardSmallStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.file_diff_inspector}
@@ -713,7 +716,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardSmallStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.PM_ENABLE_HISTORY}
@@ -735,7 +738,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">3. 🧹 Purging, GDPR & Governor Automations</h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.PM_ENABLE_GHOST_PURGER}
@@ -748,7 +751,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.PM_ENABLE_GDPR_SWEEPER}
@@ -761,7 +764,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.backup_automation}
@@ -774,7 +777,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.sweeper_execution}
@@ -787,7 +790,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.governor_telemetry}
@@ -800,7 +803,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3.5 bg-pm-bg rounded-lg border border-pm-border cursor-pointer hover:border-pm-primary/40 transition-colors">
+            <label className={checkCardStyle}>
               <input
                 type="checkbox"
                 checked={!!capabilities.governor_autopilot}
