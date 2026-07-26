@@ -15,16 +15,32 @@ import { useTranslation } from '../../i18n/LanguageContext';
 interface ClientListViewProps {
   users: UserAccount[];
   licenses: License[];
+  tiers?: any[];
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   onSelectClient: (user: UserAccount, tab?: 'overview' | 'edit') => void;
 }
 
-export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, onRefresh, showAlert, onSelectClient }) => {
+export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, tiers = [], onRefresh, showAlert, onSelectClient }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const tierOptions = useMemo(() => {
+    if (tiers && tiers.length > 0) {
+      return tiers.map((t: any) => ({
+        value: (t.name || '').toLowerCase(),
+        label: `${(t.name || '').toUpperCase()} TIER`
+      }));
+    }
+    return [
+      { value: 'basic', label: 'BASIC TIER' },
+      { value: 'pro', label: 'PRO TIER' },
+      { value: 'enterprise', label: 'ENTERPRISE TIER' },
+    ];
+  }, [tiers]);
+
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -632,12 +648,9 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                   label="Package Tier for Issued Key"
                   value={selectedIssueTier}
                   onChange={e => setSelectedIssueTier(e.target.value)}
-                  options={[
-                    { value: 'basic', label: 'BASIC TIER' },
-                    { value: 'pro', label: 'PRO TIER' },
-                    { value: 'enterprise', label: 'ENTERPRISE TIER' },
-                  ]}
+                  options={tierOptions}
                 />
+
               </div>
             )}
           </div>

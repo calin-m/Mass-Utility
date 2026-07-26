@@ -264,6 +264,7 @@ export const App: React.FC = () => {
             users={users}
             licenses={licenses}
             companies={companies}
+            tiers={tiers}
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             initialSelectedUser={inspectedClient}
@@ -275,12 +276,14 @@ export const App: React.FC = () => {
             licenses={licenses}
             users={users}
             companies={companies}
+            tiers={tiers}
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             onInspectClient={handleInspectClient}
             onInspectCompany={handleInspectCompany}
           />
         )}
+
 
 
         {activeTab === 'tiers' && (

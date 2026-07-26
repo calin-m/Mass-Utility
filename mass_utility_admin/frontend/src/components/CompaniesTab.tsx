@@ -8,6 +8,7 @@ interface CompaniesTabProps {
   companies: Company[];
   users: any[];
   licenses: any[];
+  tiers?: any[];
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (user: any) => void;
@@ -19,6 +20,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
   companies,
   users,
   licenses,
+  tiers = [],
   onRefresh,
   showAlert,
   onInspectClient,
@@ -53,6 +55,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
           company={currentCompany}
           users={users}
           licenses={licenses}
+          tiers={tiers}
           initialTab={selectedTab}
           onBack={handleBackToList}
           onRefresh={onRefresh}
@@ -60,6 +63,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
           onInspectClient={onInspectClient}
           highlightedLicenseKey={highlightedLicenseKey || undefined}
         />
+
 
       ) : (
         <CompanyListView

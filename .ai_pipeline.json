@@ -23,7 +23,6 @@
         "i18n_linter": "python .orchestra/.conductor/tools/cli_i18n_linter.py",
         "sandbox_dev": "python .orchestra/.conductor/tools/cli_sandbox_runner.py",
         "sandbox_preflight": "python .orchestra/.conductor/tools/cli_sandbox_runner.py --dry-run"
-
     },
     "pre_commit_hooks": [
         "sandbox_preflight",

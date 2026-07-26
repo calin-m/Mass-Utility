@@ -92,58 +92,53 @@ export const TierCardGrid: React.FC<TierCardGridProps> = ({
             </div>
 
             {/* Action Bar */}
-            <div className="pt-2 border-t border-pm-border flex items-center justify-between gap-1">
-              <span className="text-[10px] font-bold text-pm-primary uppercase">
+            <div className="pt-2.5 border-t border-pm-border flex items-center justify-between gap-1 mt-2">
+              <span className="text-[10px] font-bold text-pm-primary uppercase tracking-wider">
                 {isSelected ? '● Active' : 'Select'}
               </span>
-              
+
               <div className="flex items-center gap-1">
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  icon={Copy}
                   onClick={(e) => {
                     e.stopPropagation();
                     onCloneClick(tier);
                   }}
-                  className="p-1 h-7 w-7"
+                  className="px-2 py-1 rounded-md text-[10px] font-bold bg-pm-input/80 hover:bg-purple-500/15 text-pm-secondary hover:text-purple-400 border border-pm-border flex items-center gap-1 transition"
                   title="Clone Tier Settings"
                 >
-                  {''}
-                </Button>
+                  <Copy className="w-3 h-3" />
+                  <span>Clone</span>
+                </button>
 
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  icon={Edit3}
                   onClick={(e) => {
                     e.stopPropagation();
                     onRenameClick(tier);
                   }}
-                  className="p-1 h-7 w-7"
+                  className="px-2 py-1 rounded-md text-[10px] font-bold bg-pm-input/80 hover:bg-indigo-500/15 text-pm-secondary hover:text-indigo-400 border border-pm-border flex items-center gap-1 transition"
                   title="Rename Tier"
                 >
-                  {''}
-                </Button>
+                  <Edit3 className="w-3 h-3" />
+                  <span>Rename</span>
+                </button>
 
-                <Button
+                <button
                   type="button"
-                  variant="danger"
-                  size="sm"
-                  icon={Trash2}
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteClick(tier);
                   }}
-                  className="p-1 h-7 w-7"
+                  className="px-2 py-1 rounded-md text-[10px] font-bold bg-pm-input/80 hover:bg-rose-500/15 text-pm-secondary hover:text-rose-400 border border-pm-border flex items-center gap-1 transition"
                   title="Delete Tier"
                 >
-                  {''}
-                </Button>
+                  <Trash2 className="w-3 h-3" />
+                  <span>Delete</span>
+                </button>
               </div>
             </div>
+
           </div>
         );
       })}

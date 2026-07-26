@@ -15,10 +15,10 @@ interface CompanyDetailsViewProps {
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (user: any) => void;
   highlightedLicenseKey?: string;
+  tiers?: any[];
 }
 
-export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, highlightedLicenseKey }) => {
-
+export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, highlightedLicenseKey, tiers = [] }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
@@ -26,6 +26,18 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
   const [poolTier, setPoolTier] = useState('pro');
+
+  const tierOptions = (tiers && tiers.length > 0)
+    ? tiers.map((t: any) => ({
+        value: (t.name || '').toLowerCase(),
+        label: `${(t.name || '').toUpperCase()} TIER`
+      }))
+    : [
+        { value: 'basic', label: 'BASIC TIER' },
+        { value: 'pro', label: 'PRO TIER' },
+        { value: 'enterprise', label: 'ENTERPRISE TIER' },
+      ];
+
 
   const toggleKeyVisibility = (id: number) => {
     setVisibleKeys(prev => ({ ...prev, [id]: !prev[id] }));
@@ -697,10 +709,13 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                     onChange={e => setPoolTier(e.target.value)}
                     className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-1.5 text-xs font-bold text-pm-text focus:outline-none focus:border-purple-500"
                   >
-                    <option value="basic">BASIC TIER (Standard Feature Suite)</option>
-                    <option value="pro">PRO TIER (Advanced Automation &amp; Backups)</option>
-                    <option value="enterprise">ENTERPRISE TIER (Unlimited Multi-Store Pools)</option>
+                    {tierOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
+
                 </div>
 
                 <button

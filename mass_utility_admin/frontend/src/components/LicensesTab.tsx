@@ -40,16 +40,31 @@ interface LicensesTabProps {
   licenses: License[];
   users?: UserAccount[];
   companies?: any[];
+  tiers?: any[];
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (client: UserAccount) => void;
   onInspectCompany?: (company: any, licenseKey?: string) => void;
 }
 
-export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], companies = [], onRefresh, showAlert, onInspectClient, onInspectCompany }) => {
-
+export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], companies = [], tiers = [], onRefresh, showAlert, onInspectClient, onInspectCompany }) => {
   const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const tierOptions = useMemo(() => {
+    if (tiers && tiers.length > 0) {
+      return tiers.map((t: any) => ({
+        value: (t.name || '').toLowerCase(),
+        label: `${(t.name || '').toUpperCase()} TIER`
+      }));
+    }
+    return [
+      { value: 'basic', label: 'BASIC TIER' },
+      { value: 'pro', label: 'PRO TIER' },
+      { value: 'enterprise', label: 'ENTERPRISE TIER' },
+    ];
+  }, [tiers]);
+
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -379,11 +394,6 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     })),
   ];
 
-  const tierOptions = [
-    { value: 'basic', label: 'BASIC TIER' },
-    { value: 'pro', label: 'PRO TIER' },
-    { value: 'enterprise', label: 'ENTERPRISE TIER' },
-  ];
 
   return (
     <div className="space-y-6">
@@ -785,12 +795,9 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                 label="Package Tier"
                 value={editTier}
                 onChange={e => setEditTier(e.target.value)}
-                options={[
-                  { value: 'basic', label: 'BASIC TIER' },
-                  { value: 'pro', label: 'PRO TIER' },
-                  { value: 'enterprise', label: 'ENTERPRISE TIER' },
-                ]}
+                options={tierOptions}
               />
+
 
               <FormSelect
                 label="License Status"

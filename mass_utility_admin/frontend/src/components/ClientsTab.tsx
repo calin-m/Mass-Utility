@@ -7,12 +7,13 @@ interface ClientsTabProps {
   users: UserAccount[];
   licenses: License[];
   companies?: any[];
+  tiers?: any[];
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   initialSelectedUser?: UserAccount | null;
 }
 
-export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, companies = [], onRefresh, showAlert, initialSelectedUser }) => {
+export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, companies = [], tiers = [], onRefresh, showAlert, initialSelectedUser }) => {
   const [activeSubView, setActiveSubView] = useState<'list' | 'details'>(initialSelectedUser ? 'details' : 'list');
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(initialSelectedUser || null);
   const [selectedTab, setSelectedTab] = useState<'overview' | 'edit'>('overview');
@@ -52,9 +53,11 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, compani
     <ClientListView
       users={users}
       licenses={licenses}
+      tiers={tiers}
       onRefresh={onRefresh}
       showAlert={showAlert}
       onSelectClient={handleSelectClient}
     />
   );
 };
+
