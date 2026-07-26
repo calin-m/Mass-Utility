@@ -33,13 +33,17 @@ export function SubTabNav<T extends string = string>({
     if (!containerRef.current) return;
 
     const updatePill = () => {
-      const activeEl = containerRef.current?.querySelector<HTMLElement>(`[data-tab-id="${activeTab}"]`);
+      if (!containerRef.current) return;
+      const activeEl = containerRef.current.querySelector<HTMLElement>(`[data-tab-id="${activeTab}"]`);
       if (activeEl) {
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const activeRect = activeEl.getBoundingClientRect();
+
         setPillStyle({
-          left: activeEl.offsetLeft,
-          top: activeEl.offsetTop,
-          width: activeEl.offsetWidth,
-          height: activeEl.offsetHeight,
+          left: activeRect.left - containerRect.left + containerRef.current.scrollLeft,
+          top: activeRect.top - containerRect.top + containerRef.current.scrollTop,
+          width: activeRect.width,
+          height: activeRect.height,
           opacity: 1,
         });
       }
@@ -47,14 +51,23 @@ export function SubTabNav<T extends string = string>({
 
     updatePill();
 
+    // Attach scroll listener to keep pill pinned during horizontal scroll
+    const containerEl = containerRef.current;
+    if (containerEl) {
+      containerEl.addEventListener('scroll', updatePill, { passive: true });
+    }
+
     // Attach ResizeObserver for responsive window / font scaling safety
     let observer: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+    if (typeof ResizeObserver !== 'undefined' && containerEl) {
       observer = new ResizeObserver(updatePill);
-      observer.observe(containerRef.current);
+      observer.observe(containerEl);
     }
 
     return () => {
+      if (containerEl) {
+        containerEl.removeEventListener('scroll', updatePill);
+      }
       if (observer) observer.disconnect();
     };
   }, [activeTab, tabs]);
