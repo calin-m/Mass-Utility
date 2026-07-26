@@ -146,7 +146,8 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       formData.append('company', editCompany.trim());
       formData.append('company_name', editCompany.trim());
       formData.append('role', editRole);
-      formData.append('status', user.status);
+      formData.append('status', user.status || 'active');
+
 
       const res = await fetch('index.php?action=api_update_user', { method: 'POST', body: formData });
       const data = await res.json();
@@ -436,7 +437,8 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
 
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card p-3 rounded-lg border border-pm-border">
                 <div>
-                  <div className="text-xs font-bold text-pm-text">Account Status: <span className={isSuspended ? 'text-rose-400' : 'text-emerald-400'}>{user.status.toUpperCase()}</span></div>
+                  <div className="text-xs font-bold text-pm-text">Account Status: <span className={isSuspended ? 'text-rose-400' : 'text-emerald-400'}>{(user.status || 'active').toUpperCase()}</span></div>
+
                   <p className="text-[11px] text-pm-secondary">
                     {isSuspended ? 'This client account is currently suspended. Re-activate to restore store access.' : 'This client account is active and verified.'}
                   </p>

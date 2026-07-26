@@ -222,14 +222,19 @@ d:/Project Mass/
     │   └── v2/                     # Compiled V2 Super-Admin React SPA static assets (index.html, JS, CSS)
     ├── src/
     │   ├── Controller/
-    │   │   └── AdminApiController.php # Admin AJAX actions (key generation, company CRUD, user CRUD, assign license)
+    │   │   └── AdminApiController.php # Admin API dispatcher (login, list, create/update/delete company/user/tier, assign license)
     │   ├── Repository/
     │   │   └── LicenseRepository.php  # License, company, and user CRUD with B2B retention safeguard
     │   └── Service/
     │       └── AdminSettingsManager.php # PDO manager & self-healing SQLite schema auto-migrations
     └── frontend/                   # V2 REACT 18 + TYPESCRIPT + VITE SPA SOURCE
         └── src/
-            └── components/         # CompanyListView, CompanyDetailsView, ClientListView, ClientDetailsView, LicensesTab, PackageTiersTab, SecurityHealthTab
+            ├── components/         # CompanyListView, CompanyDetailsView, ClientListView, ClientDetailsView, LicensesTab, PackageTiersTab, SecurityHealthTab
+            │   └── common/         # Atomic UI Primitives (LicenseRowCard, FormSelect, FormInput, BaseModal, StatusBadge, Button, DirectoryToolbar, PaginationBar)
+            ├── hooks/              # useAdminData.ts (Custom React hook encapsulating data fetching & state management)
+            ├── types/              # adminApi.ts (Central TypeScript domain models: License, UserAccount, Company, PackageTier)
+            └── utils/              # tierUtils.ts (Deterministic tier ranking engine), licenseUtils.ts (Key masking & clipboard utilities)
+
 ```
 
 ---

@@ -11,31 +11,8 @@ import { PaginationBar } from './common/PaginationBar';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getSortedTierOptions } from '../utils/tierUtils';
 
-export interface License {
-  id: number;
-  company_id?: number | null;
-  company_name?: string | null;
-  user_id?: number | null;
-  user_email?: string | null;
-  user_name?: string | null;
-  license_key: string;
-  store_url: string | null;
-  package_tier: string;
-  status: 'active' | 'suspended' | 'expired';
-  expires_at: string | null;
-  created_at: string;
-}
-
-export interface UserAccount {
-  id: number;
-  name?: string | null;
-  email: string;
-  company_name: string | null;
-  company_id?: number | null;
-  role?: string | null;
-  status: string;
-  created_at: string;
-}
+import { License, UserAccount } from '../types/adminApi';
+export type { License, UserAccount };
 
 interface LicensesTabProps {
   licenses: License[];
@@ -45,7 +22,8 @@ interface LicensesTabProps {
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (client: UserAccount) => void;
-  onInspectCompany?: (company: any, licenseKey?: string) => void;
+  onInspectCompany?: (company: any, licenseKey?: string | null) => void;
+
 }
 
 export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], companies = [], tiers = [], onRefresh, showAlert, onInspectClient, onInspectCompany }) => {
@@ -114,7 +92,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
   const [editExpiresAt, setEditExpiresAt] = useState<string>('');
   const [editStoreUrl, setEditStoreUrl] = useState<string>('');
   const [editUserId, setEditUserId] = useState<number | ''>('');
-  const [editStatus, setEditStatus] = useState<'active' | 'suspended' | 'expired'>('active');
+  const [editStatus, setEditStatus] = useState<'active' | 'expiring' | 'suspended' | 'expired' | 'revoked'>('active');
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   const openEditLicenseModal = (lic: License) => {
@@ -125,6 +103,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     setEditUserId(lic.user_id || '');
     setEditStatus(lic.status || 'active');
   };
+
 
   const handleSaveEditLicense = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -328,7 +307,8 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
     }
   };
 
-  const renderExpirationRadar = (expiresAt: string | null) => {
+  const renderExpirationRadar = (expiresAt: string | null | undefined) => {
+
     if (!expiresAt) {
       return <span className="px-2 py-0.5 text-[0.65rem] font-bold uppercase rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 font-mono">♾️ Lifetime Key</span>;
     }
@@ -587,7 +567,8 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                                     type="button"
                                     onClick={() => {
                                       const foundComp = companies.find(c => (c.company_name || '').toLowerCase() === (lic.company_name || '').toLowerCase());
-                                      if (foundComp) onInspectCompany(foundComp, lic.license_key);
+                                      if (foundComp) onInspectCompany(foundComp, lic.license_key || undefined);
+
                                     }}
                                     className="hover:underline hover:text-purple-400 font-bold"
                                   >

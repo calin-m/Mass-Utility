@@ -48,9 +48,10 @@ export interface PackageTierCapabilities {
 export interface PackageTier {
   id?: number;
   name: string;
-  capabilities: PackageTierCapabilities;
+  capabilities: PackageTierCapabilities | Record<string, any>;
   active_licenses?: number;
 }
+
 
 interface PackageTiersTabProps {
   tiers: PackageTier[];
@@ -221,9 +222,9 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
   const activeTierObj = displayTiers.find(t => t.name.toLowerCase() === selectedTier.toLowerCase());
 
-  const currentCaps = activeTierObj && activeTierObj.capabilities && Object.keys(activeTierObj.capabilities).length > 0
+  const currentCaps = (activeTierObj && activeTierObj.capabilities && Object.keys(activeTierObj.capabilities).length > 0
     ? activeTierObj.capabilities
-    : getDefaultCapsForTier(selectedTier);
+    : getDefaultCapsForTier(selectedTier)) as PackageTierCapabilities;
 
   const [capabilities, setCapabilities] = useState<PackageTierCapabilities>(currentCaps);
 
@@ -241,11 +242,12 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     setSelectedTier(tierName);
     setIsRenaming(false);
     const tierObj = displayTiers.find(t => t.name.toLowerCase() === tierName.toLowerCase());
-    const caps = tierObj && tierObj.capabilities && Object.keys(tierObj.capabilities).length > 0
+    const caps = (tierObj && tierObj.capabilities && Object.keys(tierObj.capabilities).length > 0
       ? tierObj.capabilities
-      : getDefaultCapsForTier(tierName);
+      : getDefaultCapsForTier(tierName)) as PackageTierCapabilities;
     setCapabilities(caps);
   };
+
 
   const handleToggle = (key: keyof PackageTierCapabilities) => {
     setCapabilities(prev => ({

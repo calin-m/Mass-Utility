@@ -11,17 +11,10 @@ import { FormSelect } from '../common/FormSelect';
 import { PaginationBar } from '../common/PaginationBar';
 import { useTranslation } from '../../i18n/LanguageContext';
 
-export interface Company {
-  id: number;
-  company_name: string;
-  tax_id?: string;
-  max_licenses: number;
-  status: string;
-  user_count?: number;
-  license_count?: number;
-  created_at: string;
-  updated_at?: string;
-}
+import { Company } from '../../types/adminApi';
+export type { Company };
+
+
 
 interface CompanyListViewProps {
   companies: Company[];

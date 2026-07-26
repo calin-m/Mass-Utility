@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Key, Globe, Eye, EyeOff, Copy, Check, Edit, Building2, User, ExternalLink, Trash2, Calendar, ShieldAlert } from 'lucide-react';
-import { License, UserAccount } from '../LicensesTab';
+import { License, UserAccount } from '../../types/adminApi';
 import { StatusBadge } from './StatusBadge';
 import { Button } from './Button';
+import { maskLicenseKey, copyLicenseKeyToClipboard } from '../../utils/licenseUtils';
 
 export interface LicenseRowCardProps {
   license: License;
@@ -36,18 +37,14 @@ export const LicenseRowCard: React.FC<LicenseRowCardProps> = ({
 
   const isHighlighted = highlightedKey && license.license_key === highlightedKey;
 
-  const maskKey = (key: string) => {
-    if (!key) return '';
-    const parts = key.split('-');
-    if (parts.length < 3) return key.substring(0, 8) + '••••••••';
-    return `${parts[0]}-${parts[1]}-••••••••••••-${parts[parts.length - 1]}`;
+  const copyKey = async () => {
+    const success = await copyLicenseKeyToClipboard(license.license_key);
+    if (success) {
+      setCopiedKey(true);
+      setTimeout(() => setCopiedKey(false), 2000);
+    }
   };
 
-  const copyKey = () => {
-    navigator.clipboard.writeText(license.license_key);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
-  };
 
   // Find assigned company object if license belongs to a company or user
   const assignedUser = license.user_id ? users.find(u => Number(u.id) === Number(license.user_id)) : null;
@@ -73,7 +70,8 @@ export const LicenseRowCard: React.FC<LicenseRowCardProps> = ({
             </div>
 
             <code className="font-mono text-xs font-bold text-pm-text bg-pm-card px-2.5 py-1 rounded-lg border border-pm-border tracking-wider select-all">
-              {showFullKey ? license.license_key : maskKey(license.license_key)}
+              {showFullKey ? license.license_key : maskLicenseKey(license.license_key)}
+
             </code>
 
             <button

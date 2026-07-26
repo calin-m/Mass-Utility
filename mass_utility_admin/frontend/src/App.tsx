@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Key, Package, Settings, ShieldCheck, Shield, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users, Building2, X } from 'lucide-react';
-import { LicensesTab, License, UserAccount } from './components/LicensesTab';
+import { LicensesTab } from './components/LicensesTab';
 import { ClientsTab } from './components/ClientsTab';
-import { CompaniesTab, Company } from './components/CompaniesTab';
-import { PackageTiersTab, PackageTier } from './components/PackageTiersTab';
+import { CompaniesTab } from './components/CompaniesTab';
+import { PackageTiersTab } from './components/PackageTiersTab';
 import { SettingsTab } from './components/SettingsTab';
 import { SecurityHealthTab } from './components/SecurityHealthTab';
 import { AuditLogsTab } from './components/AuditLogsTab';
@@ -11,89 +11,48 @@ import { LoginView } from './components/LoginView';
 import { SetupView } from './components/SetupView';
 import { ToastNotification } from './components/common/ToastNotification';
 import { useTranslation } from './i18n/LanguageContext';
+import { useAdminData } from './hooks/useAdminData';
+import { License, UserAccount, Company } from './types/adminApi';
 
 export const App: React.FC = () => {
   const { t } = useTranslation();
-  const [authChecked, setAuthChecked] = useState(false);
-  const [hasAdmin, setHasAdmin] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+  const {
+    authChecked,
+    hasAdmin,
+    authenticated,
+    setAuthenticated,
+    licenses,
+    companies,
+    tiers,
+    users,
+    loading,
+    toast,
+    setToast,
+    showAlert,
+    fetchAdminData,
+    checkAuth,
+  } = useAdminData();
 
   const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit'>('companies');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
 
-  const [licenses, setLicenses] = useState<License[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [tiers, setTiers] = useState<PackageTier[]>([]);
-  const [users, setUsers] = useState<UserAccount[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
-  const [inspectedClient, setInspectedClient] = useState<any | null>(null);
-  const [inspectedCompany, setInspectedCompany] = useState<any | null>(null);
+  const [inspectedClient, setInspectedClient] = useState<UserAccount | null>(null);
+  const [inspectedCompany, setInspectedCompany] = useState<Company | null>(null);
   const [highlightedLicenseKey, setHighlightedLicenseKey] = useState<string | null>(null);
 
-  const handleInspectClient = (client: any) => {
+  const handleInspectClient = (client: UserAccount) => {
     setInspectedClient(client);
     setActiveTab('clients');
   };
 
-  const handleInspectCompany = (company: any, licenseKey?: string) => {
+  const handleInspectCompany = (company: Company, licenseKey?: string | null) => {
     setInspectedCompany(company);
     setHighlightedLicenseKey(licenseKey || null);
     setActiveTab('companies');
   };
 
-
-  const showAlert = (msg: string, type: 'success' | 'error' = 'success') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 4000);
-  };
-
-  const getApiUrl = (action: string) => {
-    const path = window.location.pathname;
-    return `${path}?action=${action}`;
-  };
-
-  const checkStatus = async () => {
-    try {
-      const res = await fetch(getApiUrl('api_status'));
-      const data = await res.json();
-      if (data.success) {
-        setHasAdmin(data.has_admin);
-        setAuthenticated(data.authenticated);
-        if (data.authenticated) {
-          fetchAdminData();
-        }
-      }
-    } catch (e) {
-      setAuthenticated(false);
-    } finally {
-      setAuthChecked(true);
-    }
-  };
-
-  const fetchAdminData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(getApiUrl('api_list'));
-      const data = await res.json();
-      if (data.success) {
-        setLicenses(data.licenses || []);
-        setCompanies(data.companies || []);
-        setTiers(data.tiers || []);
-        setUsers(data.users || []);
-      }
-    } catch (e) {
-      showAlert('Failed to connect to Admin Bridge Server', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    checkStatus();
-  }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -107,10 +66,11 @@ export const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch(getApiUrl('api_logout'));
+      await fetch('index.php?action=api_logout');
       setAuthenticated(false);
     } catch (e) {}
   };
+
 
   if (!authChecked) {
     return (
@@ -124,8 +84,9 @@ export const App: React.FC = () => {
   }
 
   if (!hasAdmin) {
-    return <SetupView onSetupSuccess={() => checkStatus()} />;
+    return <SetupView onSetupSuccess={() => checkAuth()} />;
   }
+
 
   if (!authenticated) {
     return <LoginView onLoginSuccess={() => { setAuthenticated(true); fetchAdminData(); }} />;

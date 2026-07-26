@@ -18,12 +18,16 @@ class AdminApiController
     public function execute(string $action): void
     {
         $method = str_replace('api_', '', $action);
+        if ($method === 'data') {
+            $method = 'list';
+        }
         if (method_exists($this, $method)) {
             $this->$method();
         } else {
-            echo json_encode(['success' => false, 'error' => 'API endpoint not found.']);
+            echo json_encode(['success' => false, 'error' => 'API endpoint not found: ' . $action]);
         }
     }
+
 
     private function status(): void
     {
