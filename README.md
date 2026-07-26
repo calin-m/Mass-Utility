@@ -488,7 +488,7 @@ CREATE TABLE pm_admins (
 
 ---
 
-## 🛠️ 10. Setup, Build Pipeline & Orchestra Developer Tools
+## 🛠️ 10. Setup & Build Pipeline
 
 ### 10.1 Initializing the Database Registry
 Run the SQLite migration script from the root workspace:
@@ -511,14 +511,6 @@ npm run build
 ```
 *Outputs compiled assets (`index-*.js`, `index-*.css`) to `mass_utility_admin/public/v2/`.*
 
-### 10.3 Orchestra Pre-Commit Pipeline & Tools
-The workspace includes automated Orchestra developer tools in `.orchestra/.conductor/tools/`:
-- `python .orchestra/.conductor/tools/workspace_inspector.py plan "<GOAL>"`: Pre-flight impact analysis, symbol mapping, and pre-flight plan synthesis.
-- `python .bench/scripts/generate_frontend_map.py`: Universal stack-conditioned frontend AST mapper (React TSX/JSX, Vanilla JS, CSS tokens, Smarty/HTML).
-- `python .orchestra/.conductor/tools/cli_doctor.py`: Environment health audit & SHA-256 cryptographic integrity lockfile (`.orchestra/orchestra.lock`) generator.
-- `python .orchestra/.conductor/tools/cli_security_audit.py`: Scans JS/PHP files for security vulnerabilities and high-entropy secrets.
-- `python .orchestra/.conductor/tools/cli_commit.py`: Atomically ingests `.ai_plan.md` into conventional git commits, runs all 11 build pipeline hooks in parallel (with Smart Conditional Vite Auto-Build when `frontend/src/` is modified), and stages changes.
-
 ---
 
 ## 🔧 11. Troubleshooting & Emergency Protocols
@@ -532,9 +524,3 @@ If server CPU load is high or the shop state is misidentified, you can temporari
    touch .bypass_governor
    ```
 4. Safety Governor checks are bypassed for 15 minutes before the sentinel auto-removes the file.
-
-### 11.2 Re-Syndicating Framework Rules
-If directories or tools are moved, re-run the framework syndication installer:
-```bash
-python .orchestra/.conductor/tools/install_framework.py
-```
