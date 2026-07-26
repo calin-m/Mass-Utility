@@ -31,9 +31,9 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
 }) => {
   const [activeSubView, setActiveSubView] = useState<'list' | 'details'>(initialSelectedCompany ? 'details' : 'list');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(initialSelectedCompany || null);
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'edit'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'licenses' | 'members' | 'settings'>('overview');
 
-  const handleSelectCompany = (company: Company, tab: 'overview' | 'edit' = 'overview') => {
+  const handleSelectCompany = (company: Company, tab: 'overview' | 'licenses' | 'members' | 'settings' = 'overview') => {
     setSelectedCompany(company);
     setSelectedTab(tab);
     setActiveSubView('details');

@@ -19,7 +19,7 @@ interface ClientListViewProps {
   tiers?: any[];
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
-  onSelectClient: (user: UserAccount, tab?: 'overview' | 'edit') => void;
+  onSelectClient: (user: UserAccount, tab?: 'profile' | 'licenses' | 'governance') => void;
 }
 
 export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, tiers = [], onRefresh, showAlert, onSelectClient }) => {
@@ -467,7 +467,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                           </div>
                           <div>
                             <button
-                              onClick={() => onSelectClient(user, 'overview')}
+                              onClick={() => onSelectClient(user, 'profile')}
                               className="font-bold text-pm-text hover:text-purple-500 transition text-left block"
                             >
                               {user.email}
@@ -521,7 +521,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                             variant="neutral"
                             size="sm"
                             icon={Eye}
-                            onClick={() => onSelectClient(user, 'overview')}
+                            onClick={() => onSelectClient(user, 'profile')}
                           >
                             {t('btn_inspect_client')}
                           </Button>

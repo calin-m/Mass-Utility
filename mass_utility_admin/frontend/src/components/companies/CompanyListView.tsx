@@ -22,7 +22,7 @@ interface CompanyListViewProps {
   licenses: any[];
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
-  onSelectCompany: (company: Company, tab?: 'overview' | 'edit') => void;
+  onSelectCompany: (company: Company, tab?: 'overview' | 'licenses' | 'members' | 'settings') => void;
 }
 
 export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, users, licenses, onRefresh, showAlert, onSelectCompany }) => {

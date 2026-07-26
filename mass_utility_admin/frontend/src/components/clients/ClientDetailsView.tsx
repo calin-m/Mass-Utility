@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Mail, Building, Building2, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles } from 'lucide-react';
+import { ArrowLeft, Mail, Building, Building2, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles, User } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { FormSelect } from '../common/FormSelect';
 import { FormInput } from '../common/FormInput';
 import { Button } from '../common/Button';
 import { LicenseRowCard } from '../common/LicenseRowCard';
+import { SubTabNav, SubTabItem } from '../common/SubTabNav';
+import { DetailHeaderBanner } from '../common/DetailHeaderBanner';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 
@@ -15,7 +17,7 @@ interface ClientDetailsViewProps {
   licenses: License[];
   companies?: any[];
   tiers?: any[];
-  initialTab?: 'overview' | 'edit';
+  initialTab?: 'profile' | 'licenses' | 'governance';
   onBack: () => void;
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
@@ -24,7 +26,8 @@ interface ClientDetailsViewProps {
 
 export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], tiers = [], initialTab, onBack, onRefresh, showAlert, onInspectCompany }) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
+  const [activeTab, setActiveTab] = useState<'profile' | 'licenses' | 'governance'>(initialTab || 'profile');
+
   const [submitting, setSubmitting] = useState(false);
   const [selectedTier, setSelectedTier] = useState('pro');
 
@@ -238,148 +241,175 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
     }
   };
 
+  const subTabs: SubTabItem<'profile' | 'licenses' | 'governance'>[] = [
+    { id: 'profile', label: 'Profile & Company', icon: User, badge: user.company_name ? 'Affiliated' : 'Standalone' },
+    { id: 'licenses', label: 'Issued Licenses & Stores', icon: Key, badge: clientLicenses.length },
+    { id: 'governance', label: 'Governance & Security', icon: ShieldCheck },
+  ];
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Top Header Control Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-pm-card border border-pm-border rounded-xl p-4 shadow-sm pm-card-elevation">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="pm-btn-neutral p-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
-            title="Return to Client Accounts List"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <div className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider flex items-center gap-1">
-              <span>Clients Directory</span>
-              <span>›</span>
-              <span className="text-purple-400 font-mono">{user.email}</span>
-            </div>
-            <h2 className="text-lg font-extrabold text-pm-text flex items-center gap-2">
-              <span>{user.name ? user.name : user.email}</span>
-              {user.name && <span className="text-xs font-mono font-normal text-pm-secondary">({user.email})</span>}
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
-                isSuspended ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-              }`}>
-                {isSuspended ? 'SUSPENDED' : 'ACTIVE'}
-              </span>
-            </h2>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1 p-1 bg-pm-input/60 border border-pm-border rounded-xl">
-            <button
-              type="button"
-              onClick={() => setActiveTab('overview')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
-                activeTab === 'overview'
-                  ? 'bg-pm-primary text-white shadow-sm'
-                  : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
-              }`}
+    <div className="space-y-6">
+      <DetailHeaderBanner
+        title={user.name ? `${user.name} (${user.email})` : user.email}
+        subtitle={`Client ID: #${user.id} • Role: ${user.role || 'Owner'}`}
+        icon={User}
+        status={user.status || 'active'}
+        onBack={onBack}
+        actions={
+          <>
+            <Button
+              variant="neutral"
+              size="sm"
+              icon={Key}
+              onClick={() => setShowResetModal(true)}
             >
-              <Mail className="w-3.5 h-3.5" /> {t('subtab_overview')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('edit')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
-                activeTab === 'edit'
-                  ? 'bg-pm-primary text-white shadow-sm'
-                  : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
-              }`}
+              Reset Password
+            </Button>
+
+            <Button
+              variant="neutral"
+              size="sm"
+              icon={isSuspended ? ShieldCheck : ShieldAlert}
+              onClick={handleToggleStatus}
+              disabled={submitting}
             >
-              <Edit className="w-3.5 h-3.5" /> Edit Client
-            </button>
+              {isSuspended ? 'Re-Activate' : 'Suspend'}
+            </Button>
 
-          </div>
+            <Button
+              variant="danger"
+              size="sm"
+              icon={Trash2}
+              onClick={() => setShowDeleteModal(true)}
+            />
+          </>
+        }
+      >
+        <SubTabNav
+          tabs={subTabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+      </DetailHeaderBanner>
 
-          <button
-            type="button"
-            onClick={() => setShowResetModal(true)}
-            className="pm-btn-neutral px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5"
-          >
-            <Key className="w-3.5 h-3.5 text-amber-400" /> {t('btn_reset_password')}
-          </button>
 
-          <button
-            type="button"
-            onClick={handleToggleStatus}
-            disabled={submitting}
-            className={`pm-btn-neutral px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
-              isSuspended ? 'hover:bg-emerald-500/20 hover:text-emerald-400' : 'hover:bg-rose-500/20 hover:text-rose-400'
-            }`}
-            title={isSuspended ? 'Re-Activate Client Account' : 'Suspend Client Account'}
-          >
-            {isSuspended ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> : <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />}
-            <span>{isSuspended ? 'Re-Activate' : 'Suspend'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowDeleteModal(true)}
-            className="pm-btn-danger-outline p-2 rounded-xl text-xs font-semibold flex items-center gap-1"
-            title="Delete Account"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Dynamic Tab Content */}
-      {activeTab === 'edit' ? (
-        <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation space-y-6 animate-in fade-in duration-200">
-          <div className="flex justify-between items-center pb-4 border-b border-pm-border">
-            <div>
-              <h3 className="text-sm font-extrabold text-pm-text flex items-center gap-2">
-                <Mail className="w-4 h-4 text-purple-400" /> Comprehensive Client Profile Settings
+      {/* Dynamic Sub-Tab Content */}
+      {activeTab === 'profile' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-200">
+          {/* Left: Account Identity & Company Affiliation Card */}
+          <div className="space-y-6">
+            <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Mail className="w-4 h-4 text-purple-400" /> Account Profile
               </h3>
-              <p className="text-xs text-pm-secondary mt-0.5">
-                Update client account properties, company affiliation, role permissions, password credentials, and status governance.
-              </p>
+
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
+                  <span className="text-pm-secondary">Account ID</span>
+                  <span className="font-mono font-bold text-pm-text">#{user.id}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
+                  <span className="text-pm-secondary">Email Address</span>
+                  <span className="font-semibold text-pm-text font-mono">{user.email}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
+                  <span className="text-pm-secondary">Account Role</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    {user.role || 'Owner'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-pm-secondary">Status</span>
+                  <span className="text-emerald-400 font-semibold font-mono">{(user.status || 'active').toUpperCase()}</span>
+                </div>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setActiveTab('overview')}
-              className="pm-btn-neutral px-3 py-1.5 rounded-lg text-xs font-semibold"
-            >
-              ✕ Cancel
-            </button>
+
+            {/* Symmetrical Company Affiliation Cross-Information Card */}
+            <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-purple-400" /> Organization Affiliation
+              </h3>
+
+              {assignedComp ? (
+                <div className="space-y-3 text-xs">
+                  <div className="p-3 bg-pm-input/30 border border-pm-border rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-pm-text text-sm flex items-center gap-1.5">
+                        <Building2 className="w-4 h-4 text-purple-400" /> {assignedComp.company_name}
+                      </span>
+                      <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        {assignedComp.status || 'ACTIVE'}
+                      </span>
+                    </div>
+
+                    <div className="text-[11px] text-pm-secondary font-mono pt-1 border-t border-pm-border/40 space-y-1">
+                      <div>Tax ID: {assignedComp.tax_id || 'Not Specified'}</div>
+                      <div>Max License Quota: {assignedComp.max_licenses || 10} Keys</div>
+                    </div>
+                  </div>
+
+                  {onInspectCompany && (
+                    <Button
+                      variant="neutral"
+                      size="sm"
+                      icon={Building2}
+                      onClick={() => onInspectCompany(assignedComp)}
+                      className="w-full justify-center"
+                    >
+                      Inspect Company Profile
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 bg-pm-input/30 border border-pm-border rounded-xl text-center space-y-2">
+                  <p className="text-xs text-pm-secondary italic">This client is a Standalone Account (Not affiliated with any company profile).</p>
+                </div>
+              )}
+            </div>
           </div>
 
-          <form onSubmit={handleEditClientProfile} className="space-y-6">
-            {/* Section 1: Client Identity & Affiliation */}
-            <div className="p-4 bg-pm-input/40 border border-pm-border rounded-xl space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-purple-400" /> Account Identity &amp; Organization
-              </h4>
+          {/* Right: Edit Profile Form */}
+          <div className="lg:col-span-2">
+            <div className="bg-pm-card border border-pm-border rounded-2xl p-6 shadow-sm space-y-6">
+              <div className="pb-4 border-b border-pm-border">
+                <h3 className="text-sm font-extrabold text-pm-text flex items-center gap-2">
+                  <Edit className="w-4 h-4 text-purple-400" /> Profile & Organization Details
+                </h3>
+                <p className="text-xs text-pm-secondary mt-0.5">
+                  Update client name, organization affiliation, and role permissions.
+                </p>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-pm-secondary mb-1">{t('field_full_name')}</label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    placeholder={t('ph_full_name')}
-                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-pm-primary focus:outline-none"
-                  />
+              <form onSubmit={handleEditClientProfile} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-pm-secondary mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={e => setEditName(e.target.value)}
+                      placeholder={t('ph_full_name')}
+                      className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-pm-primary focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-pm-secondary mb-1">Account Role</label>
+                    <select
+                      value={editRole}
+                      onChange={e => setEditRole(e.target.value)}
+                      className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:border-pm-primary focus:outline-none"
+                    >
+                      <option value="Owner">Owner / Primary Admin</option>
+                      <option value="Manager">Store Manager</option>
+                      <option value="Developer">Technical Developer</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Client Email (Read Only)</label>
-                  <input
-                    type="text"
-                    disabled
-                    value={user.email}
-                    className="w-full bg-pm-input/50 border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-secondary cursor-not-allowed"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Assigned Company Profile</label>
+                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Assign to Organization Profile</label>
                   <select
                     value={editCompany}
                     onChange={e => setEditCompany(e.target.value)}
@@ -393,204 +423,148 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                     ))}
                   </select>
                 </div>
-              </div>
-            </div>
 
-            {/* Section 2: Account Role & Password Governance */}
-            <div className="p-4 bg-pm-input/40 border border-pm-border rounded-xl space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                <Key className="w-3.5 h-3.5 text-amber-400" /> Role &amp; Password Governance
-              </h4>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-pm-secondary mb-1">Account Role</label>
-                  <select
-                    value={editRole}
-                    onChange={e => setEditRole(e.target.value)}
-                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:border-pm-primary focus:outline-none"
+                <div className="flex justify-end pt-4 border-t border-pm-border">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={Check}
+                    disabled={submitting}
                   >
-                    <option value="Owner">Owner / Primary Admin</option>
-                    <option value="Manager">Store Manager</option>
-                    <option value="Developer">Technical Developer</option>
-                  </select>
+                    {submitting ? 'Saving...' : 'Save Profile Changes'}
+                  </Button>
                 </div>
-
-                <div className="flex items-end">
-                  <button
-                    type="button"
-                    onClick={() => setShowResetModal(true)}
-                    className="pm-btn-neutral w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2"
-                  >
-                    <Key className="w-4 h-4 text-amber-400" />
-                    <span>Reset Client Password</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 3: Status & Governance */}
-            <div className="p-4 bg-pm-input/40 border border-pm-border rounded-xl space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Account Status &amp; Governance
-              </h4>
-
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card p-3 rounded-lg border border-pm-border">
-                <div>
-                  <div className="text-xs font-bold text-pm-text">Account Status: <span className={isSuspended ? 'text-rose-400' : 'text-emerald-400'}>{(user.status || 'active').toUpperCase()}</span></div>
-
-                  <p className="text-[11px] text-pm-secondary">
-                    {isSuspended ? 'This client account is currently suspended. Re-activate to restore store access.' : 'This client account is active and verified.'}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleToggleStatus}
-                  disabled={submitting}
-                  className={`pm-btn-neutral px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
-                    isSuspended ? 'hover:bg-emerald-500/20 hover:text-emerald-400' : 'hover:bg-rose-500/20 hover:text-rose-400'
-                  }`}
-                >
-                  {isSuspended ? <ShieldCheck className="w-4 h-4 text-emerald-400" /> : <ShieldAlert className="w-4 h-4 text-amber-400" />}
-                  <span>{isSuspended ? 'Re-Activate Account' : 'Suspend Account'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Form Action Controls */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-pm-border">
-              <button
-                type="button"
-                onClick={() => setActiveTab('overview')}
-                className="pm-btn-neutral px-4 py-2 rounded-xl text-xs font-bold"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="pm-btn-primary px-6 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md"
-              >
-                <Check className="w-4 h-4" />
-                <span>{submitting ? 'Saving Changes...' : 'Save Client Settings'}</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      ) : (
-        /* Main 2-Column Layout (Overview Tab) */
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Client Identity & Company Context */}
-          <div className="space-y-6">
-            {/* Identity Card */}
-            <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                <Mail className="w-4 h-4 text-purple-400" /> Client Account Profile
-              </h3>
-
-              <div className="space-y-3 text-xs">
-                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
-                  <span className="text-pm-secondary">Account ID</span>
-                  <span className="font-mono font-bold text-pm-text">#{user.id}</span>
-                </div>
-                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
-                  <span className="text-pm-secondary">Email Address</span>
-                  <span className="font-semibold text-pm-text font-mono">{user.email}</span>
-                </div>
-                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
-                  <span className="text-pm-secondary">Assigned Company</span>
-                  {assignedComp && onInspectCompany ? (
-                    <button
-                      type="button"
-                      onClick={() => onInspectCompany(assignedComp)}
-                      className="font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1 hover:underline transition"
-                      title="Inspect Company Profile"
-                    >
-                      <Building2 className="w-3.5 h-3.5" />
-                      <span>{assignedComp.company_name}</span>
-                    </button>
-                  ) : (
-                    <span className="font-semibold text-purple-400">
-                      {user.company_name ? user.company_name : <span className="italic text-pm-secondary/60">Standalone Client</span>}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex justify-between items-center pb-2 border-b border-pm-border">
-                  <span className="text-pm-secondary">Account Role</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                    {user.role || 'Owner'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-pm-secondary">Status</span>
-                  <span className="text-emerald-400 font-semibold">Verified Member</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Main Workspace Area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Section 1: Issued License Keys & PrestaShop Store Domains Table */}
-            <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                  <Key className="w-4 h-4 text-amber-400" /> Issued License Keys &amp; Bound Stores ({clientLicenses.length})
-                </h3>
-              </div>
-
-              <div className="space-y-3">
-                {clientLicenses.length === 0 ? (
-                  <p className="p-8 text-center text-pm-secondary border border-pm-border rounded-xl">No license keys issued to this client email yet.</p>
-                ) : (
-                  clientLicenses.map(l => (
-                    <LicenseRowCard
-                      key={l.id}
-                      license={l}
-                      users={[user]}
-                      companies={companies}
-                      onEditLicense={openInlineEditModal}
-                      onInspectCompany={onInspectCompany}
-                      showCompanyButton={true}
-                    />
-                  ))
-                )}
-              </div>
-
-            </div>
-
-            {/* Section 2: Inline 1-Click License Key Generator Widget */}
-            <div className="bg-pm-card border border-pm-border rounded-xl p-5 shadow-sm pm-card-elevation space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-purple-400" /> 1-Click License Key Provisioning Widget
-              </h3>
-
-              <form onSubmit={handleIssueLicense} className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-pm-input/50 border border-pm-border rounded-xl">
-                <div className="flex-1 w-full">
-                  <FormSelect
-                    label="Package Tier"
-                    value={selectedTier}
-                    onChange={e => setSelectedTier(e.target.value)}
-                    options={tierOptions}
-                  />
-                </div>
-
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full sm:w-auto pm-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shrink-0 mt-auto shadow-md"
-                >
-                  <PlusCircle className="w-4 h-4 text-white" />
-                  <span>{submitting ? 'Issuing...' : 'Issue License Key'}</span>
-                </button>
               </form>
             </div>
           </div>
         </div>
       )}
+
+      {activeTab === 'licenses' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-purple-400" /> 1-Click License Key Provisioning
+            </h3>
+
+            <form onSubmit={handleIssueLicense} className="flex flex-col sm:flex-row items-end gap-3 p-4 bg-pm-input/30 border border-pm-border rounded-xl">
+              <div className="w-full sm:flex-1">
+                <FormSelect
+                  label={`Package Tier for ${user.email}`}
+                  value={selectedTier}
+                  onChange={e => setSelectedTier(e.target.value)}
+                  options={tierOptions}
+                />
+              </div>
+
+              <Button
+                variant="primary"
+                size="sm"
+                icon={PlusCircle}
+                disabled={submitting}
+              >
+                {submitting ? 'Issuing...' : 'Issue License Key'}
+              </Button>
+            </form>
+          </div>
+
+          <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+              <Key className="w-4 h-4 text-amber-400" /> Issued License Keys & Bound Stores ({clientLicenses.length})
+            </h3>
+
+            {clientLicenses.length === 0 ? (
+              <p className="p-8 text-center text-pm-secondary text-xs italic">No license keys issued to this client email yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {clientLicenses.map(l => (
+                  <LicenseRowCard
+                    key={l.id}
+                    license={l}
+                    users={[user]}
+                    companies={companies}
+                    onEditLicense={openInlineEditModal}
+                    onInspectCompany={onInspectCompany}
+                    showCompanyButton={true}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'governance' && (
+        <div className="bg-pm-card border border-pm-border rounded-2xl p-6 shadow-sm space-y-6 animate-in fade-in duration-200">
+          <div className="pb-4 border-b border-pm-border">
+            <h3 className="text-sm font-extrabold text-pm-text flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" /> Governance & Security Control Panel
+            </h3>
+            <p className="text-xs text-pm-secondary mt-0.5">
+              Manage account activation status, reset credentials, and purge client records.
+            </p>
+          </div>
+
+          <div className="p-4 bg-pm-input/30 border border-pm-border rounded-xl space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Account Status Governance
+            </h4>
+
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card p-3 rounded-lg border border-pm-border">
+              <div>
+                <div className="text-xs font-bold text-pm-text">Account Status: <span className={isSuspended ? 'text-rose-400' : 'text-emerald-400'}>{(user.status || 'active').toUpperCase()}</span></div>
+                <p className="text-[11px] text-pm-secondary">
+                  {isSuspended ? 'This client account is currently suspended. Re-activate to restore store access.' : 'This client account is active and verified.'}
+                </p>
+              </div>
+
+              <Button
+                variant="neutral"
+                size="sm"
+                icon={isSuspended ? ShieldCheck : ShieldAlert}
+                onClick={handleToggleStatus}
+                disabled={submitting}
+              >
+                {isSuspended ? 'Re-Activate Account' : 'Suspend Account'}
+              </Button>
+            </div>
+          </div>
+
+          <div className="p-4 bg-pm-input/30 border border-pm-border rounded-xl space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+              <Key className="w-3.5 h-3.5 text-amber-400" /> Security Credentials
+            </h4>
+
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card p-3 rounded-lg border border-pm-border">
+              <div>
+                <div className="text-xs font-bold text-pm-text">Password Reset</div>
+                <p className="text-[11px] text-pm-secondary">Generate a temporary password or reset credentials for this client.</p>
+              </div>
+
+              <Button
+                variant="neutral"
+                size="sm"
+                icon={Key}
+                onClick={() => setShowResetModal(true)}
+              >
+                Reset Password
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center pt-4 border-t border-pm-border">
+            <Button
+              variant="danger"
+              size="sm"
+              icon={Trash2}
+              onClick={() => setShowDeleteModal(true)}
+            >
+              Delete Client Account
+            </Button>
+          </div>
+        </div>
+      )}
+
 
       {/* Inline Edit License Modal */}
       <BaseModal isOpen={!!editingLic} onClose={() => setEditingLic(null)} title={`Edit License Key #${editingLic?.id || ''}`}>
