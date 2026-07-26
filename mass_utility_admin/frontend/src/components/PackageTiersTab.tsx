@@ -7,6 +7,7 @@ import { SubTabNav, SubTabItem } from './common/SubTabNav';
 import { TierCardGrid } from './package_tiers/TierCardGrid';
 import { TierCapabilitiesForm } from './package_tiers/TierCapabilitiesForm';
 import { CreateTierModal } from './package_tiers/CreateTierModal';
+import { useTranslation } from '../i18n/LanguageContext';
 
 export interface PackageTierCapabilities {
   // Essential Operations & History
@@ -187,6 +188,7 @@ const TIER_RANK: Record<string, number> = {
 };
 
 export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefresh, showAlert }) => {
+  const { t } = useTranslation();
   const [subTab, setSubTab] = useState<'overview' | 'editor'>('overview');
   const [selectedTier, setSelectedTier] = useState('basic');
   const [loading, setLoading] = useState(false);
@@ -532,19 +534,19 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             {/* Quota & Capacity Highlights */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
-                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">Max Store Domains</span>
+                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">{t('stat_max_store_domains') || 'Max Store Domains'}</span>
                 <span className="text-sm font-extrabold font-mono text-purple-400">{capabilities.max_bound_domains ?? 1} Domain(s)</span>
               </div>
               <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
-                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">Daily Sweeper Runs</span>
+                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">{t('stat_daily_sweeper_runs') || 'Daily Sweeper Runs'}</span>
                 <span className="text-sm font-extrabold font-mono text-emerald-400">{capabilities.max_daily_sweeper_runs ?? 1} / Day</span>
               </div>
               <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
-                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">Cloud Backups Retained</span>
+                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">{t('stat_cloud_backups') || 'Cloud Backups Retained'}</span>
                 <span className="text-sm font-extrabold font-mono text-blue-400">{capabilities.max_cloud_backups ?? 3} Backup(s)</span>
               </div>
               <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
-                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">Rollback Snapshots</span>
+                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">{t('stat_rollback_snapshots') || 'Rollback Snapshots'}</span>
                 <span className="text-sm font-extrabold font-mono text-amber-400">{capabilities.rollback_history_limit ?? 5} Snapshots</span>
               </div>
             </div>
@@ -554,9 +556,9 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-pm-input/60 text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                    <th className="p-3">Feature Capability</th>
-                    <th className="p-3 text-center">Status</th>
-                    <th className="p-3">Access Level & Description</th>
+                    <th className="p-3">{t('th_feature_capability') || 'Feature Capability'}</th>
+                    <th className="p-3 text-center">{t('th_status') || 'Status'}</th>
+                    <th className="p-3">{t('th_access_level_desc') || 'Access Level & Description'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-pm-border">

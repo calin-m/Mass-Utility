@@ -316,6 +316,16 @@ const en = {
   err_password_mismatch: 'Passwords do not match. Please verify both input fields.',
   modal_suspend_client_confirm: 'Are you sure you want to suspend access for client account',
   modal_activate_client_confirm: 'Are you sure you want to re-activate access for client account',
+  th_store_url: 'Store URL',
+  lbl_unassigned: 'Unassigned',
+  lbl_standalone: 'Standalone',
+  lbl_any_store: 'Any Store',
+  stat_max_store_domains: 'Max Store Domains',
+  stat_daily_sweeper_runs: 'Daily Sweeper Runs',
+  stat_cloud_backups: 'Cloud Backups Retained',
+  stat_rollback_snapshots: 'Rollback Snapshots',
+  th_feature_capability: 'Feature Capability',
+  th_access_level_desc: 'Access Level & Description',
 };
 
 export type TranslationSchema = typeof en;

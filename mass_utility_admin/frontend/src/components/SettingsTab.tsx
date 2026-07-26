@@ -136,10 +136,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ showAlert }) => {
           <div className="p-4 bg-pm-input/50 rounded-xl border border-pm-border text-xs text-pm-secondary space-y-1">
             <div className="font-bold text-pm-text flex items-center gap-1.5">
               <Globe className="w-4 h-4 text-purple-400 shrink-0" />
-              <span>Multi-Language Localization Engine</span>
+              <span>{t('settings_lang_help_title') || 'Multi-Language Localization Engine'}</span>
             </div>
             <p className="leading-relaxed">
-              Updates labels across the Super-Admin navigation, tables, search toolbars, buttons, and setting forms in real-time.
+              {t('settings_lang_help_desc') || 'Updates labels across the Super-Admin navigation, tables, search toolbars, buttons, and setting forms in real-time.'}
             </p>
           </div>
         </div>

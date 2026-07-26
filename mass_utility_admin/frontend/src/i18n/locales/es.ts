@@ -316,8 +316,18 @@ const es: TranslationSchema = {
   err_invalid_email: 'Por favor, ingrese un correo electrónico válido (ej: usuario@dominio.com)',
   modal_confirm_pass_placeholder: 'Ingrese nuevamente la contraseña para confirmar',
   err_password_mismatch: 'Las contraseñas no coinciden. Por favor, verifique ambos campos.',
-  modal_suspend_client_confirm: '¿Está seguro de que desea suspender el acceso a la cuenta del cliente',
-  modal_activate_client_confirm: '¿Está seguro de que desea reactivar el acceso a la cuenta del cliente',
+  modal_suspend_client_confirm: '¿Está seguro de que desea suspender el acceso a la cuenta de cliente',
+  modal_activate_client_confirm: '¿Está seguro de que desea reactivar el acceso a la cuenta de cliente',
+  th_store_url: 'URL de la Tienda',
+  lbl_unassigned: 'Sin asignar',
+  lbl_standalone: 'Independiente',
+  lbl_any_store: 'Cualquier tienda',
+  stat_max_store_domains: 'Dominios Máx. de Tienda',
+  stat_daily_sweeper_runs: 'Ejecuciones Diarias de Barredor',
+  stat_cloud_backups: 'Respaldos en la Nube Retenidos',
+  stat_rollback_snapshots: 'Capturas de Reversión',
+  th_feature_capability: 'Capacidad de Función',
+  th_access_level_desc: 'Nivel de Acceso y Descripción',
 };
 
 export default es;

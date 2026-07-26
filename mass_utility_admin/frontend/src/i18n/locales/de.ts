@@ -316,8 +316,18 @@ const de: TranslationSchema = {
   err_invalid_email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein (z. B. benutzer@domain.com)',
   modal_confirm_pass_placeholder: 'Neues Passwort zur Bestätigung erneut eingeben',
   err_password_mismatch: 'Passwörter stimmen nicht überein. Bitte überprüfen Sie beide Felder.',
-  modal_suspend_client_confirm: 'Sind Sie sicher, dass Sie den Zugriff für das Kundenkonto sperren möchten:',
-  modal_activate_client_confirm: 'Sind Sie sicher, dass Sie den Zugriff für das Kundenkonto reaktivieren möchten:',
+  modal_suspend_client_confirm: 'Möchten Sie den Zugriff für das Kundenkonto wirklich aussetzen',
+  modal_activate_client_confirm: 'Möchten Sie den Zugriff für das Kundenkonto wirklich reaktivieren',
+  th_store_url: 'Shop-URL',
+  lbl_unassigned: 'Nicht zugewiesen',
+  lbl_standalone: 'Eigenständig',
+  lbl_any_store: 'Beliebiger Shop',
+  stat_max_store_domains: 'Max. Shop-Domains',
+  stat_daily_sweeper_runs: 'Tägliche Sweeper-Läufe',
+  stat_cloud_backups: 'Gespeicherte Cloud-Backups',
+  stat_rollback_snapshots: 'Rollback-Snapshots',
+  th_feature_capability: 'Funktionsfähigkeit',
+  th_access_level_desc: 'Zugriffsstufe & Beschreibung',
 };
 
 export default de;

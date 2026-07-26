@@ -316,8 +316,18 @@ const ro: TranslationSchema = {
   err_invalid_email: 'Vă rugăm să introduceți o adresă de email validă (ex: utilizator@domeniu.com)',
   modal_confirm_pass_placeholder: 'Re-introduceți noua parolă pentru confirmare',
   err_password_mismatch: 'Parolele nu se potrivesc. Vă rugăm să verificați ambele câmpuri.',
-  modal_suspend_client_confirm: 'Sunteți sigur că doriți să suspendați accesul pentru contul client',
-  modal_activate_client_confirm: 'Sunteți sigur că doriți să reactivați accesul pentru contul client',
+  modal_suspend_client_confirm: 'Sunteți sigur că doriți să suspendați accesul pentru contul de client',
+  modal_activate_client_confirm: 'Sunteți sigur că doriți să reactivați accesul pentru contul de client',
+  th_store_url: 'URL Magazin',
+  lbl_unassigned: 'Neatribuit',
+  lbl_standalone: 'De sine stătător',
+  lbl_any_store: 'Orice magazin',
+  stat_max_store_domains: 'Domenii Max. Magazin',
+  stat_daily_sweeper_runs: 'Rulări Zilnice Sweeper',
+  stat_cloud_backups: 'Backup-uri Cloud Păstrate',
+  stat_rollback_snapshots: 'Instantanee Rollback',
+  th_feature_capability: 'Capabilitate Funcție',
+  th_access_level_desc: 'Nivel Acces & Descriere',
 };
 
 export default ro;

@@ -430,10 +430,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                 <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
                   <th className="p-3 px-4">{t('th_license_key')}</th>
                   <th className="p-3">{t('th_assigned_user')}</th>
-                  <th className="p-3">Company</th>
+                  <th className="p-3">{t('th_company') || 'Company'}</th>
                   <th className="p-3">{t('th_tier')}</th>
                   <th className="p-3">{t('th_status')}</th>
-                  <th className="p-3">Store URL</th>
+                  <th className="p-3">{t('th_store_url') || 'Store URL'}</th>
                   <th className="p-3">{t('th_expires')}</th>
                   <th className="p-3 text-right">{t('th_actions')}</th>
                 </tr>
@@ -499,7 +499,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                               {lic.user_name || lic.user_email || `User #${lic.user_id}`}
                             </button>
                           ) : (
-                            <span className="text-pm-secondary italic">Unassigned</span>
+                            <span className="text-pm-secondary italic">{t('lbl_unassigned') || 'Unassigned'}</span>
                           )}
                         </td>
                         <td className="p-3 font-bold">
@@ -519,7 +519,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                               )}
                             </div>
                           ) : (
-                            <span className="text-pm-secondary/70 italic text-[11px] font-mono">Standalone</span>
+                            <span className="text-pm-secondary/70 italic text-[11px] font-mono">{t('lbl_standalone') || 'Standalone'}</span>
                           )}
                         </td>
                         <td className="p-3">
@@ -544,7 +544,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                           {lic.store_url ? (
                             <span className="truncate max-w-[150px] inline-block">{lic.store_url}</span>
                           ) : (
-                            <span className="italic">Any Store</span>
+                            <span className="italic">{t('lbl_any_store') || 'Any Store'}</span>
                           )}
                         </td>
                         <td className="p-3 font-mono text-xs text-pm-secondary">

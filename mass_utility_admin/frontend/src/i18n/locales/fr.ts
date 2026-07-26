@@ -318,6 +318,16 @@ const fr: TranslationSchema = {
   err_password_mismatch: 'Les mots de passe ne correspondent pas. Veuillez vérifier les deux champs.',
   modal_suspend_client_confirm: 'Êtes-vous sûr de vouloir suspendre l\'accès pour le compte client',
   modal_activate_client_confirm: 'Êtes-vous sûr de vouloir réactiver l\'accès pour le compte client',
+  th_store_url: 'URL de la Boutique',
+  lbl_unassigned: 'Non assigné',
+  lbl_standalone: 'Autonome',
+  lbl_any_store: 'Toute boutique',
+  stat_max_store_domains: 'Domaines Máx. de Boutique',
+  stat_daily_sweeper_runs: 'Exécutions Quotidiennes Sweeper',
+  stat_cloud_backups: 'Sauvegardes Cloud Conservées',
+  stat_rollback_snapshots: 'Instantanés de Restauration',
+  th_feature_capability: 'Fonctionnalité',
+  th_access_level_desc: 'Niveau d\'Accès & Description',
 };
 
 export default fr;
