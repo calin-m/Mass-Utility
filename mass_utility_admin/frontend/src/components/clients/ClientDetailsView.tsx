@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Mail, Building, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles } from 'lucide-react';
+import { ArrowLeft, Mail, Building, Building2, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { useTranslation } from '../../i18n/LanguageContext';
@@ -12,13 +12,20 @@ interface ClientDetailsViewProps {
   onBack: () => void;
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
+  onInspectCompany?: (company: any) => void;
 }
 
-export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], initialTab, onBack, onRefresh, showAlert }) => {
+export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], initialTab, onBack, onRefresh, showAlert, onInspectCompany }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
   const [selectedTier, setSelectedTier] = useState('pro');
+
+  const assignedComp = user.company_name
+    ? companies.find(c => (c.company_name || '').toLowerCase() === (user.company_name || '').toLowerCase())
+    : null;
+
+
 
   // Form State
   const [editName, setEditName] = useState(user.name || '');
@@ -431,10 +438,23 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                 </div>
                 <div className="flex justify-between items-center pb-2 border-b border-pm-border">
                   <span className="text-pm-secondary">Assigned Company</span>
-                  <span className="font-semibold text-purple-400">
-                    {user.company_name ? user.company_name : <span className="italic text-pm-secondary/60">Standalone Client</span>}
-                  </span>
+                  {assignedComp && onInspectCompany ? (
+                    <button
+                      type="button"
+                      onClick={() => onInspectCompany(assignedComp)}
+                      className="font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1 hover:underline transition"
+                      title="Inspect Company Profile"
+                    >
+                      <Building2 className="w-3.5 h-3.5" />
+                      <span>{assignedComp.company_name}</span>
+                    </button>
+                  ) : (
+                    <span className="font-semibold text-purple-400">
+                      {user.company_name ? user.company_name : <span className="italic text-pm-secondary/60">Standalone Client</span>}
+                    </span>
+                  )}
                 </div>
+
                 <div className="flex justify-between items-center pb-2 border-b border-pm-border">
                   <span className="text-pm-secondary">Account Role</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
@@ -484,10 +504,22 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                             </span>
                             <span>•</span>
                             {user.company_name ? (
-                              <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20" title="Key is owned by company pool and remains with company if employee transfers">
-                                🏢 Owned by {user.company_name} Pool
-                              </span>
+                              assignedComp && onInspectCompany ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onInspectCompany(assignedComp)}
+                                  className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/20 transition flex items-center gap-1"
+                                  title="Inspect Company Profile"
+                                >
+                                  🏢 Owned by {user.company_name} Pool
+                                </button>
+                              ) : (
+                                <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20" title="Key is owned by company pool and remains with company if employee transfers">
+                                  🏢 Owned by {user.company_name} Pool
+                                </span>
+                              )
                             ) : (
+
                               <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                                 Direct Standalone Key
                               </span>

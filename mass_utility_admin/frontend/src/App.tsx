@@ -260,7 +260,6 @@ export const App: React.FC = () => {
           />
         )}
 
-
         {activeTab === 'clients' && (
           <ClientsTab
             users={users}
@@ -270,8 +269,10 @@ export const App: React.FC = () => {
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             initialSelectedUser={inspectedClient}
+            onInspectCompany={handleInspectCompany}
           />
         )}
+
 
         {activeTab === 'licenses' && (
           <LicensesTab

@@ -15,11 +15,13 @@ interface CompanyDetailsViewProps {
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (user: any) => void;
+  onEditLicense?: (license: any) => void;
   highlightedLicenseKey?: string;
   tiers?: any[];
 }
 
-export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, highlightedLicenseKey, tiers = [] }) => {
+export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, onEditLicense, highlightedLicenseKey, tiers = [] }) => {
+
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
@@ -703,10 +705,24 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                               Unbound Store Domain
                             </span>
                           )}
+
+                          {onEditLicense && (
+                            <Button
+                              type="button"
+                              variant="neutral"
+                              size="sm"
+                              icon={Edit}
+                              onClick={() => onEditLicense(l)}
+                              title="Edit License Settings"
+                            >
+                              Edit
+                            </Button>
+                          )}
                         </div>
                       </div>
                     );
                   })}
+
                   </div>
 
                 )}
