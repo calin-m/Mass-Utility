@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PackageCheck, RefreshCw, Plus, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PackageCheck, RefreshCw, Plus, Edit, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
 import { Button } from './common/Button';
 import { ConfirmModal } from './common/ConfirmModal';
@@ -391,39 +391,54 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
   const nextTier = currentTierIdx < displayTiers.length - 1 ? displayTiers[currentTierIdx + 1] : null;
 
   const editorSwitcherContent = (
-    <div className="flex items-center gap-1.5 bg-pm-input/40 border border-pm-border rounded-lg p-1">
-      <Button
-        variant="neutral"
-        size="sm"
-        icon={ChevronLeft}
+    <div className="flex items-center gap-1.5 bg-pm-card/90 border border-pm-border rounded-xl p-1 shadow-sm backdrop-blur-md">
+      {/* Prev Tier Stepper Button */}
+      <button
+        type="button"
         disabled={!prevTier}
         onClick={() => prevTier && handleTierChange(prevTier.name)}
-        title={prevTier ? `Previous Tier: ${prevTier.name.toUpperCase()}` : 'First Tier'}
-        className="!p-1.5 !h-7"
-      />
-      <div className="flex items-center gap-1.5 px-2">
-        <span className="text-[10px] uppercase font-bold text-pm-secondary hidden sm:inline">Editing Tier:</span>
+        title={prevTier ? `Step to ${prevTier.name.toUpperCase()}` : 'First Tier'}
+        className={`h-7 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 border ${
+          prevTier
+            ? 'bg-pm-input border-pm-border text-pm-text hover:bg-purple-500/10 hover:border-purple-500/30 hover:text-purple-400 cursor-pointer'
+            : 'bg-pm-input/20 border-pm-border/30 text-pm-secondary/40 cursor-not-allowed'
+        }`}
+      >
+        <ChevronLeft className="w-3.5 h-3.5" />
+        <span className="hidden md:inline font-mono uppercase">{prevTier ? prevTier.name : 'First'}</span>
+      </button>
+
+      {/* Active Tier Dropdown Pill */}
+      <div className="relative flex items-center">
         <select
           value={selectedTier.toLowerCase()}
           onChange={(e) => handleTierChange(e.target.value)}
-          className="bg-pm-card text-pm-text border border-pm-border rounded-md px-2 py-0.5 text-xs font-bold font-mono focus:outline-none focus:border-purple-500 cursor-pointer"
+          className="appearance-none h-7 pl-2.5 pr-7 bg-purple-500/15 text-purple-300 dark:text-purple-200 border border-purple-500/40 rounded-lg text-xs font-extrabold font-mono focus:outline-none focus:ring-2 focus:ring-purple-500/30 cursor-pointer shadow-sm shadow-purple-500/10 hover:border-purple-400 transition-colors"
         >
           {displayTiers.map((t) => (
             <option key={t.name} value={t.name.toLowerCase()} className="bg-pm-card text-pm-text font-mono font-bold">
-              {t.name.toUpperCase()}
+              {t.name.toUpperCase()} TIER
             </option>
           ))}
         </select>
+        <ChevronDown className="w-3.5 h-3.5 text-purple-400 absolute right-2 pointer-events-none" />
       </div>
-      <Button
-        variant="neutral"
-        size="sm"
-        icon={ChevronRight}
+
+      {/* Next Tier Stepper Button */}
+      <button
+        type="button"
         disabled={!nextTier}
         onClick={() => nextTier && handleTierChange(nextTier.name)}
-        title={nextTier ? `Next Tier: ${nextTier.name.toUpperCase()}` : 'Last Tier'}
-        className="!p-1.5 !h-7"
-      />
+        title={nextTier ? `Step to ${nextTier.name.toUpperCase()}` : 'Last Tier'}
+        className={`h-7 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 border ${
+          nextTier
+            ? 'bg-pm-input border-pm-border text-pm-text hover:bg-purple-500/10 hover:border-purple-500/30 hover:text-purple-400 cursor-pointer'
+            : 'bg-pm-input/20 border-pm-border/30 text-pm-secondary/40 cursor-not-allowed'
+        }`}
+      >
+        <span className="hidden md:inline font-mono uppercase">{nextTier ? nextTier.name : 'Last'}</span>
+        <ChevronRight className="w-3.5 h-3.5" />
+      </button>
     </div>
   );
 
