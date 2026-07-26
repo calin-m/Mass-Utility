@@ -4,6 +4,7 @@ import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { StatSummaryGrid } from '../common/StatSummaryGrid';
 import { BaseModal } from '../common/BaseModal';
+import { ConfirmModal } from '../common/ConfirmModal';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
 import { StatusBadge } from '../common/StatusBadge';
 import { Button } from '../common/Button';
@@ -538,29 +539,16 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       </BaseModal>
 
       {/* Delete Confirmation Modal */}
-      <BaseModal
+      <ConfirmModal
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Delete Company Profile?"
-        icon={AlertTriangle}
+        message={`Are you sure you want to delete company profile "${selectedCompany?.company_name || ''}"? Linked user accounts will be unassigned from this organization.`}
+        confirmText="Confirm Delete"
         variant="danger"
-        maxWidth="md"
-      >
-        <div className="space-y-4 text-xs">
-          <p className="text-pm-secondary leading-relaxed">
-            Are you sure you want to delete company profile <strong>{selectedCompany?.company_name}</strong>?
-            Linked user accounts will be unassigned from this organization.
-          </p>
-          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-            <Button variant="neutral" size="md" onClick={() => setIsDeleteOpen(false)}>
-              {t('btn_cancel')}
-            </Button>
-            <Button variant="danger" size="md" onClick={handleDelete} loading={submitting}>
-              {t('btn_delete')} Company
-            </Button>
-          </div>
-        </div>
-      </BaseModal>
+        loading={submitting}
+      />
     </div>
   );
 };

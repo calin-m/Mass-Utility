@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw, UserPlus, Check, Sparkles, Copy, PlusCircle } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
+import { ConfirmModal } from '../common/ConfirmModal';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { StatSummaryGrid } from '../common/StatSummaryGrid';
@@ -804,29 +805,16 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
       </BaseModal>
 
       {/* Delete Confirmation Modal */}
-      <BaseModal
+      <ConfirmModal
         isOpen={!!deletingUser}
         onClose={() => setDeletingUser(null)}
+        onConfirm={handleDeleteUser}
         title="Delete Client Account?"
-        icon={ShieldAlert}
+        message={`Are you sure you want to delete client account "${deletingUser?.email || ''}"? Associated license keys will become unassigned.`}
+        confirmText="Confirm Delete"
         variant="danger"
-        maxWidth="md"
-      >
-        <div className="space-y-4 text-xs">
-          <p className="text-pm-secondary leading-relaxed">
-            Are you sure you want to delete client account <strong>{deletingUser?.email}</strong>?
-            Associated license keys will become unassigned.
-          </p>
-          <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-            <Button variant="neutral" size="md" onClick={() => setDeletingUser(null)}>
-              {t('btn_cancel')}
-            </Button>
-            <Button variant="danger" size="md" onClick={handleDeleteUser} loading={loading}>
-              {t('btn_delete')} Account
-            </Button>
-          </div>
-        </div>
-      </BaseModal>
+        loading={loading}
+      />
     </div>
   );
 };

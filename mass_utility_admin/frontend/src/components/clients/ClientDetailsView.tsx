@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Mail, Building, Building2, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles, User } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
+import { ConfirmModal } from '../common/ConfirmModal';
 import { FormSelect } from '../common/FormSelect';
 import { FormInput } from '../common/FormInput';
 import { Button } from '../common/Button';
@@ -611,21 +612,16 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       </BaseModal>
 
       {/* Delete Confirmation Modal */}
-      <BaseModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Confirm Permanent Deletion">
-        <div className="space-y-4">
-          <p className="text-xs text-pm-text">
-            Are you sure you want to permanently delete account <strong>{user.email}</strong>? All assigned licenses will be unlinked.
-          </p>
-          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-            <button type="button" onClick={() => setShowDeleteModal(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
-              Cancel
-            </button>
-            <button type="button" onClick={handleDeleteUser} disabled={submitting} className="pm-btn-danger px-4 py-2 rounded-lg text-xs font-bold">
-              {submitting ? 'Deleting...' : 'Confirm Delete'}
-            </button>
-          </div>
-        </div>
-      </BaseModal>
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteUser}
+        title="Delete Client Account?"
+        message={`Are you sure you want to permanently delete account "${user.email}"? All assigned licenses will be unlinked.`}
+        confirmText="Confirm Delete"
+        variant="danger"
+        loading={submitting}
+      />
     </DetailSubViewLayout>
   );
 };

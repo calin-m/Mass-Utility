@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle, LayoutDashboard } from 'lucide-react';
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
+import { ConfirmModal } from '../common/ConfirmModal';
 import { Button } from '../common/Button';
 import { FormSelect } from '../common/FormSelect';
 import { FormInput } from '../common/FormInput';
@@ -786,27 +787,16 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
       />
 
       {/* Delete Confirmation Modal */}
-      <BaseModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Company Profile">
-        <div className="space-y-4">
-          <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-rose-400">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-            <div className="text-xs">
-              <p className="font-bold">Warning: Permanent Deletion</p>
-              <p className="mt-1">
-                Deleting company profile <strong>"{company.company_name}"</strong> will unlink all associated team member client accounts and store licenses.
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-            <button type="button" onClick={() => setIsDeleteOpen(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
-              Cancel
-            </button>
-            <button type="button" onClick={handleDeleteCompany} disabled={submitting} className="pm-btn-danger px-4 py-2 rounded-lg text-xs font-bold min-w-[140px] flex justify-center items-center">
-              {submitting ? 'Deleting...' : 'Confirm Delete'}
-            </button>
-          </div>
-        </div>
-      </BaseModal>
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDeleteCompany}
+        title="Delete Company Profile?"
+        message={`Deleting company profile "${company.company_name}" will unlink all associated team member client accounts and store licenses.`}
+        confirmText="Confirm Delete"
+        variant="danger"
+        loading={submitting}
+      />
     </DetailSubViewLayout>
   );
 };

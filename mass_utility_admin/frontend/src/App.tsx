@@ -34,7 +34,15 @@ export const App: React.FC = () => {
     getApiUrl,
   } = useAdminData();
 
-  const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit'>('companies');
+  const getTabFromHash = (): 'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit' => {
+    const hash = window.location.hash.replace('#', '').toLowerCase();
+    const validTabs: ('companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit')[] = [
+      'companies', 'clients', 'licenses', 'tiers', 'settings', 'security', 'audit'
+    ];
+    return validTabs.includes(hash as any) ? (hash as any) : 'companies';
+  };
+
+  const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit'>(getTabFromHash);
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
@@ -42,6 +50,22 @@ export const App: React.FC = () => {
   const [inspectedClient, setInspectedClient] = useState<UserAccount | null>(null);
   const [inspectedCompany, setInspectedCompany] = useState<Company | null>(null);
   const [highlightedLicenseKey, setHighlightedLicenseKey] = useState<string | null>(null);
+
+  // Sync window.location.hash on tab change
+  useEffect(() => {
+    if (window.location.hash !== `#${activeTab}`) {
+      window.history.replaceState(null, '', `#${activeTab}`);
+    }
+  }, [activeTab]);
+
+  // Listen to browser hashchange for Back/Forward support
+  useEffect(() => {
+    const handleHashChange = () => {
+      setActiveTab(getTabFromHash());
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const handleInspectClient = (client: UserAccount) => {
     setInspectedClient(client);
