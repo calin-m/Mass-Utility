@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 
 export interface SubTabItem<T extends string = string> {
   id: T;
@@ -20,27 +20,81 @@ export function SubTabNav<T extends string = string>({
   onTabChange,
   className = '',
 }: SubTabNavProps<T>) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pillStyle, setPillStyle] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    opacity: number;
+  }>({ left: 0, top: 0, width: 0, height: 0, opacity: 0 });
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+
+    const updatePill = () => {
+      const activeEl = containerRef.current?.querySelector<HTMLElement>(`[data-tab-id="${activeTab}"]`);
+      if (activeEl) {
+        setPillStyle({
+          left: activeEl.offsetLeft,
+          top: activeEl.offsetTop,
+          width: activeEl.offsetWidth,
+          height: activeEl.offsetHeight,
+          opacity: 1,
+        });
+      }
+    };
+
+    updatePill();
+
+    // Attach ResizeObserver for responsive window / font scaling safety
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      observer = new ResizeObserver(updatePill);
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (observer) observer.disconnect();
+    };
+  }, [activeTab, tabs]);
+
   return (
-    <div className={`flex items-center gap-1.5 p-1.5 bg-pm-card/80 border border-pm-border rounded-xl backdrop-blur-sm overflow-x-auto ${className}`}>
+    <div
+      ref={containerRef}
+      className={`relative flex items-center gap-1.5 p-1.5 bg-pm-card/80 border border-pm-border rounded-xl backdrop-blur-sm overflow-x-auto ${className}`}
+    >
+      {/* Sliding GPU-Accelerated Purple Active Pill */}
+      <div
+        className="absolute bg-purple-500 rounded-lg shadow-md shadow-purple-500/25 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none z-0"
+        style={{
+          transform: `translate3d(${pillStyle.left}px, ${pillStyle.top}px, 0)`,
+          width: `${pillStyle.width}px`,
+          height: `${pillStyle.height}px`,
+          opacity: pillStyle.opacity,
+        }}
+      />
+
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
         return (
           <button
             key={tab.id}
+            data-tab-id={tab.id}
             type="button"
             onClick={() => onTabChange(tab.id)}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
+            className={`relative z-10 flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 whitespace-nowrap ${
               isActive
-                ? 'bg-purple-500 text-white shadow-md shadow-purple-500/20 font-bold'
-                : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
+                ? 'text-white font-bold'
+                : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/30'
             }`}
           >
-            {Icon && <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-pm-secondary'}`} />}
+            {Icon && <Icon className={`w-3.5 h-3.5 transition-colors duration-200 ${isActive ? 'text-white' : 'text-pm-secondary'}`} />}
             <span>{tab.label}</span>
             {tab.badge !== undefined && tab.badge !== null && (
               <span
-                className={`px-1.5 py-0.5 text-[10px] font-mono rounded-full ${
+                className={`px-1.5 py-0.5 text-[10px] font-mono rounded-full transition-colors duration-200 ${
                   isActive
                     ? 'bg-white/20 text-white font-bold'
                     : 'bg-pm-input text-pm-secondary border border-pm-border'
