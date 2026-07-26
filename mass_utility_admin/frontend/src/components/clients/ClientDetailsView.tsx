@@ -3,8 +3,12 @@ import { ArrowLeft, Mail, Building, Building2, Key, ShieldCheck, ShieldAlert, Gl
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { FormSelect } from '../common/FormSelect';
+import { FormInput } from '../common/FormInput';
+import { Button } from '../common/Button';
+import { LicenseRowCard } from '../common/LicenseRowCard';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
+
 
 interface ClientDetailsViewProps {
   user: UserAccount;
@@ -47,6 +51,56 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
 
   // Delete Modal State
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Inline License Edit Modal State
+  const [editingLic, setEditingLic] = useState<any | null>(null);
+  const [editLicTier, setEditLicTier] = useState('pro');
+  const [editLicExpiresAt, setEditLicExpiresAt] = useState('');
+  const [editLicStoreUrl, setEditLicStoreUrl] = useState('');
+  const [editLicUserId, setEditLicUserId] = useState<string | number>('');
+  const [editLicStatus, setEditLicStatus] = useState('active');
+  const [editLicSubmitting, setEditLicSubmitting] = useState(false);
+
+  const openInlineEditModal = (lic: any) => {
+    setEditingLic(lic);
+    setEditLicTier(lic.package_tier || 'basic');
+    setEditLicExpiresAt(lic.expires_at ? lic.expires_at.split(' ')[0] : '');
+    setEditLicStoreUrl(lic.store_url || '');
+    setEditLicUserId(lic.user_id || '');
+    setEditLicStatus(lic.status || 'active');
+  };
+
+  const handleSaveInlineEditLicense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLic) return;
+    setEditLicSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('id', String(editingLic.id));
+      formData.append('package_tier', editLicTier);
+      formData.append('expires_at', editLicExpiresAt);
+      formData.append('store_url', editLicStoreUrl.trim());
+      formData.append('status', editLicStatus);
+      if (editLicUserId !== '') {
+        formData.append('user_id', String(editLicUserId));
+      }
+
+      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        showAlert('✨ License key details updated successfully!', 'success');
+        setEditingLic(null);
+        onRefresh();
+      } else {
+        showAlert(data.error || 'Failed to update license key', 'error');
+      }
+    } catch (err: any) {
+      showAlert('Error updating license key: ' + err.message, 'error');
+    } finally {
+      setEditLicSubmitting(false);
+    }
+  };
+
 
   const clientLicenses = licenses.filter(l => l.user_email?.toLowerCase() === user.email.toLowerCase() || l.user_id === user.id);
   const isSuspended = user.status === 'suspended';
@@ -485,75 +539,24 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                 </h3>
               </div>
 
-              <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
+              <div className="space-y-3">
                 {clientLicenses.length === 0 ? (
-                  <p className="p-8 text-center text-pm-secondary">No license keys issued to this client email yet.</p>
+                  <p className="p-8 text-center text-pm-secondary border border-pm-border rounded-xl">No license keys issued to this client email yet.</p>
                 ) : (
-                  <div className="divide-y divide-pm-border">
-                    {clientLicenses.map(l => (
-                      <div key={l.id} className="p-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card hover:bg-pm-input/40 transition">
-                        <div className="space-y-1">
-                          <div className="font-mono text-amber-400 font-bold flex items-center gap-2 text-sm">
-                            <span>{l.license_key}</span>
-                            <button
-                              type="button"
-                              onClick={() => copyKey(l.license_key)}
-                              className="text-pm-secondary hover:text-pm-primary transition p-1"
-                              title="Copy License Key"
-                            >
-                              {copiedKey === l.license_key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                          <div className="text-[11px] text-pm-secondary flex flex-wrap items-center gap-2">
-                            <span className="uppercase font-bold text-purple-400 px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">
-                              {l.package_tier} Tier
-                            </span>
-                            <span>•</span>
-                            {user.company_name ? (
-                              assignedComp && onInspectCompany ? (
-                                <button
-                                  type="button"
-                                  onClick={() => onInspectCompany(assignedComp)}
-                                  className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/20 transition flex items-center gap-1"
-                                  title="Inspect Company Profile"
-                                >
-                                  🏢 Owned by {user.company_name} Pool
-                                </button>
-                              ) : (
-                                <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20" title="Key is owned by company pool and remains with company if employee transfers">
-                                  🏢 Owned by {user.company_name} Pool
-                                </span>
-                              )
-                            ) : (
-
-                              <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                                Direct Standalone Key
-                              </span>
-                            )}
-                            <span>•</span>
-                            <span>Issued: {l.created_at ? new Date(l.created_at).toLocaleDateString() : 'N/A'}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          {l.store_url ? (
-                            <a
-                              href={`https://${l.store_url.replace(/^https?:\/\//, '')}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 font-mono text-[11px] text-emerald-400 hover:underline bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20"
-                            >
-                              <Globe className="w-3.5 h-3.5" /> {l.store_url} <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
-                            </a>
-                          ) : (
-                            <span className="italic text-pm-secondary/60 bg-pm-input px-2.5 py-1 rounded text-[11px]">Unbound Store Domain</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  clientLicenses.map(l => (
+                    <LicenseRowCard
+                      key={l.id}
+                      license={l}
+                      users={[user]}
+                      companies={companies}
+                      onEditLicense={openInlineEditModal}
+                      onInspectCompany={onInspectCompany}
+                      showCompanyButton={true}
+                    />
+                  ))
                 )}
               </div>
+
             </div>
 
             {/* Section 2: Inline 1-Click License Key Generator Widget */}
@@ -586,6 +589,57 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
           </div>
         </div>
       )}
+
+      {/* Inline Edit License Modal */}
+      <BaseModal isOpen={!!editingLic} onClose={() => setEditingLic(null)} title={`Edit License Key #${editingLic?.id || ''}`}>
+        <form onSubmit={handleSaveInlineEditLicense} className="space-y-4">
+          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl font-mono text-xs text-purple-400 font-bold tracking-wider select-all">
+            🔑 {editingLic?.license_key}
+          </div>
+
+          <FormSelect
+            label="Package Tier"
+            value={editLicTier}
+            onChange={e => setEditLicTier(e.target.value)}
+            options={tierOptions}
+          />
+
+          <FormInput
+            label="Bound Store Domain"
+            placeholder="e.g. mystore.com"
+            value={editLicStoreUrl}
+            onChange={e => setEditLicStoreUrl(e.target.value)}
+          />
+
+          <FormInput
+            label="Expiration Date"
+            type="date"
+            value={editLicExpiresAt}
+            onChange={e => setEditLicExpiresAt(e.target.value)}
+          />
+
+          <FormSelect
+            label="License Status"
+            value={editLicStatus}
+            onChange={e => setEditLicStatus(e.target.value)}
+            options={[
+              { value: 'active', label: '🟢 Active' },
+              { value: 'expiring', label: '🟠 Expiring Soon' },
+              { value: 'suspended', label: '🔴 Suspended' },
+              { value: 'revoked', label: '⚫ Revoked' },
+            ]}
+          />
+
+          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
+            <Button type="button" variant="neutral" onClick={() => setEditingLic(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" loading={editLicSubmitting}>
+              Save License Changes
+            </Button>
+          </div>
+        </form>
+      </BaseModal>
 
       {/* Password Reset Modal */}
       <BaseModal isOpen={showResetModal} onClose={() => setShowResetModal(false)} title={`Reset Password: ${user.email}`}>
@@ -631,3 +685,4 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
     </div>
   );
 };
+

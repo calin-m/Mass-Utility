@@ -580,8 +580,25 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
                               <span>{lic.user_email}</span>
                             )}
                             {lic.company_name && (
-                              <div className="text-[10px] text-pm-secondary font-mono">🏢 {lic.company_name}</div>
+                              <div className="text-[10px] text-pm-secondary font-mono flex items-center gap-1">
+                                <span>🏢</span>
+                                {onInspectCompany ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const foundComp = companies.find(c => (c.company_name || '').toLowerCase() === (lic.company_name || '').toLowerCase());
+                                      if (foundComp) onInspectCompany(foundComp, lic.license_key);
+                                    }}
+                                    className="hover:underline hover:text-purple-400 font-bold"
+                                  >
+                                    {lic.company_name}
+                                  </button>
+                                ) : (
+                                  <span>{lic.company_name}</span>
+                                )}
+                              </div>
                             )}
+
                           </div>
                         ) : (
                           <span className="italic text-pm-secondary">{t('lic_standalone')}</span>

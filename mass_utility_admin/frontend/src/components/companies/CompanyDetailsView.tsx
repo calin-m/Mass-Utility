@@ -5,8 +5,11 @@ import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
 import { Button } from '../common/Button';
 import { FormSelect } from '../common/FormSelect';
+import { FormInput } from '../common/FormInput';
+import { LicenseRowCard } from '../common/LicenseRowCard';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
+
 
 interface CompanyDetailsViewProps {
   company: Company;
@@ -62,6 +65,56 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [newMemberPassword, setNewMemberPassword] = useState('');
   const [showMemberPassword, setShowMemberPassword] = useState(false);
+
+  // Inline License Edit Modal State
+  const [editingLic, setEditingLic] = useState<any | null>(null);
+  const [editLicTier, setEditLicTier] = useState('pro');
+  const [editLicExpiresAt, setEditLicExpiresAt] = useState('');
+  const [editLicStoreUrl, setEditLicStoreUrl] = useState('');
+  const [editLicUserId, setEditLicUserId] = useState<string | number>('');
+  const [editLicStatus, setEditLicStatus] = useState('active');
+  const [editLicSubmitting, setEditLicSubmitting] = useState(false);
+
+  const openInlineEditModal = (lic: any) => {
+    setEditingLic(lic);
+    setEditLicTier(lic.package_tier || 'basic');
+    setEditLicExpiresAt(lic.expires_at ? lic.expires_at.split(' ')[0] : '');
+    setEditLicStoreUrl(lic.store_url || '');
+    setEditLicUserId(lic.user_id || '');
+    setEditLicStatus(lic.status || 'active');
+  };
+
+  const handleSaveInlineEditLicense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLic) return;
+    setEditLicSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('id', String(editingLic.id));
+      formData.append('package_tier', editLicTier);
+      formData.append('expires_at', editLicExpiresAt);
+      formData.append('store_url', editLicStoreUrl.trim());
+      formData.append('status', editLicStatus);
+      if (editLicUserId !== '') {
+        formData.append('user_id', String(editLicUserId));
+      }
+
+      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        if (showAlert) showAlert('✨ License key details updated successfully!', 'success');
+        setEditingLic(null);
+        onRefresh();
+      } else {
+        if (showAlert) showAlert(data.error || 'Failed to update license key', 'error');
+      }
+    } catch (err: any) {
+      if (showAlert) showAlert('Error updating license key: ' + err.message, 'error');
+    } finally {
+      setEditLicSubmitting(false);
+    }
+  };
+
 
   const companyMembers = users.filter(u => u.company_name && u.company_name.trim().toLowerCase() === company.company_name.trim().toLowerCase());
   const companyLicenses = licenses.filter(l => (l.company_id && l.company_id === company.id) || (l.company_name && l.company_name.trim().toLowerCase() === company.company_name.trim().toLowerCase()) || (l.user_email && companyMembers.some(m => m.email.toLowerCase() === l.user_email.toLowerCase())));
@@ -607,109 +660,27 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                 </h3>
               </div>
 
-              <div className="border border-pm-border rounded-lg overflow-hidden text-xs">
+              <div className="space-y-3">
                 {companyLicenses.length === 0 ? (
-                  <p className="p-8 text-center text-pm-secondary">No active store licenses issued to company pool yet.</p>
+                  <p className="p-8 text-center text-pm-secondary border border-pm-border rounded-xl">No active store licenses issued to company pool yet.</p>
                 ) : (
-                  <div className="divide-y divide-pm-border">
-                    {companyLicenses.map(l => {
-                      const isHighlighted = highlightedLicenseKey && l.license_key === highlightedLicenseKey;
-                      return (
-                        <div
-                          key={l.id}
-                          className={`p-3.5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 rounded-lg transition ${
-                            isHighlighted
-                              ? 'bg-purple-500/15 border-2 border-purple-500/80 ring-2 ring-purple-500/30 shadow-md'
-                              : 'bg-pm-card hover:bg-pm-input/40'
-                          }`}
-                        >
-
-                        <div className="space-y-1">
-                          <div className="font-mono text-amber-400 font-bold flex items-center gap-2 text-sm">
-                            <span>{visibleKeys[l.id] ? l.license_key : maskKey(l.license_key)}</span>
-                            <button
-                              type="button"
-                              onClick={() => toggleKeyVisibility(l.id)}
-                              className="text-pm-secondary hover:text-pm-primary transition p-1 rounded hover:bg-pm-input"
-                              title={visibleKeys[l.id] ? t('modal_raw_json_hide') : t('modal_raw_json_show')}
-                            >
-                              {visibleKeys[l.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => copyLicenseKey(l.license_key)}
-                              className="text-pm-secondary hover:text-pm-primary transition p-1 rounded hover:bg-pm-input"
-                              title="Copy License Key"
-                            >
-                              {copiedKey === l.license_key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                          <div className="text-[11px] text-pm-secondary flex items-center gap-2">
-                            <span className="uppercase font-bold text-purple-400 px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">
-                              {l.package_tier} Tier
-                            </span>
-                            <span>•</span>
-                            <span>Issued: {l.created_at ? new Date(l.created_at).toLocaleDateString() : 'N/A'}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2 shrink-0">
-                          {/* Employee Assignment Dropdown */}
-                          <div className="flex items-center gap-1.5">
-                            <label className="text-[10px] font-semibold text-pm-secondary uppercase">Assigned To:</label>
-                            <select
-                              value={l.user_id || ''}
-                              onChange={e => handleAssignEmployee(l.id, e.target.value)}
-                              className="bg-pm-input border border-pm-border rounded-lg px-2.5 py-1 text-xs font-semibold text-pm-text focus:border-purple-500 focus:outline-none"
-                            >
-                              <option value="">-- Unassigned (Available in Pool) --</option>
-                              {companyMembers.map(m => (
-                                <option key={m.id} value={m.id}>
-                                  👤 {m.name ? `${m.name} (${m.email})` : m.email}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          {/* Bound Domain Badge */}
-                          {l.store_url ? (
-                            <a
-                              href={l.store_url.startsWith('http') ? l.store_url : `https://${l.store_url}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs hover:bg-emerald-500/20 transition"
-                            >
-                              <Globe className="w-3.5 h-3.5" />
-                              <span>{l.store_url}</span>
-                              <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
-                            </a>
-                          ) : (
-                            <span className="px-2.5 py-1 rounded-lg bg-pm-input/80 text-pm-secondary font-mono text-[11px] border border-pm-border italic">
-                              Unbound Store Domain
-                            </span>
-                          )}
-
-                          {onEditLicense && (
-                            <Button
-                              type="button"
-                              variant="neutral"
-                              size="sm"
-                              icon={Edit}
-                              onClick={() => onEditLicense(l)}
-                              title="Edit License Settings"
-                            >
-                              Edit
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  </div>
-
+                  companyLicenses.map(l => (
+                    <LicenseRowCard
+                      key={l.id}
+                      license={l}
+                      users={companyMembers}
+                      companies={[company]}
+                      highlightedKey={highlightedLicenseKey}
+                      showAssignSelect={true}
+                      onAssignEmployee={handleAssignEmployee}
+                      onEditLicense={openInlineEditModal}
+                      onInspectClient={onInspectClient}
+                      showCompanyButton={false}
+                    />
+                  ))
                 )}
               </div>
+
 
               {/* 1-Click Pool Key Generator */}
               <form onSubmit={handleIssuePoolLicense} className="flex flex-col sm:flex-row items-center gap-3 p-3.5 bg-pm-input/40 border border-pm-border rounded-xl">
@@ -859,6 +830,70 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
         </div>
       )}
 
+      {/* Inline Edit License Modal */}
+      <BaseModal isOpen={!!editingLic} onClose={() => setEditingLic(null)} title={`Edit License Key #${editingLic?.id || ''}`}>
+        <form onSubmit={handleSaveInlineEditLicense} className="space-y-4">
+          <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl font-mono text-xs text-purple-400 font-bold tracking-wider select-all">
+            🔑 {editingLic?.license_key}
+          </div>
+
+          <FormSelect
+            label="Package Tier"
+            value={editLicTier}
+            onChange={e => setEditLicTier(e.target.value)}
+            options={tierOptions}
+          />
+
+          <FormInput
+            label="Bound Store Domain"
+            placeholder="e.g. mystore.com"
+            value={editLicStoreUrl}
+            onChange={e => setEditLicStoreUrl(e.target.value)}
+          />
+
+          <FormInput
+            label="Expiration Date"
+            type="date"
+            value={editLicExpiresAt}
+            onChange={e => setEditLicExpiresAt(e.target.value)}
+          />
+
+          <FormSelect
+            label="Assigned Team Member"
+            value={editLicUserId || ''}
+            onChange={e => setEditLicUserId(e.target.value)}
+            options={[
+              { value: '', label: '-- Unassigned (Available in Company Pool) --' },
+              ...companyMembers.map(m => ({
+                value: String(m.id),
+                label: `👤 ${m.name ? `${m.name} (${m.email})` : m.email}`
+              }))
+            ]}
+          />
+
+          <FormSelect
+            label="License Status"
+            value={editLicStatus}
+            onChange={e => setEditLicStatus(e.target.value)}
+            options={[
+              { value: 'active', label: '🟢 Active' },
+              { value: 'expiring', label: '🟠 Expiring Soon' },
+              { value: 'suspended', label: '🔴 Suspended' },
+              { value: 'revoked', label: '⚫ Revoked' },
+            ]}
+          />
+
+          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
+            <Button type="button" variant="neutral" onClick={() => setEditingLic(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" loading={editLicSubmitting}>
+              Save License Changes
+            </Button>
+          </div>
+        </form>
+      </BaseModal>
+
       {/* Delete Confirmation Modal */}
       <BaseModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Company Profile">
         <div className="space-y-4">
@@ -884,3 +919,4 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
     </div>
   );
 };
+
