@@ -4,7 +4,9 @@ import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, Exte
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
 import { Button } from '../common/Button';
+import { FormSelect } from '../common/FormSelect';
 import { useTranslation } from '../../i18n/LanguageContext';
+import { getSortedTierOptions } from '../../utils/tierUtils';
 
 interface CompanyDetailsViewProps {
   company: Company;
@@ -21,7 +23,6 @@ interface CompanyDetailsViewProps {
 }
 
 export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, onEditLicense, highlightedLicenseKey, tiers = [] }) => {
-
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
@@ -30,26 +31,8 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
   const [poolTier, setPoolTier] = useState('pro');
 
-  const TIER_RANK: Record<string, number> = {
-    basic: 10, essential: 10, pro: 20, growth: 20, enterprise: 30, autopilot: 30, developer: 40, agency: 50, vip: 60
-  };
+  const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
 
-  const tierOptions = useMemo(() => {
-    const rawTiers = (tiers && tiers.length > 0)
-      ? tiers
-      : [{ name: 'basic' }, { name: 'pro' }, { name: 'enterprise' }];
-
-    const sorted = [...rawTiers].sort((a: any, b: any) => {
-      const rA = TIER_RANK[(a.name || '').toLowerCase()] ?? 99;
-      const rB = TIER_RANK[(b.name || '').toLowerCase()] ?? 99;
-      return rA - rB;
-    });
-
-    return sorted.map((t: any) => ({
-      value: (t.name || '').toLowerCase(),
-      label: `${(t.name || '').toUpperCase()} TIER`
-    }));
-  }, [tiers]);
 
 
 
@@ -731,21 +714,14 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
               {/* 1-Click Pool Key Generator */}
               <form onSubmit={handleIssuePoolLicense} className="flex flex-col sm:flex-row items-center gap-3 p-3.5 bg-pm-input/40 border border-pm-border rounded-xl">
                 <div className="flex-1 w-full">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-pm-secondary mb-1">Issue New Key to {company.company_name} Pool</label>
-                  <select
+                  <FormSelect
+                    label={`Issue New Key to ${company.company_name} Pool`}
                     value={poolTier}
                     onChange={e => setPoolTier(e.target.value)}
-                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-1.5 text-xs font-bold text-pm-text focus:outline-none focus:border-purple-500"
-                  >
-                    {tierOptions.map((opt: any) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-
-                  </select>
-
+                    options={tierOptions}
+                  />
                 </div>
+
 
                 <button
                   type="submit"

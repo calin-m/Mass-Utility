@@ -41,11 +41,13 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, compani
         user={currentActiveUser}
         licenses={licenses}
         companies={companies}
+        tiers={tiers}
         initialTab={selectedTab}
         onBack={handleBackToList}
         onRefresh={onRefresh}
         showAlert={showAlert}
         onInspectCompany={onInspectCompany}
+
       />
     );
   }

@@ -255,10 +255,12 @@ export const App: React.FC = () => {
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             onInspectClient={handleInspectClient}
+            onEditLicense={() => setActiveTab('licenses')}
             initialSelectedCompany={inspectedCompany}
             highlightedLicenseKey={highlightedLicenseKey}
           />
         )}
+
 
         {activeTab === 'clients' && (
           <ClientsTab

@@ -9,6 +9,7 @@ import { FormInput } from './common/FormInput';
 import { FormSelect } from './common/FormSelect';
 import { PaginationBar } from './common/PaginationBar';
 import { useTranslation } from '../i18n/LanguageContext';
+import { getSortedTierOptions } from '../utils/tierUtils';
 
 export interface License {
   id: number;
@@ -51,26 +52,8 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
   const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const TIER_RANK: Record<string, number> = {
-    basic: 10, essential: 10, pro: 20, growth: 20, enterprise: 30, autopilot: 30, developer: 40, agency: 50, vip: 60
-  };
+  const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
 
-  const tierOptions = useMemo(() => {
-    const rawTiers = (tiers && tiers.length > 0)
-      ? tiers
-      : [{ name: 'basic' }, { name: 'pro' }, { name: 'enterprise' }];
-
-    const sorted = [...rawTiers].sort((a: any, b: any) => {
-      const rA = TIER_RANK[(a.name || '').toLowerCase()] ?? 99;
-      const rB = TIER_RANK[(b.name || '').toLowerCase()] ?? 99;
-      return rA - rB;
-    });
-
-    return sorted.map((t: any) => ({
-      value: (t.name || '').toLowerCase(),
-      label: `${(t.name || '').toUpperCase()} TIER`
-    }));
-  }, [tiers]);
 
 
 
@@ -491,42 +474,45 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ licenses, users = [], 
             title={t('licenses_title')}
             subtitle={t('licenses_subtitle')}
             icon={Key}
-            action={
-              <Button
-                variant="neutral"
-                size="sm"
-                icon={RefreshCw}
-                loading={isRefreshing}
-                onClick={handleRefresh}
-              >
-                {t('btn_refresh')}
-              </Button>
-            }
           />
 
-          {/* Cleaned Status Filter Tab Pills */}
-          <div className="flex items-center gap-1 bg-pm-input p-1 rounded-xl shrink-0 self-start md:self-auto">
-            {(['ALL', 'ACTIVE', 'EXPIRING', 'EXPIRED'] as const).map(mode => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => {
-                  setFilterMode(mode);
-                  setCurrentPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ${
-                  filterMode === mode
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-pm-secondary hover:text-pm-text hover:bg-pm-card/60'
-                }`}
-              >
-                {mode === 'ALL' && 'All Keys'}
-                {mode === 'ACTIVE' && '🟢 Active'}
-                {mode === 'EXPIRING' && '🟠 Expiring Soon'}
-                {mode === 'EXPIRED' && '🔴 Expired'}
-              </button>
-            ))}
+          <div className="flex items-center gap-3 shrink-0 self-start md:self-auto">
+            {/* Cleaned Status Filter Tab Pills */}
+            <div className="flex items-center gap-1 bg-pm-input p-1 rounded-xl">
+              {(['ALL', 'ACTIVE', 'EXPIRING', 'EXPIRED'] as const).map(mode => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => {
+                    setFilterMode(mode);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ${
+                    filterMode === mode
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'text-pm-secondary hover:text-pm-text hover:bg-pm-card/60'
+                  }`}
+                >
+                  {mode === 'ALL' && 'All Keys'}
+                  {mode === 'ACTIVE' && '🟢 Active'}
+                  {mode === 'EXPIRING' && '🟠 Expiring Soon'}
+                  {mode === 'EXPIRED' && '🔴 Expired'}
+                </button>
+              ))}
+            </div>
+
+            {/* Refresh Button */}
+            <Button
+              variant="neutral"
+              size="sm"
+              icon={RefreshCw}
+              loading={isRefreshing}
+              onClick={handleRefresh}
+            >
+              {t('btn_refresh')}
+            </Button>
           </div>
+
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-pm-border">

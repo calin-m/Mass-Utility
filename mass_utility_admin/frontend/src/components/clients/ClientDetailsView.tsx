@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Mail, Building, Building2, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
+import { FormSelect } from '../common/FormSelect';
 import { useTranslation } from '../../i18n/LanguageContext';
+import { getSortedTierOptions } from '../../utils/tierUtils';
 
 interface ClientDetailsViewProps {
   user: UserAccount;
   licenses: License[];
   companies?: any[];
+  tiers?: any[];
   initialTab?: 'overview' | 'edit';
   onBack: () => void;
   onRefresh: () => void;
@@ -15,15 +18,18 @@ interface ClientDetailsViewProps {
   onInspectCompany?: (company: any) => void;
 }
 
-export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], initialTab, onBack, onRefresh, showAlert, onInspectCompany }) => {
+export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], tiers = [], initialTab, onBack, onRefresh, showAlert, onInspectCompany }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'edit'>(initialTab || 'overview');
   const [submitting, setSubmitting] = useState(false);
   const [selectedTier, setSelectedTier] = useState('pro');
 
+  const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
+
   const assignedComp = user.company_name
     ? companies.find(c => (c.company_name || '').toLowerCase() === (user.company_name || '').toLowerCase())
     : null;
+
 
 
 
@@ -558,17 +564,14 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
 
               <form onSubmit={handleIssueLicense} className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-pm-input/50 border border-pm-border rounded-xl">
                 <div className="flex-1 w-full">
-                  <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Package Tier</label>
-                  <select
+                  <FormSelect
+                    label="Package Tier"
                     value={selectedTier}
                     onChange={e => setSelectedTier(e.target.value)}
-                    className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-bold text-pm-text focus:outline-none focus:border-purple-500"
-                  >
-                    <option value="basic">BASIC TIER (Standard Feature Suite)</option>
-                    <option value="pro">PRO TIER (Advanced Automation &amp; Backups)</option>
-                    <option value="enterprise">ENTERPRISE TIER (Unlimited Multi-Store Pools)</option>
-                  </select>
+                    options={tierOptions}
+                  />
                 </div>
+
 
                 <button
                   type="submit"
