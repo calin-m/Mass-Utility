@@ -24,7 +24,8 @@ import {
 import { License, UserAccount } from '../../types/adminApi';
 import { Button } from '../common/Button';
 import { StatusBadge } from '../common/StatusBadge';
-import { SubTabNav, SubTabItem } from '../common/SubTabNav';
+import { SubTabItem } from '../common/SubTabNav';
+import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { maskLicenseKey, copyLicenseKeyToClipboard } from '../../utils/licenseUtils';
 
 export interface LicenseDetailsViewProps {
@@ -135,76 +136,49 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Back Button Navigation Header */}
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-pm-secondary hover:text-pm-text transition bg-pm-card border border-pm-border px-3 py-1.5 rounded-lg shadow-sm"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span>Back to License Directory</span>
-        </button>
-
+    <DetailSubViewLayout
+      backLabel="Back to License Directory"
+      onBack={onBack}
+      headerIcon={Key}
+      headerTitle={showFullKey ? license.license_key : maskLicenseKey(license.license_key)}
+      headerSubtitle={`License ID #${license.id} • Registered Key Signature & Whitelisted Domain Governance`}
+      headerBadges={
         <div className="flex items-center gap-2">
+          <StatusBadge status={license.status} />
+          <span className="text-xs text-pm-secondary bg-pm-input px-2.5 py-1 rounded-lg border border-pm-border uppercase font-mono font-bold">
+            {license.package_tier}
+          </span>
+        </div>
+      }
+      headerActions={
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowFullKey(!showFullKey)}
+            className="inline-flex items-center gap-1 text-xs text-pm-secondary hover:text-pm-text bg-pm-input px-2.5 py-1.5 rounded-lg border border-pm-border transition"
+          >
+            {showFullKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            <span>{showFullKey ? 'Hide Key' : 'Show Key'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleCopyKey}
+            className="inline-flex items-center gap-1 text-xs text-pm-secondary hover:text-pm-text bg-pm-input px-2.5 py-1.5 rounded-lg border border-pm-border transition"
+          >
+            {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copiedKey ? 'Copied' : 'Copy'}</span>
+          </button>
           {onEditLicense && (
             <Button variant="neutral" size="sm" icon={Edit} onClick={() => onEditLicense(license)}>
               Edit Key Details
             </Button>
           )}
         </div>
-      </div>
-
-      {/* Detail Header Banner Card */}
-      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-2 flex-1">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              <Key className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <code className="font-mono text-base font-bold text-pm-text bg-pm-input px-3 py-1 rounded-lg border border-pm-border tracking-wider">
-                  {showFullKey ? license.license_key : maskLicenseKey(license.license_key)}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => setShowFullKey(!showFullKey)}
-                  className="text-pm-secondary hover:text-pm-text p-1 transition"
-                  title={showFullKey ? 'Hide Key' : 'Show Key'}
-                >
-                  {showFullKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyKey}
-                  className={`p-1 rounded transition ${
-                    copiedKey ? 'text-emerald-400 bg-emerald-500/10' : 'text-pm-secondary hover:text-pm-text'
-                  }`}
-                  title="Copy Key"
-                >
-                  {copiedKey ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              <p className="text-xs text-pm-secondary mt-1">
-                Software License Key ID #{license.id} • Issued{' '}
-                {license.created_at ? new Date(license.created_at).toLocaleDateString() : 'N/A'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 shrink-0">
-          <StatusBadge status={license.status || 'active'} />
-          <span className="text-xs font-mono uppercase font-bold px-3 py-1 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/30">
-            {license.package_tier || 'basic'} Tier
-          </span>
-        </div>
-      </div>
-
-      {/* Sub-Tab Navigation */}
-      <SubTabNav tabs={subTabs} activeTab={activeTab} onTabChange={setActiveTab} />
+      }
+      tabs={subTabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    >
 
       {/* Sub-Tab 1: Overview & Expiry */}
       {activeTab === 'overview' && (
@@ -406,6 +380,6 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </DetailSubViewLayout>
   );
 };

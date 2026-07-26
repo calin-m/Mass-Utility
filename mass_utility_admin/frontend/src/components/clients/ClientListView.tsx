@@ -4,6 +4,7 @@ import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
+import { StatSummaryGrid } from '../common/StatSummaryGrid';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
 import { StatusBadge } from '../common/StatusBadge';
 import { Button } from '../common/Button';
@@ -355,13 +356,15 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         }
       />
 
-      {/* Top Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label={t('stat_total_clients')} value={totalClients} icon={Users} color="purple" />
-        <StatCard label={t('stat_active_accounts')} value={activeClients} icon={CheckCircle} color="emerald" />
-        <StatCard label={t('stat_suspended_accounts')} value={suspendedClients} icon={ShieldAlert} color="rose" />
-        <StatCard label={t('stat_bound_domains')} value={totalBoundDomains} icon={Building} color="amber" />
-      </div>
+      {/* 4 Stat Summary Cards Grid */}
+      <StatSummaryGrid
+        cards={[
+          { label: t('stat_total_clients'), value: totalClients, icon: Users, color: 'purple' },
+          { label: t('stat_active_accounts' as any) || 'Active Accounts', value: activeClients, icon: CheckCircle, color: 'emerald' },
+          { label: t('stat_suspended_accounts' as any) || 'Suspended Accounts', value: suspendedClients, icon: ShieldAlert, color: 'rose' },
+          { label: t('stat_bound_domains' as any) || 'Bound Store Domains', value: totalBoundDomains, icon: Building, color: 'blue' },
+        ]}
+      />
 
       {/* Shared Directory Toolbar */}
       <DirectoryToolbar

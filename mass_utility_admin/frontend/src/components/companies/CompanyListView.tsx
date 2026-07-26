@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
+import { StatSummaryGrid } from '../common/StatSummaryGrid';
 import { BaseModal } from '../common/BaseModal';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
 import { StatusBadge } from '../common/StatusBadge';
@@ -234,13 +235,15 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
         }
       />
 
-      {/* Horizontal Overview Stat Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label={t('stat_total_companies')} value={companies.length} icon={Building2} color="purple" />
-        <StatCard label={t('stat_active_orgs')} value={activeCount} icon={ShieldCheck} color="emerald" />
-        <StatCard label={t('stat_team_members')} value={totalMembers} icon={Users} color="blue" />
-        <StatCard label={t('stat_managed_licenses')} value={totalCompanyLicenses} icon={Key} color="amber" />
-      </div>
+      {/* 4 Stat Summary Cards Grid */}
+      <StatSummaryGrid
+        cards={[
+          { label: t('stat_total_companies'), value: companies.length, icon: Building2, color: 'purple' },
+          { label: t('stat_active_orgs'), value: activeCount, icon: ShieldCheck, color: 'emerald' },
+          { label: t('stat_team_members'), value: totalMembers, icon: Users, color: 'blue' },
+          { label: t('stat_managed_licenses'), value: totalCompanyLicenses, icon: Key, color: 'amber' },
+        ]}
+      />
 
       {/* Shared Directory Toolbar */}
       <DirectoryToolbar

@@ -3,6 +3,8 @@ import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Tra
 import { BaseModal } from './common/BaseModal';
 import { ConfirmModal } from './common/ConfirmModal';
 import { StatCard } from './common/StatCard';
+import { StatSummaryGrid } from './common/StatSummaryGrid';
+import { DirectoryCardTable } from './common/DirectoryCardTable';
 import { Button } from './common/Button';
 import { FormInput } from './common/FormInput';
 import { FormSelect } from './common/FormSelect';
@@ -362,13 +364,15 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
         }
       />
 
-      {/* 4 Stat Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label={t('stat_total_keys')} value={licenses.length} icon={Key} color="purple" />
-        <StatCard label={t('stat_active_keys')} value={activeCount} icon={CheckCircle} color="emerald" />
-        <StatCard label={t('stat_expiring_soon')} value={expiringSoonCount} icon={Clock} color="amber" />
-        <StatCard label={t('stat_unassigned_keys')} value={licenses.filter((l) => !l.user_id).length} icon={Unlock} color="blue" />
-      </div>
+      {/* 4 Stat Summary Cards Grid */}
+      <StatSummaryGrid
+        cards={[
+          { label: t('stat_total_keys'), value: licenses.length, icon: Key, color: 'purple' },
+          { label: t('stat_active_keys'), value: activeCount, icon: CheckCircle, color: 'emerald' },
+          { label: t('stat_expiring_soon'), value: expiringSoonCount, icon: Clock, color: 'amber' },
+          { label: t('stat_unassigned_keys'), value: licenses.filter((l) => !l.user_id).length, icon: Unlock, color: 'blue' },
+        ]}
+      />
 
       {/* Unified Directory Toolbar (Search, Filters, View Mode Switcher, Primary Action) */}
       <DirectoryToolbar

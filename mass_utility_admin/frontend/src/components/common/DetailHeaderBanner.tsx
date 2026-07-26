@@ -1,60 +1,54 @@
 import React from 'react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from './Button';
-import { StatusBadge } from './StatusBadge';
+import { LucideIcon } from 'lucide-react';
 
 export interface DetailHeaderBannerProps {
+  icon: LucideIcon;
   title: string;
+  titleCode?: string;
   subtitle?: string;
-  icon?: React.ComponentType<{ className?: string }>;
   status?: string;
-  onBack: () => void;
+  badges?: React.ReactNode;
   actions?: React.ReactNode;
+  onBack?: () => void;
   children?: React.ReactNode;
 }
 
 export const DetailHeaderBanner: React.FC<DetailHeaderBannerProps> = ({
-  title,
-  subtitle,
   icon: Icon,
+  title,
+  titleCode,
+  subtitle,
   status,
-  onBack,
+  badges,
   actions,
   children,
 }) => {
   return (
-    <div className="bg-pm-card/60 border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {/* Left: Back Button & Title */}
-        <div className="flex items-center gap-3">
-          <Button
-            variant="neutral"
-            size="sm"
-            icon={ArrowLeft}
-            onClick={onBack}
-            className="hover:bg-pm-input"
-          />
-
-          {Icon && (
-            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              <Icon className="w-5 h-5" />
-            </div>
-          )}
-
-          <div>
+    <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="space-y-2 flex-1 min-w-0">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
+            <Icon className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg font-bold text-pm-text tracking-tight">{title}</h2>
-              {status && <StatusBadge status={status} />}
+              <h2 className="text-lg font-bold text-pm-text tracking-tight truncate">{title}</h2>
+              {titleCode && (
+                <code className="font-mono text-xs font-bold text-pm-text bg-pm-input px-2.5 py-1 rounded-lg border border-pm-border tracking-wider">
+                  {titleCode}
+                </code>
+              )}
             </div>
-            {subtitle && <p className="text-xs text-pm-secondary font-mono mt-0.5">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-pm-secondary mt-1">{subtitle}</p>}
           </div>
         </div>
-
-        {/* Right: Actions */}
-        {actions && <div className="flex items-center gap-2 flex-wrap">{actions}</div>}
       </div>
 
-      {children && <div className="pt-2 border-t border-pm-border/50">{children}</div>}
+      <div className="flex items-center gap-3 shrink-0 flex-wrap">
+        {badges}
+        {actions}
+      </div>
+      {children && <div className="w-full mt-4 border-t border-pm-border pt-4">{children}</div>}
     </div>
   );
 };
