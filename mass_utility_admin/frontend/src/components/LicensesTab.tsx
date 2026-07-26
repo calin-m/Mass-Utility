@@ -328,26 +328,23 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
     { key: 'EXPIRED', label: '🔴 Expired', count: expiredCount },
   ];
 
-  // Render Sub-Page Details View if activeSubView === 'details'
-  if (activeSubView === 'details' && currentLicense) {
-    return (
-      <LicenseDetailsView
-        license={currentLicense}
-        users={users}
-        companies={companies}
-        tiers={tiers}
-        onBack={handleBackToList}
-        onRefresh={onRefresh}
-        showAlert={showAlert}
-        onInspectClient={onInspectClient}
-        onInspectCompany={onInspectCompany}
-        onEditLicense={openEditLicenseModal}
-      />
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <>
+      {activeSubView === 'details' && currentLicense ? (
+        <LicenseDetailsView
+          license={currentLicense}
+          users={users}
+          companies={companies}
+          tiers={tiers}
+          onBack={handleBackToList}
+          onRefresh={onRefresh}
+          showAlert={showAlert}
+          onInspectClient={onInspectClient}
+          onInspectCompany={onInspectCompany}
+          onEditLicense={openEditLicenseModal}
+        />
+      ) : (
+        <div className="space-y-6">
       {/* Unified Section Header (Matches Companies & Clients 1:1) */}
       <SectionHeader
         title={t('licenses_title') || 'License Registry Directory'}
@@ -584,6 +581,8 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
           />
         </div>
       )}
+        </div>
+      )}
 
       {/* Issue License Key Modal */}
       <IssueLicenseModal
@@ -712,6 +711,6 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
           loading={deleteSubmitting}
         />
       )}
-    </div>
+    </>
   );
 };

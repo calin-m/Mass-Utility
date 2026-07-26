@@ -180,7 +180,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Glassmorphic Top Banner */}
-        <div className="relative overflow-hidden p-4.5 bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-950/40 border border-purple-500/30 shadow-lg shadow-purple-500/5 backdrop-blur-md rounded-2xl space-y-3">
+        <div className="relative overflow-hidden p-4 sm:p-5 bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-950/40 border border-purple-500/30 shadow-lg shadow-purple-500/5 backdrop-blur-md rounded-2xl space-y-3">
           {/* Ambient Glow */}
           <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -287,7 +287,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
               <select
                 value={editCompanyId}
                 onChange={e => handleCompanyChange(e.target.value)}
-                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none transition-all"
+                className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-semibold text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
               >
                 <option value="">-- Standalone B2C / Unassigned Company --</option>
                 {companies.map(c => {
@@ -311,7 +311,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
               <select
                 value={editUserId}
                 onChange={e => handleUserChange(e.target.value)}
-                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none transition-all"
+                className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-semibold text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
               >
                 <option value="">-- Unassigned (Company / Global Pool Key) --</option>
                 {filteredUsers.map(u => (
@@ -350,7 +350,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
                 placeholder="e.g. store.myshop.com"
                 value={editStoreUrl}
                 onChange={e => setEditStoreUrl(e.target.value)}
-                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none transition-all"
+                className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-mono text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
               />
             </div>
 
@@ -372,7 +372,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
                 type="date"
                 value={editExpiresAt}
                 onChange={e => setEditExpiresAt(e.target.value)}
-                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none transition-all"
+                className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-mono text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
               />
             </div>
           </div>

@@ -144,16 +144,19 @@ The Mass Utility Framework enforces a unified **V2 React 18 SPA Architecture & D
 - `<GovernorTab>`: Real-time CloudLinux LVE telemetry dashboard featuring **Zero-CLS Instant Skeleton Frame Architecture**.
 
 ### 2.3 Super-Admin V2 React Component Architecture (`mass_utility_admin/frontend/src/components/`)
-- `<CompanyListView>` & `<CompanyDetailsView>`: **Companies Directory** featuring real-time license utilization meters (`usedCount` / `max_licenses`), Dual-Mode tab switcher (`[📊 Overview]` vs `[⚙️ Edit Profile & Settings]`), 1-click pool key generator, master `<PaginationBar>`, and employee assignment select dropdowns.
-- `<ClientListView>` & `<ClientDetailsView>`: **Clients Directory** featuring Client Full Name (`name`) support, Company Dropdown client reassignment, Dual-Mode tab switcher (`[📊 Overview & Keys]` vs `[⚙️ Edit Client & Settings]`), password masking toggles (`<Eye />` / `<EyeOff />`), master `<PaginationBar>`, and Company Pool Ownership badges (`🏢 Owned by Acme Inc Pool`).
-- `<LicensesTab>`: **License Registry & Subscriptions** featuring 9-column exact header alignment, `<ConfirmModal>` Suspend/Activate safety shield, 4-card telemetry grid, `Company Owner` column, `Assigned Employee` column, master `<PaginationBar>`, and 1-click key masking.
+- `<CompanyListView>` & `<CompanyDetailsView>`: **Companies Directory** featuring real-time license utilization meters (`usedCount` / `max_licenses`), Company Suspend/Activate action button with `<ConfirmModal>` integration, Dual-Mode tab switcher (`[📊 Overview]` vs `[⚙️ Edit Profile & Settings]`), 1-click pool key generator, normalized Onboard Team Member mode toggle onto an animated GPU segmented pill, master `<PaginationBar>`, `<TableCellIdentity>`, `<TableCellActions>`, and employee assignment select dropdowns.
+- `<ClientListView>` & `<ClientDetailsView>`: **Clients Directory** featuring Client Full Name (`name`) support, Company Dropdown client reassignment, sub-page header Company Affiliation badge (`🏢 Company Name` with 1-click navigation), Dual-Mode tab switcher (`[📊 Overview & Keys]` vs `[⚙️ Edit Client & Settings]`), password masking toggles (`<Eye />` / `<EyeOff />`), master `<PaginationBar>`, `<TableCellIdentity>`, `<TableCellActions>`, and Company Pool Ownership badges (`🏢 Owned by Acme Inc Pool`).
+- `<LicensesTab>`: **License Registry & Subscriptions** featuring 8-column standardized alignment, `<TableCellIdentity>` (2-row identity cell with normal-weight subtitle: `ID #1 • Created 2026-07-26`), `<TableCellActions>` with 🟠 Amber Suspend and 🟢 Emerald Activate action pills, `<ConfirmModal>` Suspend/Activate safety shield, 4-card telemetry grid, `Company Owner` column, `Assigned Employee` column, nested card `<PaginationBar>`, and 1-click key masking.
 - `<AuditLogsTab>`: **Operations Audit Trail** featuring search & filter toolbar, **`[Clear Audit Logs]`** with red `<ConfirmModal>` confirmation safety prompt, master `<PaginationBar>`, and Light/Dark adaptive code terminal for raw JSON inspection.
 - `<SettingsTab>`: Full-width 2-column side-by-side password form layout with icon inputs (`<FormInput type="password" icon={Lock} />`).
-- `<PackageTiersTab>`: **Package Tiers & Quotas** feature capability matrix editor for `basic`, `pro`, `enterprise` subscription tiers.
+- `<PackageTiersTab>`: **Package Editor & Tier Matrix** featuring sub-tab label `'Package Editor'`, Tier Overview selector, and dynamic Selected Package Feature & Quota Matrix Card displaying active/inactive capability checkboxes and daily quota limits for `basic`, `pro`, `enterprise` subscription tiers.
 - `<SecurityHealthTab>`: Super Admin 4-Card Security Grid auditing SaaS server infrastructure (HSTS, SSL 301 Redirect Enforcer, Vault Isolation `pm_cloud_backups.db` 403, SaaS Server Filesystem Permissions).
 
 ### 2.4 Normalized Interactive UX Features & Primitives
-- **Master Data Table Pagination (`<PaginationBar>`)**: Standardized data table pagination with dynamic page size options (`10`, `25`, `50`, `100`), `< Previous` / `Next >` navigation, and real-time item counter across all listing tables.
+- **Standardized Identity Cell (`<TableCellIdentity>`)**: Reusable table identity cell primitive (`src/components/common/TableCellIdentity.tsx`) rendering primary titles in `font-extrabold text-sm text-pm-text` and subtitles in non-bold, normal-weight text (`font-normal font-mono text-xs text-pm-secondary/80`). Standardizes identity layout across Companies, Clients, and Licenses.
+- **Standardized Row Actions (`<TableCellActions>`)**: Reusable table row action buttons primitive (`src/components/common/TableCellActions.tsx`) standardizing `Inspect` (`variant="neutral"`), `Suspend / Activate` (🟠 `variant="warning"` Amber Orange / 🟢 `variant="success"` Emerald Green), and `Delete` (🔴 `variant="danger"` Rose Red) across all directory tables with 100% sizing and transition parity.
+- **URL Hash Tab Navigation & State Restoration**: `App.tsx` reads and syncs `window.location.hash` (`#companies`, `#clients`, `#licenses`, `#tiers`, `#settings`, `#security`, `#audit`), maintaining active tab state seamlessly across browser refreshes (`F5`) and Back/Forward navigation.
+- **Master Data Table Pagination (`<PaginationBar>`)**: Standardized data table pagination with dynamic page size options (`10`, `25`, `50`, `100`), `< Previous` / `Next >` navigation, and real-time item counter nested seamlessly inside the bottom border of all listing table cards (`border-t border-pm-border`).
 - **Safety Confirmation Shield (`<ConfirmModal>`)**: Modal overlay shield for high-impact actions (Suspend, Activate, Delete Company/Client, Clear Audit Logs) featuring backdrop blur (`backdrop-blur-md z-[9999999]`), `top-0 left-0 w-screen h-screen` bounds, and variant-specific color schemes (`danger`, `warning`, `info`).
 - **Enhanced Select Dropdowns (`<FormSelect>`)**: Standardized custom dropdown primitive featuring custom SVG chevron arrow icons, hover/focus rings (`focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30`), and option styling.
 - **Normalized Bottom-Right Toast Engine**: Notifications across both portals are positioned at **Bottom-Right** (`fixed bottom-5 right-5 z-[999999]`), featuring dark backdrop blur (`backdrop-blur-md`), elevated drop shadows (`shadow-2xl`), left status accent borders (`border-l-4`), and an instant manual dismissal button (`<X />`).
@@ -162,12 +165,12 @@ The Mass Utility Framework enforces a unified **V2 React 18 SPA Architecture & D
 
 ### 2.5 Design System & System Tokens (`index.css`)
 All V2 React components inherit from unified CSS design tokens (`var(--pm-*)`):
-- **Theme Variables**: `--pm-bg`, `--pm-card-bg`, `--pm-input-bg`, `--pm-border-color`, `--pm-primary`, `--pm-success`, `--pm-danger`.
-- **Dark & Light Mode Adaptation**: Root level `color-scheme: dark` and `color-scheme: light` coupled with custom WebKit scrollbars (`::-webkit-scrollbar`).
+- **Theme Variables**: `--pm-body-bg`, `--pm-card-bg`, `--pm-input-bg`, `--pm-border-color`, `--pm-text-primary`, `--pm-text-secondary`, `--pm-primary`, `--pm-success`, `--pm-danger`.
+- **Harmonized Dark & Light Mode Adaptation**: Root level `color-scheme: dark` (`--pm-body-bg: #0b0c10`, `--pm-card-bg: #12131c`, `--pm-border-color: #242636`, `--pm-input-bg: #181926`) and `color-scheme: light` coupled with custom WebKit scrollbars (`::-webkit-scrollbar`).
 - **3-Tier Action Button Hierarchy**:
   - **Tier 1 (Primary Action)**: `.pm-btn-primary` (Solid accent color for main actions like `🔄 Revert` or `☁️ Push to Cloud`).
-  - **Tier 2 (Secondary Actions)**: `.pm-btn-neutral` (Subtle theme pills for non-destructive actions like `👁️ View`, `📥 Download`, `📌 Pin`).
-  - **Tier 3 (Destructive Actions)**: `.pm-btn-danger-outline` (Subtle red outline/tint on hover for `🗑️ Delete`).
+  - **Tier 2 (Secondary Actions)**: `.pm-btn-neutral` (Subtle theme pills for non-destructive actions like `👁️ Inspect`, `📥 Download`, `📌 Pin`).
+  - **Tier 3 (Destructive / Warning Actions)**: `variant="warning"` (Amber Orange pill), `variant="success"` (Emerald Green pill), `.pm-btn-danger-outline` / `variant="danger"` (Rose Red pill for `🗑️ Delete`).
 
 ---
 
