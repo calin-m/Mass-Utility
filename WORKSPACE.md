@@ -16,7 +16,7 @@
 
 
 ## 🔍 Agent Investigation & Planning Protocol
-1. **Strict Sequential AST-First Investigation Protocol**: Run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `lookup` / `plan`) FIRST. ONLY if `workspace_inspector.py` outputs `[INSPECTOR_FALLBACK_RECOMMENDED]`, execute native `grep_search` restricted strictly by target file globs (`Includes: ["*.tsx", "*.ts"]`).
+1. **Strict Sequential AST-First Investigation Protocol**: Run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `caller` for reverse call-graph lookups, `lookup`, `plan`) FIRST. ONLY if `workspace_inspector.py` outputs `[INSPECTOR_FALLBACK_RECOMMENDED]`, execute native `grep_search` restricted strictly by target file globs (`Includes: ["*.tsx", "*.ts"]`).
 2. **Dual Plan Synchronization**: Whenever drafting a plan or presenting feature options, write to `.ai_plan.md` on disk AND simultaneously generate/update the interactive `implementation_plan.md` artifact in the brain folder with `request_feedback=true` and `user_facing=true`.
 3. **Post-Execution Zero-Copy AST Re-Index**: Run `python .orchestra/.conductor/tools/workspace_inspector.py map` after code edits to re-build symbol, frontend, and route maps in zero-copy memory.
 4. **Scope Pre-Flight Inspection**: Inspect lines 1–60 (or top of target component files) before editing sub-components to ensure 100% awareness of imported symbols, props, and `useState` hook scope.
