@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Edit, Key, Building2, User, Globe, Calendar, RefreshCw, Check, Sparkles } from 'lucide-react';
+import { Edit, Key, Building2, User, Globe, Calendar, RefreshCw, Check, Sparkles, Copy, ShieldCheck, ShieldAlert, Clock, Infinity as InfinityIcon, Sparkle } from 'lucide-react';
 import { BaseModal } from './BaseModal';
 import { FormSelect } from './FormSelect';
 import { FormInput } from './FormInput';
@@ -38,6 +38,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [submitting, setSubmitting] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(false);
 
   // Form State
   const [editTier, setEditTier] = useState('pro');
@@ -79,10 +80,18 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
     }
   }, [license, companies, users]);
 
+  // Copy License Key Handler
+  const handleCopyKey = () => {
+    if (license?.license_key) {
+      navigator.clipboard.writeText(license.license_key);
+      setCopiedKey(true);
+      setTimeout(() => setCopiedKey(false), 2000);
+    }
+  };
+
   // Dynamic Filtered Users based on selected Company
   const filteredUsers = useMemo(() => {
     if (!editCompanyId) {
-      // If no company selected, return all users
       return users;
     }
     const selectedComp = companies.find(c => Number(c.id) === Number(editCompanyId));
@@ -101,7 +110,6 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
     setEditCompanyId(parsedId);
 
     if (parsedId !== '') {
-      // Check if current editUserId belongs to the new company
       const selectedComp = companies.find(c => Number(c.id) === parsedId);
       const compName = selectedComp ? (selectedComp.company_name || '').toLowerCase() : '';
 
@@ -124,7 +132,6 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
     if (parsedId !== '') {
       const selectedU = users.find(u => Number(u.id) === parsedId);
       if (selectedU) {
-        // Auto-parent company if client belongs to a company
         let parentCompId: number | '' = '';
         if (selectedU.company_id) {
           parentCompId = Number(selectedU.company_id);
@@ -155,7 +162,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
       });
       onClose();
     } catch (err) {
-      // Error handled by parent component
+      // Handled upstream
     } finally {
       setSubmitting(false);
     }
@@ -172,37 +179,103 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* License Key Display Header */}
-        <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl space-y-1">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-purple-400">License Key</label>
-          <div className="font-mono text-sm font-bold text-purple-300 select-all tracking-wider">
-            🔑 {license.license_key}
+        {/* Glassmorphic Top Banner */}
+        <div className="relative overflow-hidden p-4.5 bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-950/40 border border-purple-500/30 shadow-lg shadow-purple-500/5 backdrop-blur-md rounded-2xl space-y-3">
+          {/* Ambient Glow */}
+          <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] font-extrabold uppercase tracking-widest text-purple-400 flex items-center gap-1.5">
+              <Key className="w-3.5 h-3.5 text-purple-400" /> License Key Identifier
+            </label>
+            <button
+              type="button"
+              onClick={handleCopyKey}
+              className="px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+            >
+              {copiedKey ? (
+                <>
+                  <Check className="w-3 h-3 text-emerald-400" />
+                  <span className="text-emerald-400 font-bold">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3 text-purple-400" />
+                  <span>Copy Key</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="font-mono text-sm sm:text-base font-bold text-purple-200 select-all tracking-wider break-all bg-black/30 p-2.5 rounded-xl border border-purple-500/20">
+            {license.license_key}
+          </div>
+
+          {/* Live Preview Status Badges Row */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-purple-400" /> {editTier.toUpperCase()} TIER
+            </span>
+
+            {editStatus === 'active' && (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-400" /> ACTIVE
+              </span>
+            )}
+
+            {editStatus === 'suspended' && (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                <ShieldAlert className="w-3 h-3 text-rose-400" /> SUSPENDED
+              </span>
+            )}
+
+            {editStatus === 'expired' && (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <Clock className="w-3 h-3 text-amber-400" /> EXPIRED
+              </span>
+            )}
+
+            {!editExpiresAt ? (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                <InfinityIcon className="w-3 h-3 text-indigo-400" /> LIFETIME
+              </span>
+            ) : (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-pm-card text-pm-secondary border border-pm-border flex items-center gap-1 font-mono">
+                <Calendar className="w-3 h-3 text-purple-400" /> EXP: {editExpiresAt}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Tier & Status Settings */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormSelect
-            label="Package Tier"
-            value={editTier}
-            onChange={e => setEditTier(e.target.value)}
-            options={tierOptions}
-          />
+        {/* Card 1: General License Configuration */}
+        <div className="p-4 bg-pm-card/60 backdrop-blur-sm border border-pm-border hover:border-purple-500/30 transition-all rounded-xl space-y-3.5">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" /> General License Parameters
+          </h4>
 
-          <FormSelect
-            label="License Status"
-            value={editStatus}
-            onChange={e => setEditStatus(e.target.value as any)}
-            options={[
-              { value: 'active', label: '🟢 ACTIVE' },
-              { value: 'suspended', label: '🔴 SUSPENDED' },
-              { value: 'expired', label: '🟠 EXPIRED' },
-            ]}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormSelect
+              label="Package Tier"
+              value={editTier}
+              onChange={e => setEditTier(e.target.value)}
+              options={tierOptions}
+            />
+
+            <FormSelect
+              label="License Status"
+              value={editStatus}
+              onChange={e => setEditStatus(e.target.value as any)}
+              options={[
+                { value: 'active', label: '🟢 ACTIVE' },
+                { value: 'suspended', label: '🔴 SUSPENDED' },
+                { value: 'expired', label: '🟠 EXPIRED' },
+              ]}
+            />
+          </div>
         </div>
 
-        {/* Cascading Company & Client Assignment Section */}
-        <div className="p-4 bg-pm-input/30 border border-pm-border rounded-xl space-y-4">
+        {/* Card 2: Cascading Company & Client Hierarchy */}
+        <div className="p-4 bg-pm-card/60 backdrop-blur-sm border border-pm-border hover:border-purple-500/30 transition-all rounded-xl space-y-4">
           <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5 text-purple-400" /> B2B / B2C License Assignment & Hierarchy
           </h4>
@@ -214,7 +287,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
               <select
                 value={editCompanyId}
                 onChange={e => handleCompanyChange(e.target.value)}
-                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-purple-500 focus:outline-none"
+                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none transition-all"
               >
                 <option value="">-- Standalone B2C / Unassigned Company --</option>
                 {companies.map(c => {
@@ -231,13 +304,14 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
 
             {/* Filtered Client Account Dropdown */}
             <div>
-              <label className="block text-xs font-semibold text-pm-secondary mb-1">
-                Assigned Client Account {editCompanyId ? `(Filtered to Company)` : ''}
+              <label className="block text-xs font-semibold text-pm-secondary mb-1 flex items-center justify-between">
+                <span>Assigned Client Account</span>
+                {editCompanyId && <span className="text-[10px] text-purple-400 font-bold">(Filtered)</span>}
               </label>
               <select
                 value={editUserId}
                 onChange={e => handleUserChange(e.target.value)}
-                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-purple-500 focus:outline-none"
+                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-semibold text-pm-text focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none transition-all"
               >
                 <option value="">-- Unassigned (Company / Global Pool Key) --</option>
                 {filteredUsers.map(u => (
@@ -250,47 +324,67 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
           </div>
         </div>
 
-        {/* Bound Store Domain & 1-Click Clear Button */}
-        <div className="space-y-1">
-          <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-semibold text-pm-secondary">Bound Store Domain</label>
-            {editStoreUrl && (
-              <button
-                type="button"
-                onClick={() => setEditStoreUrl('')}
-                className="text-[11px] text-purple-400 hover:underline flex items-center gap-1 font-mono"
-              >
-                🧹 Clear Domain Binding
-              </button>
-            )}
-          </div>
-          <input
-            type="text"
-            placeholder="e.g. store.myshop.com (Leave blank for unbound)"
-            value={editStoreUrl}
-            onChange={e => setEditStoreUrl(e.target.value)}
-            className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-purple-500 focus:outline-none"
-          />
-        </div>
+        {/* Card 3: Store Domain Binding & Expiration Rules */}
+        <div className="p-4 bg-pm-card/60 backdrop-blur-sm border border-pm-border hover:border-purple-500/30 transition-all rounded-xl space-y-4">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+            <Globe className="w-3.5 h-3.5 text-purple-400" /> Domain & Expiration Rules
+          </h4>
 
-        {/* Expiration Date Picker */}
-        <div>
-          <label className="block text-xs font-semibold text-pm-secondary mb-1">Expiration Date (Leave blank for Lifetime)</label>
-          <input
-            type="date"
-            value={editExpiresAt}
-            onChange={e => setEditExpiresAt(e.target.value)}
-            className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-purple-500 focus:outline-none"
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Bound Store Domain */}
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-semibold text-pm-secondary">Bound Store Domain</label>
+                {editStoreUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setEditStoreUrl('')}
+                    className="text-[10px] text-purple-400 hover:underline font-mono"
+                  >
+                    🧹 Clear Domain
+                  </button>
+                )}
+              </div>
+              <input
+                type="text"
+                placeholder="e.g. store.myshop.com"
+                value={editStoreUrl}
+                onChange={e => setEditStoreUrl(e.target.value)}
+                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none transition-all"
+              />
+            </div>
+
+            {/* Expiration Date Picker */}
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-semibold text-pm-secondary">Expiration Date</label>
+                {editExpiresAt && (
+                  <button
+                    type="button"
+                    onClick={() => setEditExpiresAt('')}
+                    className="text-[10px] text-purple-400 hover:underline font-mono"
+                  >
+                    ♾️ Lifetime Key
+                  </button>
+                )}
+              </div>
+              <input
+                type="date"
+                value={editExpiresAt}
+                onChange={e => setEditExpiresAt(e.target.value)}
+                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs font-mono text-pm-text focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none transition-all"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-pm-border">
+        <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
           <Button variant="neutral" size="sm" type="button" onClick={onClose}>
             {t('btn_cancel')}
           </Button>
           <Button variant="primary" size="sm" type="submit" disabled={submitting} icon={Check}>
-            {submitting ? 'Saving...' : 'Save License Changes'}
+            {submitting ? 'Saving Changes...' : 'Save License Changes'}
           </Button>
         </div>
       </form>
