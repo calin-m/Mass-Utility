@@ -367,7 +367,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                     <td className="p-3">
                       <StatusBadge status={c.status} />
                     </td>
-                    <td className="p-3 text-right">
+                    <td className="p-3 text-right min-w-[220px]">
                       <TableCellActions
                         onInspect={() => onSelectCompany(c, 'overview')}
                         inspectLabel="Inspect"

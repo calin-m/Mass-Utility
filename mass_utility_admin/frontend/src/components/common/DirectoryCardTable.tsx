@@ -41,11 +41,22 @@ export function DirectoryCardTable<T>({
           </thead>
           <tbody className="divide-y divide-pm-border">
             {loading ? (
-              <tr>
-                <td colSpan={headers.length} className="p-8 text-center text-pm-secondary italic">
-                  Loading directory records...
-                </td>
-              </tr>
+              Array.from({ length: 5 }).map((_, idx) => (
+                <tr key={idx} className="h-[49px] animate-pulse bg-pm-input/20">
+                  <td colSpan={headers.length} className="p-3 px-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-pm-input/60 shrink-0" />
+                        <div className="space-y-1">
+                          <div className="w-32 h-3 bg-pm-input/70 rounded" />
+                          <div className="w-20 h-2 bg-pm-input/50 rounded" />
+                        </div>
+                      </div>
+                      <div className="w-24 h-6 bg-pm-input/50 rounded-lg" />
+                    </div>
+                  </td>
+                </tr>
+              ))
             ) : data.length === 0 ? (
               <tr>
                 <td colSpan={headers.length} className="p-8 text-center text-pm-secondary italic">

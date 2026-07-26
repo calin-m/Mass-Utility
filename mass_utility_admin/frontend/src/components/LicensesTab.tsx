@@ -550,7 +550,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                         <td className="p-3 font-mono text-xs text-pm-secondary">
                           {lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Lifetime'}
                         </td>
-                        <td className="p-3 text-right">
+                        <td className="p-3 text-right min-w-[220px]">
                           <TableCellActions
                             onInspect={() => handleSelectLicense(lic)}
                             inspectLabel="Inspect"

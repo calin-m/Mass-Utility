@@ -61,7 +61,7 @@ export function DetailSubViewLayout<T extends string = string>({
       <SubTabNav tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} />
 
       {/* Active Sub-Tab Content Slot */}
-      <div>{children}</div>
+      <div className="min-h-[520px]">{children}</div>
     </div>
   );
 }

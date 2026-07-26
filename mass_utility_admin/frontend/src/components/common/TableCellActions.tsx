@@ -22,7 +22,7 @@ export const TableCellActions: React.FC<TableCellActionsProps> = ({
   deleteLoading = false,
 }) => {
   return (
-    <div className="flex items-center justify-end gap-1.5">
+    <div className="flex items-center justify-end gap-1.5 min-w-[210px] shrink-0">
       {onInspect && (
         <Button
           variant="neutral"

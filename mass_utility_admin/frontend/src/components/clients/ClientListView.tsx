@@ -513,7 +513,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         <StatusBadge status={user.status} />
                       </td>
 
-                      <td className="p-3 text-right">
+                      <td className="p-3 text-right min-w-[220px]">
                         <TableCellActions
                           onInspect={() => onSelectClient(user, 'profile')}
                           inspectLabel="Inspect"
