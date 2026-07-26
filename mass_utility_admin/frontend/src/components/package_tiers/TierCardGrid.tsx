@@ -54,9 +54,9 @@ export const TierCardGrid: React.FC<TierCardGridProps> = ({
           <div
             key={tier.id || tier.name}
             onClick={() => onSelectTier(tier.name)}
-            className={`p-4 rounded-xl border cursor-pointer transition-all relative group flex flex-col justify-between ${
+            className={`p-4 rounded-xl border cursor-pointer transition-all duration-150 relative group flex flex-col justify-between ${
               isSelected
-                ? 'bg-pm-primary/10 border-pm-primary ring-2 ring-pm-primary/30 shadow-md'
+                ? 'bg-pm-primary/10 border-pm-primary shadow-sm'
                 : 'bg-pm-card border-pm-border hover:border-pm-primary/50'
             }`}
           >
@@ -92,7 +92,7 @@ export const TierCardGrid: React.FC<TierCardGridProps> = ({
             </div>
 
             {/* Action Bar */}
-            <div className="pt-2 border-t border-pm-border/50 flex items-center justify-between gap-1">
+            <div className="pt-2 border-t border-pm-border flex items-center justify-between gap-1">
               <span className="text-[10px] font-bold text-pm-primary uppercase">
                 {isSelected ? '● Active' : 'Select'}
               </span>
