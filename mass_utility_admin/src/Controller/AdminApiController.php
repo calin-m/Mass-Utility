@@ -115,14 +115,40 @@ class AdminApiController
 
         try {
             $cId = $this->repo->createCompany($name, $taxId, $maxLicenses);
+
+            $ownerCreated = false;
+            $ownerEmail = trim($_POST['owner_email'] ?? '');
+            $ownerPass = $_POST['owner_password'] ?? '';
+            $createOwner = ($_POST['create_owner'] ?? '') === '1';
+
+            if ($createOwner && !empty($ownerEmail)) {
+                if (empty($ownerPass)) {
+                    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+                    $ownerPass = '';
+                    for ($i = 0; $i < 16; $i++) $ownerPass .= $chars[rand(0, strlen($chars) - 1)];
+                }
+                $this->repo->createUser($ownerEmail, $ownerPass, $name, null, 'Owner');
+                $ownerCreated = true;
+            }
+
             $adminUser = $_SESSION['admin_username'] ?? 'admin';
             $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
             $this->repo->logAdminAction($adminUser, 'CREATE_COMPANY', 'company', (string)$cId, [
                 'company_name' => $name,
                 'tax_id' => $taxId,
-                'max_licenses' => $maxLicenses
+                'max_licenses' => $maxLicenses,
+                'owner_created' => $ownerCreated,
+                'owner_email' => $ownerCreated ? $ownerEmail : null
             ], $ip);
-            echo json_encode(['success' => true, 'company_id' => $cId, 'companies' => $this->repo->getAllCompanies()]);
+
+            echo json_encode([
+                'success' => true,
+                'company_id' => $cId,
+                'owner_created' => $ownerCreated,
+                'owner_email' => $ownerCreated ? $ownerEmail : null,
+                'companies' => $this->repo->getAllCompanies(),
+                'users' => $this->repo->getAllUsers()
+            ]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }

@@ -135,7 +135,8 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       const res = await fetch(getApiUrl('api_create_company'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        if (showAlert) showAlert(`🏢 Company '${name}' created successfully!`, 'success');
+        const ownerMsg = data.owner_created && data.owner_email ? ` 👤 Owner account '${data.owner_email}' provisioned!` : '';
+        if (showAlert) showAlert(`🏢 Company '${name}' created successfully!${ownerMsg}`, 'success');
         setIsCreateOpen(false);
         setName('');
         setTaxId('');
