@@ -208,6 +208,7 @@ class AdminApiController
 
     private function save_tier(): void
     {
+        $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $capsJson = $_POST['capabilities'] ?? '';
         if (empty($name)) {
@@ -222,7 +223,7 @@ class AdminApiController
         }
 
         try {
-            $success = $this->repo->saveTier($name, $caps);
+            $success = $this->repo->saveTier($name, $caps, $id > 0 ? $id : null);
             echo json_encode(['success' => $success, 'tiers' => $this->repo->getAllTiers()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);

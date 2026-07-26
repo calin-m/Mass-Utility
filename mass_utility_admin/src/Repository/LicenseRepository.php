@@ -252,8 +252,13 @@ class LicenseRepository
         return is_array($res) ? $res : [];
     }
 
-    public function saveTier(string $name, array $capabilities): bool
+    public function saveTier(string $name, array $capabilities, ?int $id = null): bool
     {
+        if ($id && $id > 0) {
+            $stmt = $this->db->prepare("UPDATE pm_package_tiers SET name = ?, capabilities = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            return $stmt->execute([$name, json_encode($capabilities), $id]);
+        }
+
         $stmt = $this->db->prepare("INSERT INTO pm_package_tiers (name, capabilities, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(name) DO UPDATE SET capabilities = excluded.capabilities, updated_at = CURRENT_TIMESTAMP");
         return $stmt->execute([$name, json_encode($capabilities)]);
@@ -261,6 +266,14 @@ class LicenseRepository
 
     public function deleteTier(int $id): bool
     {
+        // Protect system default tiers from deletion
+        $stmtCheck = $this->db->prepare("SELECT name FROM pm_package_tiers WHERE id = ?");
+        $stmtCheck->execute([$id]);
+        $tierName = strtolower(trim((string)$stmtCheck->fetchColumn()));
+        if (in_array($tierName, ['basic', 'pro', 'enterprise'])) {
+            throw new \InvalidArgumentException("System default tier '{$tierName}' cannot be deleted.");
+        }
+
         $stmt = $this->db->prepare("DELETE FROM pm_package_tiers WHERE id = ?");
         return $stmt->execute([$id]);
     }
