@@ -2,6 +2,7 @@
     "framework_version": "1.0.0",
     "directories": {
         "docs": ".bench/docs/",
+        "custom_rules": ".bench/agents/custom_rules/",
         "source": "./"
     },
     "scripts": {
@@ -64,6 +65,7 @@
         "bin",
         "mass_utility_admin/frontend/src",
         ".bench/docs",
+        ".bench/agents/custom_rules",
         ".orchestra"
     ],
     "ignore_ghost_files": [

@@ -19,11 +19,14 @@
 3. **Smart Ephemeral Commits:**
    - The `cli_commit.py` script will automatically ingest the exact contents of `.ai_plan.md` into the Git Commit message.
    - Once the commit succeeds, `cli_commit.py` will delete `.ai_plan.md`.
-4. **Smart Interconnectivity Tracing & Hybrid Search:**
+4. **Smart Interconnectivity Tracing & Sequential Investigation:**
    - **Primary Token-Saving Scanner:** You MUST use the custom Python script `.orchestra/.conductor/tools/workspace_inspector.py` as your primary tool to mathematically map architecture, symbols, and dependencies.
    - **Questions & Diagnostics Mandate:** Whenever the user asks any question about how code works, module layout, or system behaviors, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `lookup "<symbol>"` / `matrix`) to ground your response in live AST symbol maps and generated reports.
    - **Modification & Feature Request Mandate:** Before drafting any plan or making code changes, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"`, which automatically executes the complete multi-tool chain (`trace`, `frontend_map`, `route_map`, `design_map`, `advisories`) and synthesizes the 360° Architectural Impact Report.
-   - **Targeted Fallback Mode:** If `workspace_inspector.py` outputs `[INSPECTOR_FALLBACK_RECOMMENDED]` (e.g., when querying UI/React components, CSS tokens, or literal text strings where no AST symbol is found), you are explicitly authorized to use native `grep_search` ONLY when restricted by target file globs (`Includes: ["*.tsx", "*.ts"]`) to prevent API context bloat.
+   - **Strict Sequential Investigation Protocol:** You MUST run `workspace_inspector.py trace` (or `plan`) FIRST. ONLY if `workspace_inspector.py` outputs `[INSPECTOR_FALLBACK_RECOMMENDED]` (e.g., when querying UI/React components, CSS tokens, or literal text strings where no AST symbol is found), are you authorized to use native `grep_search`, restricted strictly by target file globs (`Includes: ["*.tsx", "*.ts"]`) to prevent API context bloat.
+   - **Dual Plan Synchronization Mandate:** Whenever drafting a plan or presenting feature options, you MUST write to `.ai_plan.md` on disk AND simultaneously generate/update the interactive `implementation_plan.md` artifact in the brain folder with `request_feedback=true` and `user_facing=true`.
+   - **Post-Execution Zero-Copy AST Re-Index:** After any code modification or component refactor, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py map` to refresh `symbol_map.json`, `00_auto_generated_oop_map.md`, and `00_auto_generated_frontend_map.md`.
+   - **Scope Pre-Flight Inspection:** Before editing lines within a component or view file, you MUST inspect lines 1–60 (or the top of the file) to verify all imported symbols, prop interfaces, and `useState`/`useEffect` hook variables in scope.
    - Use `python ".orchestra/.conductor/tools/workspace_inspector.py" map` to rebuild and query the unified class/method AST symbol map registry (`.bench/docs/symbol_map.json`).
    - Use `python ".orchestra/.conductor/tools/workspace_inspector.py" trace "keyword"` to trace full vertical slices.
    - Use `python ".orchestra/.conductor/tools/workspace_inspector.py" lookup "EntityName"` to quickly extract specific classes or CSS tokens.
