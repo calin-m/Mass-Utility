@@ -146,3 +146,19 @@ html:not(.dark) .shadow-sm {
   background-color: rgba(239, 68, 68, 0.1);
   border-color: #ef4444;
 }
+
+@layer components {
+  .pm-panel {
+    @apply bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm;
+  }
+  .pm-header-banner {
+    @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-pm-card p-4 rounded-xl border border-pm-border shadow-sm;
+  }
+  .pm-input-field {
+    @apply w-full h-10 bg-pm-input border border-pm-border rounded-xl px-3 text-xs text-pm-text placeholder:text-pm-secondary/60 focus:outline-none focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 transition-colors duration-150;
+  }
+  .pm-select-field {
+    @apply w-full h-10 bg-pm-input border border-pm-border rounded-xl px-3 text-xs text-pm-text focus:outline-none focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 transition-colors duration-150;
+  }
+}
+
