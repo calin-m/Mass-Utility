@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, Unlock, RefreshCw, Clock, User, LayoutGrid, List, Calendar } from 'lucide-react';
+import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, Unlock, RefreshCw, Clock, User, LayoutGrid, List, Calendar, Building2 } from 'lucide-react';
 import { BaseModal } from './common/BaseModal';
 import { ConfirmModal } from './common/ConfirmModal';
 import { StatCard } from './common/StatCard';
@@ -427,6 +427,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                 <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
                   <th className="p-3.5">{t('th_license_key')}</th>
                   <th className="p-3.5">{t('th_assigned_user')}</th>
+                  <th className="p-3.5">Company</th>
                   <th className="p-3.5">{t('th_tier')}</th>
                   <th className="p-3.5">{t('th_status')}</th>
                   <th className="p-3.5">Store URL</th>
@@ -437,7 +438,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
               <tbody className="divide-y divide-pm-border">
                 {paginatedLicenses.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-pm-secondary italic">
+                    <td colSpan={8} className="p-8 text-center text-pm-secondary italic">
                       No license keys found matching the current search & filter query.
                     </td>
                   </tr>
@@ -445,6 +446,12 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                   paginatedLicenses.map((lic) => {
                     const isVisible = visibleKeys[lic.id];
                     const isSuspended = lic.status === 'suspended';
+
+                    const assignedUser = lic.user_id ? users.find((u) => u.id === lic.user_id) : null;
+                    const companyName = lic.company_name || (assignedUser ? assignedUser.company_name : null);
+                    const assignedComp = companyName
+                      ? companies.find((c) => (c.company_name || '').toLowerCase() === companyName.toLowerCase())
+                      : null;
 
                     return (
                       <tr key={lic.id} className="hover:bg-pm-input/50 transition">
@@ -489,6 +496,26 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             </button>
                           ) : (
                             <span className="text-pm-secondary italic">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="p-3.5 font-bold">
+                          {companyName ? (
+                            <div className="flex items-center gap-1.5 text-purple-400">
+                              <Building2 className="w-3.5 h-3.5 shrink-0" />
+                              {onInspectCompany && assignedComp ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onInspectCompany(assignedComp)}
+                                  className="hover:underline font-bold text-purple-400 text-left truncate max-w-[140px]"
+                                >
+                                  {companyName}
+                                </button>
+                              ) : (
+                                <span className="truncate max-w-[140px]">{companyName}</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-pm-secondary/70 italic text-[11px] font-mono">Standalone</span>
                           )}
                         </td>
                         <td className="p-3.5">
