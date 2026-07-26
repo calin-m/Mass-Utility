@@ -226,6 +226,12 @@ if (isset($_GET['ott'])) {
                     $settingsRepo->set('PM_BRIDGE_URL', $payload['bridge_url']);
                 }
                 
+                // Resynchronize active license status & active bridge token in SQLite storage
+                $settingsRepo->set('PM_LICENSE_STATUS', 'active');
+                if (!empty($activeToken)) {
+                    $settingsRepo->set('PM_BRIDGE_TOKEN', $activeToken);
+                }
+                
                 logAuthTelemetry('DEC_SUCCESS', ['employee_id' => $payload['id_employee']]);
                 @session_write_close();
                 
