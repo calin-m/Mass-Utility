@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, Unlock, RefreshCw, Clock, User, LayoutGrid, List, Calendar, Building2 } from 'lucide-react';
 import { BaseModal } from './common/BaseModal';
 import { ConfirmModal } from './common/ConfirmModal';
+import { TableCellIdentity } from './common/TableCellIdentity';
 import { StatCard } from './common/StatCard';
 import { StatSummaryGrid } from './common/StatSummaryGrid';
 import { DirectoryCardTable } from './common/DirectoryCardTable';
@@ -459,35 +460,33 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
 
                     return (
                       <tr key={lic.id} className="hover:bg-pm-input/50 transition">
-                        <td className="p-3.5 font-mono">
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleSelectLicense(lic)}
-                              className="font-extrabold text-sm text-pm-text hover:text-purple-400 transition text-left block font-mono"
-                            >
-                              {isVisible ? lic.license_key : '••••-••••-••••-••••'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => toggleKeyMask(lic.id)}
-                              className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
-                              title={isVisible ? 'Mask Key' : 'Show Key'}
-                            >
-                              {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(lic.license_key)}
-                              className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
-                              title="Copy Key"
-                            >
-                              <Copy className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                          <div className="text-xs text-pm-secondary font-mono mt-0.5">
-                            ID #{lic.id}{lic.created_at ? ` • Created ${lic.created_at}` : ''}
-                          </div>
+                        <td className="p-3.5">
+                          <TableCellIdentity
+                            icon={Key}
+                            title={isVisible ? lic.license_key : '••••-••••-••••-••••'}
+                            onTitleClick={() => handleSelectLicense(lic)}
+                            subtitle={`ID #${lic.id}${lic.created_at ? ` • Created ${lic.created_at.split(' ')[0]}` : ''}`}
+                            rightContent={
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleKeyMask(lic.id)}
+                                  className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
+                                  title={isVisible ? 'Mask Key' : 'Show Key'}
+                                >
+                                  {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(lic.license_key)}
+                                  className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
+                                  title="Copy Key"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            }
+                          />
                         </td>
                         <td className="p-3.5">
                           {lic.user_id ? (

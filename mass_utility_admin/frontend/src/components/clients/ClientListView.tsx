@@ -3,6 +3,8 @@ import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { TableCellIdentity } from '../common/TableCellIdentity';
+import { TableCellActions } from '../common/TableCellActions';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { StatSummaryGrid } from '../common/StatSummaryGrid';
@@ -464,39 +466,29 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
                   return (
                     <tr key={user.id} className="hover:bg-pm-input/50 transition">
-                      <td className="p-3 font-semibold text-pm-text">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
-                            <Mail className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <button
-                              onClick={() => onSelectClient(user, 'profile')}
-                              className="font-extrabold text-sm text-pm-text hover:text-purple-400 transition text-left block"
-                            >
-                              {user.name ? `${user.name} (${user.email})` : user.email}
-                            </button>
-                            <div className="text-xs text-pm-secondary font-mono">
-                              {user.email} • ID #{user.id} • Joined {user.created_at}
-                            </div>
-                          </div>
-                        </div>
+                      <td className="p-3">
+                        <TableCellIdentity
+                          icon={Mail}
+                          title={user.name ? `${user.name} (${user.email})` : user.email}
+                          onTitleClick={() => onSelectClient(user, 'profile')}
+                          subtitle={`${user.email} • ID #${user.id}${user.created_at ? ` • Joined ${user.created_at.split(' ')[0]}` : ''}`}
+                        />
                       </td>
 
-                      <td className="p-3 font-semibold text-pm-text">
+                      <td className="p-3 font-semibold text-xs text-pm-text">
                         {user.company_name ? (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1.5">
                             <Building className="w-3.5 h-3.5 text-purple-400" />
                             <span>{user.company_name}</span>
                           </div>
                         ) : (
-                          <span className="italic text-pm-secondary">{t('lbl_individual_client')}</span>
+                          <span className="italic text-pm-secondary/70">{t('lbl_individual_client')}</span>
                         )}
                       </td>
 
-                      <td className="p-3 font-mono font-semibold text-pm-text">
+                      <td className="p-3 font-mono font-semibold text-xs text-pm-text">
                         {metrics.total === 0 ? (
-                          <span className="italic text-pm-secondary">{t('lbl_no_licenses')}</span>
+                          <span className="italic text-pm-secondary/70">{t('lbl_no_licenses')}</span>
                         ) : (
                           <span className="text-purple-600 dark:text-purple-400 font-bold">{metrics.active} {t('status_active')}</span>
                         )}
@@ -504,7 +496,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
                       <td className="p-3 font-mono text-[0.72rem]">
                         {metrics.boundDomains.length === 0 ? (
-                          <span className="italic text-pm-secondary">{t('lbl_none')}</span>
+                          <span className="italic text-pm-secondary/70">{t('lbl_none')}</span>
                         ) : (
                           <div className="flex items-center gap-1">
                             <span className="text-pm-text font-bold">{metrics.boundDomains[0]}</span>
@@ -522,41 +514,13 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                       </td>
 
                       <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="neutral"
-                            size="sm"
-                            icon={Eye}
-                            onClick={() => onSelectClient(user, 'profile')}
-                          >
-                            {t('btn_inspect_client')}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={Key}
-                            onClick={() => openResetModal(user)}
-                          >
-                            Reset Pass
-                          </Button>
-
-                          <Button
-                            variant={isSuspended ? 'success' : 'danger'}
-                            size="sm"
-                            icon={isSuspended ? CheckCircle : ShieldAlert}
-                            onClick={() => setStatusUser(user)}
-                          >
-                            {isSuspended ? t('btn_activate') : t('btn_suspend')}
-                          </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            icon={Trash2}
-                            onClick={() => setDeletingUser(user)}
-                          >
-                            {t('btn_delete')}
-                          </Button>
-                        </div>
+                        <TableCellActions
+                          onInspect={() => onSelectClient(user, 'profile')}
+                          inspectLabel="Inspect"
+                          isSuspended={isSuspended}
+                          onToggleSuspend={() => setStatusUser(user)}
+                          onDelete={() => setDeletingUser(user)}
+                        />
                       </td>
                     </tr>
                   );

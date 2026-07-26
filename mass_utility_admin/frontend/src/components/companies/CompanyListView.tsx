@@ -5,6 +5,8 @@ import { StatCard } from '../common/StatCard';
 import { StatSummaryGrid } from '../common/StatSummaryGrid';
 import { BaseModal } from '../common/BaseModal';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { TableCellIdentity } from '../common/TableCellIdentity';
+import { TableCellActions } from '../common/TableCellActions';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
 import { StatusBadge } from '../common/StatusBadge';
 import { Button } from '../common/Button';
@@ -329,28 +331,18 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
               ) : (
                 paginatedCompanies.map(c => (
                   <tr key={c.id} className="hover:bg-pm-input/50 transition">
-                    <td className="p-3 font-semibold text-pm-text">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
-                          <Building2 className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <button
-                            onClick={() => onSelectCompany(c, 'overview')}
-                            className="font-extrabold text-sm text-pm-text hover:text-purple-400 transition text-left block"
-                          >
-                            {c.company_name}
-                          </button>
-                          <div className="text-xs text-pm-secondary font-mono">
-                            ID #{c.id}{c.created_at ? ` • Joined Date ${c.created_at}` : ''}
-                          </div>
-                        </div>
-                      </div>
+                    <td className="p-3">
+                      <TableCellIdentity
+                        icon={Building2}
+                        title={c.company_name}
+                        onTitleClick={() => onSelectCompany(c, 'overview')}
+                        subtitle={`ID #${c.id}${c.created_at ? ` • Joined ${c.created_at.split(' ')[0]}` : ''}`}
+                      />
                     </td>
-                    <td className="p-3 font-mono">
+                    <td className="p-3 font-mono text-xs">
                       {c.tax_id ? (
                         <div className="flex items-center gap-1.5">
-                          <span className="text-pm-text">{c.tax_id}</span>
+                          <span className="text-pm-text font-medium">{c.tax_id}</span>
                           <button
                             onClick={() => copyVat(c.tax_id!, c.id)}
                             className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
@@ -360,48 +352,29 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                           </button>
                         </div>
                       ) : (
-                        <span className="italic text-pm-secondary">{t('lbl_unspecified')}</span>
+                        <span className="italic text-pm-secondary/70">{t('lbl_unspecified')}</span>
                       )}
                     </td>
-                    <td className="p-3 font-bold text-pm-text">
-                      <div className="flex items-center gap-1">
+                    <td className="p-3 font-bold text-pm-text text-xs">
+                      <div className="flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-purple-400" />
                         <span>{c.user_count || 0} {t('lbl_members')}</span>
                       </div>
                     </td>
-                    <td className="p-3 font-mono font-semibold text-pm-text">
-                      <span className="text-purple-600 dark:text-purple-400">{c.license_count || 0}</span> / {c.max_licenses} {t('lbl_allocated')}
+                    <td className="p-3 font-mono font-semibold text-xs text-pm-text">
+                      <span className="text-purple-600 dark:text-purple-400 font-extrabold">{c.license_count || 0}</span> / {c.max_licenses} {t('lbl_allocated')}
                     </td>
                     <td className="p-3">
                       <StatusBadge status={c.status} />
                     </td>
                     <td className="p-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="neutral"
-                          size="sm"
-                          icon={Eye}
-                          onClick={() => onSelectCompany(c, 'overview')}
-                        >
-                          {t('btn_inspect_company')}
-                        </Button>
-                        <Button
-                          variant={c.status === 'suspended' ? 'primary' : 'neutral'}
-                          size="sm"
-                          icon={c.status === 'suspended' ? Play : Pause}
-                          onClick={() => setSuspendingCompany(c)}
-                        >
-                          {c.status === 'suspended' ? 'Activate' : 'Suspend'}
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          icon={Trash2}
-                          onClick={() => openDeleteModal(c)}
-                        >
-                          {t('btn_delete')}
-                        </Button>
-                      </div>
+                      <TableCellActions
+                        onInspect={() => onSelectCompany(c, 'overview')}
+                        inspectLabel="Inspect"
+                        isSuspended={c.status === 'suspended'}
+                        onToggleSuspend={() => setSuspendingCompany(c)}
+                        onDelete={() => openDeleteModal(c)}
+                      />
                     </td>
                   </tr>
                 ))
