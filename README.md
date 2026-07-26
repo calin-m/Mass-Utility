@@ -224,8 +224,8 @@ d:/Project Mass/
     │       └── AdminSettingsManager.php # PDO manager & self-healing SQLite schema auto-migrations
     └── frontend/                   # V2 REACT 18 + TYPESCRIPT + VITE SPA SOURCE
         └── src/
-            ├── components/         # CompanyListView, CompanyDetailsView, ClientListView, ClientDetailsView, LicensesTab, PackageTiersTab, SecurityHealthTab
-            │   └── common/         # Atomic UI Primitives (LicenseRowCard, FormSelect, FormInput, BaseModal, StatusBadge, Button, DirectoryToolbar, PaginationBar)
+            ├── components/         # CompanyListView, CompanyDetailsView, ClientListView, ClientDetailsView, LicensesTab, LicenseDetailsView, PackageTiersTab, SecurityHealthTab
+            │   └── common/         # Atomic UI Primitives (LicenseRowCard, IssueLicenseModal, SectionHeader, FormSelect, FormInput, BaseModal, StatusBadge, Button, DirectoryToolbar, PaginationBar)
             ├── hooks/              # useAdminData.ts (Custom React hook encapsulating data fetching & state management)
             ├── types/              # adminApi.ts (Central TypeScript domain models: License, UserAccount, Company, PackageTier)
             └── utils/              # tierUtils.ts (Deterministic tier ranking engine), licenseUtils.ts (Key masking & clipboard utilities)
