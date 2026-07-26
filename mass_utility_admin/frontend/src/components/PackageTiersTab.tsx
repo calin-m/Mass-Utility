@@ -391,29 +391,28 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
   const nextTier = currentTierIdx < displayTiers.length - 1 ? displayTiers[currentTierIdx + 1] : null;
 
   const editorSwitcherContent = (
-    <div className="flex items-center gap-1.5 bg-pm-card/90 border border-pm-border rounded-xl p-1 shadow-sm backdrop-blur-md">
-      {/* Prev Tier Stepper Button */}
+    <div className="flex items-center gap-2 bg-pm-card/90 border border-pm-border rounded-xl p-1 shadow-sm backdrop-blur-md">
+      {/* Prev Tier Stepper Button (Fixed 28px Icon-Only) */}
       <button
         type="button"
         disabled={!prevTier}
         onClick={() => prevTier && handleTierChange(prevTier.name)}
         title={prevTier ? `Step to ${prevTier.name.toUpperCase()}` : 'First Tier'}
-        className={`h-7 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 border ${
+        className={`w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center border ${
           prevTier
             ? 'bg-pm-input border-pm-border text-pm-text hover:bg-purple-500/10 hover:border-purple-500/30 hover:text-purple-400 cursor-pointer'
             : 'bg-pm-input/20 border-pm-border/30 text-pm-secondary/40 cursor-not-allowed'
         }`}
       >
-        <ChevronLeft className="w-3.5 h-3.5" />
-        <span className="hidden md:inline font-mono uppercase">{prevTier ? prevTier.name : 'First'}</span>
+        <ChevronLeft className="w-4 h-4" />
       </button>
 
-      {/* Active Tier Dropdown Pill (Fixed 144px Width - Zero Layout Shift) */}
-      <div className="relative flex items-center w-36 shrink-0">
+      {/* Active Tier Dropdown Pill (Fixed 140px Width - Zero Layout Shift) */}
+      <div className="relative flex items-center w-[140px] shrink-0">
         <select
           value={selectedTier.toLowerCase()}
           onChange={(e) => handleTierChange(e.target.value)}
-          className="appearance-none w-full h-7 pl-2.5 pr-7 bg-purple-500/15 text-purple-300 dark:text-purple-200 border border-purple-500/40 rounded-lg text-xs font-extrabold font-mono truncate text-center focus:outline-none focus:ring-2 focus:ring-purple-500/30 cursor-pointer shadow-sm shadow-purple-500/10 hover:border-purple-400 transition-colors"
+          className="appearance-none w-full h-7 pl-2.5 pr-7 bg-purple-500/15 text-purple-300 dark:text-purple-200 border border-pm-border hover:border-purple-500/40 rounded-lg text-xs font-extrabold font-mono truncate text-center focus:outline-none focus:ring-1 focus:ring-purple-500/30 cursor-pointer shadow-sm transition-colors"
         >
           {displayTiers.map((t) => (
             <option key={t.name} value={t.name.toLowerCase()} className="bg-pm-card text-pm-text font-mono font-bold">
@@ -424,20 +423,19 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         <ChevronDown className="w-3.5 h-3.5 text-purple-400 absolute right-2 pointer-events-none" />
       </div>
 
-      {/* Next Tier Stepper Button */}
+      {/* Next Tier Stepper Button (Fixed 28px Icon-Only) */}
       <button
         type="button"
         disabled={!nextTier}
         onClick={() => nextTier && handleTierChange(nextTier.name)}
         title={nextTier ? `Step to ${nextTier.name.toUpperCase()}` : 'Last Tier'}
-        className={`h-7 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 border ${
+        className={`w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center border ${
           nextTier
             ? 'bg-pm-input border-pm-border text-pm-text hover:bg-purple-500/10 hover:border-purple-500/30 hover:text-purple-400 cursor-pointer'
             : 'bg-pm-input/20 border-pm-border/30 text-pm-secondary/40 cursor-not-allowed'
         }`}
       >
-        <span className="hidden md:inline font-mono uppercase">{nextTier ? nextTier.name : 'Last'}</span>
-        <ChevronRight className="w-3.5 h-3.5" />
+        <ChevronRight className="w-4 h-4" />
       </button>
     </div>
   );
