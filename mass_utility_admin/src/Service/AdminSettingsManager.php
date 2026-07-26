@@ -70,6 +70,57 @@ class AdminSettingsManager
                 capabilities TEXT,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )');
+
+            // Seed default package tiers if table is empty
+            $tStmt = $pdo->query("SELECT COUNT(*) FROM pm_package_tiers");
+            if ($tStmt && (int)$tStmt->fetchColumn() === 0) {
+                $baseCaps = [
+                    'PM_ENABLE_GHOST_PURGER' => true,
+                    'PM_ENABLE_GDPR_SWEEPER' => true,
+                    'PM_ENABLE_HISTORY' => true,
+                ];
+
+                $defaultTiers = [
+                    'basic' => array_merge($baseCaps, [
+                        'PM_ENABLE_DB_TOOLS' => false,
+                        'PM_ENABLE_FILE_TOOLS' => false,
+                        'query_visual_filter' => false,
+                        'query_visual_mutate' => false,
+                        'backup_automation' => false,
+                        'governor_autopilot' => false,
+                        'sweeper_execution' => false,
+                        'rollback_history_limit' => 5,
+                        'backup_destinations' => ['local'],
+                    ]),
+                    'pro' => array_merge($baseCaps, [
+                        'PM_ENABLE_DB_TOOLS' => true,
+                        'PM_ENABLE_FILE_TOOLS' => true,
+                        'query_visual_filter' => true,
+                        'query_visual_mutate' => false,
+                        'backup_automation' => true,
+                        'governor_autopilot' => false,
+                        'sweeper_execution' => true,
+                        'rollback_history_limit' => 25,
+                        'backup_destinations' => ['local', 'gdrive'],
+                    ]),
+                    'enterprise' => array_merge($baseCaps, [
+                        'PM_ENABLE_DB_TOOLS' => true,
+                        'PM_ENABLE_FILE_TOOLS' => true,
+                        'query_visual_filter' => true,
+                        'query_visual_mutate' => true,
+                        'backup_automation' => true,
+                        'governor_autopilot' => true,
+                        'sweeper_execution' => true,
+                        'rollback_history_limit' => 100,
+                        'backup_destinations' => ['local', 'gdrive'],
+                    ]),
+                ];
+
+                $insStmt = $pdo->prepare("INSERT INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
+                foreach ($defaultTiers as $tName => $tCaps) {
+                    $insStmt->execute([$tName, json_encode($tCaps)]);
+                }
+            }
             $pdo->exec('CREATE TABLE IF NOT EXISTS pm_licenses ( /* nosec */
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,

@@ -241,6 +241,14 @@ class LicenseRepository
     {
         $stmt = $this->db->query("SELECT * FROM pm_package_tiers ORDER BY name ASC");
         $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (is_array($res)) {
+            foreach ($res as &$row) {
+                if (isset($row['capabilities']) && is_string($row['capabilities'])) {
+                    $decoded = json_decode($row['capabilities'], true);
+                    $row['capabilities'] = is_array($decoded) ? $decoded : [];
+                }
+            }
+        }
         return is_array($res) ? $res : [];
     }
 

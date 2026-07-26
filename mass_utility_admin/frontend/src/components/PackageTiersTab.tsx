@@ -1,28 +1,33 @@
 import React, { useState } from 'react';
-import { PackageCheck, Save, RefreshCw, CheckCircle2, ShieldCheck, Zap, Crown, HardDrive, Cloud } from 'lucide-react';
+import { PackageCheck, Save, RefreshCw, CheckCircle2, ShieldCheck, Zap, Crown, HardDrive, Cloud, Sliders, Database, Layers } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
 import { Button } from './common/Button';
 import { FormInput } from './common/FormInput';
 import { useTranslation } from '../i18n/LanguageContext';
 
+export interface PackageTierCapabilities {
+  // Essential Operations
+  PM_ENABLE_DB_TOOLS: boolean;
+  PM_ENABLE_FILE_TOOLS: boolean;
+  PM_ENABLE_GHOST_PURGER: boolean;
+  PM_ENABLE_GDPR_SWEEPER: boolean;
+  PM_ENABLE_HISTORY: boolean;
+  // AST Engine Granular Split
+  query_visual_filter: boolean;
+  query_visual_mutate: boolean;
+  // Automation & Safety Governor
+  backup_automation: boolean;
+  sweeper_execution: boolean;
+  governor_autopilot: boolean;
+  // Quotas & Storage
+  rollback_history_limit: number;
+  backup_destinations: string[];
+}
+
 export interface PackageTier {
   id: number;
   name: string;
-  capabilities: {
-    // Usability
-    PM_ENABLE_DB_TOOLS: boolean;
-    PM_ENABLE_FILE_TOOLS: boolean;
-    PM_ENABLE_GHOST_PURGER: boolean;
-    PM_ENABLE_GDPR_SWEEPER: boolean;
-    PM_ENABLE_HISTORY: boolean;
-    // Convenience
-    query_visual_execute: boolean;
-    backup_automation: boolean;
-    governor_autopilot: boolean;
-    sweeper_execution: boolean;
-    rollback_history_limit: number;
-    backup_destinations: string[];
-  };
+  capabilities: PackageTierCapabilities;
 }
 
 interface PackageTiersTabProps {
@@ -31,7 +36,7 @@ interface PackageTiersTabProps {
   showAlert: (msg: string, type?: 'success' | 'error') => void;
 }
 
-const getDefaultCapsForTier = (tierName: string) => {
+const getDefaultCapsForTier = (tierName: string): PackageTierCapabilities => {
   const name = tierName.toLowerCase();
   
   const base = {
@@ -45,7 +50,8 @@ const getDefaultCapsForTier = (tierName: string) => {
       ...base,
       PM_ENABLE_DB_TOOLS: false,
       PM_ENABLE_FILE_TOOLS: false,
-      query_visual_execute: false,
+      query_visual_filter: false,
+      query_visual_mutate: false,
       backup_automation: false,
       governor_autopilot: false,
       sweeper_execution: false,
@@ -59,7 +65,8 @@ const getDefaultCapsForTier = (tierName: string) => {
       ...base,
       PM_ENABLE_DB_TOOLS: true,
       PM_ENABLE_FILE_TOOLS: true,
-      query_visual_execute: true,
+      query_visual_filter: true,
+      query_visual_mutate: false,
       backup_automation: true,
       governor_autopilot: false,
       sweeper_execution: true,
@@ -73,7 +80,8 @@ const getDefaultCapsForTier = (tierName: string) => {
     ...base,
     PM_ENABLE_DB_TOOLS: true,
     PM_ENABLE_FILE_TOOLS: true,
-    query_visual_execute: true,
+    query_visual_filter: true,
+    query_visual_mutate: true,
     backup_automation: true,
     governor_autopilot: true,
     sweeper_execution: true,
@@ -104,7 +112,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     ? activeTierObj.capabilities
     : getDefaultCapsForTier(selectedTier);
 
-  const [capabilities, setCapabilities] = useState(currentCaps);
+  const [capabilities, setCapabilities] = useState<PackageTierCapabilities>(currentCaps);
 
   const handleTierChange = (tierName: string) => {
     setSelectedTier(tierName);
@@ -115,10 +123,10 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     setCapabilities(caps);
   };
 
-  const handleToggle = (key: string) => {
+  const handleToggle = (key: keyof PackageTierCapabilities) => {
     setCapabilities(prev => ({
       ...prev,
-      [key]: !prev[key as keyof typeof prev],
+      [key]: !prev[key],
     }));
   };
 
@@ -167,10 +175,17 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
   return (
     <div className="space-y-6">
-      {/* Top Marketing & Feature Strategy Overview Cards */}
+      {/* Top Interactive Preset Selector Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* BASIC Card */}
-        <div className={`p-5 rounded-xl border transition ${selectedTier === 'basic' ? 'bg-pm-primary/5 border-pm-primary shadow-md' : 'bg-pm-card border-pm-border'}`}>
+        <div
+          onClick={() => handleTierChange('basic')}
+          className={`p-5 rounded-xl border cursor-pointer transition-all ${
+            selectedTier === 'basic'
+              ? 'bg-pm-primary/10 border-pm-primary ring-2 ring-pm-primary/30 shadow-lg'
+              : 'bg-pm-card border-pm-border hover:border-pm-primary/50'
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-500" />
@@ -184,15 +199,23 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           <ul className="text-[11px] space-y-1.5 text-pm-secondary mb-4">
             <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Manual DB & File Backups</li>
             <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Ghost Purger & GDPR Sweeper</li>
-            <li className="flex items-center gap-1.5 text-pm-secondary/60">🔒 Scheduled Cron Automation (Pro)</li>
+            <li className="flex items-center gap-1.5 text-pm-secondary/60">🔒 Step 1 Visual AST Filter (Pro)</li>
           </ul>
-          <Button variant={selectedTier === 'basic' ? 'primary' : 'neutral'} size="sm" className="w-full" onClick={() => handleTierChange('basic')}>
-            Configure Basic Matrix
-          </Button>
+          <div className="pt-2 border-t border-pm-border/50 text-[10px] font-bold text-pm-primary uppercase flex items-center justify-between">
+            <span>{selectedTier === 'basic' ? '● Active Preset Selected' : 'Click to Edit Matrix'}</span>
+            <Sliders className="w-3 h-3" />
+          </div>
         </div>
 
         {/* PRO Card */}
-        <div className={`p-5 rounded-xl border transition ${selectedTier === 'pro' ? 'bg-pm-primary/5 border-pm-primary shadow-md' : 'bg-pm-card border-pm-border'}`}>
+        <div
+          onClick={() => handleTierChange('pro')}
+          className={`p-5 rounded-xl border cursor-pointer transition-all ${
+            selectedTier === 'pro'
+              ? 'bg-pm-primary/10 border-pm-primary ring-2 ring-pm-primary/30 shadow-lg'
+              : 'bg-pm-card border-pm-border hover:border-pm-primary/50'
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5 text-amber-500" />
@@ -201,20 +224,28 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 uppercase">Recommended</span>
           </div>
           <p className="text-[11px] text-pm-secondary mb-4 leading-relaxed">
-            Automation & Growth. Unlocks scheduled background backups, Visual SQL Query Builder, Automated Sweeper, and Google Drive cloud sync.
+            Automation & Growth. Unlocks Step 1 Visual AST Filter, scheduled background backups, Automated Sweeper, and Google Drive cloud sync.
           </p>
           <ul className="text-[11px] space-y-1.5 text-pm-secondary mb-4">
+            <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Step 1: Visual AST Filter</li>
             <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Scheduled Backups (Cron CLI)</li>
-            <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Visual SQL Query Builder</li>
             <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Google Drive Cloud Storage</li>
           </ul>
-          <Button variant={selectedTier === 'pro' ? 'primary' : 'neutral'} size="sm" className="w-full" onClick={() => handleTierChange('pro')}>
-            Configure Pro Matrix
-          </Button>
+          <div className="pt-2 border-t border-pm-border/50 text-[10px] font-bold text-pm-primary uppercase flex items-center justify-between">
+            <span>{selectedTier === 'pro' ? '● Active Preset Selected' : 'Click to Edit Matrix'}</span>
+            <Sliders className="w-3 h-3" />
+          </div>
         </div>
 
         {/* ENTERPRISE Card */}
-        <div className={`p-5 rounded-xl border transition ${selectedTier === 'enterprise' ? 'bg-pm-primary/5 border-pm-primary shadow-md' : 'bg-pm-card border-pm-border'}`}>
+        <div
+          onClick={() => handleTierChange('enterprise')}
+          className={`p-5 rounded-xl border cursor-pointer transition-all ${
+            selectedTier === 'enterprise'
+              ? 'bg-pm-primary/10 border-pm-primary ring-2 ring-pm-primary/30 shadow-lg'
+              : 'bg-pm-card border-pm-border hover:border-pm-primary/50'
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-indigo-500" />
@@ -223,23 +254,24 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 uppercase">Autopilot</span>
           </div>
           <p className="text-[11px] text-pm-secondary mb-4 leading-relaxed">
-            Full Governance & Scale. Unlocks Governor Auto-Pilot dynamic CPU/RAM resource tuning and maximum rollback history limits.
+            Full Governance & Scale. Unlocks Step 2 Batch Action Configurator & Mutations, Governor Auto-Pilot CPU/RAM tuning, and 100 rollback limit.
           </p>
           <ul className="text-[11px] space-y-1.5 text-pm-secondary mb-4">
+            <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-indigo-500" /> Step 2: Batch Action Configurator</li>
             <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-indigo-500" /> Governor Auto-Pilot Tuning</li>
             <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-indigo-500" /> 100 Rollback History Limit</li>
-            <li className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-indigo-500" /> Multi-Domain Module Licensing</li>
           </ul>
-          <Button variant={selectedTier === 'enterprise' ? 'primary' : 'neutral'} size="sm" className="w-full" onClick={() => handleTierChange('enterprise')}>
-            Configure Enterprise Matrix
-          </Button>
+          <div className="pt-2 border-t border-pm-border/50 text-[10px] font-bold text-pm-primary uppercase flex items-center justify-between">
+            <span>{selectedTier === 'enterprise' ? '● Active Preset Selected' : 'Click to Edit Matrix'}</span>
+            <Sliders className="w-3 h-3" />
+          </div>
         </div>
       </div>
 
       {/* Main Tier Matrix Configuration Container */}
       <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm pm-card-elevation w-full">
         <SectionHeader
-          title={`${t('tiers_title')} (${selectedTier.toUpperCase()})`}
+          title={`${t('tiers_title')} (${selectedTier.toUpperCase()} PRESET)`}
           subtitle={t('tiers_subtitle')}
           icon={PackageCheck}
           action={
@@ -255,26 +287,9 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
           }
         />
 
-        <div className="flex gap-3 my-6">
-          {['basic', 'pro', 'enterprise'].map(tierName => (
-            <button
-              key={tierName}
-              type="button"
-              onClick={() => handleTierChange(tierName)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition ${
-                selectedTier === tierName
-                  ? 'pm-btn-primary shadow-md'
-                  : 'pm-btn-neutral'
-              }`}
-            >
-              {tierName} TIER
-            </button>
-          ))}
-        </div>
-
-        <form onSubmit={handleSave} className="space-y-6">
+        <form onSubmit={handleSave} className="space-y-6 mt-6">
           
-          {/* Category 1: Essential Operations (Module Enablement) */}
+          {/* Sub-Category 1: Essential Operations & Module Enablement */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
@@ -335,26 +350,48 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             </div>
           </div>
 
-          {/* Category 2: Automation & Convenience (Dashboard Feature Locks) */}
+          {/* Sub-Category 2: AST Query & Batch Mutation Engine */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-500" />
-              2. Automation & Convenience (Dashboard Feature Locks)
+              <Database className="w-4 h-4 text-amber-500" />
+              2. AST Query & Batch Mutation Engine (Granular Differentiation)
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
-                  <span className="text-xs font-semibold text-pm-text block">{t('tier_visual_query_name')}</span>
-                  <span className="text-[11px] text-pm-secondary">{t('tier_visual_query_desc')}</span>
+                  <span className="text-xs font-semibold text-pm-text block">Step 1: Visual AST Product & Data Filter (PRO)</span>
+                  <span className="text-[11px] text-pm-secondary">Drag-and-drop query filter compiler & SQL dry-run preview</span>
                 </div>
                 <input
                   type="checkbox"
-                  checked={Boolean(capabilities.query_visual_execute)}
-                  onChange={() => handleToggle('query_visual_execute')}
+                  checked={Boolean(capabilities.query_visual_filter)}
+                  onChange={() => handleToggle('query_visual_filter')}
                   className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
               </label>
 
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">Step 2: Batch Action Configurator & Mutations (ENTERPRISE)</span>
+                  <span className="text-[11px] text-pm-secondary">Bulk price/stock updates, category assignments, and execution</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={Boolean(capabilities.query_visual_mutate)}
+                  onChange={() => handleToggle('query_visual_mutate')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Sub-Category 3: Automation & Safety Governor */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-sky-500" />
+              3. Automation & Safety Governor
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
                 <div>
                   <span className="text-xs font-semibold text-pm-text block">{t('tier_backup_auto_name')}</span>
@@ -364,6 +401,19 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                   type="checkbox"
                   checked={Boolean(capabilities.backup_automation)}
                   onChange={() => handleToggle('backup_automation')}
+                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
+                />
+              </label>
+
+              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
+                <div>
+                  <span className="text-xs font-semibold text-pm-text block">Automated Sweeper Jobs</span>
+                  <span className="text-[11px] text-pm-secondary">Background scheduled GDPR and cart purging</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={Boolean(capabilities.sweeper_execution)}
+                  onChange={() => handleToggle('sweeper_execution')}
                   className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
               </label>
@@ -380,27 +430,14 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                   className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
                 />
               </label>
-
-              <label className="flex items-center justify-between p-3 bg-pm-input/50 rounded-lg border border-pm-border cursor-pointer hover:bg-pm-input transition">
-                <div>
-                  <span className="text-xs font-semibold text-pm-text block">Automated Sweeper Jobs</span>
-                  <span className="text-[11px] text-pm-secondary">Enable background scheduled GDPR and Ghost Purging runs</span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={Boolean(capabilities.sweeper_execution)}
-                  onChange={() => handleToggle('sweeper_execution')}
-                  className="rounded border-pm-border text-pm-primary focus:ring-pm-primary"
-                />
-              </label>
             </div>
           </div>
 
-          {/* Category 3: Quotas & Storage Limits (Implemented Engines) */}
+          {/* Sub-Category 4: Quotas & Storage Destinations */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary mb-3 flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-indigo-500" />
-              3. Quotas & Storage Destinations (Implemented Engines Only)
+              4. Quotas & Storage Destinations (Implemented Engines Only)
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-pm-input/30 p-4 rounded-xl border border-pm-border">
@@ -424,11 +461,11 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                 </span>
               </div>
 
-              {/* Cloud Destinations */}
+              {/* Cloud Destinations Container (Div instead of Label to fix nested label bug) */}
               <div>
-                <label className="block text-xs font-semibold text-pm-text mb-2">
+                <div className="block text-xs font-semibold text-pm-text mb-2">
                   Allowed Backup Storage Destinations
-                </label>
+                </div>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2.5 cursor-pointer text-xs text-pm-text">
                     <input
@@ -464,7 +501,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
               icon={Save}
               loading={loading}
             >
-              {t('btn_save')} Matrix
+              {t('btn_save')} {selectedTier.toUpperCase()} Matrix
             </Button>
           </div>
         </form>
