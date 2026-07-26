@@ -83,6 +83,11 @@ export class FetchService {
       headers
     });
 
+    if (res.status === 401 || res.status === 403) {
+      window.location.reload();
+      return;
+    }
+
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     }

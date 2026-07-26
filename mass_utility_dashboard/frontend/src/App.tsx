@@ -91,6 +91,30 @@ function AppContent() {
     } catch (e) {}
   }, [activeTab]);
 
+  // Tab Visibility Sensor & 60s Background Heartbeat Session Check
+  useEffect(() => {
+    const checkSession = () => {
+      FetchService.post('get_server_status').catch(() => {});
+    };
+
+    // 1. Check session state when switching back to this tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkSession();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // 2. Background heartbeat ping every 60 seconds
+    const heartbeatInterval = setInterval(checkSession, 60000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(heartbeatInterval);
+    };
+  }, []);
+
   // Mousemove spotlight proximity listener
   useEffect(() => {
     let cursorTicking = false;

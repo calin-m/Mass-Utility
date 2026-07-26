@@ -941,7 +941,7 @@ if (!$isAuthorized && !$isWebhook) {
                 <h1><?= $suspendedMessage ? 'License Suspended' : 'Access Restricted' ?></h1>
                 <p><?= $suspendedMessage 
                     ? 'Your merchant license key has been suspended. Please contact your administrator to reactivate your license.' 
-                    : 'This Standalone SaaS Dashboard is securely locked. To access this dashboard, please open the PrestaShop back office and click the <strong>Launch Standalone Dashboard</strong> button.' 
+                    : 'Your session has expired or the Standalone SaaS Dashboard is securely locked.<br><br>To resume access, it is advised to open your <strong>PrestaShop Back Office</strong> and click the <strong>Launch Standalone Dashboard</strong> button in the Mass Utility module.' 
                 ?></p>
                 <button class="btn" onclick="window.close()">Close Window</button>
             </div>
