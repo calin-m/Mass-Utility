@@ -235,8 +235,32 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       headerTitle={user.name ? `${user.name} (${user.email})` : user.email}
       headerSubtitle={`Client ID: #${user.id} • Role: ${user.role || 'Owner'} • Affiliation: ${user.company_name || 'Standalone'}`}
       headerBadges={
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <StatusBadge status={user.status || 'active'} />
+          
+          {user.company_name ? (
+            onInspectCompany && assignedComp ? (
+              <button
+                type="button"
+                onClick={() => onInspectCompany(assignedComp)}
+                className="inline-flex items-center gap-1.5 text-xs text-purple-400 font-bold bg-purple-500/10 hover:bg-purple-500/20 px-2.5 py-1 rounded-lg border border-purple-500/30 transition truncate max-w-[180px]"
+                title={`Inspect Company Profile (${user.company_name})`}
+              >
+                <Building2 className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{user.company_name}</span>
+              </button>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs text-purple-400 font-bold bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-500/30 truncate max-w-[180px]">
+                <Building2 className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{user.company_name}</span>
+              </span>
+            )
+          ) : (
+            <span className="text-xs text-pm-secondary bg-pm-input px-2.5 py-1 rounded-lg border border-pm-border italic font-mono font-medium">
+              Standalone
+            </span>
+          )}
+
           <span className="text-xs text-pm-secondary bg-pm-input px-2.5 py-1 rounded-lg border border-pm-border uppercase font-mono font-bold">
             {clientLicenses.length} Keys
           </span>

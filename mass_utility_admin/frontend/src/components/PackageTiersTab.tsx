@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PackageCheck, RefreshCw, Plus, Edit, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { PackageCheck, RefreshCw, Plus, Edit, ChevronLeft, ChevronRight, ChevronDown, Check, X, ShieldCheck, Sliders } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
 import { Button } from './common/Button';
 import { ConfirmModal } from './common/ConfirmModal';
@@ -383,7 +383,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
 
   const subTabs: SubTabItem<'overview' | 'editor'>[] = [
     { id: 'overview', label: 'Package Overview', icon: PackageCheck, badge: displayTiers.length },
-    { id: 'editor', label: 'Capability Editor', icon: Edit },
+    { id: 'editor', label: 'Package Editor', icon: Edit },
   ];
 
   const currentTierIdx = displayTiers.findIndex(t => t.name.toLowerCase() === selectedTier.toLowerCase());
@@ -479,7 +479,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         rightContent={subTab === 'editor' ? editorSwitcherContent : undefined}
       />
 
-      {/* Sub-Tab 1: Package Catalog & Preset Selector Grid */}
+      {/* Sub-Tab 1: Package Catalog & Compact Feature Matrix */}
       {subTab === 'overview' && (
         <div className="animate-in fade-in duration-200 space-y-6">
           <TierCardGrid
@@ -487,7 +487,6 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             selectedTier={selectedTier}
             onSelectTier={(tierName) => {
               handleTierChange(tierName);
-              setSubTab('editor');
             }}
             onCloneClick={(tier) => {
               setNewTierName(`${tier.name}_Copy`);
@@ -502,6 +501,106 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             }}
             onDeleteClick={(tier) => setTierToDelete(tier)}
           />
+
+          {/* Compact Selected Package Active/Inactive Feature & Quota Matrix */}
+          <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-pm-border">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    <ShieldCheck className="w-4 h-4" />
+                  </span>
+                  <h3 className="text-sm font-extrabold text-pm-text tracking-tight uppercase font-mono">
+                    Selected Package Matrix: <span className="text-purple-400 font-extrabold">{selectedTier.toUpperCase()} TIER</span>
+                  </h3>
+                </div>
+                <p className="text-xs text-pm-secondary">
+                  Live breakdown of active feature flags, AST query tools, and daily operational capacity limits for the <strong className="text-pm-text">{selectedTier.toUpperCase()}</strong> tier.
+                </p>
+              </div>
+
+              <Button
+                variant="neutral"
+                size="sm"
+                icon={Edit}
+                onClick={() => setSubTab('editor')}
+                className="shrink-0"
+              >
+                Package Editor
+              </Button>
+            </div>
+
+            {/* Quota & Capacity Highlights */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
+                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">Max Store Domains</span>
+                <span className="text-sm font-extrabold font-mono text-purple-400">{capabilities.max_bound_domains ?? 1} Domain(s)</span>
+              </div>
+              <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
+                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">Daily Sweeper Runs</span>
+                <span className="text-sm font-extrabold font-mono text-emerald-400">{capabilities.max_daily_sweeper_runs ?? 1} / Day</span>
+              </div>
+              <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
+                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">Cloud Backups Retained</span>
+                <span className="text-sm font-extrabold font-mono text-blue-400">{capabilities.max_cloud_backups ?? 3} Backup(s)</span>
+              </div>
+              <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
+                <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">Rollback Snapshots</span>
+                <span className="text-sm font-extrabold font-mono text-amber-400">{capabilities.rollback_history_limit ?? 5} Snapshots</span>
+              </div>
+            </div>
+
+            {/* Active vs Inactive Feature Table */}
+            <div className="border border-pm-border rounded-lg overflow-hidden">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-pm-input/60 text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
+                    <th className="p-3">Feature Capability</th>
+                    <th className="p-3 text-center">Status</th>
+                    <th className="p-3">Access Level & Description</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-pm-border">
+                  {[
+                    { label: 'AST Visual Data Filter (Step 1)', key: 'query_visual_filter', desc: 'Allows filtering MariaDB database rows via AST rules' },
+                    { label: 'SQL Compilation & Preview (Step 2)', key: 'query_visual_compile', desc: 'Generates MariaDB SQL queries with dry-run safety previews' },
+                    { label: 'Batch Action Mutations (Step 3)', key: 'query_visual_mutate', desc: 'Executes transactional batch update & delete mutations' },
+                    { label: 'Single Table Data Export (CSV/SQL)', key: 'db_tools_export', desc: 'Exports individual table structures and data' },
+                    { label: 'Full Database Backup & Compression', key: 'db_tools_backup', desc: 'Executes chunked gzipped MariaDB database backups' },
+                    { label: 'Database Schema Diff Inspector', key: 'db_diff_inspector', desc: 'Inspects schema differences against snapshot benchmarks' },
+                    { label: '1-Click Database Snapshot Restore', key: 'db_tools_restore', desc: 'Restores databases from local binary backup sidecars' },
+                    { label: 'File System Directory Browser', key: 'file_tools_browse', desc: 'Browses PrestaShop store files and directories' },
+                    { label: 'Full Directory Zip Backup', key: 'file_tools_backup', desc: 'Creates compressed zip backups of store directories' },
+                    { label: 'Visual File Code Diff Inspector', key: 'file_diff_inspector', desc: 'Visually compares file changes line-by-line' },
+                    { label: 'Scheduled Cron Automation Jobs', key: 'backup_automation', desc: 'Automates background database & file backup schedules' },
+                    { label: 'Background Sweeper Execution', key: 'sweeper_execution', desc: 'Executes ghost file and image purger jobs' },
+                    { label: 'Live CPU & RAM Telemetry', key: 'governor_telemetry', desc: 'Monitors real-time CloudLinux LVE hosting load' },
+                    { label: 'Governor Auto-Pilot Throttling', key: 'governor_autopilot', desc: 'Automatically throttles background jobs under high server load' },
+                  ].map((feat) => {
+                    const isEnabled = Boolean((capabilities as any)[feat.key]);
+                    return (
+                      <tr key={feat.key} className="hover:bg-pm-input/30 transition">
+                        <td className="p-3 font-semibold text-pm-text">{feat.label}</td>
+                        <td className="p-3 text-center">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                              isEnabled
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                : 'bg-pm-input text-pm-secondary border-pm-border'
+                            }`}
+                          >
+                            {isEnabled ? <Check className="w-3 h-3 text-emerald-400" /> : <X className="w-3 h-3 text-pm-secondary/50" />}
+                            <span>{isEnabled ? 'Enabled' : 'Disabled'}</span>
+                          </span>
+                        </td>
+                        <td className="p-3 text-pm-secondary text-[11px]">{feat.desc}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
