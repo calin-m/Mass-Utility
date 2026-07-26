@@ -178,11 +178,6 @@ d:/Project Mass/
 ├── WORKSPACE.md                    # Workspace constitution and directory manifest
 ├── README.md                       # Master consolidated technical manual
 ├── .gitignore                      # Workspace ignore rules (DBs, logs, build outputs)
-├── .bench/                         # Benchmarking, audits, and automated doc maps
-│   ├── docs/                       # Architectural dictionaries & design system maps
-│   └── scripts/                    # JIT verification tools and build scripts
-├── .orchestra/                     # Conductor pipeline tools and pre-commit hooks
-│   └── .conductor/tools/           # cli_commit.py, workspace_inspector.py, cli_security_audit.py
 ├── mass_utility/                   # NATIVE PRESTASHOP MODULE (Transactional Bridge)
 │   ├── mass_utility.php            # Module installer, hooks, back-office controller
 │   ├── api.php                     # Unauthenticated gateway receiver for Dashboard API calls
