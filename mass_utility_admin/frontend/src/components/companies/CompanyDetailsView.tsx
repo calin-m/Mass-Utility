@@ -626,24 +626,36 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
               <UserPlus className="w-4 h-4 text-purple-400" /> Onboard Team Member to Company
             </h3>
 
-            <div className="flex items-center gap-2 border-b border-pm-border pb-3">
+            {/* Standardized Animated Segmented Pill Mode Switcher */}
+            <div className="relative flex items-center bg-pm-input/50 border border-pm-border rounded-xl p-1 h-9">
+              {/* Sliding Background Pill */}
+              <div
+                className={`absolute top-1 bottom-1 rounded-lg bg-purple-500 shadow-sm transition-all duration-300 ease-out ${
+                  onboardMode === 'assign' ? 'left-1 w-[calc(50%-4px)]' : 'left-[calc(50%+2px)] w-[calc(50%-4px)]'
+                }`}
+              />
+
               <button
                 type="button"
                 onClick={() => setOnboardMode('assign')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  onboardMode === 'assign' ? 'bg-purple-500 text-white font-bold' : 'text-pm-secondary hover:text-pm-text'
+                className={`relative z-10 flex-1 h-7 rounded-lg text-xs font-extrabold transition-colors flex items-center justify-center gap-1.5 ${
+                  onboardMode === 'assign' ? 'text-white' : 'text-pm-secondary hover:text-pm-text'
                 }`}
               >
-                🔗 Assign Registered Unassigned Client ({unassignedUsers.length})
+                <span>🔗 Assign Registered Client</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${onboardMode === 'assign' ? 'bg-white/20 text-white' : 'bg-pm-card text-pm-secondary'}`}>
+                  {unassignedUsers.length}
+                </span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setOnboardMode('create')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  onboardMode === 'create' ? 'bg-purple-500 text-white font-bold' : 'text-pm-secondary hover:text-pm-text'
+                className={`relative z-10 flex-1 h-7 rounded-lg text-xs font-extrabold transition-colors flex items-center justify-center gap-1.5 ${
+                  onboardMode === 'create' ? 'text-white' : 'text-pm-secondary hover:text-pm-text'
                 }`}
               >
-                ✨ Create Brand-New Account
+                <span>✨ Create Brand-New Account</span>
               </button>
             </div>
 

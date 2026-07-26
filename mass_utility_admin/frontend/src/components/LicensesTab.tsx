@@ -464,7 +464,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             <button
                               type="button"
                               onClick={() => handleSelectLicense(lic)}
-                              className="font-bold text-pm-text hover:text-purple-400 transition text-xs text-left"
+                              className="font-extrabold text-sm text-pm-text hover:text-purple-400 transition text-left block font-mono"
                             >
                               {isVisible ? lic.license_key : '••••-••••-••••-••••'}
                             </button>
@@ -484,6 +484,9 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             >
                               <Copy className="w-3.5 h-3.5" />
                             </button>
+                          </div>
+                          <div className="text-xs text-pm-secondary font-mono mt-0.5">
+                            ID #{lic.id}{lic.created_at ? ` • Created ${lic.created_at}` : ''}
                           </div>
                         </td>
                         <td className="p-3.5">

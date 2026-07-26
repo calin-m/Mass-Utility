@@ -464,19 +464,21 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
 
                   return (
                     <tr key={user.id} className="hover:bg-pm-input/50 transition">
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                      <td className="p-3 font-semibold text-pm-text">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
                             <Mail className="w-4 h-4" />
                           </div>
                           <div>
                             <button
                               onClick={() => onSelectClient(user, 'profile')}
-                              className="font-bold text-pm-text hover:text-purple-500 transition text-left block"
+                              className="font-extrabold text-sm text-pm-text hover:text-purple-400 transition text-left block"
                             >
-                              {user.email}
+                              {user.name ? `${user.name} (${user.email})` : user.email}
                             </button>
-                            <div className="text-[10px] text-pm-secondary font-mono">ID #{user.id} • {t('stat_joined_date')} {user.created_at}</div>
+                            <div className="text-xs text-pm-secondary font-mono">
+                              {user.email} • ID #{user.id} • Joined {user.created_at}
+                            </div>
                           </div>
                         </div>
                       </td>

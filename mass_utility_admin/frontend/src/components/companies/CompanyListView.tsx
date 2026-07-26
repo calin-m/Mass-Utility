@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
+import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle, Eye, EyeOff, Copy, Check, RefreshCw, Pause, Play } from 'lucide-react';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { StatSummaryGrid } from '../common/StatSummaryGrid';
@@ -52,6 +52,32 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [suspendingCompany, setSuspendingCompany] = useState<Company | null>(null);
+
+  const handleToggleSuspendCompany = async () => {
+    if (!suspendingCompany) return;
+    setSubmitting(true);
+    const newStatus = suspendingCompany.status === 'suspended' ? 'active' : 'suspended';
+    try {
+      const res = await fetch(getApiUrl('api_update_company'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: suspendingCompany.id, company_name: suspendingCompany.company_name, tax_id: suspendingCompany.tax_id, status: newStatus, max_licenses: suspendingCompany.max_licenses }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (showAlert) showAlert(`Company profile "${suspendingCompany.company_name}" status updated to ${newStatus}!`, 'success');
+        await onRefresh();
+        setSuspendingCompany(null);
+      } else {
+        if (showAlert) showAlert(data.error || 'Failed to update company status', 'error');
+      }
+    } catch {
+      if (showAlert) showAlert('Server communication error', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Form States
   const [name, setName] = useState('');
@@ -304,18 +330,20 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                 paginatedCompanies.map(c => (
                   <tr key={c.id} className="hover:bg-pm-input/50 transition">
                     <td className="p-3 font-semibold text-pm-text">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
                           <Building2 className="w-4 h-4" />
                         </div>
                         <div>
                           <button
                             onClick={() => onSelectCompany(c, 'overview')}
-                            className="font-bold text-pm-text hover:text-purple-500 transition text-left"
+                            className="font-extrabold text-sm text-pm-text hover:text-purple-400 transition text-left block"
                           >
                             {c.company_name}
                           </button>
-                          <div className="text-[10px] text-pm-secondary font-mono">ID #{c.id}</div>
+                          <div className="text-xs text-pm-secondary font-mono">
+                            ID #{c.id}{c.created_at ? ` • Joined Date ${c.created_at}` : ''}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -358,6 +386,14 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                           {t('btn_inspect_company')}
                         </Button>
                         <Button
+                          variant={c.status === 'suspended' ? 'primary' : 'neutral'}
+                          size="sm"
+                          icon={c.status === 'suspended' ? Play : Pause}
+                          onClick={() => setSuspendingCompany(c)}
+                        >
+                          {c.status === 'suspended' ? 'Activate' : 'Suspend'}
+                        </Button>
+                        <Button
                           variant="danger"
                           size="sm"
                           icon={Trash2}
@@ -365,7 +401,6 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                         >
                           {t('btn_delete')}
                         </Button>
-
                       </div>
                     </td>
                   </tr>
@@ -547,6 +582,22 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
         message={`Are you sure you want to delete company profile "${selectedCompany?.company_name || ''}"? Linked user accounts will be unassigned from this organization.`}
         confirmText="Confirm Delete"
         variant="danger"
+        loading={submitting}
+      />
+
+      {/* Suspend / Activate Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!suspendingCompany}
+        onClose={() => setSuspendingCompany(null)}
+        onConfirm={handleToggleSuspendCompany}
+        title={suspendingCompany?.status === 'suspended' ? 'Activate Company Profile?' : 'Suspend Company Profile?'}
+        message={
+          suspendingCompany?.status === 'suspended'
+            ? `Are you sure you want to activate company profile "${suspendingCompany?.company_name || ''}"? License rights will be restored for company keys.`
+            : `Are you sure you want to suspend company profile "${suspendingCompany?.company_name || ''}"? Associated client keys under this organization will inherit suspended status.`
+        }
+        confirmText={suspendingCompany?.status === 'suspended' ? 'Confirm Activate' : 'Confirm Suspend'}
+        variant={suspendingCompany?.status === 'suspended' ? 'info' : 'warning'}
         loading={submitting}
       />
     </div>
