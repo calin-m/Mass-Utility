@@ -1,3 +1,4 @@
+// @Arch[en]
 const en = {
   // App Header & Navigation
   portal_title: 'MASS UTILITY ADMIN',

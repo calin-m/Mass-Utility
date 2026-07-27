@@ -1,4 +1,6 @@
 <?php
+// @Arch[MaintenanceSweeperEngine]
+
 declare(strict_types=1);
 
 namespace MassUtility\Service;

@@ -1,4 +1,6 @@
 <?php
+// @Arch[AdminApiController]
+
 namespace MassUtilityAdmin\Controller;
 
 use MassUtilityAdmin\Repository\LicenseRepository;

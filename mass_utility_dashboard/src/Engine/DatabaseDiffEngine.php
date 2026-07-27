@@ -1,4 +1,6 @@
 <?php
+// @Arch[DatabaseDiffEngine]
+
 /**
  * Project Mass - Database Audit Trail Diff Engine
  * Boundary Isolation Shield to mathematically prove zero side-effects during mutations.

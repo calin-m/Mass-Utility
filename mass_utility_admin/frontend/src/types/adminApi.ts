@@ -1,3 +1,4 @@
+// @Arch[adminApi]
 // Super-Admin Portal Central TypeScript Domain Models & API Payload Contracts
 
 export interface License {

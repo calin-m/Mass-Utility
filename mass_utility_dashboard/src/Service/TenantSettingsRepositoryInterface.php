@@ -1,4 +1,6 @@
 <?php
+// @Arch[TenantSettingsRepositoryInterface]
+
 declare(strict_types=1);
 
 namespace MassUtility\SaaS\Service;

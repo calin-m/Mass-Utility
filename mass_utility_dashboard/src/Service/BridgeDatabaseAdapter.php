@@ -1,4 +1,6 @@
 <?php
+// @Arch[BridgeDatabaseAdapter]
+
 declare(strict_types=1);
 
 namespace MassUtility\SaaS\Service;

@@ -1,3 +1,4 @@
+// @Arch[CompanyDetailsView]
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Link as LinkIcon, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle, LayoutDashboard, LayoutGrid, List, Search } from 'lucide-react';
 import { Company } from './CompanyListView';

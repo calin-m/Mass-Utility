@@ -1,4 +1,6 @@
 <?php
+// @Arch[LicenseVerifyController]
+
 namespace MassUtility\Dashboard\Controller\Api;
 
 class LicenseVerifyController

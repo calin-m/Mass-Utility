@@ -1,3 +1,4 @@
+// @Arch[LoginView]
 import React, { useState } from 'react';
 import { Lock, User, KeyRound, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';

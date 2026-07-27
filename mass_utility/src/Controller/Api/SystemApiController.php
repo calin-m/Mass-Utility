@@ -1,4 +1,6 @@
 <?php
+// @Arch[SystemApiController]
+
 declare(strict_types=1);
 
 namespace MassUtility\Controller\Api;

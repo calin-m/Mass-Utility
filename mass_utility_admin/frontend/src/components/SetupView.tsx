@@ -1,3 +1,4 @@
+// @Arch[SetupView]
 import React, { useState } from 'react';
 import { ShieldAlert, UserPlus, KeyRound, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';

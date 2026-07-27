@@ -1,4 +1,6 @@
 <?php
+// @Arch[api]
+
 declare(strict_types=1);
 
 /**

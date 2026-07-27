@@ -1,3 +1,4 @@
+// @Arch[ToggleSwitch]
 import React from 'react';
 
 export interface ToggleSwitchProps {

@@ -1,3 +1,4 @@
+// @Arch[SettingsTab]
 import React, { useState } from 'react';
 import { Lock, RefreshCw, KeyRound, ShieldCheck, Languages, Globe } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';

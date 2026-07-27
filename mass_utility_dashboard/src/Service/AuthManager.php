@@ -1,4 +1,6 @@
 <?php
+// @Arch[AuthManager]
+
 namespace MassUtility\SaaS\Service;
 
 class AuthManager

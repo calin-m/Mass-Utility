@@ -1,3 +1,4 @@
+// @Arch[SearchFilterBar]
 import React from 'react';
 
 export interface FilterOption {

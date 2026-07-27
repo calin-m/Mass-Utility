@@ -1,3 +1,4 @@
+// @Arch[ErrorBoundary]
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertOctagon, RefreshCw } from 'lucide-react';
 

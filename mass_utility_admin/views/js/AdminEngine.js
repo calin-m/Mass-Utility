@@ -1,3 +1,4 @@
+// @Arch[AdminEngine]
 document.addEventListener('DOMContentLoaded', () => {
     // Theme Toggle Handler
     const themeBtn = document.getElementById('pm-theme-toggle-btn');

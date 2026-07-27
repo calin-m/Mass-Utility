@@ -1,3 +1,4 @@
+// @Arch[IssueLicenseModal]
 import React, { useState } from 'react';
 import { PlusCircle, User, Package, Calendar, Globe } from 'lucide-react';
 import { BaseModal } from './BaseModal';

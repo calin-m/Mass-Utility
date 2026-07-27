@@ -1,3 +1,4 @@
+// @Arch[overlay]
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 type ModalType = 'alert' | 'confirm' | 'prompt';

@@ -1,3 +1,4 @@
+// @Arch[PackageTiersTab]
 import React, { useState } from 'react';
 import { PackageCheck, RefreshCw, Plus, Edit, ChevronLeft, ChevronRight, ChevronDown, Check, X, ShieldCheck, Sliders } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';

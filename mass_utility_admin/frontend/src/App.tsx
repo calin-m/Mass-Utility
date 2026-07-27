@@ -1,3 +1,4 @@
+// @Arch[App]
 import React, { useState, useEffect } from 'react';
 import { Key, Package, Settings, ShieldCheck, Shield, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users, Building2, X } from 'lucide-react';
 import { LicensesTab } from './components/LicensesTab';

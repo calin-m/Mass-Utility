@@ -1,3 +1,4 @@
+// @Arch[TierCapabilitiesForm]
 import React from 'react';
 import { Sliders, Save, Database, Layers, Clock, ShieldAlert, Cloud, HardDrive, Edit3 } from 'lucide-react';
 import { Button } from '../common/Button';

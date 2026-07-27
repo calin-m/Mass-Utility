@@ -1,4 +1,6 @@
 <?php
+// @Arch[test_license_encryption]
+
 declare(strict_types=1);
 
 // Mock class Configuration representing PrestaShop Configuration storage

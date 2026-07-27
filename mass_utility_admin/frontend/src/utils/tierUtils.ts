@@ -1,3 +1,4 @@
+// @Arch[tierUtils]
 // Centralized Package Tier Ranking & Dynamic Select Options Utility
 
 export const TIER_RANK: Record<string, number> = {

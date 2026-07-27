@@ -1,3 +1,4 @@
+// @Arch[BaseModal]
 import React, { useEffect } from 'react';
 import { LucideIcon } from 'lucide-react';
 

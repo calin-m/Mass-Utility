@@ -1,4 +1,6 @@
 <?php
+// @Arch[cli_backup_worker]
+
 declare(strict_types=1);
 
 /**

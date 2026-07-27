@@ -1,4 +1,6 @@
 <?php
+// @Arch[mass_utility]
+
 declare(strict_types=1);
 
 if (!defined('_PS_VERSION_')) {

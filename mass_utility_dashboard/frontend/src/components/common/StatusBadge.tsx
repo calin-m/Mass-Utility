@@ -1,3 +1,4 @@
+// @Arch[StatusBadge]
 import React from 'react';
 
 export type BadgeVariant = 'local' | 'cloud' | 'pinned' | 'success' | 'danger' | 'warning' | 'info';

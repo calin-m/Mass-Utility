@@ -1,3 +1,4 @@
+// @Arch[index]
 import en, { TranslationSchema } from './locales/en';
 import ro from './locales/ro';
 import de from './locales/de';

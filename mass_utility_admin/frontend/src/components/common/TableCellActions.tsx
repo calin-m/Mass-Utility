@@ -1,3 +1,4 @@
+// @Arch[TableCellActions]
 import React from 'react';
 import { Eye, Edit, ShieldAlert, ShieldCheck, Trash2 } from 'lucide-react';
 import { Button } from './Button';

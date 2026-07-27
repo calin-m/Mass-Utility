@@ -1,3 +1,4 @@
+// @Arch[useAuthStore]
 export interface UserPermissions {
   id: number;
   name: string;

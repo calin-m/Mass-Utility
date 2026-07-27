@@ -1,3 +1,4 @@
+// @Arch[ResetPasswordPage]
 import React, { useState, useEffect } from 'react';
 
 interface ResetPasswordPageProps {

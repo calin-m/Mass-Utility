@@ -1,3 +1,4 @@
+// @Arch[AuditLogsTab]
 import React, { useState, useEffect, useMemo } from 'react';
 import { Shield, Search, RefreshCw, Download, Terminal, User, Globe, FileText, ChevronDown, ChevronUp, CheckCircle, Activity, Layers, UserCheck, ShieldAlert, Eye, EyeOff, CheckCircle2, Code2, X, Trash2 } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';

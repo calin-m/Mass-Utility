@@ -1,4 +1,6 @@
 <?php
+// @Arch[phpstanbootstrap]
+
 /**
  * PHPStan Bootstrap Stubs File
  * Defines stubs for PrestaShop native classes to prevent analysis crashes.

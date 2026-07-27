@@ -1,3 +1,4 @@
+// @Arch[CompanyListView]
 import React, { useState, useMemo } from 'react';
 import { Building2, PlusCircle, Search, Edit, Trash2, Users, Key, ShieldCheck, AlertTriangle, Eye, EyeOff, Copy, Check, RefreshCw, Pause, Play } from 'lucide-react';
 import { SectionHeader } from '../common/SectionHeader';

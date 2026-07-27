@@ -1,3 +1,4 @@
+// @Arch[TierCardGrid]
 import React from 'react';
 import { Sparkles, ShieldCheck, Zap, Crown, Copy, Edit3, Trash2 } from 'lucide-react';
 import { Button } from '../common/Button';

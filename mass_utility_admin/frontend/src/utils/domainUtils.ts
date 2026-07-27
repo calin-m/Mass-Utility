@@ -1,3 +1,4 @@
+// @Arch[domainUtils]
 export function parseDomains(storeUrl: string | null | undefined): string[] {
   if (!storeUrl) return [];
   const raw = storeUrl.trim();

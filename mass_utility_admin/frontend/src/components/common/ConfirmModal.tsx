@@ -1,3 +1,4 @@
+// @Arch[ConfirmModal]
 import React from 'react';
 import { AlertTriangle, ShieldAlert, CheckCircle, X } from 'lucide-react';
 import { Button } from './Button';

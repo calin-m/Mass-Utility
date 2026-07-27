@@ -1,3 +1,4 @@
+// @Arch[LoginPage]
 import React, { useState } from 'react';
 import { AuthStore } from '../../store/useAuthStore';
 
@@ -75,30 +76,24 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-pm-bg text-pm-text flex items-center justify-center p-4 selection:bg-pm-accent selection:text-white overflow-hidden">
+    <div className="relative min-h-screen bg-pm-bg text-pm-text-primary flex items-center justify-center p-4 selection:bg-pm-accent selection:text-white overflow-hidden">
       
-      {/* Multi-colored Ambient Mesh Background Glow */}
+      {/* Ambient Mesh Background Glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-purple-600/15 via-indigo-600/20 to-blue-600/15 rounded-full blur-[120px] opacity-70 animate-pulse duration-10000" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-pm-accent/10 rounded-full blur-[100px]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-purple-600/10 via-indigo-600/15 to-blue-600/10 rounded-full blur-[120px] opacity-70" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-pm-accent/10 rounded-full blur-[100px]" />
       </div>
 
       {/* Glassmorphic Container Card */}
       <main className="relative w-full max-w-md bg-pm-card/95 backdrop-blur-2xl border border-pm-border/80 rounded-2xl p-8 shadow-[0_16px_48px_rgba(0,0,0,0.5)] space-y-6">
         
-        {/* Header Badge & Title */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pm-accent/10 border border-pm-accent/25 text-pm-accent text-xs font-semibold uppercase tracking-widest shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-            <span>Mass Utility SaaS</span>
-          </div>
+        {/* Header Title */}
+        <div className="text-center space-y-1">
           <h1 className="text-2xl font-bold text-pm-text-primary tracking-tight">
-            Sign In to Dashboard
+            Mass Utility
           </h1>
           <p className="text-xs text-pm-text-muted">
-            Authenticate with your Mass Utility Admin account
+            Sign In to Dashboard
           </p>
         </div>
 
@@ -130,7 +125,7 @@ export const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@company.com"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text placeholder:text-pm-text-muted transition-all outline-none"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text-primary placeholder:text-pm-text-muted transition-all outline-none"
               />
             </div>
           </div>
@@ -151,13 +146,13 @@ export const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text placeholder:text-pm-text-muted transition-all outline-none"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text-primary placeholder:text-pm-text-muted transition-all outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password text" : "Show password text"}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-pm-text-muted hover:text-pm-text transition-colors cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-pm-text-muted hover:text-pm-text-primary transition-colors cursor-pointer"
               >
                 {showPassword ? (
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4" aria-hidden="true">
@@ -210,14 +205,6 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Security Footer Info */}
-        <div className="pt-4 border-t border-pm-border/40 text-center text-xs text-pm-text-muted flex items-center justify-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Protected by Mass Utility Enterprise Security &amp; RBAC</span>
-        </div>
-
       </main>
 
       {/* Forgot Password Modal */}
@@ -242,7 +229,7 @@ export const LoginPage: React.FC = () => {
                 placeholder="admin@company.com"
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text placeholder:text-pm-text-muted transition-all outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text-primary placeholder:text-pm-text-muted transition-all outline-none"
               />
 
               <div className="flex gap-2 pt-2">

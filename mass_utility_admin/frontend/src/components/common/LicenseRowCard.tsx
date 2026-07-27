@@ -1,3 +1,4 @@
+// @Arch[LicenseRowCard]
 import React, { useState } from 'react';
 import { Key, Globe, Eye, EyeOff, Copy, Check, Edit, Building2, User, ExternalLink, Trash2, Calendar, ShieldAlert } from 'lucide-react';
 import { License, UserAccount } from '../../types/adminApi';

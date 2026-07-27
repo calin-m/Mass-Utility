@@ -1,4 +1,6 @@
 <?php
+// @Arch[LicenseRepository]
+
 namespace MassUtilityAdmin\Repository;
 
 use PDO;

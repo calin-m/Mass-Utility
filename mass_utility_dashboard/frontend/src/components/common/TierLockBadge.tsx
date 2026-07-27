@@ -1,3 +1,4 @@
+// @Arch[TierLockBadge]
 import React from 'react';
 
 interface TierLockBadgeProps {

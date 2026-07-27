@@ -1,3 +1,4 @@
+// @Arch[DetailSubViewLayout]
 import React from 'react';
 import { ChevronLeft, LucideIcon } from 'lucide-react';
 import { DetailHeaderBanner } from './DetailHeaderBanner';

@@ -1,3 +1,4 @@
+// @Arch[ClientListView]
 import React, { useState, useMemo } from 'react';
 import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw, UserPlus, Check, Sparkles, Copy, PlusCircle, Shield } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';

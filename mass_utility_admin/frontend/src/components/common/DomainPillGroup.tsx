@@ -1,3 +1,4 @@
+// @Arch[DomainPillGroup]
 import React, { useState, useRef, useEffect } from 'react';
 import { Globe, ExternalLink, Search, Copy, Check, ChevronDown } from 'lucide-react';
 import { parseDomains } from '../../utils/domainUtils';

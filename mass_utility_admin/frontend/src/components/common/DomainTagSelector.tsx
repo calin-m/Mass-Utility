@@ -1,3 +1,4 @@
+// @Arch[DomainTagSelector]
 import React, { useState, KeyboardEvent, ClipboardEvent } from 'react';
 import { Globe, X, Plus } from 'lucide-react';
 import { parseDomains } from '../../utils/domainUtils';

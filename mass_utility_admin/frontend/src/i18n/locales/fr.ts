@@ -1,3 +1,4 @@
+// @Arch[fr]
 import { TranslationSchema } from './en';
 
 const fr: TranslationSchema = {

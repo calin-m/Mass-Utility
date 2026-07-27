@@ -1,3 +1,4 @@
+// @Arch[licenseUtils]
 // Centralized License Key Utilities & Formatting Helpers
 
 /**

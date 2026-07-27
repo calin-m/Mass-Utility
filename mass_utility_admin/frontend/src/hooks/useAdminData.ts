@@ -1,3 +1,4 @@
+// @Arch[useAdminData]
 import { useState, useEffect, useCallback } from 'react';
 import { License, UserAccount, Company, PackageTier } from '../types/adminApi';
 

@@ -1,3 +1,4 @@
+// @Arch[ClientsTab]
 import React, { useState } from 'react';
 import { License, UserAccount } from './LicensesTab';
 import { ClientListView } from './clients/ClientListView';

@@ -1,3 +1,4 @@
+// @Arch[DirectoryToolbar]
 import React from 'react';
 import { Search, LucideIcon, X, List, LayoutGrid } from 'lucide-react';
 import { Button } from './Button';

@@ -1,4 +1,6 @@
 <?php
+// @Arch[cli_restore]
+
 declare(strict_types=1);
 
 /**

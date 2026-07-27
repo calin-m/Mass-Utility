@@ -1,4 +1,6 @@
 <?php
+// @Arch[index]
+
 declare(strict_types=1);
 
 /**

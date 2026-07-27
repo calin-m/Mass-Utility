@@ -1,3 +1,4 @@
+// @Arch[mass_utility]
 /**
  * Project Mass - Main Dashboard Entry Point
  * Implements pre-hydration dark mode adjustments and coordinates

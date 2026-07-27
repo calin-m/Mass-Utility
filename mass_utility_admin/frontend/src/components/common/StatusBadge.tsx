@@ -1,3 +1,4 @@
+// @Arch[StatusBadge]
 import React from 'react';
 import { Building2, Key, User, Shield, CheckCircle, ShieldAlert, Clock, Layers, Crown, Cpu } from 'lucide-react';
 

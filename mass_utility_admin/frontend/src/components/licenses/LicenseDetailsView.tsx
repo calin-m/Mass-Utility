@@ -1,3 +1,4 @@
+// @Arch[LicenseDetailsView]
 import React, { useState, useMemo } from 'react';
 import {
   ChevronLeft,

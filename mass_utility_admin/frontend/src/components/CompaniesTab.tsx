@@ -1,3 +1,4 @@
+// @Arch[CompaniesTab]
 import React, { useState } from 'react';
 import { Company, CompanyListView } from './companies/CompanyListView';
 import { CompanyDetailsView } from './companies/CompanyDetailsView';

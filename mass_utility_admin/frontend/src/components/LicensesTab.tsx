@@ -1,3 +1,4 @@
+// @Arch[LicensesTab]
 import React, { useState, useMemo } from 'react';
 import { Eye, EyeOff, Copy, Edit, ShieldAlert, CheckCircle, PlusCircle, Key, Trash2, Unlock, RefreshCw, Clock, User, LayoutGrid, List, Calendar, Building2 } from 'lucide-react';
 import { BaseModal } from './common/BaseModal';

@@ -1,3 +1,4 @@
+// @Arch[AccountTab]
 import React from 'react';
 import { AuthStore, UserPermissions } from '../../store/useAuthStore';
 import { SectionHeader } from '../common/SectionHeader';

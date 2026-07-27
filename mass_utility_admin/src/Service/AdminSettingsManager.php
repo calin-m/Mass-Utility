@@ -1,4 +1,6 @@
 <?php
+// @Arch[AdminSettingsManager]
+
 namespace MassUtilityAdmin\Service;
 
 class AdminSettingsManager

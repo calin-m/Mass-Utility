@@ -1,3 +1,4 @@
+// @Arch[TableActionToolbar]
 import React from 'react';
 
 export interface ToolbarActionItem {

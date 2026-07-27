@@ -1,3 +1,4 @@
+// @Arch[RolePermissionsModal]
 import React from 'react';
 import { Shield, Check, Lock, X } from 'lucide-react';
 import { BaseModal } from '../common/BaseModal';

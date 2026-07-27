@@ -1,4 +1,6 @@
 <?php
+// @Arch[FileToolsApiController]
+
 declare(strict_types=1);
 
 namespace MassUtility\Controller\Api;
