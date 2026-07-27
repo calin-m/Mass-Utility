@@ -451,7 +451,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                 <th className="p-3.5 w-[20%]">{t('th_company_profile')}</th>
                 <th className="p-3.5 w-[14%]">Package Tier</th>
                 <th className="p-3.5 w-[14%]">{t('th_active_licenses')}</th>
-                <th className="p-3.5 w-[12%]">{t('th_domains')}</th>
+                <th className="p-3.5 w-[12%]">Store URL</th>
                 <th className="p-3.5 w-[8%]">{t('th_status')}</th>
                 <th className="p-3.5 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
               </tr>
@@ -498,11 +498,11 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         <StatusBadge type="tier" label={userTier} />
                       </td>
 
-                      <td className="p-3 font-mono font-semibold text-xs text-pm-text align-middle whitespace-nowrap">
+                      <td className="p-3 align-middle whitespace-nowrap">
                         {metrics.total === 0 ? (
                           <span className="italic text-pm-secondary/70">{t('lbl_no_licenses')}</span>
                         ) : (
-                          <span className="text-purple-600 dark:text-purple-400 font-bold">{metrics.active} {t('status_active')}</span>
+                          <StatusBadge label={`ACTIVE - ${metrics.active}`} customColor="emerald" />
                         )}
                       </td>
 
@@ -511,7 +511,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                           <span className="italic text-pm-secondary/70">{t('lbl_none')}</span>
                         ) : (
                           <div className="flex items-center gap-1">
-                            <span className="text-pm-text font-bold">{metrics.boundDomains[0]}</span>
+                            <span className="text-pm-secondary font-medium">{metrics.boundDomains[0]}</span>
                             {metrics.boundDomains.length > 1 && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">
                                 +{metrics.boundDomains.length - 1} {t('lbl_more')}
