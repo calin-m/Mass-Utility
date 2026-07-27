@@ -113,25 +113,6 @@ function AppContent() {
     return localStorage.getItem('pm-theme') !== 'light';
   });
 
-  if (resetToken) {
-    return <ResetPasswordPage token={resetToken} />;
-  }
-
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
-
-  if (isHydrating) {
-    return (
-      <div className="min-h-screen bg-pm-body flex flex-col items-center justify-center p-6 space-y-4">
-        <div className="w-12 h-12 border-3 border-pm-primary/30 border-t-pm-primary rounded-full animate-spin" />
-        <p className="text-xs font-bold tracking-widest text-pm-text-secondary uppercase animate-pulse">
-          ⚡ Hydrating Mass Utility Security Controls...
-        </p>
-      </div>
-    );
-  }
-
   // Sync theme choices to document classes and localStorage
   useEffect(() => {
     if (darkMode) {
@@ -158,7 +139,6 @@ function AppContent() {
       FetchService.post('get_server_status').catch(() => {});
     };
 
-    // 1. Check session state when switching back to this tab
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         checkSession();
@@ -166,8 +146,6 @@ function AppContent() {
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // 2. Background heartbeat ping every 60 seconds
     const heartbeatInterval = setInterval(checkSession, 60000);
 
     return () => {
@@ -208,6 +186,25 @@ function AppContent() {
       document.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
+
+  if (resetToken) {
+    return <ResetPasswordPage token={resetToken} />;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  if (isHydrating) {
+    return (
+      <div className="min-h-screen bg-pm-body flex flex-col items-center justify-center p-6 space-y-4">
+        <div className="w-12 h-12 border-3 border-pm-primary/30 border-t-pm-primary rounded-full animate-spin" />
+        <p className="text-xs font-bold tracking-widest text-pm-text-secondary uppercase animate-pulse">
+          ⚡ Hydrating Mass Utility Security Controls...
+        </p>
+      </div>
+    );
+  }
 
   const handleLogout = () => {
     showConfirm('Confirm Logout', 'Are you sure you want to log out from the administrative utility dashboard?', null, () => {
