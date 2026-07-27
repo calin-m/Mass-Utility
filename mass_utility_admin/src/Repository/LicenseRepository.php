@@ -515,7 +515,7 @@ class LicenseRepository
                 }
             } catch (\Throwable $t) {}
 
-            // 2. Real-Time Push Revocation Webhook to all bound store domain origins
+            // 2. Real-Time Push Revocation Webhooks to BOTH Store Module AND Standalone Dashboard
             if (!empty($rawUrl)) {
                 $domains = json_decode($rawUrl, true);
                 if (!is_array($domains)) {
@@ -527,21 +527,31 @@ class LicenseRepository
                     if (empty($domain)) continue;
 
                     $scheme = (strpos($domain, 'http') === 0) ? '' : 'https://';
-                    $targetUrl = rtrim($scheme . $domain, '/') . '/modules/mass_utility/api.php?action=revoke_license';
+                    $baseDomainUrl = rtrim($scheme . $domain, '/');
 
-                    try {
-                        $ch = curl_init($targetUrl);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_POST, true);
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-                            'license_key' => $key,
-                            'timestamp' => time()
-                        ]));
-                        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                        curl_exec($ch);
-                        curl_close($ch);
-                    } catch (\Throwable $t) {}
+                    // Target 1: PrestaShop Store Module Webhook
+                    $moduleWebhookUrl = $baseDomainUrl . '/modules/mass_utility/api.php?action=revoke_license';
+
+                    // Target 2: Dashboard SaaS Webhook
+                    $dashboardWebhookUrl = $baseDomainUrl . '/mass_utility_dashboard/public/index.php?action=revoke_license';
+
+                    $webhookEndpoints = [$moduleWebhookUrl, $dashboardWebhookUrl];
+
+                    foreach ($webhookEndpoints as $targetUrl) {
+                        try {
+                            $ch = curl_init($targetUrl);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                                'license_key' => $key,
+                                'timestamp' => time()
+                            ]));
+                            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+                            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                            curl_exec($ch);
+                            curl_close($ch);
+                        } catch (\Throwable $t) {}
+                    }
                 }
             }
         }

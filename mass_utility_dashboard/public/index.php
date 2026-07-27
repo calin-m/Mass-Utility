@@ -178,6 +178,30 @@ function logAuthTelemetry(string $status, array $context = []): void {
     } catch (\Throwable $e) {}
 }
 
+// Handle Master Admin Revocation Webhook Push
+if (isset($_GET['action']) && $_GET['action'] === 'revoke_license') {
+    header('Content-Type: application/json');
+    $targetKey = trim((string)($_POST['license_key'] ?? $_GET['license_key'] ?? ''));
+    
+    $settingsRepo->remove('PM_LICENSE_KEY');
+    $settingsRepo->remove('PM_LICENSE_TOKEN');
+    $settingsRepo->remove('PM_LICENSE_TIER');
+    $settingsRepo->set('PM_LICENSE_STATUS', 'revoked');
+
+    try {
+        $dbPath = dirname(__DIR__) . '/data/pm_cloud_backups.db';
+        if (file_exists($dbPath) && !empty($targetKey)) {
+            $pdo = new \PDO('sqlite:' . $dbPath);
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $stmt = $pdo->prepare("DELETE FROM pm_licenses WHERE license_key = ?");
+            $stmt->execute([$targetKey]);
+        }
+    } catch (\Throwable $e) {}
+
+    echo json_encode(['success' => true, 'message' => 'Dashboard license revoked and cached tokens purged cleanly.']);
+    exit;
+}
+
 // Process OTT (One-Time Token) from Bridge if present
 if (isset($_GET['ott'])) {
     $ott = $_GET['ott'];
