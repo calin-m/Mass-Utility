@@ -17,8 +17,9 @@
 2. **The Zero-Draft Atomic Pipeline:**
    - **No PENDING states:** Ensure your logic is complete.
    - **Single Atomic Operation:** When a task or phase is complete, update all `.md` dictionaries, and then immediately execute `python .orchestra/.conductor/tools/cli_commit.py`. This guarantees the docs, code, and history are perfectly bound and formatted.
-   - The `cli_commit.py` script will automatically ingest `.ai_plan.md` into the Git Commit message.
-   - For multi-phase execution plans, `cli_commit.py` marks completed phases as `[COMPLETED]` and preserves `.ai_plan.md` on disk across phases until all phases complete, preventing premature deletion.
+3. **Smart Ephemeral Commits:**
+   - The `cli_commit.py` script will automatically ingest the exact contents of `.ai_plan.md` into the Git Commit message.
+   - Once the commit succeeds, `cli_commit.py` will delete `.ai_plan.md`.
 4. **Smart Interconnectivity Tracing & Sequential Investigation:**
    - **Primary Token-Saving Scanner:** You MUST use the custom Python script `.orchestra/.conductor/tools/workspace_inspector.py` as your primary tool to mathematically map architecture, symbols, and dependencies.
    - **Questions & Diagnostics Mandate:** Whenever the user asks any question about how code works, module layout, or system behaviors, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `lookup "<symbol>"` / `matrix`) to ground your response in live AST symbol maps and generated reports.
@@ -44,6 +45,22 @@
 7. **JIT Failure Telemetry (Self-Healing Loop):**
     - If a validation run fails, check `.bench/agents/custom_rules/_failures.md` for compiler and gate error details. You MUST immediately adapt your implementation plan to resolve the specific compilation/linters errors logged in that file.
 </RULE[Antigravity_Pipeline]>
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
 <!-- RULE-END[Pipeline Rules] -->
 
 <!-- RULE-START[Tool Reusability Policy] -->
