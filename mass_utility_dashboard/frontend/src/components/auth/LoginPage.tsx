@@ -1,6 +1,7 @@
 // @Arch[LoginPage]
 import React, { useState } from 'react';
 import { AuthStore } from '../../store/useAuthStore';
+import { FetchService } from '../../utils/FetchService';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -29,38 +30,52 @@ export const LoginPage: React.FC = () => {
     setError(null);
 
     const candidateEndpoints = [
-      '../mass_utility_admin/public/index.php?action=api_user_login',
       './index.php?action=api_user_login',
+      '../index.php?action=api_user_login',
+      '../mass_utility_admin/public/index.php?action=api_user_login',
       '../../mass_utility_admin/public/index.php?action=api_user_login'
     ];
 
     let lastError = 'Invalid credentials or user account deactivated.';
     let success = false;
 
-    for (const endpoint of candidateEndpoints) {
-      try {
-        const formData = new FormData();
-        formData.append('email', cleanEmail);
-        formData.append('password', cleanPassword);
+    // First try FetchService post for api_user_login
+    try {
+      const data = await FetchService.post('api_user_login', { email: cleanEmail, password: cleanPassword });
+      if (data && data.success && data.token && data.user) {
+        AuthStore.setSession(data.token, data.user);
+        success = true;
+      } else if (data && data.error) {
+        lastError = data.error;
+      }
+    } catch (e) {}
 
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          body: formData
-        });
+    if (!success) {
+      for (const endpoint of candidateEndpoints) {
+        try {
+          const formData = new FormData();
+          formData.append('email', cleanEmail);
+          formData.append('password', cleanPassword);
 
-        if (!response.ok) continue;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            body: formData
+          });
 
-        const data = await response.json();
-        if (data.success && data.token && data.user) {
-          AuthStore.setSession(data.token, data.user);
-          success = true;
-          break;
-        } else if (data.error) {
-          lastError = data.error;
-          break;
+          if (!response.ok) continue;
+
+          const data = await response.json();
+          if (data.success && data.token && data.user) {
+            AuthStore.setSession(data.token, data.user);
+            success = true;
+            break;
+          } else if (data.error) {
+            lastError = data.error;
+            break;
+          }
+        } catch (err) {
+          // Continue loop
         }
-      } catch (err) {
-        // Try next candidate endpoint if path differs
       }
     }
 
