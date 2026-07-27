@@ -9,6 +9,12 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Forgot Password Modal State
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMsg, setForgotMsg] = useState<string | null>(null);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -40,22 +46,50 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const handleSendResetLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail) return;
+
+    setForgotLoading(true);
+    setForgotMsg(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('email', forgotEmail.trim());
+
+      const res = await fetch('../mass_utility_admin/public/index.php?action=api_send_password_reset_link', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForgotMsg(data.message || 'Password reset link sent to your email.');
+      } else {
+        setForgotMsg(data.error || 'Failed to dispatch reset email.');
+      }
+    } catch (err) {
+      setForgotMsg('Error connecting to reset server.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-pm-bg text-pm-text flex items-center justify-center p-4 selection:bg-pm-accent selection:text-white overflow-hidden">
       
       {/* Multi-colored Ambient Mesh Background Glow */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-purple-600/15 via-indigo-600/20 to-blue-600/15 rounded-full blur-[120px] opacity-70 animate-pulse duration-10000" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-pm-accent/10 rounded-full blur-[100px]" />
       </div>
 
       {/* Glassmorphic Container Card */}
-      <div className="relative w-full max-w-md bg-pm-card/90 backdrop-blur-2xl border border-white/10 dark:border-white/10 border-pm-border/80 rounded-2xl p-8 shadow-[0_16px_48px_rgba(0,0,0,0.5)] space-y-6">
+      <main className="relative w-full max-w-md bg-pm-card/90 backdrop-blur-2xl border border-white/10 border-pm-border/80 rounded-2xl p-8 shadow-[0_16px_48px_rgba(0,0,0,0.5)] space-y-6">
         
         {/* Header Badge & Title */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pm-accent/10 border border-pm-accent/25 text-pm-accent text-xs font-semibold uppercase tracking-widest shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
             </svg>
             <span>Mass Utility SaaS</span>
@@ -70,8 +104,8 @@ export const LoginPage: React.FC = () => {
 
         {/* Error Alert */}
         {error && (
-          <div className="flex items-start gap-3 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fadeIn">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 shrink-0 mt-0.5">
+          <div role="alert" aria-live="polite" className="flex items-start gap-3 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fadeIn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 shrink-0 mt-0.5" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
             <span>{error}</span>
@@ -81,14 +115,16 @@ export const LoginPage: React.FC = () => {
         {/* Form Controls */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider">
+            <label htmlFor="login-email" className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block">
               Email Address
             </label>
             <div className="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pm-text-muted">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pm-text-muted" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
               <input
+                id="login-email"
+                name="email"
                 type="email"
                 required
                 value={email}
@@ -100,14 +136,16 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider">
+            <label htmlFor="login-password" className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block">
               Password
             </label>
             <div className="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pm-text-muted">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pm-text-muted" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
               </svg>
               <input
+                id="login-password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
@@ -118,14 +156,15 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password text" : "Show password text"}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-pm-text-muted hover:text-pm-text transition-colors cursor-pointer"
               >
                 {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
                   </svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12c1.318 4.01 5.372 7 9.964 7 4.592 0 8.646-2.99 9.964-7-1.318-4.01-5.372-7-9.964-7-4.592 0-8.646 2.99-9.964 7z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -144,6 +183,13 @@ export const LoginPage: React.FC = () => {
               />
               <span>Remember active session</span>
             </label>
+            <button
+              type="button"
+              onClick={() => { setShowForgotModal(true); setForgotEmail(email); }}
+              className="text-xs text-pm-accent hover:underline cursor-pointer font-medium"
+            >
+              Forgot password?
+            </button>
           </div>
 
           <button
@@ -156,7 +202,7 @@ export const LoginPage: React.FC = () => {
             ) : (
               <>
                 <span>Sign In to Dashboard</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                 </svg>
               </>
@@ -166,13 +212,59 @@ export const LoginPage: React.FC = () => {
 
         {/* Security Footer Info */}
         <div className="pt-4 border-t border-pm-border/40 text-center text-xs text-pm-text-muted flex items-center justify-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5 text-emerald-400">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>Protected by Mass Utility Enterprise Security &amp; RBAC</span>
         </div>
 
-      </div>
+      </main>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-sm bg-pm-card border border-pm-border rounded-2xl p-6 shadow-2xl space-y-4">
+            <div className="text-center space-y-1">
+              <h2 className="text-lg font-bold text-pm-text-primary">Request Password Reset</h2>
+              <p className="text-xs text-pm-text-muted">Enter your registered email address to receive a secure reset link.</p>
+            </div>
+
+            {forgotMsg && (
+              <div className="p-3 rounded-xl bg-pm-accent/10 border border-pm-accent/20 text-pm-accent text-xs text-center">
+                {forgotMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleSendResetLink} className="space-y-3">
+              <input
+                type="email"
+                required
+                placeholder="admin@company.com"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-pm-input border border-pm-border text-sm text-pm-text outline-none focus:border-pm-accent"
+              />
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(false)}
+                  className="w-1/2 py-2 px-3 rounded-xl bg-pm-input text-pm-text-secondary text-xs font-medium hover:bg-pm-input/80 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={forgotLoading}
+                  className="w-1/2 py-2 px-3 rounded-xl bg-pm-accent text-white text-xs font-medium hover:bg-pm-accent/90 cursor-pointer flex items-center justify-center gap-1"
+                >
+                  {forgotLoading ? 'Sending...' : 'Send Link'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

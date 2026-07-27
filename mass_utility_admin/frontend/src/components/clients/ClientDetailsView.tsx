@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Mail, Building, Building2, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles, User } from 'lucide-react';
+import { ArrowLeft, Mail, Building, Building2, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, PlusCircle, Check, Copy, Trash2, Edit, Clock, Sparkles, User, Eye, EyeOff } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { ConfirmModal } from '../common/ConfirmModal';
@@ -54,6 +54,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
   // Password Reset Modal State
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetPassword, setResetPassword] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   // Delete Modal State
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -521,8 +522,8 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-pm-card p-3 rounded-lg border border-pm-border">
               <div>
-                <div className="text-xs font-bold text-pm-text">Password Reset</div>
-                <p className="text-[11px] text-pm-secondary">Generate a temporary password or reset credentials for this client.</p>
+                <div className="text-xs font-bold text-pm-text">Change Client Password</div>
+                <p className="text-[11px] text-pm-secondary">Generate password, toggle visibility, copy to clipboard, or send email reset link.</p>
               </div>
 
               <Button
@@ -531,7 +532,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                 icon={Key}
                 onClick={() => setShowResetModal(true)}
               >
-                Reset Password
+                Change Password
               </Button>
             </div>
           </div>
@@ -552,27 +553,102 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
 
 
 
-      {/* Password Reset Modal */}
-      <BaseModal isOpen={showResetModal} onClose={() => setShowResetModal(false)} title={`Reset Password: ${user.email}`}>
+      {/* Password Change & Reset Modal */}
+      <BaseModal isOpen={showResetModal} onClose={() => setShowResetModal(false)} title={`Change Password: ${user.email}`} icon={Key} maxWidth="md">
         <form onSubmit={handleResetPassword} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">{t('settings_new_password')}</label>
-            <input
-              type="text"
-              required
-              value={resetPassword}
-              onChange={e => setResetPassword(e.target.value)}
-              placeholder={t('ph_strong_pass')}
-              className="w-full bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm font-mono text-pm-text focus:border-pm-primary focus:outline-none"
-            />
+            <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">New Password</label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <FormInput
+                  type={showResetPassword ? 'text' : 'password'}
+                  required
+                  placeholder={t('ph_new_pass')}
+                  value={resetPassword}
+                  onChange={e => setResetPassword(e.target.value)}
+                />
+                <div className="absolute right-2 top-2 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword(!showResetPassword)}
+                    className="p-1 text-pm-secondary hover:text-pm-text"
+                    title={showResetPassword ? "Hide password" : "Show password"}
+                  >
+                    {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                  {resetPassword && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(resetPassword);
+                        showAlert('Password copied to clipboard!', 'success');
+                      }}
+                      className="p-1 text-pm-accent hover:text-pm-accent/80"
+                      title="Copy password to clipboard"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="neutral"
+                size="md"
+                onClick={() => {
+                  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+                  let pass = '';
+                  for (let i = 0; i < 16; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+                  setResetPassword(pass);
+                  setShowResetPassword(true);
+                }}
+              >
+                ⚡ Generate
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-end gap-2 pt-4 border-t border-pm-border">
-            <button type="button" onClick={() => setShowResetModal(false)} className="pm-btn-neutral px-4 py-2 rounded-lg text-xs font-bold">
-              Cancel
-            </button>
-            <button type="submit" disabled={submitting} className="pm-btn-primary px-4 py-2 rounded-lg text-xs font-bold">
-              {submitting ? 'Resetting...' : 'Update Password'}
-            </button>
+
+          <div className="flex justify-between items-center pt-3 border-t border-pm-border flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="neutral"
+              size="md"
+              onClick={async () => {
+                if (!user?.id) return;
+                try {
+                  const formData = new FormData();
+                  formData.append('user_id', String(user.id));
+                  const res = await fetch('index.php?action=api_send_password_reset_link', { method: 'POST', body: formData });
+                  const data = await res.json();
+                  if (data.success) {
+                    showAlert(data.message || 'Password reset link sent to client email.', 'success');
+                    if (data.reset_url) {
+                      navigator.clipboard.writeText(data.reset_url);
+                    }
+                  } else {
+                    showAlert(data.error || 'Failed to send reset link', 'error');
+                  }
+                } catch (err: any) {
+                  showAlert('Error sending reset link: ' + err.message, 'error');
+                }
+              }}
+            >
+              ✉️ Send Password Reset Link
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="neutral" size="md" onClick={() => setShowResetModal(false)}>
+                {t('btn_cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                type="submit"
+                loading={submitting}
+                disabled={!resetPassword || resetPassword.length < 6}
+              >
+                Change Password
+              </Button>
+            </div>
           </div>
         </form>
       </BaseModal>

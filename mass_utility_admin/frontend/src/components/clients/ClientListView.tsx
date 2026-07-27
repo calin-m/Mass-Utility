@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw, UserPlus, Check, Sparkles, Copy, PlusCircle } from 'lucide-react';
+import { Users, Search, Edit, Trash2, Key, Eye, EyeOff, ShieldAlert, CheckCircle, Building, Mail, ExternalLink, RefreshCw, UserPlus, Check, Sparkles, Copy, PlusCircle, Shield } from 'lucide-react';
 import { License, UserAccount } from '../LicensesTab';
 import { BaseModal } from '../common/BaseModal';
 import { ConfirmModal } from '../common/ConfirmModal';
+import { RolePermissionsModal } from './RolePermissionsModal';
 import { TableCellIdentity } from '../common/TableCellIdentity';
 import { TableCellActions } from '../common/TableCellActions';
 import { TableCellCompany } from '../common/TableCellCompany';
@@ -56,11 +57,15 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     }
   };
 
-  // Create Client Modal State
+  // RBAC Matrix Modal State
+  const [showRolesModal, setShowRolesModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createEmail, setCreateEmailState] = useState(() => localStorage.getItem('pm_draft_client_email') || '');
+  const [createEmail, setCreateEmailState] = useState(() => {
+    try { return localStorage.getItem('pm_draft_client_email') || ''; } catch (e) { return ''; }
+  });
   const [createPassword, setCreatePassword] = useState('');
   const [createCompany, setCreateCompanyState] = useState(() => localStorage.getItem('pm_draft_client_company') || '');
+  const [createRole, setCreateRole] = useState('CompanyAdmin');
   const [showCreatePassword, setShowCreatePassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -131,7 +136,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
       formData.append('email', createEmail.trim());
       formData.append('password', createPassword);
       formData.append('company_name', createCompany.trim());
-      formData.append('role', 'client');
+      formData.append('role', createRole || 'CompanyAdmin');
       formData.append('status', 'active');
 
       const res = await fetch('index.php?action=api_create_user', { method: 'POST', body: formData });
@@ -352,15 +357,25 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         subtitle={t('clients_subtitle')}
         icon={Users}
         action={
-          <Button
-            variant="neutral"
-            size="sm"
-            icon={RefreshCw}
-            loading={isRefreshing}
-            onClick={handleRefresh}
-          >
-            {t('btn_refresh')}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="neutral"
+              size="sm"
+              icon={Shield}
+              onClick={() => setShowRolesModal(true)}
+            >
+              RBAC Permissions Matrix
+            </Button>
+            <Button
+              variant="neutral"
+              size="sm"
+              icon={RefreshCw}
+              loading={isRefreshing}
+              onClick={handleRefresh}
+            >
+              {t('btn_refresh')}
+            </Button>
+          </div>
         }
       />
 
@@ -593,6 +608,19 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
             placeholder={t('ph_company_inc')}
             value={createCompany}
             onChange={e => setCreateCompany(e.target.value)}
+          />
+
+          <FormSelect
+            label="Assigned RBAC Role"
+            value={createRole}
+            onChange={e => setCreateRole(e.target.value)}
+            options={[
+              { value: 'SuperAdmin', label: 'Super Admin (Full Platform Control)' },
+              { value: 'CompanyAdmin', label: 'Company Admin (Manage Company Users & Licenses)' },
+              { value: 'CatalogManager', label: 'Catalog Manager (AST & Catalog Mutations)' },
+              { value: 'Operator', label: 'Operator (Database & File Tools Only)' },
+              { value: 'Observer', label: 'Observer (Read Only Access)' }
+            ]}
           />
 
           <div className="pt-2 border-t border-pm-border space-y-3">
@@ -828,6 +856,12 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         confirmText="Confirm Delete"
         variant="danger"
         loading={loading}
+      />
+
+      {/* RBAC Roles & Permissions Matrix Modal */}
+      <RolePermissionsModal
+        isOpen={showRolesModal}
+        onClose={() => setShowRolesModal(false)}
       />
     </div>
   );

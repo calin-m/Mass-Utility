@@ -77,6 +77,18 @@ export class FetchService {
       headers['X-CSRF-Token'] = config.csrfToken;
     }
 
+    try {
+      const authState = (window as any).PM_AUTH_STORE?.getState?.() || null;
+      if (authState && authState.token) {
+        headers['Authorization'] = `Bearer ${authState.token}`;
+      } else {
+        const rawToken = localStorage.getItem('pm_user_session_token');
+        if (rawToken) {
+          headers['Authorization'] = `Bearer ${rawToken}`;
+        }
+      }
+    } catch (e) {}
+
     const res = await fetch(url, {
       method: 'POST',
       body: formData,
