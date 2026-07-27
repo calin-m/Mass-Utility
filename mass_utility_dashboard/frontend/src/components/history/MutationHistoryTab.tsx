@@ -352,8 +352,8 @@ export const MutationHistoryTab: React.FC = () => {
                     <td className="px-6 py-3.5 whitespace-nowrap text-center">
                       {getStatusBadge(job.state)}
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap text-center">
-                      <div className="inline-flex gap-1.5 items-center">
+                    <td className="px-6 py-3.5 whitespace-nowrap text-right">
+                      <div className="inline-flex gap-1.5 items-center justify-end">
                         <button
                           type="button"
                           onClick={() => setSelectedJob(job)}

@@ -25,6 +25,7 @@ interface MutationRulesEditorProps {
   onUpdateMutationRule: (id: string, updates: Partial<MutationAction>) => void;
   onExecuteMutations: () => void;
   onToggleLogTerminal: () => void;
+  onClearMutationLogs: () => void;
 }
 
 export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
@@ -40,6 +41,7 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
   onUpdateMutationRule,
   onExecuteMutations,
   onToggleLogTerminal,
+  onClearMutationLogs,
 }) => {
   return (
     <div className="bg-pm-card border border-pm-border rounded-xl p-6 pm-card-elevation space-y-6 border-l-4 border-l-rose-500">
@@ -287,6 +289,7 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
           logs={mutationLogs}
           maxHeight="240px"
           downloadFilename="mutation_execution.log"
+          onClearLogs={onClearMutationLogs}
         />
       )}
     </div>

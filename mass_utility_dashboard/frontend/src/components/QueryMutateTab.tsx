@@ -964,6 +964,7 @@ export const QueryMutateTab: React.FC = () => {
           }
           onExecuteMutations={handleExecuteMutations}
           onToggleLogTerminal={() => setShowLogTerminal((prev) => !prev)}
+          onClearMutationLogs={() => setMutationLogs('')}
         />
       )}
     </div>
