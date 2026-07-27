@@ -18,7 +18,9 @@ export const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+    if (!cleanEmail || !cleanPassword) {
       setError('Please provide both email address and password.');
       return;
     }
@@ -26,25 +28,46 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    try {
-      const response = await fetch('../mass_utility_admin/public/index.php?action=api_user_login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+    const candidateEndpoints = [
+      '../mass_utility_admin/public/index.php?action=api_user_login',
+      './index.php?action=api_user_login',
+      '../../mass_utility_admin/public/index.php?action=api_user_login'
+    ];
 
-      const data = await response.json();
+    let lastError = 'Invalid credentials or user account deactivated.';
+    let success = false;
 
-      if (data.success && data.token && data.user) {
-        AuthStore.setSession(data.token, data.user);
-      } else {
-        setError(data.error || 'Invalid credentials or user account deactivated.');
+    for (const endpoint of candidateEndpoints) {
+      try {
+        const formData = new FormData();
+        formData.append('email', cleanEmail);
+        formData.append('password', cleanPassword);
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) continue;
+
+        const data = await response.json();
+        if (data.success && data.token && data.user) {
+          AuthStore.setSession(data.token, data.user);
+          success = true;
+          break;
+        } else if (data.error) {
+          lastError = data.error;
+          break;
+        }
+      } catch (err) {
+        // Try next candidate endpoint if path differs
       }
-    } catch (err) {
-      setError('Connection failed. Could not reach Mass Utility Admin authentication server.');
-    } finally {
-      setLoading(false);
     }
+
+    if (!success) {
+      setError(lastError);
+    }
+    setLoading(false);
   };
 
   const handleSendResetLink = async (e: React.FormEvent) => {
