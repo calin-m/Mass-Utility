@@ -202,125 +202,160 @@ function AppContent() {
           </button>
         </div>
       </header>
-
       {/* Navigation Tabs Nav Toggles */}
-      <div className="flex justify-between items-center border-b border-pm-border pb-4 mb-6 flex-wrap gap-4 transition-colors duration-300">
-        <div className="flex gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setActiveTab('governor')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-              activeTab === 'governor'
-                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-            }`}
-          >
-            🛡️ Safety Governor
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('database')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-              activeTab === 'database'
-                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-            }`}
-          >
-            🗄️ Database Tools
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('files')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-              activeTab === 'files'
-                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-            }`}
-          >
-            📂 File Backups
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('query')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-              activeTab === 'query'
-                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-            }`}
-          >
-            ⚡ Query &amp; Mutate
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('history')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-              activeTab === 'history'
-                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-            }`}
-          >
-            🕒 Mutation History
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('security')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-              activeTab === 'security'
-                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-            }`}
-          >
-            🛡️ Security &amp; Health
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('logs')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-              activeTab === 'logs'
-                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-            }`}
-          >
-            📜 Event Logs
-          </button>
-        </div>
+      {(() => {
+        const config = (window as any).PM_CONFIG || {};
+        const isUnlicensed = !config.settings?.PM_LICENSE_KEY;
 
-        <div className="flex gap-2 items-center">
-          <button
-            type="button"
-            onClick={() => setActiveTab('settings')}
-            className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-              activeTab === 'settings'
-                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-            }`}
-          >
-            ⚙️ Settings
-          </button>
+        return (
+          <>
+            <div className="flex justify-between items-center border-b border-pm-border pb-4 mb-6 flex-wrap gap-4 transition-colors duration-300">
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  type="button"
+                  disabled={isUnlicensed}
+                  onClick={() => setActiveTab('governor')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    isUnlicensed ? 'opacity-40 cursor-not-allowed border-transparent text-pm-text-secondary' :
+                    activeTab === 'governor'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  🛡️ Safety Governor {isUnlicensed && '🔒'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isUnlicensed}
+                  onClick={() => setActiveTab('database')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    isUnlicensed ? 'opacity-40 cursor-not-allowed border-transparent text-pm-text-secondary' :
+                    activeTab === 'database'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  🗄️ Database Tools {isUnlicensed && '🔒'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isUnlicensed}
+                  onClick={() => setActiveTab('files')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    isUnlicensed ? 'opacity-40 cursor-not-allowed border-transparent text-pm-text-secondary' :
+                    activeTab === 'files'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  📂 File Backups {isUnlicensed && '🔒'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isUnlicensed}
+                  onClick={() => setActiveTab('query')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    isUnlicensed ? 'opacity-40 cursor-not-allowed border-transparent text-pm-text-secondary' :
+                    activeTab === 'query'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  ⚡ Query &amp; Mutate {isUnlicensed && '🔒'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isUnlicensed}
+                  onClick={() => setActiveTab('history')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    isUnlicensed ? 'opacity-40 cursor-not-allowed border-transparent text-pm-text-secondary' :
+                    activeTab === 'history'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  🕒 Mutation History {isUnlicensed && '🔒'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isUnlicensed}
+                  onClick={() => setActiveTab('security')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    isUnlicensed ? 'opacity-40 cursor-not-allowed border-transparent text-pm-text-secondary' :
+                    activeTab === 'security'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  🛡️ Security &amp; Health {isUnlicensed && '🔒'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isUnlicensed}
+                  onClick={() => setActiveTab('logs')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    isUnlicensed ? 'opacity-40 cursor-not-allowed border-transparent text-pm-text-secondary' :
+                    activeTab === 'logs'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  📜 Event Logs {isUnlicensed && '🔒'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('settings')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    activeTab === 'settings'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  ⚙️ Settings
+                </button>
+              </div>
 
-          <button
-            type="button"
-            onClick={() => setDarkMode(!darkMode)}
-            className="pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 border bg-pm-input border-transparent text-pm-text hover:bg-pm-input/80 shadow-sm focus:outline-none"
-            title="Toggle Light/Dark Theme"
-          >
-            {darkMode ? '☀️ Light' : '🌙 Dark'}
-          </button>
-        </div>
-      </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="pm-theme-btn px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 border bg-pm-input border-transparent text-pm-text hover:bg-pm-input/80 shadow-sm focus:outline-none"
+                  title="Toggle Light/Dark Theme"
+                >
+                  {darkMode ? '☀️ Light' : '🌙 Dark'}
+                </button>
+              </div>
+            </div>
 
-      <main
-        className="border border-pm-border bg-pm-card rounded-xl p-6 shadow-2xl transition-all duration-300"
-      >
-        {activeTab === 'settings' && <SettingsTab />}
-        {activeTab === 'files' && <FileToolsTab />}
-        {activeTab === 'governor' && <GovernorTab />}
-        {activeTab === 'database' && <DatabaseToolsTab />}
-        {activeTab === 'query' && <QueryMutateTab />}
-        {activeTab === 'history' && <MutationHistoryTab />}
-        {activeTab === 'security' && <MerchantSecurityTab />}
-        {activeTab === 'logs' && <EventLogsTab />}
-      </main>
+            <main className="border border-pm-border bg-pm-card rounded-xl p-6 shadow-2xl transition-all duration-300">
+              {isUnlicensed && activeTab !== 'settings' ? (
+                <div className="p-12 text-center space-y-4">
+                  <div className="w-16 h-16 bg-pm-danger/10 border border-pm-danger/20 rounded-full flex items-center justify-center mx-auto text-pm-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold uppercase text-pm-text">🔒 Access Restricted: No Active License</h2>
+                  <p className="text-sm text-pm-text-secondary max-w-md mx-auto">
+                    This store does not have an active merchant license key. All database tools, backup engines, and query tools are disabled.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {activeTab === 'settings' && <SettingsTab />}
+                  {activeTab === 'files' && <FileToolsTab />}
+                  {activeTab === 'governor' && <GovernorTab />}
+                  {activeTab === 'database' && <DatabaseToolsTab />}
+                  {activeTab === 'query' && <QueryMutateTab />}
+                  {activeTab === 'history' && <MutationHistoryTab />}
+                  {activeTab === 'security' && <MerchantSecurityTab />}
+                  {activeTab === 'logs' && <EventLogsTab />}
+                </>
+              )}
+            </main>
+          </>
+        );
+      })()}
     </div>
   );
 }
