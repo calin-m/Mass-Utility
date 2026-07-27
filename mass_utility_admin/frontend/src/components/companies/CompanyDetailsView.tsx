@@ -254,7 +254,6 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert('🏢 Company profile updated successfully!', 'success');
-        setActiveTab('overview');
         onRefresh();
       } else {
         if (showAlert) showAlert('❌ Failed: ' + (data.error || 'Unknown error'), 'error');

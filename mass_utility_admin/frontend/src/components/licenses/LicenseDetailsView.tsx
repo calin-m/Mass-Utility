@@ -166,7 +166,6 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
       if (data.success) {
         showAlert('✨ License key details updated successfully!', 'success');
         onRefresh();
-        setActiveTab('overview');
       } else {
         showAlert(data.error || 'Failed to update license key details', 'error');
       }

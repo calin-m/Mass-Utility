@@ -952,26 +952,20 @@ if (!$isAuthorized && !$isWebhook) {
         </head>
         <body>
         <?php
-        $cardTitle = 'Access Restricted: Session Expired';
-        $cardDesc = 'Your authorization session has expired or the Standalone SaaS Dashboard is securely locked.<br><br>To resume access, open your <strong>PrestaShop Back Office</strong> and click the <strong>Launch Standalone Dashboard</strong> button.';
-        $themeBg = 'rgba(99, 102, 241, 0.1)';
-        $themeBorder = 'rgba(99, 102, 241, 0.2)';
-        $themeColor = '#6366f1';
+        $cardTitle = 'Access Restricted';
+        $cardDesc = 'Your session has expired or the Standalone SaaS Dashboard is securely locked.<br><br>To resume access, it is advised to open your <strong>PrestaShop Back Office</strong> and click the <strong>Launch Standalone Dashboard</strong> button in the Mass Utility module.';
+        $themeBg = 'rgba(239, 68, 68, 0.1)';
+        $themeBorder = 'rgba(239, 68, 68, 0.2)';
+        $themeColor = '#ef4444';
 
-        if ($lockoutReason === 'unlicensed') {
-            $cardTitle = '🔒 Access Restricted: No Active License';
-            $cardDesc = 'No active merchant license key was found for this store.<br><br>To activate access, open your <strong>PrestaShop Back Office</strong>, enter & activate a valid merchant license key in the Mass Utility module, and launch the dashboard.';
-            $themeBg = 'rgba(139, 92, 246, 0.1)';
-            $themeBorder = 'rgba(139, 92, 246, 0.2)';
-            $themeColor = '#8b5cf6';
-        } elseif ($lockoutReason === 'expired') {
-            $cardTitle = '⏰ License Expired';
+        if ($lockoutReason === 'expired') {
+            $cardTitle = 'License Expired';
             $cardDesc = 'Your merchant license subscription term has ended.<br><br>Please renew your subscription in <strong>Mass Utility Admin</strong> or contact administrator support to reactivate your dashboard access.';
             $themeBg = 'rgba(245, 158, 11, 0.1)';
             $themeBorder = 'rgba(245, 158, 11, 0.2)';
             $themeColor = '#f59e0b';
         } elseif ($lockoutReason === 'suspended') {
-            $cardTitle = '🛑 License Suspended';
+            $cardTitle = 'License Suspended';
             $cardDesc = 'Your merchant license key has been administratively suspended.<br><br>Please contact your administrator to resolve account status and restore dashboard access.';
             $themeBg = 'rgba(239, 68, 68, 0.1)';
             $themeBorder = 'rgba(239, 68, 68, 0.2)';
