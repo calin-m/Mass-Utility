@@ -102,6 +102,11 @@ class LicenseRepository
 
     public function deleteUser(int $id): bool
     {
+        // 0. Pre-fetch Client-owned licenses to notify store webhooks upon deletion
+        $stmtFetch = $this->db->prepare("SELECT license_key, store_url FROM pm_licenses WHERE user_id = ? AND (company_id IS NULL OR company_id = 0)");
+        $stmtFetch->execute([$id]);
+        $revokedLics = $stmtFetch->fetchAll(PDO::FETCH_ASSOC);
+
         $this->db->beginTransaction();
         try {
             // 1. Delete Client-owned licenses (where company_id IS NULL)
@@ -117,6 +122,10 @@ class LicenseRepository
             $res = $stmtUser->execute([$id]);
 
             $this->db->commit();
+
+            if ($res && !empty($revokedLics)) {
+                $this->notifyRevocation($revokedLics);
+            }
             return $res;
         } catch (\Throwable $t) {
             $this->db->rollBack();
@@ -172,8 +181,17 @@ class LicenseRepository
 
     public function deleteLicense(int $id): bool
     {
+        $stmtFetch = $this->db->prepare("SELECT license_key, store_url FROM pm_licenses WHERE id = ?");
+        $stmtFetch->execute([$id]);
+        $lic = $stmtFetch->fetch(PDO::FETCH_ASSOC);
+
         $stmt = $this->db->prepare("DELETE FROM pm_licenses WHERE id = ?");
-        return $stmt->execute([$id]);
+        $res = $stmt->execute([$id]);
+
+        if ($res && $lic) {
+            $this->notifyRevocation([$lic]);
+        }
+        return $res;
     }
 
     public function verifyLicense(string $key, string $url): array
@@ -379,6 +397,19 @@ class LicenseRepository
         $oldRow = $oldStmt->fetch(PDO::FETCH_ASSOC);
         $oldName = $oldRow['company_name'] ?? null;
 
+        // Pre-fetch all licenses bound to this company OR its users before deletion
+        $revokedLics = [];
+        try {
+            if ($oldName) {
+                $stmtFetch = $this->db->prepare("SELECT license_key, store_url FROM pm_licenses WHERE company_id = ? OR user_id IN (SELECT id FROM pm_users WHERE company_id = ? OR (company_name IS NOT NULL AND LOWER(company_name) = LOWER(?)))");
+                $stmtFetch->execute([$id, $id, $oldName]);
+            } else {
+                $stmtFetch = $this->db->prepare("SELECT license_key, store_url FROM pm_licenses WHERE company_id = ? OR user_id IN (SELECT id FROM pm_users WHERE company_id = ?)");
+                $stmtFetch->execute([$id, $id]);
+            }
+            $revokedLics = $stmtFetch->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $t) {}
+
         $this->db->beginTransaction();
         try {
             // 1. Delete all Company-owned licenses AND licenses assigned to the company's users
@@ -399,10 +430,50 @@ class LicenseRepository
             $res = $stmt->execute([$id]);
 
             $this->db->commit();
+
+            if ($res && !empty($revokedLics)) {
+                $this->notifyRevocation($revokedLics);
+            }
             return $res;
         } catch (\Throwable $t) {
             $this->db->rollBack();
             throw $t;
+        }
+    }
+
+    private function notifyRevocation(array $licensesToRevoke): void
+    {
+        foreach ($licensesToRevoke as $lic) {
+            $key = $lic['license_key'] ?? '';
+            $rawUrl = $lic['store_url'] ?? '';
+            if (empty($key) || empty($rawUrl)) continue;
+
+            $domains = json_decode($rawUrl, true);
+            if (!is_array($domains)) {
+                $domains = [$rawUrl];
+            }
+
+            foreach ($domains as $domain) {
+                $domain = trim($domain);
+                if (empty($domain)) continue;
+
+                $scheme = (strpos($domain, 'http') === 0) ? '' : 'https://';
+                $targetUrl = rtrim($scheme . $domain, '/') . '/modules/mass_utility/api.php?action=revoke_license';
+
+                try {
+                    $ch = curl_init($targetUrl);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                        'license_key' => $key,
+                        'timestamp' => time()
+                    ]));
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_exec($ch);
+                    curl_close($ch);
+                } catch (\Throwable $t) {}
+            }
         }
     }
 

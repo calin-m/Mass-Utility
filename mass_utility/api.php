@@ -119,6 +119,31 @@ if (!empty($secureToken) && !empty($incomingToken)) {
     $tokenValid = hash_equals($secureToken, $incomingToken);
 }
 
+// 4. Handle Real-Time Push Revocation Webhook from Master Admin
+if (isset($_GET['action']) && $_GET['action'] === 'revoke_license') {
+    header('Content-Type: application/json');
+    $licenseKey = trim((string)($_POST['license_key'] ?? $_GET['license_key'] ?? ''));
+    $currentKey = class_exists('\Configuration') ? (string)\Configuration::get('PM_LICENSE_KEY') : '';
+
+    if (!empty($currentKey) && (!empty($licenseKey) && strtolower($licenseKey) === strtolower($currentKey) || $tokenValid)) {
+        if (class_exists('\Configuration')) {
+            \Configuration::deleteByName('PM_LICENSE_KEY');
+            \Configuration::deleteByName('PM_SECURE_TOKEN');
+            \Configuration::deleteByName('PM_LICENSE_TIER');
+        }
+        try {
+            $dbPath = _PS_ROOT_DIR_ . '/mass_utility_dashboard/data/pm_cloud_backups.db';
+            if (file_exists($dbPath)) {
+                $pdo = new \PDO('sqlite:' . $dbPath);
+                $pdo->exec("DROP TABLE IF EXISTS tenant_settings;"); // nosec
+            }
+        } catch (\Throwable $e) {}
+
+        echo json_encode(['success' => true, 'message' => 'License revoked and local SQLite cache purged cleanly.']);
+        exit;
+    }
+}
+
 if (!$tokenValid) {
     header('HTTP/1.1 403 Forbidden');
     header('Content-Type: application/json');
