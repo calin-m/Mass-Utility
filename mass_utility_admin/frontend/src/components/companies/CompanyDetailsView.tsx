@@ -10,7 +10,6 @@ import { LicenseRowCard } from '../common/LicenseRowCard';
 import { SubTabNav, SubTabItem } from '../common/SubTabNav';
 import { StatusBadge } from '../common/StatusBadge';
 import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
-import { EditLicenseModal, EditLicenseData } from '../common/EditLicenseModal';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 
@@ -24,12 +23,13 @@ interface CompanyDetailsViewProps {
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (user: any) => void;
+  onInspectLicense?: (license: any) => void;
   onEditLicense?: (license: any) => void;
   highlightedLicenseKey?: string;
   tiers?: any[];
 }
 
-export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, onEditLicense, highlightedLicenseKey, tiers = [] }) => {
+export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, onInspectLicense, onEditLicense, highlightedLicenseKey, tiers = [] }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'licenses' | 'members' | 'settings'>(initialTab || 'overview');
 
@@ -71,32 +71,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [newMemberPassword, setNewMemberPassword] = useState('');
   const [showMemberPassword, setShowMemberPassword] = useState(false);
 
-  // Inline License Edit Modal State
-  const [editingLic, setEditingLic] = useState<any | null>(null);
-  const openInlineEditModal = (lic: any) => {
-    setEditingLic(lic);
-  };
 
-  const handleSaveInlineEditLicense = async (licenseId: number, data: EditLicenseData) => {
-    const formData = new FormData();
-    formData.append('id', String(licenseId));
-    formData.append('package_tier', data.package_tier);
-    formData.append('status', data.status);
-    formData.append('store_url', (data.store_url || '').trim());
-    formData.append('expires_at', data.expires_at || '');
-    formData.append('user_id', data.user_id !== undefined && data.user_id !== '' ? String(data.user_id) : '');
-    formData.append('company_id', data.company_id !== undefined && data.company_id !== '' ? String(data.company_id) : String(company.id));
-
-    const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
-    const resData = await res.json();
-    if (resData.success) {
-      if (showAlert) showAlert('✨ License key details updated successfully!', 'success');
-      onRefresh();
-    } else {
-      if (showAlert) showAlert(resData.error || 'Failed to update license key', 'error');
-      throw new Error(resData.error || 'Failed to update license key');
-    }
-  };
 
 
   const companyMembers = users.filter(u => u.company_name && u.company_name.trim().toLowerCase() === company.company_name.trim().toLowerCase());
@@ -614,7 +589,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                     highlightedKey={highlightedLicenseKey}
                     showAssignSelect={true}
                     onAssignEmployee={handleAssignEmployee}
-                    onEditLicense={openInlineEditModal}
+                    onInspectLicense={onInspectLicense}
                     onInspectClient={onInspectClient}
                     showCompanyButton={false}
                   />
@@ -767,16 +742,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
         </div>
       )}
 
-      {/* Centralized Edit License Modal */}
-      <EditLicenseModal
-        isOpen={!!editingLic}
-        onClose={() => setEditingLic(null)}
-        license={editingLic}
-        companies={[company]}
-        users={users}
-        tiers={tiers}
-        onSave={handleSaveInlineEditLicense}
-      />
+
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

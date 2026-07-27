@@ -18,6 +18,7 @@ import { FormSelect } from '../common/FormSelect';
 import { PaginationBar } from '../common/PaginationBar';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
+import { DomainPillGroup } from '../common/DomainPillGroup';
 
 interface ClientListViewProps {
   users: UserAccount[];
@@ -508,17 +509,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                       </td>
 
                       <td className="p-3 align-middle whitespace-nowrap">
-                        <TableCellText
-                          text={metrics.boundDomains[0]}
-                          fallbackText={t('lbl_none')}
-                          rightAction={
-                            metrics.boundDomains.length > 1 ? (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">
-                                +{metrics.boundDomains.length - 1} {t('lbl_more')}
-                              </span>
-                            ) : undefined
-                          }
-                        />
+                        <DomainPillGroup storeUrl={metrics.boundDomains.join(', ')} />
                       </td>
 
                       <td className="p-3 align-middle whitespace-nowrap">

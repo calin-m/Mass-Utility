@@ -5,6 +5,7 @@ import { StatusBadge } from './StatusBadge';
 import { Button } from './Button';
 import { maskLicenseKey, copyLicenseKeyToClipboard } from '../../utils/licenseUtils';
 import { parseDomains } from '../../utils/domainUtils';
+import { DomainPillGroup } from './DomainPillGroup';
 
 export interface LicenseRowCardProps {
   license: License;
@@ -156,28 +157,7 @@ export const LicenseRowCard: React.FC<LicenseRowCardProps> = ({
             <Globe className="w-3.5 h-3.5 text-emerald-400" />
             Allowed Store Domains:
           </span>
-          {(() => {
-            const domains = parseDomains(license.store_url);
-            if (domains.length === 0) {
-              return <span className="text-pm-secondary italic text-xs">Unbound (Any Store Domain)</span>;
-            }
-            return (
-              <div className="flex flex-wrap gap-1">
-                {domains.map((dom, idx) => (
-                  <a
-                    key={idx}
-                    href={dom.startsWith('http') ? dom : `https://${dom}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] hover:bg-emerald-500/20 transition-colors"
-                  >
-                    <span>{dom}</span>
-                    <ExternalLink className="w-2.5 h-2.5 opacity-70 shrink-0" />
-                  </a>
-                ))}
-              </div>
-            );
-          })()}
+          <DomainPillGroup storeUrl={license.store_url} />
         </div>
       </div>
 

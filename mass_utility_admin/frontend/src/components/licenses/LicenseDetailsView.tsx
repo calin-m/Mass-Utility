@@ -37,6 +37,7 @@ export interface LicenseDetailsViewProps {
   users?: UserAccount[];
   companies?: any[];
   tiers?: any[];
+  initialTab?: LicenseDetailSubTab;
   onBack: () => void;
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
@@ -52,6 +53,7 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
   users = [],
   companies = [],
   tiers = [],
+  initialTab = 'overview',
   onBack,
   onRefresh,
   showAlert,
@@ -59,7 +61,7 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
   onInspectCompany,
   onEditLicense,
 }) => {
-  const [activeTab, setActiveTab] = useState<LicenseDetailSubTab>('overview');
+  const [activeTab, setActiveTab] = useState<LicenseDetailSubTab>(initialTab);
   const [showFullKey, setShowFullKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
 
@@ -548,16 +550,13 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-pm-secondary mb-1.5">Whitelisted Store Domain URLs</label>
-                <textarea
-                  rows={3}
-                  value={editStoreUrl}
-                  onChange={(e) => setEditStoreUrl(e.target.value)}
-                  placeholder="https://myshop.com (One URL per line)"
-                  className="w-full bg-pm-input border border-pm-border rounded-xl p-3 text-xs font-mono text-pm-text focus:outline-none focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30"
-                />
-              </div>
+              <DomainTagSelector
+                value={editStoreUrl}
+                onChange={setEditStoreUrl}
+                label="Whitelisted Store Domain URLs"
+                placeholder="Type store domain origin (e.g. store.myshop.com) and press Enter..."
+                helperText="Type a store domain host origin and press Enter, Comma, or Space. Click ✕ on a tag to remove it."
+              />
 
               <div className="flex items-center justify-end gap-3 pt-2 border-t border-pm-border">
                 <Button type="button" variant="neutral" size="md" onClick={() => setActiveTab('overview')}>

@@ -10,7 +10,6 @@ import { LicenseRowCard } from '../common/LicenseRowCard';
 import { SubTabItem } from '../common/SubTabNav';
 import { StatusBadge } from '../common/StatusBadge';
 import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
-import { EditLicenseModal, EditLicenseData } from '../common/EditLicenseModal';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 
@@ -25,9 +24,10 @@ interface ClientDetailsViewProps {
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   onInspectCompany?: (company: any) => void;
+  onInspectLicense?: (license: License) => void;
 }
 
-export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], tiers = [], initialTab, onBack, onRefresh, showAlert, onInspectCompany }) => {
+export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, licenses, companies = [], tiers = [], initialTab, onBack, onRefresh, showAlert, onInspectCompany, onInspectLicense }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'profile' | 'licenses' | 'governance'>(initialTab || 'profile');
 
@@ -57,33 +57,6 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
 
   // Delete Modal State
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  // Inline License Edit Modal State
-  const [editingLic, setEditingLic] = useState<any | null>(null);
-  const openInlineEditModal = (lic: any) => {
-    setEditingLic(lic);
-  };
-
-  const handleSaveInlineEditLicense = async (licenseId: number, data: EditLicenseData) => {
-    const formData = new FormData();
-    formData.append('id', String(licenseId));
-    formData.append('package_tier', data.package_tier);
-    formData.append('status', data.status);
-    formData.append('store_url', (data.store_url || '').trim());
-    formData.append('expires_at', data.expires_at || '');
-    formData.append('user_id', data.user_id !== undefined && data.user_id !== '' ? String(data.user_id) : '');
-    formData.append('company_id', data.company_id !== undefined && data.company_id !== '' ? String(data.company_id) : '');
-
-    const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
-    const resData = await res.json();
-    if (resData.success) {
-      showAlert('✨ License key details updated successfully!', 'success');
-      onRefresh();
-    } else {
-      showAlert(resData.error || 'Failed to update license key', 'error');
-      throw new Error(resData.error || 'Failed to update license key');
-    }
-  };
 
 
   const clientLicenses = licenses.filter(l => l.user_email?.toLowerCase() === user.email.toLowerCase() || l.user_id === user.id);
@@ -494,7 +467,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                     license={l}
                     users={[user]}
                     companies={companies}
-                    onEditLicense={openInlineEditModal}
+                    onInspectLicense={onInspectLicense}
                     onInspectCompany={onInspectCompany}
                     showCompanyButton={true}
                   />
@@ -577,16 +550,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       )}
 
 
-      {/* Centralized Edit License Modal */}
-      <EditLicenseModal
-        isOpen={!!editingLic}
-        onClose={() => setEditingLic(null)}
-        license={editingLic}
-        companies={companies}
-        users={[user]}
-        tiers={tiers}
-        onSave={handleSaveInlineEditLicense}
-      />
+
 
       {/* Password Reset Modal */}
       <BaseModal isOpen={showResetModal} onClose={() => setShowResetModal(false)} title={`Reset Password: ${user.email}`}>

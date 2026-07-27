@@ -22,8 +22,8 @@ import { StatusBadge } from './common/StatusBadge';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getSortedTierOptions } from '../utils/tierUtils';
 import { parseDomains } from '../utils/domainUtils';
+import { DomainPillGroup } from './common/DomainPillGroup';
 
-import { EditLicenseModal, EditLicenseData } from './common/EditLicenseModal';
 import { License, UserAccount } from '../types/adminApi';
 export type { License, UserAccount };
 
@@ -55,11 +55,13 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   // Sub-View Inspection Navigation State ('list' vs 'details')
   const [activeSubView, setActiveSubView] = useState<'list' | 'details'>('list');
   const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
+  const [initialDetailTab, setInitialDetailTab] = useState<'overview' | 'edit'>('overview');
 
   const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
 
-  const handleSelectLicense = (lic: License) => {
+  const handleSelectLicense = (lic: License, initialTab: 'overview' | 'edit' = 'overview') => {
     setSelectedLicense(lic);
+    setInitialDetailTab(initialTab);
     setActiveSubView('details');
   };
 
@@ -115,33 +117,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const [deletingLic, setDeletingLic] = useState<License | null>(null);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
-  // Unified Edit License Modal State
-  const [editingLic, setEditingLic] = useState<License | null>(null);
 
-  const openEditLicenseModal = (lic: License) => {
-    setEditingLic(lic);
-  };
-
-  const handleSaveEditLicense = async (licenseId: number, data: EditLicenseData) => {
-    const formData = new FormData();
-    formData.append('id', String(licenseId));
-    formData.append('package_tier', data.package_tier);
-    formData.append('status', data.status);
-    formData.append('store_url', (data.store_url || '').trim());
-    formData.append('expires_at', data.expires_at || '');
-    formData.append('user_id', data.user_id !== undefined && data.user_id !== '' ? String(data.user_id) : '');
-    formData.append('company_id', data.company_id !== undefined && data.company_id !== '' ? String(data.company_id) : '');
-
-    const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
-    const resData = await res.json();
-    if (resData.success) {
-      showAlert('✨ License key details updated successfully!', 'success');
-      onRefresh();
-    } else {
-      showAlert(resData.error || 'Failed to update license key', 'error');
-      throw new Error(resData.error || 'Failed to update license key');
-    }
-  };
 
   const toggleKeyMask = (id: number) => {
     setVisibleKeys((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -345,7 +321,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
           showAlert={showAlert}
           onInspectClient={onInspectClient}
           onInspectCompany={onInspectCompany}
-          onEditLicense={openEditLicenseModal}
+          initialTab={initialDetailTab}
         />
       ) : (
         <div className="space-y-6">
@@ -418,10 +394,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
               license={lic}
               users={users}
               companies={companies}
-              onInspectLicense={handleSelectLicense}
-              onInspectClient={onInspectClient}
-              onInspectCompany={onInspectCompany}
-              onEditLicense={openEditLicenseModal}
+              onInspectLicense={(l) => handleSelectLicense(l, 'overview')}
               onDeleteLicense={() => setDeletingLic(lic)}
             />
           ))}
@@ -520,27 +493,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                           <StatusBadge status={lic.status} />
                         </td>
                         <td className="p-3 align-middle whitespace-nowrap">
-                          {(() => {
-                            const domains = parseDomains(lic.store_url);
-                            if (domains.length === 0) {
-                              return <span className="text-pm-secondary italic text-xs">Unbound</span>;
-                            }
-                            return (
-                              <div className="flex flex-wrap gap-1 max-w-[220px]">
-                                {domains.map((d, idx) => (
-                                  <a
-                                    key={idx}
-                                    href={d.startsWith('http') ? d : `https://${d}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] hover:bg-emerald-500/20 transition-colors"
-                                  >
-                                    <span>{d}</span>
-                                  </a>
-                                ))}
-                              </div>
-                            );
-                          })()}
+                          <DomainPillGroup storeUrl={lic.store_url} />
                         </td>
                         <td className="p-3 align-middle whitespace-nowrap">
                           <TableCellText
@@ -549,8 +502,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                         </td>
                         <td className="p-3 text-right align-middle min-w-[220px]">
                           <TableCellActions
-                            onInspect={() => handleSelectLicense(lic)}
+                            onInspect={() => handleSelectLicense(lic, 'overview')}
+                            onEdit={() => handleSelectLicense(lic, 'edit')}
                             inspectLabel="Inspect"
+                            editLabel="Edit"
                             isSuspended={isSuspended}
                             onToggleSuspend={() => promptConfirmStatus(lic, isSuspended ? 'activate' : 'suspend')}
                             onDelete={() => setDeletingLic(lic)}
@@ -590,18 +545,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
         onGenerate={handleGenerateKeyFromModal}
       />
 
-      {/* Unified Edit License Modal */}
-      {editingLic && (
-        <EditLicenseModal
-          isOpen={!!editingLic}
-          onClose={() => setEditingLic(null)}
-          license={editingLic}
-          users={users}
-          companies={companies}
-          tiers={tiers}
-          onSave={handleSaveEditLicense}
-        />
-      )}
+
 
       {/* Extend Expiry Modal */}
       {extendingLic && (

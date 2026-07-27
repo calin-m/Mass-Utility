@@ -1,10 +1,12 @@
 import React from 'react';
-import { Eye, ShieldAlert, ShieldCheck, Trash2 } from 'lucide-react';
+import { Eye, Edit, ShieldAlert, ShieldCheck, Trash2 } from 'lucide-react';
 import { Button } from './Button';
 
 interface TableCellActionsProps {
   onInspect?: () => void;
   inspectLabel?: string;
+  onEdit?: () => void;
+  editLabel?: string;
   isSuspended?: boolean;
   onToggleSuspend?: () => void;
   suspendLoading?: boolean;
@@ -15,6 +17,8 @@ interface TableCellActionsProps {
 export const TableCellActions: React.FC<TableCellActionsProps> = ({
   onInspect,
   inspectLabel = 'Inspect',
+  onEdit,
+  editLabel = 'Edit',
   isSuspended,
   onToggleSuspend,
   suspendLoading = false,
@@ -31,6 +35,17 @@ export const TableCellActions: React.FC<TableCellActionsProps> = ({
           onClick={onInspect}
         >
           {inspectLabel}
+        </Button>
+      )}
+
+      {onEdit && (
+        <Button
+          variant="neutral"
+          size="sm"
+          icon={Edit}
+          onClick={onEdit}
+        >
+          {editLabel}
         </Button>
       )}
 
