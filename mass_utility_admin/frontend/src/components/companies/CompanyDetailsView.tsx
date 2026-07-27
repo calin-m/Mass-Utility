@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Link as LinkIcon, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, Building2, Users, Key, ShieldCheck, ShieldAlert, Globe, ExternalLink, UserPlus, Link as LinkIcon, Check, Copy, Trash2, Edit, Mail, Sparkles, AlertTriangle, Eye, EyeOff, PlusCircle, LayoutDashboard, LayoutGrid, List, Search } from 'lucide-react';
 import { Company } from './CompanyListView';
 import { BaseModal } from '../common/BaseModal';
 import { ConfirmModal } from '../common/ConfirmModal';
@@ -9,6 +9,9 @@ import { FormInput } from '../common/FormInput';
 import { LicenseRowCard } from '../common/LicenseRowCard';
 import { SubTabNav, SubTabItem } from '../common/SubTabNav';
 import { StatusBadge } from '../common/StatusBadge';
+import { TableCellIdentity } from '../common/TableCellIdentity';
+import { TableCellText } from '../common/TableCellText';
+import { DomainPillGroup } from '../common/DomainPillGroup';
 import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
@@ -38,6 +41,8 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [visibleKeys, setVisibleKeys] = useState<Record<number, boolean>>({});
   const [poolTier, setPoolTier] = useState('pro');
+  const [poolSearchQuery, setPoolSearchQuery] = useState('');
+  const [poolViewMode, setPoolViewMode] = useState<'table' | 'grid'>('table');
 
   const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
 
@@ -76,6 +81,20 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
 
   const companyMembers = users.filter(u => u.company_name && u.company_name.trim().toLowerCase() === company.company_name.trim().toLowerCase());
   const companyLicenses = licenses.filter(l => (l.company_id && l.company_id === company.id) || (l.company_name && l.company_name.trim().toLowerCase() === company.company_name.trim().toLowerCase()) || (l.user_email && companyMembers.some(m => m.email.toLowerCase() === l.user_email.toLowerCase())));
+
+  const filteredPoolLicenses = useMemo(() => {
+    if (!poolSearchQuery.trim()) return companyLicenses;
+    const q = poolSearchQuery.toLowerCase().trim();
+    return companyLicenses.filter((lic: any) => {
+      const key = (lic.license_key || '').toLowerCase();
+      const url = (lic.store_url || '').toLowerCase();
+      const tier = (lic.package_tier || '').toLowerCase();
+      const status = (lic.status || '').toLowerCase();
+      const assignedUser = lic.user_id ? users.find((u) => Number(u.id) === Number(lic.user_id)) : null;
+      const userName = (assignedUser?.name || assignedUser?.email || '').toLowerCase();
+      return key.includes(q) || url.includes(q) || tier.includes(q) || status.includes(q) || userName.includes(q);
+    });
+  }, [companyLicenses, poolSearchQuery, users]);
 
   const usedCount = companyLicenses.length;
   const maxCount = company.max_licenses || 10;
@@ -570,17 +589,169 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
           </div>
 
           <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-              <Key className="w-4 h-4 text-purple-400" /> Company B2B License Keys ({companyLicenses.length})
-            </h3>
+            {/* Header & Controls Toolbar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-pm-border">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5 shrink-0">
+                <Key className="w-4 h-4 text-purple-400" /> Company B2B License Keys ({companyLicenses.length})
+              </h3>
 
-            {companyLicenses.length === 0 ? (
+              <div className="flex items-center gap-2 flex-1 max-w-md justify-end">
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-pm-secondary" />
+                  <input
+                    type="text"
+                    value={poolSearchQuery}
+                    onChange={(e) => setPoolSearchQuery(e.target.value)}
+                    placeholder="Search key, domain, or member..."
+                    className="w-full bg-pm-input border border-pm-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-pm-text placeholder:text-pm-secondary focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+
+                <div className="flex items-center bg-pm-input border border-pm-border rounded-lg p-0.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setPoolViewMode('table')}
+                    className={`p-1.5 rounded text-xs transition ${
+                      poolViewMode === 'table'
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-pm-secondary hover:text-pm-text'
+                    }`}
+                    title="Table View (High Density)"
+                  >
+                    <List className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPoolViewMode('grid')}
+                    className={`p-1.5 rounded text-xs transition ${
+                      poolViewMode === 'grid'
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-pm-secondary hover:text-pm-text'
+                    }`}
+                    title="Grid Card View"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {filteredPoolLicenses.length === 0 ? (
               <p className="p-8 text-center text-pm-secondary text-xs italic">
-                No license keys issued to this company pool yet.
+                {companyLicenses.length === 0
+                  ? 'No license keys issued to this company pool yet.'
+                  : 'No license keys match your search filter.'}
               </p>
+            ) : poolViewMode === 'table' ? (
+              <div className="overflow-x-auto rounded-xl border border-pm-border">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
+                      <th className="p-3 w-[24%]">License Key</th>
+                      <th className="p-3 w-[22%]">Assigned Team Member</th>
+                      <th className="p-3 w-[10%]">Tier</th>
+                      <th className="p-3 w-[10%]">Status</th>
+                      <th className="p-3 w-[18%]">Allowed Store Domains</th>
+                      <th className="p-3 w-[8%]">Expires</th>
+                      <th className="p-3 text-right w-[8%] min-w-[120px]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-pm-border">
+                    {filteredPoolLicenses.map((lic: any) => {
+                      const isVisible = visibleKeys[lic.id];
+                      const assignedUser = lic.user_id ? users.find((u: any) => Number(u.id) === Number(lic.user_id)) : null;
+
+                      return (
+                        <tr key={lic.id} className="h-[49px] align-middle hover:bg-pm-input/50 transition">
+                          <td className="p-3 align-middle">
+                            <TableCellIdentity
+                              icon={Key}
+                              title={isVisible ? lic.license_key : maskKey(lic.license_key)}
+                              onTitleClick={() => onInspectLicense && onInspectLicense(lic)}
+                              subtitle={`ID #${lic.id}`}
+                              rightContent={
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleKeyVisibility(lic.id)}
+                                    className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
+                                    title={isVisible ? 'Mask Key' : 'Reveal Key'}
+                                  >
+                                    {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      await navigator.clipboard.writeText(lic.license_key);
+                                      setCopiedKey(lic.license_key);
+                                      setTimeout(() => setCopiedKey(null), 2000);
+                                    }}
+                                    className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
+                                    title="Copy Key"
+                                  >
+                                    {copiedKey === lic.license_key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                  </button>
+                                </div>
+                              }
+                            />
+                          </td>
+
+                          <td className="p-3 align-middle">
+                            <FormSelect
+                              value={lic.user_id ? String(lic.user_id) : ''}
+                              onChange={(e) => handleAssignEmployee(lic.id, e.target.value)}
+                              disabled={submitting}
+                              options={[
+                                { label: 'Unassigned (Pool)', value: '' },
+                                ...companyMembers.map((m: any) => ({
+                                  label: `${m.name || m.email} (${m.email})`,
+                                  value: String(m.id)
+                                }))
+                              ]}
+                            />
+                          </td>
+
+                          <td className="p-3 align-middle">
+                            <StatusBadge type="tier" label={`${lic.package_tier || 'basic'} TIER`} />
+                          </td>
+
+                          <td className="p-3 align-middle">
+                            <StatusBadge status={lic.status || 'active'} />
+                          </td>
+
+                          <td className="p-3 align-middle">
+                            <DomainPillGroup storeUrl={lic.store_url} />
+                          </td>
+
+                          <td className="p-3 align-middle text-pm-secondary text-[11px] font-mono">
+                            {lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Lifetime'}
+                          </td>
+
+                          <td className="p-3 align-middle text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {onInspectLicense && (
+                                <Button
+                                  type="button"
+                                  variant="neutral"
+                                  size="sm"
+                                  icon={Eye}
+                                  onClick={() => onInspectLicense(lic)}
+                                  title="Inspect / Edit License"
+                                >
+                                  Inspect
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <div className="space-y-3">
-                {companyLicenses.map((lic: any) => (
+                {filteredPoolLicenses.map((lic: any) => (
                   <LicenseRowCard
                     key={lic.id}
                     license={lic}
