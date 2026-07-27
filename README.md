@@ -660,6 +660,7 @@ CREATE TABLE pm_audit_logs (
 | `google_oauth_callback` | `GET` | Yes | Receives Google Drive OAuth2 code exchange redirect. |
 | `disconnect_google_drive` | `POST` | Yes | Revokes and clears saved Google Drive OAuth2 access/refresh tokens. |
 | `import-legacy-state` | `POST` | Yes | Migrates V1 legacy configuration settings into SQLite database. |
+| `api_user_login` | `POST` | No | Authenticates local merchant operator credentials in standalone mode. |
 
 ---
 
@@ -728,15 +729,6 @@ CREATE TABLE pm_audit_logs (
 | **Google Drive API** | `verify_cloud_integrity` | `POST` | Verifies remote Google Drive file checksum against local file. |
 | **Google Drive API** | `download_from_drive` | `GET` | Streams backup file directly from Google Drive. |
 | **Google Drive API** | `restore_from_drive` | `POST` | Downloads cloud backup locally and stages for restoration. |
-
----
-
-### 11.2.1 SaaS Dashboard Local Endpoints (`mass_utility_dashboard/public/index.php`)
-
-| Action Key | HTTP Method | Auth Required | Description |
-| :--- | :--- | :--- | :--- |
-| `hydrate_dashboard` | `POST` | Yes | Local staging endpoint hydrating settings, presets, backups, and staging license token. |
-| `api_user_login` | `POST` | No | Authenticates local merchant operator credentials in standalone mode. |
 
 ---
 
