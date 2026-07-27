@@ -218,7 +218,7 @@ flowchart TD
     E -->|Status = Suspended| F["Return 403 License Suspended"]
     E -->|Status = Active| G{"Is Domain Binding Present?"}
 
-    G -->|Domain Unbound (store_url IS NULL)| H["Bind Current Domain to License Key<br/>(store_url = merchant-domain.com)"]
+    G -->|"Domain Unbound (store_url IS NULL)"| H["Bind Current Domain to License Key<br/>(store_url = merchant-domain.com)"]
     G -->|Domain Bound| I{"Does Request Domain Match store_url?"}
 
     I -->|Domain Mismatch| J["Return 403 Domain Mismatch<br/>(Key already bound to another store)"]
