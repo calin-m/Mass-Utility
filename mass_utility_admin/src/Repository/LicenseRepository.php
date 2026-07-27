@@ -212,13 +212,34 @@ class LicenseRepository
             return ['valid' => false, 'message' => 'License has expired.'];
         }
 
-        // Bind URL if empty
-        if (empty($lic['store_url'])) {
+        // Multi-Domain Host Normalization & Verification (Company, Client, and Standalone keys)
+        $incomingDomain = $this->normalizeDomainHost($url);
+        $rawStoreUrl = $lic['store_url'] ?? '';
+
+        $boundDomains = [];
+        $decoded = json_decode($rawStoreUrl, true);
+        if (is_array($decoded)) {
+            foreach ($decoded as $d) {
+                $norm = $this->normalizeDomainHost($d);
+                if (!empty($norm)) {
+                    $boundDomains[] = $norm;
+                }
+            }
+        } else {
+            $norm = $this->normalizeDomainHost($rawStoreUrl);
+            if (!empty($norm)) {
+                $boundDomains[] = $norm;
+            }
+        }
+
+        if (empty($boundDomains)) {
+            // Bind domain host on first activation
             $stmt = $this->db->prepare("UPDATE pm_licenses SET store_url = ? WHERE id = ?");
-            $stmt->execute([$url, $lic['id']]);
-            $lic['store_url'] = $url;
-        } elseif ($lic['store_url'] !== $url) {
-            return ['valid' => false, 'message' => 'License is registered to a different store domain.'];
+            $stmt->execute([$incomingDomain, $lic['id']]);
+            $lic['store_url'] = $incomingDomain;
+        } elseif (!in_array($incomingDomain, $boundDomains, true)) {
+            $displayList = implode(', ', $boundDomains);
+            return ['valid' => false, 'message' => "License is registered to a different store domain ({$displayList})."];
         }
 
         $isDeveloper = ($lic['package_tier'] === 'developer' || $lic['package_tier'] === 'enterprise');
@@ -566,6 +587,19 @@ class LicenseRepository
             error_log("[MassUtilityAdmin] Failed to clear admin logs: " . $e->getMessage());
             return false;
         }
+    }
+
+    private function normalizeDomainHost(?string $url): string
+    {
+        if (empty($url)) {
+            return '';
+        }
+        $host = strtolower(trim($url));
+        $host = preg_replace('/^https?:\/\//i', '', $host);
+        $host = preg_replace('/^www\./i', '', $host);
+        $host = strtok($host, '/');
+        $host = strtok($host, ':'); // Strip port numbers
+        return trim((string)$host);
     }
 }
 
