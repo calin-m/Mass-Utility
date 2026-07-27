@@ -84,7 +84,7 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Glassmorphic Container Card */}
-      <main className="relative w-full max-w-md bg-pm-card/90 backdrop-blur-2xl border border-white/10 border-pm-border/80 rounded-2xl p-8 shadow-[0_16px_48px_rgba(0,0,0,0.5)] space-y-6">
+      <main className="relative w-full max-w-md bg-pm-card/95 backdrop-blur-2xl border border-pm-border/80 rounded-2xl p-8 shadow-[0_16px_48px_rgba(0,0,0,0.5)] space-y-6">
         
         {/* Header Badge & Title */}
         <div className="text-center space-y-2">
@@ -222,8 +222,8 @@ export const LoginPage: React.FC = () => {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-sm bg-pm-card border border-pm-border rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-sm bg-pm-card/95 backdrop-blur-2xl border border-pm-border/80 rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="text-center space-y-1">
               <h2 className="text-lg font-bold text-pm-text-primary">Request Password Reset</h2>
               <p className="text-xs text-pm-text-muted">Enter your registered email address to receive a secure reset link.</p>
@@ -242,21 +242,21 @@ export const LoginPage: React.FC = () => {
                 placeholder="admin@company.com"
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-pm-input border border-pm-border text-sm text-pm-text outline-none focus:border-pm-accent"
+                className="w-full px-4 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text placeholder:text-pm-text-muted transition-all outline-none"
               />
 
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowForgotModal(false)}
-                  className="w-1/2 py-2 px-3 rounded-xl bg-pm-input text-pm-text-secondary text-xs font-medium hover:bg-pm-input/80 cursor-pointer"
+                  className="w-1/2 py-2.5 px-3 rounded-xl bg-pm-input text-pm-text-secondary text-xs font-medium hover:bg-pm-input/80 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-1/2 py-2 px-3 rounded-xl bg-pm-accent text-white text-xs font-medium hover:bg-pm-accent/90 cursor-pointer flex items-center justify-center gap-1"
+                  className="w-1/2 py-2.5 px-3 rounded-xl bg-pm-accent text-white text-xs font-medium hover:bg-pm-accent/90 shadow-md shadow-pm-accent/20 transition-all cursor-pointer flex items-center justify-center gap-1"
                 >
                   {forgotLoading ? 'Sending...' : 'Send Link'}
                 </button>
