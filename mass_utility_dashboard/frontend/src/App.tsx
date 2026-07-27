@@ -205,7 +205,9 @@ function AppContent() {
       {/* Navigation Tabs Nav Toggles */}
       {(() => {
         const config = (window as any).PM_CONFIG || {};
-        const isUnlicensed = !config.settings?.PM_LICENSE_KEY;
+        const licKey = config.settings?.PM_LICENSE_KEY;
+        const licStatus = config.settings?.PM_LICENSE_STATUS;
+        const isUnlicensed = !licKey || ['revoked', 'suspended', 'expired', 'unlicensed'].includes(String(licStatus).toLowerCase());
 
         return (
           <>

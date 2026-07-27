@@ -1487,23 +1487,27 @@ if (strpos($path, '/api/v1/') === 0) {
                                 $settings['PM_LICENSE_SIGNATURE'] = $signature;
                             }
                         } else {
-                            // If key check returned suspended or expired, store the status locally and lock out
-                            $serverError = $resData['error'] ?? '';
-                            $statusVal = 'active';
+                            // Master Admin returned success: false -> Key is invalid, deleted, revoked, suspended, or expired!
+                            $serverError = $resData['error'] ?? 'License key is invalid or revoked.';
+                            $statusVal = 'revoked';
                             if (strpos(strtolower($serverError), 'suspended') !== false) {
                                 $statusVal = 'suspended';
                             } elseif (strpos(strtolower($serverError), 'expired') !== false) {
                                 $statusVal = 'expired';
                             }
                             
-                            if ($statusVal === 'suspended' || $statusVal === 'expired') {
-                                $upStmt = $pdo->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
-                                $upStmt->execute(['PM_LICENSE_STATUS', json_encode($statusVal)]);
-                                
-                                // Return the exact license error to the browser
-                                echo json_encode(['success' => false, 'error' => $serverError]);
-                                exit;
-                            }
+                            // Purge ghost/stale keys from local SQLite tenant_settings
+                            $delStmt = $pdo->prepare("DELETE FROM tenant_settings WHERE name IN ('PM_LICENSE_KEY', 'PM_LICENSE_TOKEN', 'PM_LICENSE_TIER')");
+                            $delStmt->execute();
+
+                            $upStmt = $pdo->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
+                            $upStmt->execute(['PM_LICENSE_STATUS', json_encode($statusVal)]);
+                            
+                            // Immediately reflect purged status in-memory for frontend hydration payload
+                            $settings['PM_LICENSE_KEY'] = '';
+                            $settings['PM_LICENSE_TOKEN'] = '';
+                            $settings['PM_LICENSE_TIER'] = 'unlicensed';
+                            $settings['PM_LICENSE_STATUS'] = $statusVal;
                         }
                     }
                 } catch (\Throwable $syncEx) {

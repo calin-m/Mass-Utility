@@ -255,9 +255,9 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
 
   return (
     <div className="space-y-6">
-      {/* License Subscription Info Card */}
       {(() => {
-        const isUnlicensed = !settings.PM_LICENSE_KEY || tierName === 'unlicensed' || tierName === 'free';
+        const licStatus = String(settings.PM_LICENSE_STATUS || '').toLowerCase();
+        const isUnlicensed = !settings.PM_LICENSE_KEY || tierName === 'unlicensed' || tierName === 'free' || ['revoked', 'suspended', 'expired'].includes(licStatus);
         return (
           <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
             <div className="flex justify-between items-center mb-6">
