@@ -66,10 +66,16 @@ class AdminApiController
     {
         header('Content-Type: application/json');
         $raw = file_get_contents('php://input');
-        $data = !empty($raw) ? json_decode($raw, true) : $_POST;
+        $data = [];
+        if (!empty($raw)) {
+            $json = json_decode($raw, true);
+            if (is_array($json)) {
+                $data = $json;
+            }
+        }
 
-        $email = trim($data['email'] ?? $_POST['email'] ?? '');
-        $password = $data['password'] ?? $_POST['password'] ?? '';
+        $email = trim($data['email'] ?? $_POST['email'] ?? $_REQUEST['email'] ?? '');
+        $password = $data['password'] ?? $_POST['password'] ?? $_REQUEST['password'] ?? '';
 
         if (empty($email) || empty($password)) {
             echo json_encode(['success' => false, 'error' => 'Email address and password are required.']);
