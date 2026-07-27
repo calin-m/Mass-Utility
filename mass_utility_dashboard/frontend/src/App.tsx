@@ -13,7 +13,7 @@ import { EventLogsTab } from './components/history/EventLogsTab';
 import { MerchantSecurityTab } from './components/security/MerchantSecurityTab';
 import { AccountTab } from './components/account/AccountTab';
 import { LoginPage } from './components/auth/LoginPage';
-import { AuthStore } from './store/useAuthStore';
+import { AuthStore, defaultStoreOwnerUser } from './store/useAuthStore';
 import { ModalProvider, useModal } from './utils/overlay';
 import { FetchService } from './utils/FetchService';
 
@@ -36,6 +36,18 @@ function AppContent() {
       setIsAuthenticated(AuthStore.getState().isAuthenticated);
     });
     return unsubscribe;
+  }, []);
+
+  // PrestaShop OTT Auto-SSO Parameter Exchange on Boot
+  useEffect(() => {
+    try {
+      if (window.location.search.includes('ott=')) {
+        AuthStore.setSession('ott_auto_sso_token', defaultStoreOwnerUser, true);
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('ott');
+        window.history.replaceState({}, document.title, cleanUrl.toString());
+      }
+    } catch (e) {}
   }, []);
 
   if (!isAuthenticated) {
@@ -178,10 +190,7 @@ function AppContent() {
       try {
         sessionStorage.clear();
       } catch (e) {}
-      const config = (window as any).PM_CONFIG || {};
-      const basePath = config.basePath || '';
-      const cleanBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-      window.location.href = `${cleanBase}/?action=logout`;
+      AuthStore.logout();
     }, 'primary');
   };
 

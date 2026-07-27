@@ -15,7 +15,7 @@ export interface AuthState {
   isAutoSso: boolean;
 }
 
-const defaultUser: UserPermissions = {
+export const defaultStoreOwnerUser: UserPermissions = {
   id: 1,
   name: 'Store Owner',
   email: 'owner@store.com',
@@ -39,10 +39,10 @@ export class AuthStore {
       } catch (e) {}
     }
     return {
-      isAuthenticated: !!savedToken || true,
+      isAuthenticated: !!savedToken,
       token: savedToken,
-      user: user || defaultUser,
-      isAutoSso: !savedToken,
+      user: savedToken ? (user || defaultStoreOwnerUser) : null,
+      isAutoSso: false,
     };
   })();
 
@@ -50,14 +50,14 @@ export class AuthStore {
     return AuthStore.state;
   }
 
-  public static setSession(token: string, user: UserPermissions): void {
+  public static setSession(token: string, user: UserPermissions, isAutoSso: boolean = false): void {
     localStorage.setItem('pm_user_token', token);
     localStorage.setItem('pm_user_data', JSON.stringify(user));
     AuthStore.state = {
       isAuthenticated: true,
       token,
       user,
-      isAutoSso: false,
+      isAutoSso,
     };
     AuthStore.notify();
   }
