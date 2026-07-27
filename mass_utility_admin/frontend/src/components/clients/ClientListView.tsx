@@ -6,6 +6,7 @@ import { ConfirmModal } from '../common/ConfirmModal';
 import { TableCellIdentity } from '../common/TableCellIdentity';
 import { TableCellActions } from '../common/TableCellActions';
 import { TableCellCompany } from '../common/TableCellCompany';
+import { TableCellText } from '../common/TableCellText';
 import { SectionHeader } from '../common/SectionHeader';
 import { StatCard } from '../common/StatCard';
 import { StatSummaryGrid } from '../common/StatSummaryGrid';
@@ -506,19 +507,18 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         )}
                       </td>
 
-                      <td className="p-3 font-mono text-[0.72rem] align-middle whitespace-nowrap">
-                        {metrics.boundDomains.length === 0 ? (
-                          <span className="italic text-pm-secondary/70">{t('lbl_none')}</span>
-                        ) : (
-                          <div className="flex items-center gap-1">
-                            <span className="text-pm-secondary font-medium">{metrics.boundDomains[0]}</span>
-                            {metrics.boundDomains.length > 1 && (
+                      <td className="p-3 align-middle whitespace-nowrap">
+                        <TableCellText
+                          text={metrics.boundDomains[0]}
+                          fallbackText={t('lbl_none')}
+                          rightAction={
+                            metrics.boundDomains.length > 1 ? (
                               <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">
                                 +{metrics.boundDomains.length - 1} {t('lbl_more')}
                               </span>
-                            )}
-                          </div>
-                        )}
+                            ) : undefined
+                          }
+                        />
                       </td>
 
                       <td className="p-3 align-middle whitespace-nowrap">

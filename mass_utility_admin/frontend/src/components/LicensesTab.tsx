@@ -5,6 +5,7 @@ import { ConfirmModal } from './common/ConfirmModal';
 import { TableCellIdentity } from './common/TableCellIdentity';
 import { TableCellActions } from './common/TableCellActions';
 import { TableCellCompany } from './common/TableCellCompany';
+import { TableCellText } from './common/TableCellText';
 import { StatCard } from './common/StatCard';
 import { StatSummaryGrid } from './common/StatSummaryGrid';
 import { DirectoryCardTable } from './common/DirectoryCardTable';
@@ -517,15 +518,16 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                         <td className="p-3 align-middle whitespace-nowrap">
                           <StatusBadge status={lic.status} />
                         </td>
-                        <td className="p-3 font-mono text-xs text-pm-secondary align-middle whitespace-nowrap">
-                          {lic.store_url ? (
-                            <span className="truncate max-w-[150px] inline-block">{lic.store_url}</span>
-                          ) : (
-                            <span className="italic">{t('lbl_any_store') || 'Any Store'}</span>
-                          )}
+                        <td className="p-3 align-middle whitespace-nowrap">
+                          <TableCellText
+                            text={lic.store_url}
+                            fallbackText={t('lbl_any_store') || 'Any Store'}
+                          />
                         </td>
-                        <td className="p-3 font-mono text-xs text-pm-secondary align-middle whitespace-nowrap">
-                          {lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Lifetime'}
+                        <td className="p-3 align-middle whitespace-nowrap">
+                          <TableCellText
+                            text={lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Lifetime'}
+                          />
                         </td>
                         <td className="p-3 text-right align-middle min-w-[220px]">
                           <TableCellActions

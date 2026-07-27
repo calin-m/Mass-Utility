@@ -6,6 +6,7 @@ import { StatSummaryGrid } from '../common/StatSummaryGrid';
 import { BaseModal } from '../common/BaseModal';
 import { ConfirmModal } from '../common/ConfirmModal';
 import { TableCellIdentity } from '../common/TableCellIdentity';
+import { TableCellText } from '../common/TableCellText';
 import { TableCellActions } from '../common/TableCellActions';
 import { DirectoryToolbar } from '../common/DirectoryToolbar';
 import { StatusBadge } from '../common/StatusBadge';
@@ -339,21 +340,22 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
                         subtitle={`ID #${c.id}${c.created_at ? ` • Joined ${c.created_at.split(' ')[0]}` : ''}`}
                       />
                     </td>
-                    <td className="p-3 font-mono text-xs align-middle whitespace-nowrap">
-                      {c.tax_id ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-pm-text font-medium">{c.tax_id}</span>
-                          <button
-                            onClick={() => copyVat(c.tax_id!, c.id)}
-                            className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
-                            title="Copy Tax / VAT ID"
-                          >
-                            {copiedVatId === c.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="italic text-pm-secondary/70">{t('lbl_unspecified')}</span>
-                      )}
+                    <td className="p-3 align-middle whitespace-nowrap">
+                      <TableCellText
+                        text={c.tax_id}
+                        fallbackText={t('lbl_unspecified')}
+                        rightAction={
+                          c.tax_id ? (
+                            <button
+                              onClick={() => copyVat(c.tax_id!, c.id)}
+                              className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
+                              title="Copy Tax / VAT ID"
+                            >
+                              {copiedVatId === c.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                            </button>
+                          ) : undefined
+                        }
+                      />
                     </td>
                     <td className="p-3 font-bold text-pm-text text-xs align-middle whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
