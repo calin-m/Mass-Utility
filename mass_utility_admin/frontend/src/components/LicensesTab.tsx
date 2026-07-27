@@ -21,6 +21,7 @@ import { LicenseDetailsView } from './licenses/LicenseDetailsView';
 import { StatusBadge } from './common/StatusBadge';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getSortedTierOptions } from '../utils/tierUtils';
+import { parseDomains } from '../utils/domainUtils';
 
 import { EditLicenseModal, EditLicenseData } from './common/EditLicenseModal';
 import { License, UserAccount } from '../types/adminApi';
@@ -519,10 +520,27 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                           <StatusBadge status={lic.status} />
                         </td>
                         <td className="p-3 align-middle whitespace-nowrap">
-                          <TableCellText
-                            text={lic.store_url}
-                            fallbackText={t('lbl_any_store') || 'Any Store'}
-                          />
+                          {(() => {
+                            const domains = parseDomains(lic.store_url);
+                            if (domains.length === 0) {
+                              return <span className="text-pm-secondary italic text-xs">Unbound</span>;
+                            }
+                            return (
+                              <div className="flex flex-wrap gap-1 max-w-[220px]">
+                                {domains.map((d, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={d.startsWith('http') ? d : `https://${d}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] hover:bg-emerald-500/20 transition-colors"
+                                  >
+                                    <span>{d}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="p-3 align-middle whitespace-nowrap">
                           <TableCellText

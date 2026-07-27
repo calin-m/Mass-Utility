@@ -163,7 +163,35 @@ class LicenseRepository
 
     public function updateLicense(int $id, string $status, string $tier, ?string $expiry, ?string $storeUrl = null, ?int $userId = null, ?int $companyId = null): bool
     {
-        $cleanStoreUrl = !empty($storeUrl) ? trim($storeUrl) : null;
+        $cleanStoreUrl = null;
+        if (!empty($storeUrl)) {
+            $raw = trim($storeUrl);
+            $parsed = [];
+            if (str_starts_with($raw, '[')) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    foreach ($decoded as $d) {
+                        $n = $this->normalizeDomainHost($d);
+                        if (!empty($n)) $parsed[] = $n;
+                    }
+                }
+            } else {
+                $parts = preg_split('/[\n,]+/', $raw);
+                if (is_array($parts)) {
+                    foreach ($parts as $d) {
+                        $n = $this->normalizeDomainHost($d);
+                        if (!empty($n)) $parsed[] = $n;
+                    }
+                }
+            }
+
+            $uniqueDomains = array_values(array_unique($parsed));
+            if (count($uniqueDomains) > 1) {
+                $cleanStoreUrl = json_encode($uniqueDomains, JSON_UNESCAPED_SLASHES);
+            } elseif (count($uniqueDomains) === 1) {
+                $cleanStoreUrl = $uniqueDomains[0];
+            }
+        }
 
         // If companyId is not explicitly provided but userId is given, resolve company_id from user
         if ($companyId === null && $userId !== null) {

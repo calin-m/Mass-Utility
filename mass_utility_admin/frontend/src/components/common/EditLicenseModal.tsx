@@ -319,24 +319,25 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
             {/* Bound Store Domain */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-semibold text-pm-secondary">Bound Store Domain</label>
+                <label className="text-xs font-semibold text-pm-secondary">Allowed Store Domains</label>
                 {editStoreUrl && (
                   <button
                     type="button"
                     onClick={() => setEditStoreUrl('')}
                     className="text-[10px] text-purple-400 hover:underline font-mono"
                   >
-                    🧹 Clear Domain
+                    🧹 Clear Domains
                   </button>
                 )}
               </div>
-              <input
-                type="text"
-                placeholder="e.g. store.myshop.com"
+              <textarea
+                rows={2}
+                placeholder="e.g. store.myshop.com, staging.myshop.com"
                 value={editStoreUrl}
                 onChange={e => setEditStoreUrl(e.target.value)}
-                className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-mono text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
+                className="w-full bg-pm-input border border-pm-border rounded-xl p-2 text-xs font-mono text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all resize-none"
               />
+              <span className="text-[10px] text-pm-secondary block mt-1">Separate multiple allowed domains with commas or new lines.</span>
             </div>
 
             {/* Expiration Date Picker */}

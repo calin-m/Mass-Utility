@@ -4,6 +4,7 @@ import { License, UserAccount } from '../../types/adminApi';
 import { StatusBadge } from './StatusBadge';
 import { Button } from './Button';
 import { maskLicenseKey, copyLicenseKeyToClipboard } from '../../utils/licenseUtils';
+import { parseDomains } from '../../utils/domainUtils';
 
 export interface LicenseRowCardProps {
   license: License;
@@ -150,24 +151,33 @@ export const LicenseRowCard: React.FC<LicenseRowCardProps> = ({
         </div>
 
         {/* Bound Store Domain Row */}
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-1.5 pt-1">
           <span className="text-pm-secondary font-medium text-[11px] flex items-center gap-1.5">
             <Globe className="w-3.5 h-3.5 text-emerald-400" />
-            Bound Store:
+            Allowed Store Domains:
           </span>
-          {license.store_url ? (
-            <a
-              href={license.store_url.startsWith('http') ? license.store_url : `https://${license.store_url}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-emerald-400 hover:underline flex items-center gap-1 truncate max-w-[180px]"
-            >
-              <span className="truncate">{license.store_url}</span>
-              <ExternalLink className="w-2.5 h-2.5 opacity-70 shrink-0" />
-            </a>
-          ) : (
-            <span className="text-pm-secondary italic">Any Domain</span>
-          )}
+          {(() => {
+            const domains = parseDomains(license.store_url);
+            if (domains.length === 0) {
+              return <span className="text-pm-secondary italic text-xs">Unbound (Any Store Domain)</span>;
+            }
+            return (
+              <div className="flex flex-wrap gap-1">
+                {domains.map((dom, idx) => (
+                  <a
+                    key={idx}
+                    href={dom.startsWith('http') ? dom : `https://${dom}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] hover:bg-emerald-500/20 transition-colors"
+                  >
+                    <span>{dom}</span>
+                    <ExternalLink className="w-2.5 h-2.5 opacity-70 shrink-0" />
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </div>
 

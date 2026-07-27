@@ -29,6 +29,7 @@ import { SubTabItem } from '../common/SubTabNav';
 import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { maskLicenseKey, copyLicenseKeyToClipboard } from '../../utils/licenseUtils';
 import { getSortedTierOptions } from '../../utils/tierUtils';
+import { parseDomains, formatDomainsForInput } from '../../utils/domainUtils';
 
 export interface LicenseDetailsViewProps {
   license: License;
@@ -62,7 +63,7 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
   const [copiedKey, setCopiedKey] = useState(false);
 
   // Store Domain Edit State
-  const [storeUrlInput, setStoreUrlInput] = useState<string>(license.store_url || '');
+  const [storeUrlInput, setStoreUrlInput] = useState<string>(formatDomainsForInput(license.store_url));
   const [savingDomain, setSavingDomain] = useState(false);
 
   // Expiry Extension State
@@ -245,9 +246,30 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
                 <span className="text-pm-secondary">Created Timestamp</span>
                 <span className="font-mono text-pm-text">{license.created_at || 'N/A'}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-pm-border">
-                <span className="text-pm-secondary">Bound Store URL</span>
-                <span className="font-mono text-emerald-400">{license.store_url || 'Unbound (Any Domain)'}</span>
+              <div className="flex justify-between py-2 border-b border-pm-border items-start">
+                <span className="text-pm-secondary">Allowed Store Domains</span>
+                {(() => {
+                  const domains = parseDomains(license.store_url);
+                  if (domains.length === 0) {
+                    return <span className="font-mono text-emerald-400">Unbound (Any Domain)</span>;
+                  }
+                  return (
+                    <div className="flex flex-wrap gap-1 justify-end max-w-[240px]">
+                      {domains.map((dom, idx) => (
+                        <a
+                          key={idx}
+                          href={dom.startsWith('http') ? dom : `https://${dom}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] hover:bg-emerald-500/20 transition-colors"
+                        >
+                          <span>{dom}</span>
+                          <ExternalLink className="w-2.5 h-2.5 opacity-70 shrink-0" />
+                        </a>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -372,17 +394,40 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
 
           <form onSubmit={handleSaveStoreUrl} className="space-y-4 max-w-xl">
             <div>
-              <label className="text-xs font-bold text-pm-text block mb-1.5">Store URL / Domain Origin</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="e.g. mystore.myshopify.com or example.com"
-                  value={storeUrlInput}
-                  onChange={(e) => setStoreUrlInput(e.target.value)}
-                  className="w-full bg-pm-input border border-pm-border rounded-lg pl-9 pr-3 py-2 text-xs font-mono text-pm-text focus:border-purple-500 focus:outline-none"
-                />
-                <Globe className="w-4 h-4 text-pm-secondary absolute left-3 top-2.5" />
-              </div>
+              <label className="text-xs font-bold text-pm-text block mb-1.5">Allowed Store Domains</label>
+              <textarea
+                rows={3}
+                placeholder="e.g. store.myshop.com, staging.myshop.com, dev.myshop.com"
+                value={storeUrlInput}
+                onChange={(e) => setStoreUrlInput(e.target.value)}
+                className="w-full bg-pm-input border border-pm-border rounded-lg p-3 text-xs font-mono text-pm-text focus:border-purple-500 focus:outline-none resize-none"
+              />
+              <span className="text-[11px] text-pm-secondary block mt-1">
+                Enter multiple allowed store domains separated by commas or new lines.
+              </span>
+            </div>
+
+            {/* Domain Badge Pill Preview */}
+            <div className="p-3 bg-pm-input/50 rounded-lg border border-pm-border space-y-2">
+              <span className="text-[11px] font-bold text-pm-secondary block">Domain Whitelist Preview:</span>
+              {(() => {
+                const parsed = parseDomains(storeUrlInput);
+                if (parsed.length === 0) {
+                  return <span className="text-xs text-pm-secondary italic">Unbound (Any Store Domain)</span>;
+                }
+                return (
+                  <div className="flex flex-wrap gap-1.5">
+                    {parsed.map((dom, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-xs"
+                      >
+                        🌐 {dom}
+                      </span>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="flex justify-end">
