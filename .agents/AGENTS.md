@@ -17,9 +17,8 @@
 2. **The Zero-Draft Atomic Pipeline:**
    - **No PENDING states:** Ensure your logic is complete.
    - **Single Atomic Operation:** When a task or phase is complete, update all `.md` dictionaries, and then immediately execute `python .orchestra/.conductor/tools/cli_commit.py`. This guarantees the docs, code, and history are perfectly bound and formatted.
-3. **Smart Ephemeral Commits:**
-   - The `cli_commit.py` script will automatically ingest the exact contents of `.ai_plan.md` into the Git Commit message.
-   - Once the commit succeeds, `cli_commit.py` will delete `.ai_plan.md`.
+   - The `cli_commit.py` script will automatically ingest `.ai_plan.md` into the Git Commit message.
+   - For multi-phase execution plans, `cli_commit.py` marks completed phases as `[COMPLETED]` and preserves `.ai_plan.md` on disk across phases until all phases complete, preventing premature deletion.
 4. **Smart Interconnectivity Tracing & Sequential Investigation:**
    - **Primary Token-Saving Scanner:** You MUST use the custom Python script `.orchestra/.conductor/tools/workspace_inspector.py` as your primary tool to mathematically map architecture, symbols, and dependencies.
    - **Questions & Diagnostics Mandate:** Whenever the user asks any question about how code works, module layout, or system behaviors, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `lookup "<symbol>"` / `matrix`) to ground your response in live AST symbol maps and generated reports.
