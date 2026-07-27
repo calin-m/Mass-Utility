@@ -350,10 +350,11 @@ class Mass_Utility extends Module
                         $serverError = $data['error'] ?? ($data['message'] ?? '');
                         if (strpos(strtolower($serverError), 'suspended') !== false || strpos(strtolower($serverError), 'expired') !== false) {
                             $licenseSuspended = true;
-                        } elseif (strpos(strtolower($serverError), 'not found') !== false) {
+                        } else {
                             if (class_exists('\Configuration')) {
                                 \Configuration::deleteByName('PM_SECURE_TOKEN');
                                 \Configuration::deleteByName('PM_LICENSE_KEY');
+                                \Configuration::deleteByName('PM_LICENSE_TIER');
                             }
                             $secureToken = '';
                             $licenseKey = '';
