@@ -163,7 +163,7 @@ export const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@company.com"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-pm-input border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/40 text-sm text-slate-900 dark:text-slate-50 font-medium placeholder:text-pm-text-muted transition-all outline-none"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/30 text-sm text-slate-900 dark:text-slate-100 font-bold caret-purple-600 dark:caret-purple-400 placeholder:text-slate-600 dark:placeholder:text-slate-300 transition-all outline-none"
               />
             </div>
           </div>
@@ -184,7 +184,7 @@ export const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-pm-input border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/40 text-sm text-slate-900 dark:text-slate-50 font-medium placeholder:text-pm-text-muted transition-all outline-none"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/30 text-sm text-slate-900 dark:text-slate-100 font-bold caret-purple-600 dark:caret-purple-400 placeholder:text-slate-600 dark:placeholder:text-slate-300 transition-all outline-none"
               />
               <button
                 type="button"

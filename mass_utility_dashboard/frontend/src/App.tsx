@@ -235,16 +235,27 @@ function AppContent() {
           </p>
         </div>
         {/* Right Side Headers controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('account')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 border focus:outline-none ${
+              activeTab === 'account'
+                ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                : 'bg-pm-input/50 border-transparent text-pm-text hover:bg-pm-input shadow-sm'
+            }`}
+          >
+            👤 Account &amp; RBAC
+          </button>
           <button
             type="button"
             onClick={handleLogout}
-            className="bg-pm-danger/10 hover:bg-pm-danger/20 border border-transparent text-pm-danger px-3.5 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 focus:outline-none"
+            title="Log out from dashboard"
+            className="p-2 rounded-lg text-xs font-bold transition-all border border-transparent bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 focus:outline-none"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
             </svg>
-            Logout
           </button>
         </div>
       </header>
@@ -350,28 +361,6 @@ function AppContent() {
                 >
                   📜 Event Logs {isUnlicensed && '🔒'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('settings')}
-                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-                    activeTab === 'settings'
-                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-                  }`}
-                >
-                  ⚙️ Settings
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('account')}
-                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
-                    activeTab === 'account'
-                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
-                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
-                  }`}
-                >
-                  👤 Account &amp; RBAC
-                </button>
               </div>
 
               <div className="flex items-center gap-2">
@@ -382,6 +371,17 @@ function AppContent() {
                   title="Toggle Light/Dark Theme"
                 >
                   {darkMode ? '☀️ Light' : '🌙 Dark'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('settings')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    activeTab === 'settings'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'bg-pm-input border-transparent text-pm-text-secondary hover:text-pm-text shadow-sm'
+                  }`}
+                >
+                  ⚙️ Settings
                 </button>
               </div>
             </div>
