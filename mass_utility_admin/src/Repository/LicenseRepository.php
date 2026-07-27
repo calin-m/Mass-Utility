@@ -739,6 +739,49 @@ class LicenseRepository
         $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return is_array($res) ? $res : [];
     }
+
+    public function createPasswordResetToken(int $userId): string
+    {
+        $rawToken = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $rawToken);
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+        // Invalidate old tokens for this user
+        $del = $this->db->prepare("DELETE FROM pm_password_resets WHERE user_id = ?");
+        $del->execute([$userId]);
+
+        $stmt = $this->db->prepare("INSERT INTO pm_password_resets (user_id, token_hash, expires_at) VALUES (?, ?, ?)");
+        $stmt->execute([$userId, $tokenHash, $expiresAt]);
+
+        return $rawToken;
+    }
+
+    public function verifyPasswordResetToken(string $rawToken): ?array
+    {
+        $tokenHash = hash('sha256', $rawToken);
+        $stmt = $this->db->prepare("SELECT r.*, u.email, u.name FROM pm_password_resets r JOIN pm_users u ON r.user_id = u.id WHERE r.token_hash = ? AND r.expires_at > CURRENT_TIMESTAMP AND r.used = 0");
+        $stmt->execute([$tokenHash]);
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $res ? $res : null;
+    }
+
+    public function completePasswordReset(string $rawToken, string $newPassword): bool
+    {
+        $reset = $this->verifyPasswordResetToken($rawToken);
+        if (!$reset) {
+            return false;
+        }
+
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $upUser = $this->db->prepare("UPDATE pm_users SET password_hash = ? WHERE id = ?");
+        $upUser->execute([$hash, $reset['user_id']]);
+
+        $upReset = $this->db->prepare("UPDATE pm_password_resets SET used = 1 WHERE id = ?");
+        $upReset->execute([$reset['id']]);
+
+        return true;
+    }
 }
 
 

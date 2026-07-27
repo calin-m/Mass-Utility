@@ -13,6 +13,7 @@ import { EventLogsTab } from './components/history/EventLogsTab';
 import { MerchantSecurityTab } from './components/security/MerchantSecurityTab';
 import { AccountTab } from './components/account/AccountTab';
 import { LoginPage } from './components/auth/LoginPage';
+import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
 import { AuthStore, defaultStoreOwnerUser } from './store/useAuthStore';
 import { ModalProvider, useModal } from './utils/overlay';
 import { FetchService } from './utils/FetchService';
@@ -22,6 +23,16 @@ type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'securi
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => AuthStore.getState().isAuthenticated);
   const { showConfirm, showToast } = useModal();
+  const [resetToken] = useState<string | null>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'reset_password' && params.get('token')) {
+        return params.get('token');
+      }
+    } catch (e) {}
+    return null;
+  });
+
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     // Preserve tab on reload
     try {
@@ -49,6 +60,10 @@ function AppContent() {
       }
     } catch (e) {}
   }, []);
+
+  if (resetToken) {
+    return <ResetPasswordPage token={resetToken} />;
+  }
 
   if (!isAuthenticated) {
     return <LoginPage />;

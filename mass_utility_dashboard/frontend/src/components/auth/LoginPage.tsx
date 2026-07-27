@@ -41,12 +41,20 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-pm-bg text-pm-text flex items-center justify-center p-4 selection:bg-pm-accent selection:text-white">
-      <div className="w-full max-w-md bg-pm-card/80 backdrop-blur-xl border border-pm-border/60 rounded-2xl p-8 shadow-2xl space-y-6">
+    <div className="relative min-h-screen bg-pm-bg text-pm-text flex items-center justify-center p-4 selection:bg-pm-accent selection:text-white overflow-hidden">
+      
+      {/* Multi-colored Ambient Mesh Background Glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-purple-600/15 via-indigo-600/20 to-blue-600/15 rounded-full blur-[120px] opacity-70 animate-pulse duration-10000" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-pm-accent/10 rounded-full blur-[100px]" />
+      </div>
+
+      {/* Glassmorphic Container Card */}
+      <div className="relative w-full max-w-md bg-pm-card/90 backdrop-blur-2xl border border-white/10 dark:border-white/10 border-pm-border/80 rounded-2xl p-8 shadow-[0_16px_48px_rgba(0,0,0,0.5)] space-y-6">
         
         {/* Header Badge & Title */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pm-accent/10 border border-pm-accent/20 text-pm-accent text-xs font-semibold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pm-accent/10 border border-pm-accent/25 text-pm-accent text-xs font-semibold uppercase tracking-widest shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
             </svg>
@@ -55,7 +63,7 @@ export const LoginPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-pm-text-primary tracking-tight">
             Sign In to Dashboard
           </h1>
-          <p className="text-sm text-pm-text-muted">
+          <p className="text-xs text-pm-text-muted">
             Authenticate with your Mass Utility Admin account
           </p>
         </div>
@@ -73,7 +81,7 @@ export const LoginPage: React.FC = () => {
         {/* Form Controls */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-pm-text-secondary uppercase tracking-wider">
+            <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider">
               Email Address
             </label>
             <div className="relative">
@@ -86,13 +94,13 @@ export const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@company.com"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-1 focus:ring-pm-accent text-sm text-pm-text placeholder:text-pm-text-muted transition-all outline-none"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text placeholder:text-pm-text-muted transition-all outline-none"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-pm-text-secondary uppercase tracking-wider">
+            <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider">
               Password
             </label>
             <div className="relative">
@@ -105,12 +113,12 @@ export const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-1 focus:ring-pm-accent text-sm text-pm-text placeholder:text-pm-text-muted transition-all outline-none"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-pm-input/50 border border-pm-border focus:border-pm-accent focus:ring-2 focus:ring-pm-accent/50 text-sm text-pm-text placeholder:text-pm-text-muted transition-all outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-pm-text-muted hover:text-pm-text transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-pm-text-muted hover:text-pm-text transition-colors cursor-pointer"
               >
                 {showPassword ? (
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
@@ -141,7 +149,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 px-4 rounded-xl bg-pm-accent hover:bg-pm-accent/90 disabled:opacity-50 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-lg shadow-pm-accent/25 transition-all cursor-pointer"
+            className="w-full mt-2 py-3 px-4 rounded-xl bg-pm-accent hover:bg-pm-accent/90 disabled:opacity-50 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-lg shadow-pm-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -151,6 +151,109 @@ class AdminApiController
         echo json_encode(['success' => true, 'roles' => $roles]);
     }
 
+    private function send_password_reset_link(): void
+    {
+        header('Content-Type: application/json');
+        $userId = (int)($_POST['user_id'] ?? $_GET['user_id'] ?? 0);
+        if ($userId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Valid user ID is required.']);
+            return;
+        }
+
+        $allUsers = $this->repo->getAllUsers();
+        $user = null;
+        foreach ($allUsers as $u) {
+            if ((int)$u['id'] === $userId) {
+                $user = $u;
+                break;
+            }
+        }
+
+        if (!$user || empty($user['email'])) {
+            echo json_encode(['success' => false, 'error' => 'User account not found.']);
+            return;
+        }
+
+        $token = $this->repo->createPasswordResetToken($userId);
+        $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $script = $_SERVER['SCRIPT_NAME'] ?? '/public/index.php';
+        $resetUrl = "{$scheme}://{$host}{$script}?action=reset_password&token={$token}";
+
+        // Attempt HTML Email sending
+        $subject = "Mass Utility - Password Reset Link";
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: Mass Utility Admin <noreply@{$host}>\r\n";
+
+        $body = "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #1e1e2d; color: #ffffff; rounded-corner: 12px;'>
+            <h2 style='color: #6366f1; text-transform: uppercase;'>Mass Utility Password Reset</h2>
+            <p>Hello <strong>" . htmlspecialchars($user['name'] ?? $user['email']) . "</strong>,</p>
+            <p>An administrator requested a password reset for your Mass Utility account.</p>
+            <p style='margin: 25px 0;'>
+                <a href='" . htmlspecialchars($resetUrl) . "' style='background-color: #6366f1; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;'>Reset My Password</a>
+            </p>
+            <p style='font-size: 12px; color: #94a3b8;'>This link is valid for 24 hours. If you did not request this, please ignore this email.</p>
+            <hr style='border: 0; border-top: 1px solid #334155; margin: 20px 0;'>
+            <p style='font-size: 11px; color: #64748b;'>Direct Link: <a href='" . htmlspecialchars($resetUrl) . "' style='color: #818cf8;'>" . htmlspecialchars($resetUrl) . "</a></p>
+        </div>
+        ";
+
+        $mailSent = @mail($user['email'], $subject, $body, $headers);
+
+        echo json_encode([
+            'success' => true,
+            'mail_sent' => $mailSent,
+            'reset_url' => $resetUrl,
+            'message' => $mailSent ? 'Password reset link sent to user email.' : 'Reset link generated. You can copy the link manually if mail server is unconfigured.'
+        ]);
+    }
+
+    private function verify_reset_token(): void
+    {
+        header('Content-Type: application/json');
+        $token = trim($_GET['token'] ?? $_POST['token'] ?? '');
+        if (empty($token)) {
+            echo json_encode(['success' => false, 'error' => 'Password reset token is missing.']);
+            return;
+        }
+
+        $reset = $this->repo->verifyPasswordResetToken($token);
+        if (!$reset) {
+            echo json_encode(['success' => false, 'error' => 'Password reset link is invalid or has expired.']);
+            return;
+        }
+
+        echo json_encode(['success' => true, 'email' => $reset['email'], 'name' => $reset['name']]);
+    }
+
+    private function complete_password_reset(): void
+    {
+        header('Content-Type: application/json');
+        $raw = file_get_contents('php://input');
+        $data = !empty($raw) ? json_decode($raw, true) : $_POST;
+
+        $token = trim($data['token'] ?? $_POST['token'] ?? '');
+        $password = $data['password'] ?? $_POST['password'] ?? '';
+
+        if (empty($token) || empty($password)) {
+            echo json_encode(['success' => false, 'error' => 'Token and new password are required.']);
+            return;
+        }
+
+        if (strlen($password) < 6) {
+            echo json_encode(['success' => false, 'error' => 'Password must be at least 6 characters.']);
+            return;
+        }
+
+        if ($this->repo->completePasswordReset($token, $password)) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to reset password. Link may be invalid or expired.']);
+        }
+    }
+
     private function setup(): void
     {
         if ($this->auth->hasAnyAdmin()) {

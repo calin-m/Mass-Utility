@@ -128,7 +128,7 @@ if ($action === 'activate_key' || $action === 'verify_license' || $action === 'a
 // API Dispatcher
 if (str_starts_with($action, 'api_')) {
     header('Content-Type: application/json');
-    $publicApiActions = ['api_status', 'api_login', 'api_setup', 'api_user_login', 'api_user_verify', 'api_roles'];
+    $publicApiActions = ['api_status', 'api_login', 'api_setup', 'api_user_login', 'api_user_verify', 'api_roles', 'api_send_password_reset_link', 'api_verify_reset_token', 'api_complete_password_reset'];
     if (!$auth->isAuthenticated() && !in_array($action, $publicApiActions, true)) {
         echo json_encode(['success' => false, 'error' => 'Unauthenticated session. Please log in again.']);
         exit;

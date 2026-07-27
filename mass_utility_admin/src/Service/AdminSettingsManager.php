@@ -255,6 +255,15 @@ class AdminSettingsManager
                 ip_address VARCHAR(45),
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_password_resets ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                token_hash VARCHAR(128) NOT NULL UNIQUE,
+                expires_at DATETIME NOT NULL,
+                used INTEGER DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES pm_users(id) ON DELETE CASCADE
+            )');
 
             // Seed default RBAC permissions if empty
             $permCount = (int)$pdo->query("SELECT COUNT(*) FROM pm_permissions")->fetchColumn();

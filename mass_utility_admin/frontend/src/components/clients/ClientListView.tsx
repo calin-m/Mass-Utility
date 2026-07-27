@@ -660,18 +660,18 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         )}
       </BaseModal>
 
-      {/* Password Reset Modal */}
+      {/* Password Change & Reset Modal */}
       <BaseModal
         isOpen={!!resetUser}
         onClose={() => setResetUser(null)}
-        title={`${t('modal_reset_password')}: ${resetUser?.email || ''}`}
+        title={`Change Password: ${resetUser?.email || ''}`}
         icon={Key}
         maxWidth="md"
       >
         {resetUser && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
-              <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">{t('settings_new_password')}</label>
+              <label className="block text-[11px] font-bold uppercase text-pm-secondary mb-1">New Password</label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <FormInput
@@ -681,13 +681,29 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                     value={resetPassword}
                     onChange={e => setResetPassword(e.target.value)}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowResetPassword(!showResetPassword)}
-                    className="absolute right-3 top-2.5 text-pm-secondary hover:text-pm-text"
-                  >
-                    {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                  <div className="absolute right-2 top-2 flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowResetPassword(!showResetPassword)}
+                      className="p-1 text-pm-secondary hover:text-pm-text"
+                      title={showResetPassword ? "Hide password" : "Show password"}
+                    >
+                      {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                    {resetPassword && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(resetPassword);
+                          showAlert('Password copied to clipboard!', 'success');
+                        }}
+                        className="p-1 text-pm-accent hover:text-pm-accent/80"
+                        title="Copy password to clipboard"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <Button
                   type="button"
@@ -699,9 +715,10 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                     for (let i = 0; i < 16; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
                     setResetPassword(pass);
                     setConfirmResetPassword(pass);
+                    setShowResetPassword(true);
                   }}
                 >
-                  Generate
+                  ⚡ Generate
                 </Button>
               </div>
             </div>
@@ -718,19 +735,47 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-              <Button variant="neutral" size="md" onClick={() => setResetUser(null)}>
-                {t('btn_cancel')}
-              </Button>
+            <div className="flex justify-between items-center pt-3 border-t border-pm-border flex-wrap gap-2">
               <Button
-                variant="primary"
+                type="button"
+                variant="neutral"
                 size="md"
-                type="submit"
-                loading={loading}
-                disabled={!resetPassword || resetPassword.length < 6 || resetPassword !== confirmResetPassword}
+                onClick={async () => {
+                  if (!resetUser?.id) return;
+                  try {
+                    const formData = new FormData();
+                    formData.append('user_id', String(resetUser.id));
+                    const res = await fetch('index.php?action=api_send_password_reset_link', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.success) {
+                      showAlert(data.message || 'Password reset link sent to user.', 'success');
+                      if (data.reset_url) {
+                        navigator.clipboard.writeText(data.reset_url);
+                      }
+                    } else {
+                      showAlert(data.error || 'Failed to send reset link', 'error');
+                    }
+                  } catch (err: any) {
+                    showAlert('Error sending reset link: ' + err.message, 'error');
+                  }
+                }}
               >
-                Reset Password
+                ✉️ Send Password Reset Link
               </Button>
+              <div className="flex gap-2">
+                <Button variant="neutral" size="md" onClick={() => setResetUser(null)}>
+                  {t('btn_cancel')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="md"
+                  type="submit"
+                  loading={loading}
+                  disabled={!resetPassword || resetPassword.length < 6 || resetPassword !== confirmResetPassword}
+                >
+                  Change Password
+                </Button>
+              </div>
             </div>
           </form>
         )}
