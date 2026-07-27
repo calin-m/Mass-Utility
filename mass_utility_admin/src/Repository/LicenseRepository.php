@@ -660,5 +660,85 @@ class LicenseRepository
         $host = strtok($host, ':'); // Strip port numbers
         return trim((string)$host);
     }
+
+    public function authenticateUser(string $email, string $password): ?array
+    {
+        $stmt = $this->db->prepare("SELECT u.*, c.company_name as resolved_company_name FROM pm_users u LEFT JOIN pm_companies c ON u.company_id = c.id WHERE u.email = ? AND u.status = 'active'");
+        $stmt->execute([trim($email)]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user && password_verify($password, $user['password_hash'])) {
+            // Update last_login_at timestamp
+            $up = $this->db->prepare("UPDATE pm_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?");
+            $up->execute([$user['id']]);
+
+            unset($user['password_hash']);
+            $user['permissions'] = $this->getUserPermissions((int)$user['id'], $user['role'] ?? 'Observer');
+            return $user;
+        }
+
+        return null;
+    }
+
+    public function getUserPermissions(int $userId, string $roleSlug = 'Observer'): array
+    {
+        // Fetch role permissions via join
+        $sql = "SELECT p.slug FROM pm_permissions p 
+                JOIN pm_role_permissions rp ON p.id = rp.permission_id 
+                JOIN pm_roles r ON rp.role_id = r.id 
+                WHERE r.slug = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$roleSlug]);
+        $perms = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (empty($perms)) {
+            // Fallback default permissions based on role slug
+            $map = [
+                'SuperAdmin' => ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage'],
+                'CompanyAdmin' => ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage'],
+                'CatalogManager' => ['ast.query', 'ast.mutate', 'db.backup', 'files.backup'],
+                'Operator' => ['ast.query', 'db.backup', 'files.backup'],
+                'Observer' => ['ast.query'],
+            ];
+            $perms = $map[$roleSlug] ?? ['ast.query'];
+        }
+
+        return array_values(array_unique($perms));
+    }
+
+    public function createSessionToken(int $userId, ?string $ipAddress = null, ?string $userAgent = null): string
+    {
+        $rawToken = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $rawToken);
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+        $stmt = $this->db->prepare("INSERT INTO pm_user_sessions (user_id, token_hash, ip_address, user_agent, expires_at) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$userId, $tokenHash, $ipAddress, $userAgent, $expiresAt]);
+
+        return $rawToken;
+    }
+
+    public function validateSessionToken(string $rawToken): ?array
+    {
+        $tokenHash = hash('sha256', $rawToken);
+        $stmt = $this->db->prepare("SELECT s.*, u.email, u.name, u.role, u.company_id, u.status FROM pm_user_sessions s JOIN pm_users u ON s.user_id = u.id WHERE s.token_hash = ? AND s.expires_at > CURRENT_TIMESTAMP AND u.status = 'active'");
+        $stmt->execute([$tokenHash]);
+        $session = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($session) {
+            $session['permissions'] = $this->getUserPermissions((int)$session['user_id'], $session['role'] ?? 'Observer');
+            return $session;
+        }
+
+        return null;
+    }
+
+    public function getAllRoles(): array
+    {
+        $stmt = $this->db->query("SELECT * FROM pm_roles ORDER BY id ASC");
+        $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($res) ? $res : [];
+    }
 }
+
 

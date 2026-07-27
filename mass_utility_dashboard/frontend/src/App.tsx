@@ -11,12 +11,16 @@ import { QueryMutateTab } from './components/QueryMutateTab';
 import { MutationHistoryTab } from './components/history/MutationHistoryTab';
 import { EventLogsTab } from './components/history/EventLogsTab';
 import { MerchantSecurityTab } from './components/security/MerchantSecurityTab';
+import { AccountTab } from './components/account/AccountTab';
+import { LoginPage } from './components/auth/LoginPage';
+import { AuthStore } from './store/useAuthStore';
 import { ModalProvider, useModal } from './utils/overlay';
 import { FetchService } from './utils/FetchService';
 
-type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'security' | 'logs' | 'settings';
+type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'security' | 'logs' | 'settings' | 'account';
 
 function AppContent() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => AuthStore.getState().isAuthenticated);
   const { showConfirm, showToast } = useModal();
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     // Preserve tab on reload
@@ -26,6 +30,17 @@ function AppContent() {
     } catch (e) {}
     return 'settings';
   });
+
+  useEffect(() => {
+    const unsubscribe = AuthStore.subscribe(() => {
+      setIsAuthenticated(AuthStore.getState().isAuthenticated);
+    });
+    return unsubscribe;
+  }, []);
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
@@ -315,6 +330,17 @@ function AppContent() {
                 >
                   ⚙️ Settings
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('account')}
+                  className={`pm-tab-label px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 uppercase tracking-wider border focus:outline-none ${
+                    activeTab === 'account'
+                      ? 'bg-pm-card text-pm-primary border-pm-border shadow-md'
+                      : 'text-pm-text-secondary hover:text-pm-text border-transparent shadow-sm'
+                  }`}
+                >
+                  👤 Account &amp; RBAC
+                </button>
               </div>
 
               <div className="flex items-center gap-2">
@@ -330,7 +356,7 @@ function AppContent() {
             </div>
 
             <main className="border border-pm-border bg-pm-card rounded-xl p-6 shadow-2xl transition-all duration-300">
-              {isUnlicensed && activeTab !== 'settings' ? (
+              {isUnlicensed && activeTab !== 'settings' && activeTab !== 'account' ? (
                 <div className="p-12 text-center space-y-4">
                   <div className="w-16 h-16 bg-pm-danger/10 border border-pm-danger/20 rounded-full flex items-center justify-center mx-auto text-pm-danger">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8">
@@ -345,6 +371,7 @@ function AppContent() {
               ) : (
                 <>
                   {activeTab === 'settings' && <SettingsTab />}
+                  {activeTab === 'account' && <AccountTab />}
                   {activeTab === 'files' && <FileToolsTab />}
                   {activeTab === 'governor' && <GovernorTab />}
                   {activeTab === 'database' && <DatabaseToolsTab />}

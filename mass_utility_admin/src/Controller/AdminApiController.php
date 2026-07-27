@@ -60,6 +60,97 @@ class AdminApiController
         }
     }
 
+    private function user_login(): void
+    {
+        header('Content-Type: application/json');
+        $raw = file_get_contents('php://input');
+        $data = !empty($raw) ? json_decode($raw, true) : $_POST;
+
+        $email = trim($data['email'] ?? $_POST['email'] ?? '');
+        $password = $data['password'] ?? $_POST['password'] ?? '';
+
+        if (empty($email) || empty($password)) {
+            echo json_encode(['success' => false, 'error' => 'Email address and password are required.']);
+            return;
+        }
+
+        $user = $this->repo->authenticateUser($email, $password);
+        if (!$user) {
+            echo json_encode(['success' => false, 'error' => 'Invalid email address or password.']);
+            return;
+        }
+
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        $agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $token = $this->repo->createSessionToken((int)$user['id'], $ip, $agent);
+
+        $this->repo->logAdminActivity(
+            'User Auth System',
+            'USER_LOGIN_SUCCESS',
+            'User Account',
+            (string)$user['id'],
+            ['email' => $email, 'role' => $user['role'] ?? 'Observer'],
+            $ip
+        );
+
+        echo json_encode([
+            'success' => true,
+            'token' => $token,
+            'user' => [
+                'id' => $user['id'],
+                'name' => $user['name'] ?? $user['email'],
+                'email' => $user['email'],
+                'role' => $user['role'] ?? 'Observer',
+                'company_id' => $user['company_id'],
+                'company_name' => $user['resolved_company_name'] ?? $user['company_name'] ?? 'Standalone Tenant',
+                'permissions' => $user['permissions'],
+            ]
+        ]);
+    }
+
+    private function user_verify(): void
+    {
+        header('Content-Type: application/json');
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        $token = '';
+
+        if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+            $token = trim($matches[1]);
+        } else {
+            $token = trim($_GET['token'] ?? $_POST['token'] ?? '');
+        }
+
+        if (empty($token)) {
+            echo json_encode(['success' => false, 'error' => 'Bearer session token missing.']);
+            return;
+        }
+
+        $session = $this->repo->validateSessionToken($token);
+        if (!$session) {
+            echo json_encode(['success' => false, 'error' => 'Invalid or expired session token.']);
+            return;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'user' => [
+                'id' => $session['user_id'],
+                'email' => $session['email'],
+                'name' => $session['name'] ?? $session['email'],
+                'role' => $session['role'] ?? 'Observer',
+                'company_id' => $session['company_id'],
+                'permissions' => $session['permissions'],
+            ]
+        ]);
+    }
+
+    private function roles(): void
+    {
+        header('Content-Type: application/json');
+        $roles = $this->repo->getAllRoles();
+        echo json_encode(['success' => true, 'roles' => $roles]);
+    }
+
     private function setup(): void
     {
         if ($this->auth->hasAnyAdmin()) {

@@ -216,6 +216,104 @@ class AdminSettingsManager
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )');
 
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_roles ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(100) NOT NULL UNIQUE,
+                slug VARCHAR(100) NOT NULL UNIQUE,
+                description TEXT,
+                is_system INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_permissions ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                slug VARCHAR(100) NOT NULL UNIQUE,
+                group_name VARCHAR(100) NOT NULL,
+                description TEXT
+            )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_role_permissions ( /* nosec */
+                role_id INTEGER NOT NULL,
+                permission_id INTEGER NOT NULL,
+                PRIMARY KEY (role_id, permission_id)
+            )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_user_sessions ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                token_hash VARCHAR(128) NOT NULL UNIQUE,
+                ip_address VARCHAR(45),
+                user_agent TEXT,
+                expires_at DATETIME NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_audit_logs ( /* nosec */
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                company_id INTEGER,
+                user_id INTEGER,
+                license_key VARCHAR(100),
+                action VARCHAR(100) NOT NULL,
+                resource_type VARCHAR(100),
+                metadata TEXT,
+                ip_address VARCHAR(45),
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )');
+
+            // Seed default RBAC permissions if empty
+            $permCount = (int)$pdo->query("SELECT COUNT(*) FROM pm_permissions")->fetchColumn();
+            if ($permCount === 0) {
+                $defaultPerms = [
+                    ['slug' => 'ast.query', 'group_name' => 'AST Engine', 'description' => 'Build visual SQL queries and inspect product catalogs'],
+                    ['slug' => 'ast.mutate', 'group_name' => 'AST Engine', 'description' => 'Execute live database mutations and bulk catalog updates'],
+                    ['slug' => 'db.backup', 'group_name' => 'Database Tools', 'description' => 'Create and compress database table backups'],
+                    ['slug' => 'db.restore', 'group_name' => 'Database Tools', 'description' => 'Restore database snapshot backups'],
+                    ['slug' => 'db.drop', 'group_name' => 'Database Tools', 'description' => 'Delete database backups or drop snapshot records'],
+                    ['slug' => 'files.backup', 'group_name' => 'File Systems', 'description' => 'Archive directory assets and file backups'],
+                    ['slug' => 'files.delete', 'group_name' => 'File Systems', 'description' => 'Delete file backup archives'],
+                    ['slug' => 'settings.update', 'group_name' => 'System Settings', 'description' => 'Configure cron automation and governor rules'],
+                    ['slug' => 'users.manage', 'group_name' => 'User Access', 'description' => 'Manage company users and role assignments'],
+                ];
+                $insP = $pdo->prepare("INSERT INTO pm_permissions (slug, group_name, description) VALUES (?, ?, ?)");
+                foreach ($defaultPerms as $p) {
+                    $insP->execute([$p['slug'], $p['group_name'], $p['description']]);
+                }
+            }
+
+            // Seed default RBAC roles if empty
+            $roleCount = (int)$pdo->query("SELECT COUNT(*) FROM pm_roles")->fetchColumn();
+            if ($roleCount === 0) {
+                $defaultRoles = [
+                    ['name' => 'Super Admin', 'slug' => 'SuperAdmin', 'description' => 'Full administrative access across all tenant features'],
+                    ['name' => 'Company Admin', 'slug' => 'CompanyAdmin', 'description' => 'Organization administrator with user management rights'],
+                    ['name' => 'Catalog Manager', 'slug' => 'CatalogManager', 'description' => 'Full AST query and mutation capabilities'],
+                    ['name' => 'Operator', 'slug' => 'Operator', 'description' => 'Standard maintenance and backup creation operator'],
+                    ['name' => 'Observer', 'slug' => 'Observer', 'description' => 'Read-only catalog and telemetry monitoring access'],
+                ];
+                $insR = $pdo->prepare("INSERT INTO pm_roles (name, slug, description, is_system) VALUES (?, ?, ?, 1)");
+                foreach ($defaultRoles as $r) {
+                    $insR->execute([$r['name'], $r['slug'], $r['description']]);
+                }
+
+                // Map default role permissions
+                $allPerms = $pdo->query("SELECT id, slug FROM pm_permissions")->fetchAll(\PDO::FETCH_KEY_PAIR);
+                $rolesMap = $pdo->query("SELECT slug, id FROM pm_roles")->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+                $roleAssignments = [
+                    'SuperAdmin' => array_values($allPerms),
+                    'CompanyAdmin' => array_values($allPerms),
+                    'CatalogManager' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query', 'ast.mutate', 'db.backup', 'files.backup'])),
+                    'Operator' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query', 'db.backup', 'files.backup'])),
+                    'Observer' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query'])),
+                ];
+
+                $insRP = $pdo->prepare("INSERT INTO pm_role_permissions (role_id, permission_id) VALUES (?, ?)");
+                foreach ($roleAssignments as $rSlug => $pIds) {
+                    if (isset($rolesMap[$rSlug])) {
+                        $rId = (int)$rolesMap[$rSlug];
+                        foreach ($pIds as $pId) {
+                            $insRP->execute([$rId, (int)$pId]);
+                        }
+                    }
+                }
+            }
+
             // Auto-migrate schema columns safely
             $userCols = $pdo->query("PRAGMA table_info(pm_users)")->fetchAll(\PDO::FETCH_ASSOC);
             $hasCompanyId = false;
