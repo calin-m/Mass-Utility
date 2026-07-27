@@ -518,7 +518,8 @@ class Mass_Utility extends Module
         $payload = json_encode([
             'id_employee' => $employeeId,
             'bridge_url' => $this->getApiEndpoint(),
-            'expiry' => time() + $ttlSeconds
+            'expiry' => time() + $ttlSeconds,
+            'nonce' => bin2hex(random_bytes(8))
         ]);
 
         $key = hash('sha256', $bridgeToken, true);
