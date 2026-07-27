@@ -731,6 +731,15 @@ CREATE TABLE pm_audit_logs (
 
 ---
 
+### 11.2.1 SaaS Dashboard Local Endpoints (`mass_utility_dashboard/public/index.php`)
+
+| Action Key | HTTP Method | Auth Required | Description |
+| :--- | :--- | :--- | :--- |
+| `hydrate_dashboard` | `POST` | Yes | Local staging endpoint hydrating settings, presets, backups, and staging license token. |
+| `api_user_login` | `POST` | No | Authenticates local merchant operator credentials in standalone mode. |
+
+---
+
 ### 11.3 Super Admin Licensing Portal Routes (`mass_utility_admin/public/index.php`)
 
 | Action Key | HTTP Method | Auth Required | Description |
