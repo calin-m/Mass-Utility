@@ -78,12 +78,14 @@ class AdminSettingsManager
                     'PM_ENABLE_GHOST_PURGER' => true,
                     'PM_ENABLE_GDPR_SWEEPER' => true,
                     'PM_ENABLE_HISTORY' => true,
+                    'PM_ENABLE_SECURITY_HEALTH' => true,
                 ];
 
                 $defaultTiers = [
                     'basic' => array_merge($baseCaps, [
                         'PM_ENABLE_DB_TOOLS' => false,
                         'PM_ENABLE_FILE_TOOLS' => false,
+                        'multi_shop_scope' => false,
                         'query_visual_filter' => false,
                         'query_visual_compile' => false,
                         'query_visual_mutate' => false,

@@ -17,6 +17,8 @@ export interface PackageTierCapabilities {
   PM_ENABLE_GHOST_PURGER: boolean;
   PM_ENABLE_GDPR_SWEEPER: boolean;
   PM_ENABLE_HISTORY: boolean;
+  PM_ENABLE_SECURITY_HEALTH?: boolean;
+  multi_shop_scope?: boolean;
 
   // AST Engine Multi-Step Pipeline
   query_visual_filter: boolean;   // Step 1: Visual AST Data Filter
@@ -564,6 +566,8 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                 </thead>
                 <tbody className="divide-y divide-pm-border">
                   {[
+                    { label: 'Security & Health Protection Suite', key: 'PM_ENABLE_SECURITY_HEALTH', desc: 'HSTS headers, SSL enforcement, permissions auditing, and Git/Env shields' },
+                    { label: 'Multi-Store / Multi-Shop Scope Access', key: 'multi_shop_scope', desc: 'Enables cross-store multi-shop operations and scope switching' },
                     { label: 'AST Visual Data Filter (Step 1)', key: 'query_visual_filter', desc: 'Allows filtering MariaDB database rows via AST rules' },
                     { label: 'SQL Compilation & Preview (Step 2)', key: 'query_visual_compile', desc: 'Generates MariaDB SQL queries with dry-run safety previews' },
                     { label: 'Batch Action Mutations (Step 3)', key: 'query_visual_mutate', desc: 'Executes transactional batch update & delete mutations' },

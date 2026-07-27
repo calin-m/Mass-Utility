@@ -192,13 +192,25 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
         </div>
       </div>
 
-      {/* Section 3: Purging, GDPR & Governor Automations */}
+      {/* Section 3: Security, Purging & Governor Automations */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b border-pm-border">
           <Clock className="w-4 h-4 text-pm-primary" />
-          <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">3. 🧹 Purging, GDPR & Governor Automations</h4>
+          <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">3. 🛡️ Security, Purging & Governor Automations</h4>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ToggleSwitch
+            checked={capabilities.PM_ENABLE_SECURITY_HEALTH !== false}
+            onChange={() => onToggle('PM_ENABLE_SECURITY_HEALTH')}
+            title="Security & Health Protection Suite"
+            description="HSTS headers, SSL enforcement, permissions auditing, and Git/Env shields."
+          />
+          <ToggleSwitch
+            checked={!!capabilities.multi_shop_scope}
+            onChange={() => onToggle('multi_shop_scope')}
+            title="Multi-Store / Multi-Shop Scope Access"
+            description="Allows multi-store scope switching and cross-shop data operations."
+          />
           <ToggleSwitch
             checked={!!capabilities.PM_ENABLE_GHOST_PURGER}
             onChange={() => onToggle('PM_ENABLE_GHOST_PURGER')}
