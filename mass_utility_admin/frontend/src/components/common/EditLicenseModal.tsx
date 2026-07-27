@@ -208,7 +208,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
             </button>
           </div>
 
-          <div className="font-mono text-sm sm:text-base font-bold text-purple-200 select-all tracking-wider break-all bg-black/30 p-2.5 rounded-xl border border-purple-500/20">
+          <div className="font-mono text-sm sm:text-base font-bold text-pm-text select-all tracking-wider break-all bg-pm-input p-2.5 rounded-xl border border-pm-primary/30">
             {license.license_key}
           </div>
 
@@ -260,7 +260,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
             <Building2 className="w-3.5 h-3.5 text-purple-400" /> B2B / B2C License Assignment & Hierarchy
           </h4>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-3.5">
             {/* Assigned Company Dropdown */}
             <div>
               <label className="block text-xs font-semibold text-pm-secondary mb-1">Assigned Organization / Company</label>

@@ -74,7 +74,7 @@ export const FormInput: React.FC<FormInputProps> = ({
           <button
             type="button"
             onClick={onClear}
-            className="absolute right-2.5 p-1 text-pm-secondary hover:text-pm-text rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition"
+            className="absolute right-2.5 p-1 text-pm-secondary hover:text-pm-text rounded-lg hover:bg-pm-input/60 transition"
             title="Clear Input"
           >
             <X className="w-3.5 h-3.5" />

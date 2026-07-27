@@ -218,9 +218,6 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
             {copiedKey ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedKey ? 'Copied' : 'Copy'}</span>
           </button>
-          <Button variant="neutral" size="sm" icon={Edit} onClick={() => setActiveTab('edit')}>
-            Edit Key Details
-          </Button>
         </div>
       }
       tabs={subTabs}
