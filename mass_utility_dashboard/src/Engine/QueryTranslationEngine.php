@@ -196,7 +196,7 @@ class QueryTranslationEngine
                 // Fallback on bridge connection error
             }
         }
-        return [1, 2, 3];
+        return [];
     }
 
     private function compileNode(array $node, array &$joins): string
@@ -262,20 +262,20 @@ class QueryTranslationEngine
 
         switch ($operator) {
             case 'EQUAL':
-                return $column . ' = ' . $this->formatVal($rawValue, $type);
+                return $column . ' = ' . $this->formatVal($rawValue, $type, $fieldKey);
             case 'NOT_EQUAL':
-                return $column . ' != ' . $this->formatVal($rawValue, $type);
+                return $column . ' != ' . $this->formatVal($rawValue, $type, $fieldKey);
             case 'GREATER_THAN':
-                return $column . ' > ' . $this->formatVal($rawValue, $type);
+                return $column . ' > ' . $this->formatVal($rawValue, $type, $fieldKey);
             case 'LESS_THAN':
-                return $column . ' < ' . $this->formatVal($rawValue, $type);
+                return $column . ' < ' . $this->formatVal($rawValue, $type, $fieldKey);
             case 'LIKE':
                 $escaped = addslashes((string)$rawValue);
                 return $column . " LIKE '%" . $escaped . "%'";
             case 'IN':
             case 'NOT_IN':
                 $items = is_array($rawValue) ? $rawValue : explode(',', (string)$rawValue);
-                $formattedItems = array_map(fn($v) => $this->formatVal(trim((string)$v), $type), $items);
+                $formattedItems = array_map(fn($v) => $this->formatVal(trim((string)$v), $type, $fieldKey), $items);
                 $inList = implode(', ', array_filter($formattedItems, fn($v) => $v !== ''));
                 if ($inList === '') {
                     return '1 = 0';
@@ -287,14 +287,42 @@ class QueryTranslationEngine
         }
     }
 
-    private function formatVal($val, string $type): string
+    private function formatVal($val, string $type, string $fieldKey = ''): string
     {
-        if ($type === 'int') {
-            return (string)(int)$val;
-        } elseif ($type === 'float') {
-            return (string)(float)$val;
+        $rawStr = trim((string)$val);
+        $lowerStr = strtolower($rawStr);
+
+        // Smart Boolean / Flag Mapping for Active, On Sale, Has Discount
+        if (in_array($fieldKey, ['product.active', 'product.on_sale', 'product.has_discount'], true)) {
+            if (in_array($lowerStr, ['active', 'on_sale', 'yes', 'true', 'enabled', '1'], true)) {
+                return '1';
+            }
+            if (in_array($lowerStr, ['inactive', 'normal', 'no', 'false', 'disabled', '0'], true)) {
+                return '0';
+            }
         }
-        return "'" . addslashes((string)$val) . "'";
+
+        // Smart Enum Mapping for Catalog Visibility and Condition
+        if ($fieldKey === 'product.visibility') {
+            if (str_contains($lowerStr, 'both')) return "'both'";
+            if (str_contains($lowerStr, 'catalog')) return "'catalog'";
+            if (str_contains($lowerStr, 'search')) return "'search'";
+            if (str_contains($lowerStr, 'none')) return "'none'";
+        }
+        if ($fieldKey === 'product.condition') {
+            if (str_contains($lowerStr, 'new')) return "'new'";
+            if (str_contains($lowerStr, 'used')) return "'used'";
+            if (str_contains($lowerStr, 'refurb')) return "'refurbished'";
+        }
+
+        if ($type === 'int') {
+            $cleaned = preg_replace('/[^\d-]/', '', $rawStr);
+            return $cleaned !== '' ? (string)(int)$cleaned : '0';
+        } elseif ($type === 'float') {
+            $cleaned = str_replace(',', '.', preg_replace('/[^\d.,-]/', '', $rawStr));
+            return $cleaned !== '' ? (string)(float)$cleaned : '0.0';
+        }
+        return "'" . addslashes($rawStr) . "'";
     }
 }
 
