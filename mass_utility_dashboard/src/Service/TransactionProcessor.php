@@ -211,6 +211,10 @@ class TransactionProcessor
      */
     private function captureInitialState(array $productIds, array $actions, int $idShop): array
     {
+        if (empty($productIds)) {
+            return ['target_ids' => [], 'products' => [], 'specific_prices' => []];
+        }
+
         $escapedIds = implode(',', array_map('intval', $productIds));
         
         $state = [
@@ -219,52 +223,24 @@ class TransactionProcessor
             'specific_prices' => []
         ];
 
-        // 1. Determine columns to read from ps_product and ps_product_shop
-        $productCols = ['id_product'];
-        $productShopCols = ['id_product', 'id_shop'];
+        // 1. Core product columns to snapshot
+        $productCols = ['id_product', 'price', 'wholesale_price', 'ecotax', 'active', 'on_sale', 'weight', 'width', 'height', 'depth', 'reference', 'supplier_reference', 'ean13', 'upc', 'isbn', 'id_category_default', 'id_manufacturer', 'id_supplier', 'id_tax_rules_group'];
+        $productShopCols = ['id_product', 'id_shop', 'price', 'wholesale_price', 'ecotax', 'active', 'on_sale', 'minimal_quantity', 'low_stock_threshold', 'additional_shipping_cost', 'id_category_default', 'id_manufacturer', 'id_tax_rules_group'];
         
-        $hasProductFields = false;
-        $hasSpecificPrice = false;
-
-        foreach ($actions as $field => $action) {
-            switch ($field) {
-                case 'price':
-                case 'product.price':
-                    $productCols[] = 'price';
-                    $productShopCols[] = 'price';
-                    $hasProductFields = true;
-                    break;
-                case 'active':
-                case 'product.active':
-                    $productCols[] = 'active';
-                    $productShopCols[] = 'active';
-                    $hasProductFields = true;
-                    break;
-                case 'reference':
-                case 'product.reference':
-                    $productCols[] = 'reference';
-                    $hasProductFields = true;
-                    break;
-                case 'id_manufacturer':
-                case 'manufacturer.id':
-                case 'product.id_manufacturer':
-                    $productCols[] = 'id_manufacturer';
-                    $productShopCols[] = 'id_manufacturer';
-                    $hasProductFields = true;
-                    break;
-                case 'discount_percent':
-                case 'discount_amount':
-                    $hasSpecificPrice = true;
-                    break;
+        // Dynamically add any custom action keys
+        foreach (array_keys($actions) as $fieldKey) {
+            $cleanKey = preg_replace('/^(product|stock|discount|category|manufacturer|supplier)\./', '', strtolower((string)$fieldKey));
+            if (!in_array($cleanKey, $productCols, true)) {
+                $productCols[] = $cleanKey;
+            }
+            if (!in_array($cleanKey, $productShopCols, true)) {
+                $productShopCols[] = $cleanKey;
             }
         }
 
-        if ($hasProductFields) {
-            $productCols = array_unique($productCols);
-            $productShopCols = array_unique($productShopCols);
-
-            // Fetch from ps_product
-            $pRows = $this->db->executeS('SELECT ' . implode(',', $productCols) . ' FROM `' . $this->dbPrefix . 'product` WHERE id_product IN (' . $escapedIds . ')');
+        // Fetch baseline rows from ps_product
+        try {
+            $pRows = $this->db->executeS('SELECT * FROM `' . $this->dbPrefix . 'product` WHERE id_product IN (' . $escapedIds . ')');
             if (is_array($pRows)) {
                 foreach ($pRows as $row) {
                     $id = (int)$row['id_product'];
@@ -274,9 +250,13 @@ class TransactionProcessor
                     $state['products'][$id]['product'] = $row;
                 }
             }
+        } catch (\Throwable $e) {
+            // Graceful fallback for schema variations
+        }
 
-            // Fetch from ps_product_shop
-            $psRows = $this->db->executeS('SELECT ' . implode(',', $productShopCols) . ' FROM `' . $this->dbPrefix . 'product_shop` WHERE id_product IN (' . $escapedIds . ') AND id_shop = ' . (int)$idShop);
+        // Fetch baseline rows from ps_product_shop
+        try {
+            $psRows = $this->db->executeS('SELECT * FROM `' . $this->dbPrefix . 'product_shop` WHERE id_product IN (' . $escapedIds . ') AND id_shop = ' . (int)$idShop);
             if (is_array($psRows)) {
                 foreach ($psRows as $row) {
                     $id = (int)$row['id_product'];
@@ -286,13 +266,18 @@ class TransactionProcessor
                     $state['products'][$id]['product_shop'] = $row;
                 }
             }
+        } catch (\Throwable $e) {
+            // Graceful fallback for schema variations
         }
 
-        if ($hasSpecificPrice) {
+        // Fetch baseline rows from ps_specific_price (Discounts)
+        try {
             $spRows = $this->db->executeS('SELECT * FROM `' . $this->dbPrefix . 'specific_price` WHERE id_product IN (' . $escapedIds . ') AND id_shop IN (0, ' . (int)$idShop . ')');
             if (is_array($spRows)) {
                 $state['specific_prices'] = $spRows;
             }
+        } catch (\Throwable $e) {
+            // Graceful fallback for specific prices
         }
 
         return $state;
