@@ -738,7 +738,7 @@ if ($isAuthorized && !empty($_SESSION['employee_id']) && !empty($bridgeToken)) {
     }
 }
 
-$suspendedMessage = false;
+$lockoutReason = 'unauthorized';
 if ($isAuthorized) {
     try {
         $dbCheckPath = dirname(__DIR__) . '/data/pm_cloud_backups.db';
@@ -762,8 +762,10 @@ if ($isAuthorized) {
                 // If license key is missing or deleted -> Primary Access Restricted Gate
                 unset($_SESSION['employee_id']);
                 $isAuthorized = false;
-                $suspendedMessage = false;
+                $lockoutReason = 'unlicensed';
             } elseif ($licStatus === 'suspended' || $licStatus === 'expired') {
+                $targetReason = ($licStatus === 'expired') ? 'expired' : 'suspended';
+                
                 // Try to re-verify status with the central server in case it was reactivated
                 $licServer = 'https://startviziune.ro/mass_utility_admin';
                 $stmtServer = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSING_SERVER_URL'");
@@ -803,14 +805,14 @@ if ($isAuthorized) {
                 if (!$isReactivated) {
                     unset($_SESSION['employee_id']);
                     $isAuthorized = false;
-                    $suspendedMessage = true;
+                    $lockoutReason = $targetReason;
                 }
             }
         } else {
             // No SQLite database file created yet -> Primary Access Restricted Gate
             unset($_SESSION['employee_id']);
             $isAuthorized = false;
-            $suspendedMessage = false;
+            $lockoutReason = 'unlicensed';
         }
     } catch (\Throwable $e) {}
 }
@@ -949,18 +951,43 @@ if (!$isAuthorized && !$isWebhook) {
             </style>
         </head>
         <body>
-            <div class="glow"></div>
+        <?php
+        $cardTitle = 'Access Restricted: Session Expired';
+        $cardDesc = 'Your authorization session has expired or the Standalone SaaS Dashboard is securely locked.<br><br>To resume access, open your <strong>PrestaShop Back Office</strong> and click the <strong>Launch Standalone Dashboard</strong> button.';
+        $themeBg = 'rgba(99, 102, 241, 0.1)';
+        $themeBorder = 'rgba(99, 102, 241, 0.2)';
+        $themeColor = '#6366f1';
+
+        if ($lockoutReason === 'unlicensed') {
+            $cardTitle = '🔒 Access Restricted: No Active License';
+            $cardDesc = 'No active merchant license key was found for this store.<br><br>To activate access, open your <strong>PrestaShop Back Office</strong>, enter & activate a valid merchant license key in the Mass Utility module, and launch the dashboard.';
+            $themeBg = 'rgba(139, 92, 246, 0.1)';
+            $themeBorder = 'rgba(139, 92, 246, 0.2)';
+            $themeColor = '#8b5cf6';
+        } elseif ($lockoutReason === 'expired') {
+            $cardTitle = '⏰ License Expired';
+            $cardDesc = 'Your merchant license subscription term has ended.<br><br>Please renew your subscription in <strong>Mass Utility Admin</strong> or contact administrator support to reactivate your dashboard access.';
+            $themeBg = 'rgba(245, 158, 11, 0.1)';
+            $themeBorder = 'rgba(245, 158, 11, 0.2)';
+            $themeColor = '#f59e0b';
+        } elseif ($lockoutReason === 'suspended') {
+            $cardTitle = '🛑 License Suspended';
+            $cardDesc = 'Your merchant license key has been administratively suspended.<br><br>Please contact your administrator to resolve account status and restore dashboard access.';
+            $themeBg = 'rgba(239, 68, 68, 0.1)';
+            $themeBorder = 'rgba(239, 68, 68, 0.2)';
+            $themeColor = '#ef4444';
+        }
+        ?>
+        <body>
+            <div class="glow" style="background: radial-gradient(circle, <?= $themeBg ?> 0%, transparent 70%);"></div>
             <div class="card">
-                <div class="icon-container">
+                <div class="icon-container" style="background: <?= $themeBg ?>; border-color: <?= $themeBorder ?>; color: <?= $themeColor ?>;">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                     </svg>
                 </div>
-                <h1><?= $suspendedMessage ? 'License Suspended' : 'Access Restricted' ?></h1>
-                <p><?= $suspendedMessage 
-                    ? 'Your merchant license key has been suspended. Please contact your administrator to reactivate your license.' 
-                    : 'Your session has expired or the Standalone SaaS Dashboard is securely locked.<br><br>To resume access, it is advised to open your <strong>PrestaShop Back Office</strong> and click the <strong>Launch Standalone Dashboard</strong> button in the Mass Utility module.' 
-                ?></p>
+                <h1 style="color: var(--text-primary);"><?= $cardTitle ?></h1>
+                <p><?= $cardDesc ?></p>
                 <button class="btn" onclick="window.close()">Close Window</button>
             </div>
         </body>
