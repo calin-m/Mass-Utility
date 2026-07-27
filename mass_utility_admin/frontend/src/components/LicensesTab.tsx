@@ -425,19 +425,19 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
           ))}
         </div>
       ) : (
-        <div className="bg-pm-card border border-pm-border rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-pm-input/60 text-pm-secondary uppercase tracking-wider font-bold border-b border-pm-border text-[0.7rem]">
-                  <th className="p-3.5 px-4 w-[22%]">{t('th_license_key')}</th>
-                  <th className="p-3.5 w-[16%]">{t('th_assigned_user')}</th>
-                  <th className="p-3.5 w-[16%]">Company Profile</th>
-                  <th className="p-3.5 w-[9%]">{t('th_tier')}</th>
-                  <th className="p-3.5 w-[9%]">{t('th_status')}</th>
-                  <th className="p-3.5 w-[12%]">{t('th_store_url') || 'Store URL'}</th>
-                  <th className="p-3.5 w-[8%]">{t('th_expires')}</th>
-                  <th className="p-3.5 text-right w-[8%] min-w-[220px]">{t('th_actions')}</th>
+                <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
+                  <th className="p-3 w-[22%]">{t('th_license_key')}</th>
+                  <th className="p-3 w-[16%]">{t('th_assigned_user')}</th>
+                  <th className="p-3 w-[16%]">Company Profile</th>
+                  <th className="p-3 w-[9%]">{t('th_tier')}</th>
+                  <th className="p-3 w-[9%]">{t('th_status')}</th>
+                  <th className="p-3 w-[12%]">{t('th_store_url') || 'Store URL'}</th>
+                  <th className="p-3 w-[8%]">{t('th_expires')}</th>
+                  <th className="p-3 text-right w-[8%] min-w-[220px]">{t('th_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-pm-border">

@@ -24,15 +24,15 @@ export function DirectoryCardTable<T>({
   loading = false,
 }: DirectoryCardTableProps<T>) {
   return (
-    <div className="bg-pm-card border border-pm-border rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
               {headers.map((h) => (
                 <th
                   key={h.key}
-                  className={`p-3.5 ${h.align === 'right' ? 'text-right' : h.align === 'center' ? 'text-center' : ''}`}
+                  className={`p-3 ${h.align === 'right' ? 'text-right' : h.align === 'center' ? 'text-center' : ''}`}
                 >
                   {h.label}
                 </th>

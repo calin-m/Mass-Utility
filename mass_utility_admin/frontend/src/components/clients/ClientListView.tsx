@@ -446,14 +446,14 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-pm-input/60 text-pm-secondary uppercase tracking-wider font-bold border-b border-pm-border text-[0.7rem]">
-                <th className="p-3.5 w-[26%]">{t('th_client')}</th>
-                <th className="p-3.5 w-[20%]">{t('th_company_profile')}</th>
-                <th className="p-3.5 w-[14%]">Package Tier</th>
-                <th className="p-3.5 w-[14%]">{t('th_active_licenses')}</th>
-                <th className="p-3.5 w-[12%]">Store URL</th>
-                <th className="p-3.5 w-[8%]">{t('th_status')}</th>
-                <th className="p-3.5 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
+              <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
+                <th className="p-3 w-[26%]">{t('th_client')}</th>
+                <th className="p-3 w-[20%]">{t('th_company_profile')}</th>
+                <th className="p-3 w-[14%]">Package Tier</th>
+                <th className="p-3 w-[14%]">{t('th_active_licenses')}</th>
+                <th className="p-3 w-[12%]">Store URL</th>
+                <th className="p-3 w-[8%]">{t('th_status')}</th>
+                <th className="p-3 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
