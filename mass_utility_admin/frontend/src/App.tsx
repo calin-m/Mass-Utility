@@ -54,12 +54,31 @@ export const App: React.FC = () => {
   const [inspectedLicenseTab, setInspectedLicenseTab] = useState<'overview' | 'edit'>('overview');
   const [highlightedLicenseKey, setHighlightedLicenseKey] = useState<string | null>(null);
 
-  // Sync window.location.hash on tab change
+  // Dynamic Live Resolution for inspected detail objects
+  const liveCompany = React.useMemo(() => {
+    if (!inspectedCompany) return null;
+    return companies.find(c => c.id === inspectedCompany.id) || inspectedCompany;
+  }, [inspectedCompany, companies]);
+
+  const liveClient = React.useMemo(() => {
+    if (!inspectedClient) return null;
+    return users.find(u => Number(u.id) === Number(inspectedClient.id)) || inspectedClient;
+  }, [inspectedClient, users]);
+
+  const liveLicense = React.useMemo(() => {
+    if (!inspectedLicense) return null;
+    return licenses.find(l => l.id === inspectedLicense.id) || inspectedLicense;
+  }, [inspectedLicense, licenses]);
+
+  // Sync window.location.hash on tab change and trigger targeted section data sync
   useEffect(() => {
     if (window.location.hash !== `#${activeTab}`) {
       window.history.replaceState(null, '', `#${activeTab}`);
     }
-  }, [activeTab]);
+    if (authenticated) {
+      fetchAdminData();
+    }
+  }, [activeTab, authenticated]);
 
   // Listen to browser hashchange for Back/Forward support
   useEffect(() => {
@@ -73,18 +92,21 @@ export const App: React.FC = () => {
   const handleInspectClient = (client: UserAccount) => {
     setInspectedClient(client);
     setActiveTab('clients');
+    fetchAdminData();
   };
 
   const handleInspectCompany = (company: Company, licenseKey?: string | null) => {
     setInspectedCompany(company);
     setHighlightedLicenseKey(licenseKey || null);
     setActiveTab('companies');
+    fetchAdminData();
   };
 
   const handleInspectLicense = (license: License, tab: 'overview' | 'edit' = 'edit') => {
     setInspectedLicense(license);
     setInspectedLicenseTab(tab);
     setActiveTab('licenses');
+    fetchAdminData();
   };
 
 
@@ -253,7 +275,7 @@ export const App: React.FC = () => {
             onInspectClient={handleInspectClient}
             onInspectLicense={handleInspectLicense}
             onEditLicense={() => setActiveTab('licenses')}
-            initialSelectedCompany={inspectedCompany}
+            initialSelectedCompany={liveCompany}
             highlightedLicenseKey={highlightedLicenseKey}
           />
         )}
@@ -267,7 +289,7 @@ export const App: React.FC = () => {
             tiers={tiers}
             onRefresh={fetchAdminData}
             showAlert={showAlert}
-            initialSelectedUser={inspectedClient}
+            initialSelectedUser={liveClient}
             onInspectCompany={handleInspectCompany}
             onInspectLicense={handleInspectLicense}
           />
@@ -280,7 +302,7 @@ export const App: React.FC = () => {
             users={users}
             companies={companies}
             tiers={tiers}
-            initialSelectedLicense={inspectedLicense}
+            initialSelectedLicense={liveLicense}
             initialDetailTab={inspectedLicenseTab}
             onRefresh={fetchAdminData}
             showAlert={showAlert}
