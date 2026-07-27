@@ -12,6 +12,7 @@ interface CompaniesTabProps {
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (user: any) => void;
+  onInspectLicense?: (license: any, tab?: 'overview' | 'edit') => void;
   onEditLicense?: (license: any) => void;
   initialSelectedCompany?: Company | null;
   highlightedLicenseKey?: string | null;
@@ -25,6 +26,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
   onRefresh,
   showAlert,
   onInspectClient,
+  onInspectLicense,
   onEditLicense,
   initialSelectedCompany,
   highlightedLicenseKey,
@@ -63,6 +65,7 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
           onRefresh={onRefresh}
           showAlert={showAlert}
           onInspectClient={onInspectClient}
+          onInspectLicense={onInspectLicense}
           onEditLicense={onEditLicense}
           highlightedLicenseKey={highlightedLicenseKey || undefined}
         />

@@ -49,6 +49,8 @@ export const App: React.FC = () => {
 
   const [inspectedClient, setInspectedClient] = useState<UserAccount | null>(null);
   const [inspectedCompany, setInspectedCompany] = useState<Company | null>(null);
+  const [inspectedLicense, setInspectedLicense] = useState<License | null>(null);
+  const [inspectedLicenseTab, setInspectedLicenseTab] = useState<'overview' | 'edit'>('overview');
   const [highlightedLicenseKey, setHighlightedLicenseKey] = useState<string | null>(null);
 
   // Sync window.location.hash on tab change
@@ -76,6 +78,12 @@ export const App: React.FC = () => {
     setInspectedCompany(company);
     setHighlightedLicenseKey(licenseKey || null);
     setActiveTab('companies');
+  };
+
+  const handleInspectLicense = (license: License, tab: 'overview' | 'edit' = 'edit') => {
+    setInspectedLicense(license);
+    setInspectedLicenseTab(tab);
+    setActiveTab('licenses');
   };
 
 
@@ -242,6 +250,7 @@ export const App: React.FC = () => {
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             onInspectClient={handleInspectClient}
+            onInspectLicense={handleInspectLicense}
             onEditLicense={() => setActiveTab('licenses')}
             initialSelectedCompany={inspectedCompany}
             highlightedLicenseKey={highlightedLicenseKey}
@@ -259,6 +268,7 @@ export const App: React.FC = () => {
             showAlert={showAlert}
             initialSelectedUser={inspectedClient}
             onInspectCompany={handleInspectCompany}
+            onInspectLicense={handleInspectLicense}
           />
         )}
 
@@ -269,6 +279,8 @@ export const App: React.FC = () => {
             users={users}
             companies={companies}
             tiers={tiers}
+            initialSelectedLicense={inspectedLicense}
+            initialDetailTab={inspectedLicenseTab}
             onRefresh={fetchAdminData}
             showAlert={showAlert}
             onInspectClient={handleInspectClient}

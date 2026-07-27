@@ -32,6 +32,8 @@ interface LicensesTabProps {
   users?: UserAccount[];
   companies?: any[];
   tiers?: any[];
+  initialSelectedLicense?: License | null;
+  initialDetailTab?: 'overview' | 'edit';
   onRefresh: () => void;
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (client: UserAccount) => void;
@@ -43,6 +45,8 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   users = [],
   companies = [],
   tiers = [],
+  initialSelectedLicense = null,
+  initialDetailTab: propDetailTab = 'overview',
   onRefresh,
   showAlert,
   onInspectClient,
@@ -53,9 +57,9 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 
   // Sub-View Inspection Navigation State ('list' vs 'details')
-  const [activeSubView, setActiveSubView] = useState<'list' | 'details'>('list');
-  const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
-  const [initialDetailTab, setInitialDetailTab] = useState<'overview' | 'edit'>('overview');
+  const [activeSubView, setActiveSubView] = useState<'list' | 'details'>(initialSelectedLicense ? 'details' : 'list');
+  const [selectedLicense, setSelectedLicense] = useState<License | null>(initialSelectedLicense || null);
+  const [initialDetailTab, setInitialDetailTab] = useState<'overview' | 'edit'>(propDetailTab);
 
   const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
 

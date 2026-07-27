@@ -344,11 +344,12 @@ class Mass_Utility extends Module
                         if (class_exists('\Configuration')) {
                             $currentTier = \Configuration::get('PM_LICENSE_TIER');
                         }
-                        if ($currentTier !== ($data['tier'] ?? 'pro')) {
+                        $newTier = !empty($data['tier']) ? $data['tier'] : ($currentTier ?: 'basic');
+                        if ($currentTier !== $newTier) {
                             if (class_exists('\Configuration')) {
-                                \Configuration::updateValue('PM_LICENSE_TIER', $data['tier'] ?? 'pro');
+                                \Configuration::updateValue('PM_LICENSE_TIER', $newTier);
                             }
-                            $this->syncLocalSQLite($licenseKey, $secureToken, $data['tier'] ?? 'pro', $data['capabilities'] ?? null);
+                            $this->syncLocalSQLite($licenseKey, $secureToken, $newTier, $data['capabilities'] ?? null);
                         }
                     } else {
                         $serverError = $data['error'] ?? ($data['message'] ?? '');
