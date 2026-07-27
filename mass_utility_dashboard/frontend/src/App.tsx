@@ -69,6 +69,15 @@ function AppContent() {
       } catch (e) {}
     };
     initData();
+
+    // Instant OTT URL Parameter Sanitizer (Strips ?ott= token from URL bar)
+    try {
+      if (window.location.search.includes('ott=')) {
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('ott');
+        window.history.replaceState({}, document.title, cleanUrl.toString());
+      }
+    } catch (e) {}
   }, []);
 
   // Sync theme choices to document classes and localStorage
