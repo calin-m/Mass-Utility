@@ -30,6 +30,7 @@ import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { maskLicenseKey, copyLicenseKeyToClipboard } from '../../utils/licenseUtils';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 import { parseDomains, formatDomainsForInput } from '../../utils/domainUtils';
+import { DomainTagSelector } from '../common/DomainTagSelector';
 
 export interface LicenseDetailsViewProps {
   license: License;
@@ -392,45 +393,15 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
             Specify the exact store URL or domain origin allowed to activate and consume this software license key.
           </p>
 
-          <form onSubmit={handleSaveStoreUrl} className="space-y-4 max-w-xl">
-            <div>
-              <label className="text-xs font-bold text-pm-text block mb-1.5">Allowed Store Domains</label>
-              <textarea
-                rows={3}
-                placeholder="e.g. store.myshop.com, staging.myshop.com, dev.myshop.com"
-                value={storeUrlInput}
-                onChange={(e) => setStoreUrlInput(e.target.value)}
-                className="w-full bg-pm-input border border-pm-border rounded-lg p-3 text-xs font-mono text-pm-text focus:border-purple-500 focus:outline-none resize-none"
-              />
-              <span className="text-[11px] text-pm-secondary block mt-1">
-                Enter multiple allowed store domains separated by commas or new lines.
-              </span>
-            </div>
+          <form onSubmit={handleSaveStoreUrl} className="space-y-4 max-w-2xl">
+            <DomainTagSelector
+              value={storeUrlInput}
+              onChange={setStoreUrlInput}
+              placeholder="Type store domain origin (e.g. store.myshop.com) and press Enter..."
+              helperText="Type a store domain host origin and press Enter, Comma, or Space. Click ✕ on a tag to remove it."
+            />
 
-            {/* Domain Badge Pill Preview */}
-            <div className="p-3 bg-pm-input/50 rounded-lg border border-pm-border space-y-2">
-              <span className="text-[11px] font-bold text-pm-secondary block">Domain Whitelist Preview:</span>
-              {(() => {
-                const parsed = parseDomains(storeUrlInput);
-                if (parsed.length === 0) {
-                  return <span className="text-xs text-pm-secondary italic">Unbound (Any Store Domain)</span>;
-                }
-                return (
-                  <div className="flex flex-wrap gap-1.5">
-                    {parsed.map((dom, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-xs"
-                      >
-                        🌐 {dom}
-                      </span>
-                    ))}
-                  </div>
-                );
-              })()}
-            </div>
-
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <Button type="submit" variant="primary" size="md" icon={Save} loading={savingDomain}>
                 Save Domain Whitelist
               </Button>

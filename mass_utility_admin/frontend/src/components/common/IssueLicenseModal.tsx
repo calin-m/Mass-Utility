@@ -6,6 +6,7 @@ import { FormInput } from './FormInput';
 import { FormSelect } from './FormSelect';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { UserAccount } from '../../types/adminApi';
+import { DomainTagSelector } from './DomainTagSelector';
 
 export interface IssueLicenseModalProps {
   isOpen: boolean;
@@ -84,13 +85,12 @@ export const IssueLicenseModal: React.FC<IssueLicenseModalProps> = ({
           onChange={(e) => setExpires(e.target.value)}
         />
 
-        <FormInput
-          label={t('field_bound_url')}
-          icon={Globe}
-          type="text"
-          placeholder={t('ph_store_url')}
+        <DomainTagSelector
           value={storeUrl}
-          onChange={(e) => setStoreUrl(e.target.value)}
+          onChange={setStoreUrl}
+          label="Allowed Store Domains (Optional)"
+          placeholder="Type store domain origin (e.g. store.myshop.com) and press Enter..."
+          helperText="Type domain origin host and press Enter/Comma. Leave empty for unbound key."
         />
 
         <div className="flex justify-end gap-3 pt-4 border-t border-pm-border">

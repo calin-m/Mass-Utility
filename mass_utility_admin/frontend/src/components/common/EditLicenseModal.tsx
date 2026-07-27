@@ -8,6 +8,7 @@ import { StatusBadge } from './StatusBadge';
 import { License, UserAccount, Company } from '../../types/adminApi';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 import { useTranslation } from '../../i18n/LanguageContext';
+import { DomainTagSelector } from './DomainTagSelector';
 
 export interface EditLicenseData {
   package_tier: string;
@@ -233,7 +234,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
             <Sparkles className="w-3.5 h-3.5 text-purple-400" /> General License Parameters
           </h4>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <FormSelect
               label="Package Tier"
               value={editTier}
@@ -251,6 +252,27 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
                 { value: 'expired', label: '🟠 EXPIRED' },
               ]}
             />
+
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-semibold text-pm-secondary">Expiration Date</label>
+                {editExpiresAt && (
+                  <button
+                    type="button"
+                    onClick={() => setEditExpiresAt('')}
+                    className="text-[10px] text-purple-400 hover:underline font-mono"
+                  >
+                    ♾️ Lifetime
+                  </button>
+                )}
+              </div>
+              <input
+                type="date"
+                value={editExpiresAt}
+                onChange={e => setEditExpiresAt(e.target.value)}
+                className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-mono text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
+              />
+            </div>
           </div>
         </div>
 
@@ -265,7 +287,7 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
             </span>
           </div>
 
-          <div className="flex flex-col gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* Primary Company Ownership Dropdown */}
             <div>
               <label className="block text-xs font-semibold text-pm-secondary mb-1">Primary Owning Company</label>
@@ -309,59 +331,18 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
           </div>
         </div>
 
-        {/* Card 3: Store Domain Binding & Expiration Rules */}
-        <div className="p-4 bg-pm-card/60 backdrop-blur-sm border border-pm-border hover:border-purple-500/30 transition-all rounded-xl space-y-4">
+        {/* Card 3: Dedicated Multi-Domain Whitelist Card */}
+        <div className="p-4 bg-pm-card/60 backdrop-blur-sm border border-pm-border hover:border-purple-500/30 transition-all rounded-xl space-y-3">
           <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-            <Globe className="w-3.5 h-3.5 text-purple-400" /> Domain & Expiration Rules
+            <Globe className="w-3.5 h-3.5 text-emerald-400" /> Allowed Store Domain Whitelist
           </h4>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Bound Store Domain */}
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-semibold text-pm-secondary">Allowed Store Domains</label>
-                {editStoreUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setEditStoreUrl('')}
-                    className="text-[10px] text-purple-400 hover:underline font-mono"
-                  >
-                    🧹 Clear Domains
-                  </button>
-                )}
-              </div>
-              <textarea
-                rows={2}
-                placeholder="e.g. store.myshop.com, staging.myshop.com"
-                value={editStoreUrl}
-                onChange={e => setEditStoreUrl(e.target.value)}
-                className="w-full bg-pm-input border border-pm-border rounded-xl p-2 text-xs font-mono text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all resize-none"
-              />
-              <span className="text-[10px] text-pm-secondary block mt-1">Separate multiple allowed domains with commas or new lines.</span>
-            </div>
-
-            {/* Expiration Date Picker */}
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-semibold text-pm-secondary">Expiration Date</label>
-                {editExpiresAt && (
-                  <button
-                    type="button"
-                    onClick={() => setEditExpiresAt('')}
-                    className="text-[10px] text-purple-400 hover:underline font-mono"
-                  >
-                    ♾️ Lifetime Key
-                  </button>
-                )}
-              </div>
-              <input
-                type="date"
-                value={editExpiresAt}
-                onChange={e => setEditExpiresAt(e.target.value)}
-                className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-mono text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
-              />
-            </div>
-          </div>
+          <DomainTagSelector
+            value={editStoreUrl}
+            onChange={setEditStoreUrl}
+            placeholder="Type store domain (e.g. store.myshop.com) and press Enter..."
+            helperText="Type a store domain host origin and press Enter, Comma, or Space. Click ✕ on a pill tag to remove it."
+          />
         </div>
 
         {/* Action Controls */}
