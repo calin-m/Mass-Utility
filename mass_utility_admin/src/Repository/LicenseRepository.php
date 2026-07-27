@@ -161,7 +161,7 @@ class LicenseRepository
         return $stmt->execute([$userId, $cleanStoreUrl, $licenseId]);
     }
 
-    public function updateLicense(int $id, string $status, string $tier, ?string $expiry, ?string $storeUrl = null, ?int $userId = null, ?int $companyId = null): bool
+    public function updateLicense(int $id, string $status, ?string $tier, ?string $expiry, ?string $storeUrl = null, ?int $userId = null, ?int $companyId = null): bool
     {
         $cleanStoreUrl = null;
         if (!empty($storeUrl)) {
@@ -203,7 +203,7 @@ class LicenseRepository
             }
         }
 
-        $stmt = $this->db->prepare("UPDATE pm_licenses SET status = ?, package_tier = ?, expires_at = ?, store_url = ?, user_id = ?, company_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE pm_licenses SET status = ?, package_tier = COALESCE(NULLIF(?, ''), package_tier), expires_at = ?, store_url = ?, user_id = ?, company_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         return $stmt->execute([$status, $tier, $expiry, $cleanStoreUrl, $userId, $companyId, $id]);
     }
 
@@ -495,33 +495,50 @@ class LicenseRepository
         foreach ($licensesToRevoke as $lic) {
             $key = $lic['license_key'] ?? '';
             $rawUrl = $lic['store_url'] ?? '';
-            if (empty($key) || empty($rawUrl)) continue;
+            if (empty($key)) continue;
 
-            $domains = json_decode($rawUrl, true);
-            if (!is_array($domains)) {
-                $domains = [$rawUrl];
-            }
+            // 1. Instantly synchronize deletion with Dashboard SQLite DB
+            try {
+                $dashDbPath = dirname(dirname(__DIR__)) . '/mass_utility_dashboard/data/pm_cloud_backups.db';
+                if (!file_exists($dashDbPath)) {
+                    $dashDbPath = dirname(dirname(dirname(__DIR__))) . '/mass_utility_dashboard/data/pm_cloud_backups.db';
+                }
+                if (file_exists($dashDbPath)) {
+                    $dashPdo = new \PDO('sqlite:' . $dashDbPath);
+                    $dashPdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                    $dashStmt = $dashPdo->prepare("DELETE FROM pm_licenses WHERE license_key = ?");
+                    $dashStmt->execute([$key]);
+                }
+            } catch (\Throwable $t) {}
 
-            foreach ($domains as $domain) {
-                $domain = trim($domain);
-                if (empty($domain)) continue;
+            // 2. Real-Time Push Revocation Webhook to all bound store domain origins
+            if (!empty($rawUrl)) {
+                $domains = json_decode($rawUrl, true);
+                if (!is_array($domains)) {
+                    $domains = [$rawUrl];
+                }
 
-                $scheme = (strpos($domain, 'http') === 0) ? '' : 'https://';
-                $targetUrl = rtrim($scheme . $domain, '/') . '/modules/mass_utility/api.php?action=revoke_license';
+                foreach ($domains as $domain) {
+                    $domain = trim($domain);
+                    if (empty($domain)) continue;
 
-                try {
-                    $ch = curl_init($targetUrl);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_POST, true);
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-                        'license_key' => $key,
-                        'timestamp' => time()
-                    ]));
-                    curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                    curl_exec($ch);
-                    curl_close($ch);
-                } catch (\Throwable $t) {}
+                    $scheme = (strpos($domain, 'http') === 0) ? '' : 'https://';
+                    $targetUrl = rtrim($scheme . $domain, '/') . '/modules/mass_utility/api.php?action=revoke_license';
+
+                    try {
+                        $ch = curl_init($targetUrl);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_POST, true);
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                            'license_key' => $key,
+                            'timestamp' => time()
+                        ]));
+                        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                        curl_exec($ch);
+                        curl_close($ch);
+                    } catch (\Throwable $t) {}
+                }
             }
         }
     }

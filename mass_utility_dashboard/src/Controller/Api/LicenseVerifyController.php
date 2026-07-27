@@ -42,8 +42,8 @@ class LicenseVerifyController
             $lic = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$lic) {
-                // If they have an unassigned license key, bind it. Otherwise generate basic tier.
-                $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE user_id = ? AND store_url IS NULL LIMIT 1");
+                // Check if user has an unassigned license key to bind to this domain
+                $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE user_id = ? AND (store_url IS NULL OR store_url = '') LIMIT 1");
                 $stmt->execute([$user['id']]);
                 $lic = $stmt->fetch(\PDO::FETCH_ASSOC);
                 
@@ -52,13 +52,8 @@ class LicenseVerifyController
                     $stmt->execute([$storeUrl, $lic['id']]);
                     $lic['store_url'] = $storeUrl;
                 } else {
-                    $key = 'MASS-' . strtoupper(bin2hex(random_bytes(8))) . '-' . strtoupper(bin2hex(random_bytes(8)));
-                    $stmt = $pdo->prepare("INSERT INTO pm_licenses (user_id, license_key, store_url, package_tier) VALUES (?, ?, ?, 'basic')");
-                    $stmt->execute([$user['id'], $key, $storeUrl]);
-                    
-                    $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE license_key = ?");
-                    $stmt->execute([$key]);
-                    $lic = $stmt->fetch(\PDO::FETCH_ASSOC);
+                    echo json_encode(['success' => false, 'error' => 'No active license key found for this store domain. Please contact portal administrator.']);
+                    exit;
                 }
             } elseif (empty($lic['store_url'])) {
                 $stmt = $pdo->prepare("UPDATE pm_licenses SET store_url = ? WHERE id = ?");

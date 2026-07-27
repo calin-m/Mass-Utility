@@ -419,7 +419,7 @@ class AdminApiController
         if ($companyId === 0) $companyId = null;
 
         $status = $_POST['status'] ?? 'active';
-        $tier = $_POST['package_tier'] ?? $_POST['tier'] ?? 'basic';
+        $tier = !empty($_POST['package_tier']) ? trim($_POST['package_tier']) : (!empty($_POST['tier']) ? trim($_POST['tier']) : null);
         $storeUrl = $_POST['store_url'] ?? null;
         if (empty($storeUrl)) {
             $storeUrl = null;
