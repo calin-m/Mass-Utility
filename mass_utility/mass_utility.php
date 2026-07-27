@@ -364,7 +364,7 @@ class Mass_Utility extends Module
             }
         }
 
-        if (empty($secureToken) && !$licenseSuspended) {
+        if ((empty($secureToken) || empty($licenseKey)) && !$licenseSuspended) {
             return $this->renderActivationForm($activationError);
         }
 
@@ -378,11 +378,7 @@ class Mass_Utility extends Module
         }
 
         $standaloneUrl = $this->getSaaSUrl();
-        $launcherUrl = $standaloneUrl;
-        if (!empty($ott)) {
-            $launcherUrl .= '?ott=' . urlencode($ott);
-        }
-
+        $launcherUrl = !empty($ott) ? rtrim($standaloneUrl, '/') . '/?ott=' . urlencode($ott) : $standaloneUrl;
         $apiEndpoint = $this->getApiEndpoint();
 
         // Convert relative SaaS URL to absolute URL for cURL
@@ -390,7 +386,7 @@ class Mass_Utility extends Module
         if (strpos($curlSaaSUrl, 'http') !== 0) {
             $protocol = $this->getPreferredScheme();
             $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+            $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
             $curlSaaSUrl = $protocol . $host . rtrim($basePath, '/\\') . '/../mass_utility_dashboard/';
         }
 
@@ -407,14 +403,16 @@ class Mass_Utility extends Module
             ]);
             curl_setopt($ch, CURLOPT_TIMEOUT, 3);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $res = curl_exec($ch);
-            $chClosed = curl_close($ch);
+            $gRes = curl_exec($ch);
+            curl_close($ch);
             
-            if ($res) {
-                $statusData = json_decode($res, true);
-                $isGdriveConnected = !empty($statusData['authenticated']);
-                $gdriveConfigured = !empty($statusData['configured']);
-                $authUrl = $statusData['auth_url'] ?? '#';
+            if ($gRes) {
+                $gData = json_decode($gRes, true);
+                if (!empty($gData['success'])) {
+                    $isGdriveConnected = !empty($gData['authenticated']);
+                    $authUrl = $gData['auth_url'] ?? '#';
+                    $gdriveConfigured = !empty($gData['configured']);
+                }
             }
         } catch (\Throwable $e) {}
 
@@ -549,8 +547,8 @@ class Mass_Utility extends Module
     private function renderBridgeStatusPage(string $launcherUrl, string $apiEndpoint, bool $isGdriveConnected = false, string $authUrl = '#', bool $gdriveConfigured = false, bool $isSuspended = false): string
     {
         $permsFixed = (class_exists('\Tools') && \Tools::getValue('perms_fixed') == '1');
-        $activeTier = class_exists('\Configuration') ? strtoupper(\Configuration::get('PM_LICENSE_TIER') ?: 'PRO') : 'PRO';
-        $tierIcon = ($activeTier === 'ENTERPRISE') ? '👑' : (($activeTier === 'DEVELOPER') ? '🛠️' : (($activeTier === 'BASIC') ? '📦' : '⚡'));
+        $activeTier = class_exists('\Configuration') ? strtoupper(\Configuration::get('PM_LICENSE_TIER') ?: 'UNLICENSED') : 'UNLICENSED';
+        $tierIcon = ($activeTier === 'ENTERPRISE') ? '👑' : (($activeTier === 'DEVELOPER') ? '🛠️' : (($activeTier === 'BASIC') ? '📦' : (($activeTier === 'PRO') ? '⚡' : '🔒')));
 
         $successBanner = '';
         if ($permsFixed) {

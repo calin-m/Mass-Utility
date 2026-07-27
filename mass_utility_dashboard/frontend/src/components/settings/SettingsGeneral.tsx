@@ -68,7 +68,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
     governor_autopilot: false,
     sweeper_execution: false,
   });
-  const [tierName, setTierName] = useState('free');
+  const [tierName, setTierName] = useState('unlicensed');
 
   // Hydrate settings
   useEffect(() => {
@@ -83,7 +83,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       governor_autopilot: false,
       sweeper_execution: false,
     };
-    let tier = 'free';
+    let tier = 'unlicensed';
 
     if (settings.PM_LICENSE_TOKEN) {
       try {
@@ -256,62 +256,67 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
   return (
     <div className="space-y-6">
       {/* License Subscription Info Card */}
-      <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-pm-success rounded-full shadow-lg shadow-pm-success/50 animate-pulse"></div>
-            <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">⭐️ License Subscription Details</h3>
-          </div>
-          <span className="bg-pm-success/10 text-pm-success text-xs font-bold px-3 py-1.5 rounded-lg border border-pm-success/20 uppercase">
-            Active License
-          </span>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-pm-border">
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-1">License Subscription Key</label>
-              <div className="font-mono text-lg font-bold text-pm-warning tracking-wider py-1">
-                {settings.PM_LICENSE_KEY ? `${settings.PM_LICENSE_KEY.substring(0, 9)}-••••-••••-••••` : 'None'}
+      {(() => {
+        const isUnlicensed = !settings.PM_LICENSE_KEY || tierName === 'unlicensed' || tierName === 'free';
+        return (
+          <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full shadow-lg animate-pulse ${isUnlicensed ? 'bg-pm-danger shadow-pm-danger/50' : 'bg-pm-success shadow-pm-success/50'}`}></div>
+                <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">⭐️ License Subscription Details</h3>
               </div>
+              <span className={`text-xs font-bold px-3 py-1.5 rounded-lg border uppercase ${isUnlicensed ? 'bg-pm-danger/10 text-pm-danger border-pm-danger/20' : 'bg-pm-success/10 text-pm-success border-pm-success/20'}`}>
+                {isUnlicensed ? 'No Active License' : 'Active License'}
+              </span>
             </div>
-            <div>
-              <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-1">Subscription Package Tier</label>
-              <div className="text-md font-extrabold text-pm-primary uppercase tracking-wider py-1">
-                {tierName} TIER
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-pm-border">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-1">License Subscription Key</label>
+                  <div className="font-mono text-lg font-bold text-pm-warning tracking-wider py-1">
+                    {!isUnlicensed && settings.PM_LICENSE_KEY ? `${settings.PM_LICENSE_KEY.substring(0, 9)}-••••-••••-••••` : 'NO ACTIVE LICENSE'}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-1">Subscription Package Tier</label>
+                  <div className="text-md font-extrabold text-pm-primary uppercase tracking-wider py-1">
+                    {!isUnlicensed ? `${tierName.toUpperCase()} TIER` : 'NO ACTIVE LICENSE'}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="md:border-l border-pm-border md:pl-6">
-            <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-3">Active Feature Capabilities</label>
-            <ul className="grid grid-cols-1 gap-2.5 text-xs text-pm-text-secondary">
-              <li className="flex items-center gap-2.5">
-                <span className="w-1.5 h-1.5 bg-pm-success rounded-full"></span> Raw SQL Execution (Terminal)
-              </li>
-              <li className="flex items-center gap-2.5">
-                <span className="w-1.5 h-1.5 bg-pm-success rounded-full"></span> Local Backups (Manual)
-              </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.query_visual_execute ? 'text-pm-text-secondary/75' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.query_visual_execute ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
-                Visual Query Builder (AST Editor) {!capabilities.query_visual_execute && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
-              </li>
-              <li className={`flex items-center gap-2.5 ${!isCloudEnabled ? 'text-pm-text-secondary/75' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isCloudEnabled ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
-                Offsite Cloud Backup (Google Drive) {!isCloudEnabled && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
-              </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.backup_automation ? 'text-pm-text-secondary/75' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.backup_automation ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
-                Scheduled Backups (Cron CLI) {!capabilities.backup_automation && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
-              </li>
-              <li className={`flex items-center gap-2.5 ${!capabilities.governor_autopilot ? 'text-pm-text-secondary/75' : ''}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${capabilities.governor_autopilot ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
-                Safety Auto-Pilot Tuning {!capabilities.governor_autopilot && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
-              </li>
-            </ul>
+              <div className="md:border-l border-pm-border md:pl-6">
+                <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-3">Active Feature Capabilities</label>
+                <ul className="grid grid-cols-1 gap-2.5 text-xs text-pm-text-secondary">
+                  <li className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 bg-pm-success rounded-full"></span> Raw SQL Execution (Terminal)
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 bg-pm-success rounded-full"></span> Local Backups (Manual)
+                  </li>
+                  <li className={`flex items-center gap-2.5 ${!capabilities.query_visual_execute ? 'text-pm-text-secondary/75' : ''}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${capabilities.query_visual_execute ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
+                    Visual Query Builder (AST Editor) {!capabilities.query_visual_execute && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
+                  </li>
+                  <li className={`flex items-center gap-2.5 ${!isCloudEnabled ? 'text-pm-text-secondary/75' : ''}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isCloudEnabled ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
+                    Offsite Cloud Backup (Google Drive) {!isCloudEnabled && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
+                  </li>
+                  <li className={`flex items-center gap-2.5 ${!capabilities.backup_automation ? 'text-pm-text-secondary/75' : ''}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${capabilities.backup_automation ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
+                    Scheduled Backups (Cron CLI) {!capabilities.backup_automation && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
+                  </li>
+                  <li className={`flex items-center gap-2.5 ${!capabilities.governor_autopilot ? 'text-pm-text-secondary/75' : ''}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${capabilities.governor_autopilot ? 'bg-pm-success' : 'bg-pm-text-secondary/60'}`}></span>
+                    Safety Auto-Pilot Tuning {!capabilities.governor_autopilot && <span className="text-[0.65rem] bg-pm-input text-pm-text-secondary font-bold px-1.5 py-0.5 rounded ml-2 uppercase">PRO LOCK</span>}
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Cloud Sync & Retention Control Card */}
       <div className={`bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl transition-opacity duration-300 ${!isCloudEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
