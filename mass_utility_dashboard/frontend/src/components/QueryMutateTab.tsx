@@ -609,22 +609,35 @@ export const QueryMutateTab: React.FC = () => {
             <option value="product.visibility">Product: Catalog Visibility</option>
             <option value="product.condition">Product: Condition</option>
           </optgroup>
-          <optgroup label="Pricing & Discounts">
+          <optgroup label="🏷️ Pricing & Discounts">
             <option value="product.price">Product: Base Price</option>
             <option value="product.final_price">Product: Final Discounted Price</option>
             <option value="product.wholesale_price">Product: Wholesale / Cost Price</option>
             <option value="product.has_discount">Product: Has Active Discount</option>
-            <option value="discount.reduction_percent">Discount: Reduction %</option>
-            <option value="discount.reduction_amount">Discount: Flat Reduction Amount</option>
+            <option value="discount.reduction_percent">Discount: Reduction Percentage (%)</option>
+            <option value="discount.reduction_amount">Discount: Flat Reduction Amount ($)</option>
+            <option value="discount.reduction_type">Discount: Reduction Type (percentage/amount)</option>
+            <option value="discount.from">Discount: Validity Start Date</option>
+            <option value="discount.to">Discount: Validity Expiration Date</option>
+            <option value="discount.from_quantity">Discount: Tier Minimum Volume Quantity</option>
             <option value="product.ecotax">Product: Ecotax Amount</option>
           </optgroup>
           <optgroup label="Stock & Quantities">
             <option value="product.quantity">Product: Stock Quantity</option>
             <option value="product.weight">Product: Weight (kg)</option>
+            <option value="product.minimal_quantity">Product: Minimum Order Quantity</option>
+            <option value="product.low_stock_threshold">Product: Low Stock Alert Threshold</option>
+          </optgroup>
+          <optgroup label="Dimensions & Logistics">
+            <option value="product.width">Product: Width (cm)</option>
+            <option value="product.height">Product: Height (cm)</option>
+            <option value="product.depth">Product: Depth / Length (cm)</option>
+            <option value="product.additional_shipping_cost">Product: Additional Shipping Fee</option>
           </optgroup>
           <optgroup label="Categories & Associations">
             <option value="category.id">Category: Category ID</option>
             <option value="manufacturer.id">Manufacturer: Manufacturer ID</option>
+            <option value="supplier.id">Supplier: Primary Supplier ID</option>
             <option value="employee.id_profile">Employee: Profile (User Scope)</option>
           </optgroup>
           <optgroup label="References & Barcodes">

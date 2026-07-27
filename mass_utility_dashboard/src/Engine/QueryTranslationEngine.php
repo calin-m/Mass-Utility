@@ -128,6 +128,61 @@ class QueryTranslationEngine
             'type' => 'float',
             'join' => 'specific_price'
         ],
+        'discount.reduction_type' => [
+            'column' => 'sp.reduction_type',
+            'type' => 'string',
+            'join' => 'specific_price'
+        ],
+        'discount.from' => [
+            'column' => 'sp.from',
+            'type' => 'string',
+            'join' => 'specific_price'
+        ],
+        'discount.to' => [
+            'column' => 'sp.to',
+            'type' => 'string',
+            'join' => 'specific_price'
+        ],
+        'discount.from_quantity' => [
+            'column' => 'sp.from_quantity',
+            'type' => 'int',
+            'join' => 'specific_price'
+        ],
+        'product.minimal_quantity' => [
+            'column' => 'ps.minimal_quantity',
+            'type' => 'int',
+            'join' => null
+        ],
+        'product.low_stock_threshold' => [
+            'column' => 'ps.low_stock_threshold',
+            'type' => 'int',
+            'join' => null
+        ],
+        'product.width' => [
+            'column' => 'p.width',
+            'type' => 'float',
+            'join' => null
+        ],
+        'product.height' => [
+            'column' => 'p.height',
+            'type' => 'float',
+            'join' => null
+        ],
+        'product.depth' => [
+            'column' => 'p.depth',
+            'type' => 'float',
+            'join' => null
+        ],
+        'product.additional_shipping_cost' => [
+            'column' => 'ps.additional_shipping_cost',
+            'type' => 'float',
+            'join' => null
+        ],
+        'supplier.id' => [
+            'column' => 'p.id_supplier',
+            'type' => 'int',
+            'join' => null
+        ],
         'employee.id_profile' => [
             'column' => '1',
             'type' => 'int',

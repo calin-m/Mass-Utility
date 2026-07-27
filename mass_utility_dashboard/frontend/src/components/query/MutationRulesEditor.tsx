@@ -134,15 +134,32 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
                   <option value="weight">Product Weight (kg)</option>
                   <option value="quantity">Available Quantity / Stock</option>
                   <option value="minimal_quantity">Minimum Quantity For Sale</option>
+                  <option value="low_stock_threshold">Low Stock Alert Threshold</option>
+                  <option value="out_of_stock">Out-of-Stock Policy (0/1/2)</option>
+                </optgroup>
+                <optgroup label="🏷️ Discounts & Special Pricing">
+                  <option value="discount_percent">Discount Percentage (%)</option>
+                  <option value="discount_amount">Discount Fixed Amount ($)</option>
+                  <option value="discount_type">Discount Type (percentage / amount)</option>
+                  <option value="discount_from">Discount Start Date (YYYY-MM-DD)</option>
+                  <option value="discount_to">Discount Expiration Date (YYYY-MM-DD)</option>
+                  <option value="from_quantity">Discount Tier Minimum Quantity</option>
                 </optgroup>
                 <optgroup label="Status & Catalog Associations">
                   <option value="active">Active Status (1 / 0)</option>
                   <option value="on_sale">On Sale Flag (1 / 0)</option>
                   <option value="visibility">Catalog Visibility</option>
                   <option value="condition">Product Condition</option>
-                  <option value="id_category_default">Default Category</option>
-                  <option value="id_manufacturer">Manufacturer</option>
+                  <option value="id_category_default">Default Category ID</option>
+                  <option value="id_manufacturer">Manufacturer ID</option>
+                  <option value="id_supplier">Supplier ID</option>
                   <option value="id_tax_rules_group">Tax Rule Group ID</option>
+                </optgroup>
+                <optgroup label="Dimensions & Shipping">
+                  <option value="width">Product Width (cm)</option>
+                  <option value="height">Product Height (cm)</option>
+                  <option value="depth">Product Depth / Length (cm)</option>
+                  <option value="additional_shipping_cost">Additional Shipping Surcharge</option>
                 </optgroup>
                 <optgroup label="References & Identifiers">
                   <option value="reference">Reference / SKU Code</option>
@@ -154,6 +171,8 @@ export const MutationRulesEditor: React.FC<MutationRulesEditorProps> = ({
                 </optgroup>
                 <optgroup label="Text & SEO Metadata">
                   <option value="name">Product Name</option>
+                  <option value="link_rewrite">SEO Friendly URL Slug</option>
+                  <option value="description_short">Short Summary / Description</option>
                   <option value="meta_title">SEO Meta Title</option>
                   <option value="meta_description">SEO Meta Description</option>
                 </optgroup>
