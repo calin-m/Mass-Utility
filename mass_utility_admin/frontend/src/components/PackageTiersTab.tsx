@@ -535,19 +535,19 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
                 <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">{t('stat_max_store_domains') || 'Max Store Domains'}</span>
-                <span className="text-sm font-extrabold font-mono text-purple-400">{capabilities.max_bound_domains ?? 1} Domain(s)</span>
+                <span className="text-sm font-extrabold font-mono text-pm-text">{capabilities.max_bound_domains ?? 1} Domain(s)</span>
               </div>
               <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
                 <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">{t('stat_daily_sweeper_runs') || 'Daily Sweeper Runs'}</span>
-                <span className="text-sm font-extrabold font-mono text-emerald-400">{capabilities.max_daily_sweeper_runs ?? 1} / Day</span>
+                <span className="text-sm font-extrabold font-mono text-pm-text">{capabilities.max_daily_sweeper_runs ?? 1} / Day</span>
               </div>
               <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
                 <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">{t('stat_cloud_backups') || 'Cloud Backups Retained'}</span>
-                <span className="text-sm font-extrabold font-mono text-blue-400">{capabilities.max_cloud_backups ?? 3} Backup(s)</span>
+                <span className="text-sm font-extrabold font-mono text-pm-text">{capabilities.max_cloud_backups ?? 3} Backup(s)</span>
               </div>
               <div className="p-3 bg-pm-input/40 border border-pm-border rounded-lg space-y-0.5">
                 <span className="text-[10px] font-bold text-pm-secondary uppercase tracking-wider block">{t('stat_rollback_snapshots') || 'Rollback Snapshots'}</span>
-                <span className="text-sm font-extrabold font-mono text-amber-400">{capabilities.rollback_history_limit ?? 5} Snapshots</span>
+                <span className="text-sm font-extrabold font-mono text-pm-text">{capabilities.rollback_history_limit ?? 5} Snapshots</span>
               </div>
             </div>
 

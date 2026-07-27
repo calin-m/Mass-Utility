@@ -49,7 +49,7 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
                   type="text"
                   value={editingName}
                   onChange={(e) => onSetEditingName(e.target.value)}
-                  className="px-2 py-1 text-sm font-bold bg-pm-bg border border-pm-primary rounded text-pm-text focus:outline-none"
+                  className="px-2 py-1 text-sm font-bold bg-pm-input border border-pm-primary rounded text-pm-text focus:outline-none"
                   placeholder="Enter new tier name"
                 />
                 <Button type="button" size="sm" variant="neutral" onClick={() => onSetIsRenaming(false)}>
@@ -100,7 +100,7 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
 
       {/* Section 1: AST Query Engine */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 pb-2 border-b border-pm-border/50">
+        <div className="flex items-center gap-2 pb-2 border-b border-pm-border">
           <Database className="w-4 h-4 text-pm-primary" />
           <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">1. ⚡ AST Query Engine & Visual Tools</h4>
         </div>
@@ -128,8 +128,8 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
 
       {/* Section 2: Database & File Suite */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 pb-2 border-b border-pm-border/50">
-          <Layers className="w-4 h-4 text-emerald-500" />
+        <div className="flex items-center gap-2 pb-2 border-b border-pm-border">
+          <Layers className="w-4 h-4 text-pm-primary" />
           <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">2. 🗄️ Database & File Operations Suite</h4>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -194,8 +194,8 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
 
       {/* Section 3: Purging, GDPR & Governor Automations */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 pb-2 border-b border-pm-border/50">
-          <Clock className="w-4 h-4 text-amber-500" />
+        <div className="flex items-center gap-2 pb-2 border-b border-pm-border">
+          <Clock className="w-4 h-4 text-pm-primary" />
           <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">3. 🧹 Purging, GDPR & Governor Automations</h4>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -240,8 +240,8 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
 
       {/* Section 4: Usage Quotas & Limits */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 pb-2 border-b border-pm-border/50">
-          <ShieldAlert className="w-4 h-4 text-indigo-500" />
+        <div className="flex items-center gap-2 pb-2 border-b border-pm-border">
+          <ShieldAlert className="w-4 h-4 text-pm-primary" />
           <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">4. 📊 Usage Quotas & Operational Limits</h4>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -278,8 +278,8 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
 
       {/* Section 5: Storage Destinations */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 pb-2 border-b border-pm-border/50">
-          <Cloud className="w-4 h-4 text-blue-500" />
+        <div className="flex items-center gap-2 pb-2 border-b border-pm-border">
+          <Cloud className="w-4 h-4 text-pm-primary" />
           <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">5. ☁️ Allowed Backup Storage Destinations</h4>
         </div>
         <div className="flex items-center gap-6">
@@ -299,7 +299,7 @@ export const TierCapabilitiesForm: React.FC<TierCapabilitiesFormProps> = ({
               onChange={() => onDestinationToggle('gdrive')}
               className="w-4 h-4 rounded text-pm-primary focus:ring-pm-primary border-pm-border"
             />
-            <Cloud className="w-4 h-4 text-blue-500" /> Google Drive Cloud Destination
+            <Cloud className="w-4 h-4 text-pm-primary" /> Google Drive Cloud Destination
           </label>
         </div>
       </div>
