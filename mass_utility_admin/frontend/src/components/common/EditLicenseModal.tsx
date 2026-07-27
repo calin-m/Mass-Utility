@@ -254,22 +254,27 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
           </div>
         </div>
 
-        {/* Card 2: Cascading Company & Client Hierarchy */}
+        {/* Card 2: Cascading Company & Client Ownership Hierarchy */}
         <div className="p-4 bg-pm-card/60 backdrop-blur-sm border border-pm-border hover:border-purple-500/30 transition-all rounded-xl space-y-4">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-            <Building2 className="w-3.5 h-3.5 text-purple-400" /> B2B / B2C License Assignment & Hierarchy
-          </h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5 text-purple-400" /> License Primary Ownership & Assignment
+            </h4>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-bold border border-purple-500/20">
+              Master Admin Control
+            </span>
+          </div>
 
           <div className="flex flex-col gap-3.5">
-            {/* Assigned Company Dropdown */}
+            {/* Primary Company Ownership Dropdown */}
             <div>
-              <label className="block text-xs font-semibold text-pm-secondary mb-1">Assigned Organization / Company</label>
+              <label className="block text-xs font-semibold text-pm-secondary mb-1">Primary Owning Company</label>
               <select
                 value={editCompanyId}
                 onChange={e => handleCompanyChange(e.target.value)}
                 className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-semibold text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
               >
-                <option value="">-- Standalone B2C / Unassigned Company --</option>
+                <option value="">-- Standalone Client (Individual Ownership) --</option>
                 {companies.map(c => {
                   const used = Number(c.license_count || 0);
                   const max = Number(c.max_licenses || 10);
@@ -286,14 +291,14 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
             <div>
               <label className="block text-xs font-semibold text-pm-secondary mb-1 flex items-center justify-between">
                 <span>Assigned Client Account</span>
-                {editCompanyId && <span className="text-[10px] text-purple-400 font-bold">(Filtered)</span>}
+                {editCompanyId && <span className="text-[10px] text-purple-400 font-bold">(Filtered by Company)</span>}
               </label>
               <select
                 value={editUserId}
                 onChange={e => handleUserChange(e.target.value)}
                 className="w-full bg-pm-input border border-pm-border rounded-xl h-10 px-3 text-xs font-semibold text-pm-text focus:border-pm-primary focus:ring-1 focus:ring-pm-primary/30 focus:outline-none transition-all"
               >
-                <option value="">-- Unassigned (Company / Global Pool Key) --</option>
+                <option value="">-- Unassigned (Company Pool Key) --</option>
                 {filteredUsers.map(u => (
                   <option key={u.id} value={u.id}>
                     👤 {u.name ? `${u.name} (${u.email})` : u.email} {u.company_name ? `• 🏢 ${u.company_name}` : ''}
