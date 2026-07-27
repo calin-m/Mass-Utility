@@ -113,7 +113,7 @@ export const LicenseRowCard: React.FC<LicenseRowCardProps> = ({
 
           <span className="flex items-center gap-1 font-mono">
             <Calendar className="w-3 h-3" />
-            {license.expires_at ? new Date(license.expires_at).toLocaleDateString() : 'Lifetime'}
+            {license.expires_at ? new Date(license.expires_at).toLocaleDateString() : 'Never'}
           </span>
         </div>
 

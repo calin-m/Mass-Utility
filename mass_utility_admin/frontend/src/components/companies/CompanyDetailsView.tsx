@@ -724,7 +724,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                           </td>
 
                           <td className="p-3 align-middle text-pm-secondary text-[11px] font-mono">
-                            {lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Lifetime'}
+                            {lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Never'}
                           </td>
 
                           <td className="p-3 align-middle text-right">
