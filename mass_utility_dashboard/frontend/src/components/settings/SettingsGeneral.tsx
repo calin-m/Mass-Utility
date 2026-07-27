@@ -504,9 +504,9 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
           </div>
 
           {/* Governor Pill slider */}
-          <div className="flex bg-pm-input border border-pm-border p-1 rounded-lg text-xs font-bold relative w-[300px]">
+          <div className="flex bg-pm-input border border-pm-border p-1 rounded-xl text-xs font-bold relative w-[320px] shadow-inner">
             <div
-              className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-pm-primary/10 border border-pm-primary/20 rounded-md transition-transform duration-300 ease-out pointer-events-none ${
+              className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-pm-primary text-white shadow-md shadow-pm-primary/40 border border-pm-primary/80 rounded-lg transition-transform duration-300 ease-out pointer-events-none ${
                 governorMode === 'manual' ? 'translate-x-full' : 'translate-x-0'
               }`}
             ></div>
@@ -515,8 +515,8 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               type="button"
               disabled={!capabilities.governor_autopilot}
               onClick={() => setGovernorMode('auto')}
-              className={`flex-1 py-2 text-center rounded-md z-10 transition-colors uppercase ${
-                governorMode === 'auto' ? 'text-pm-text' : 'text-pm-text-secondary hover:text-pm-text'
+              className={`flex-1 py-2 text-center rounded-lg z-10 transition-all uppercase tracking-wider ${
+                governorMode === 'auto' ? 'text-white font-extrabold shadow-sm' : 'text-pm-text-secondary hover:text-pm-text font-semibold'
               }`}
             >
               🤖 Auto-Pilot
@@ -524,8 +524,8 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
             <button
               type="button"
               onClick={() => setGovernorMode('manual')}
-              className={`flex-1 py-2 text-center rounded-md z-10 transition-colors uppercase ${
-                governorMode === 'manual' ? 'text-pm-text' : 'text-pm-text-secondary hover:text-pm-text'
+              className={`flex-1 py-2 text-center rounded-lg z-10 transition-all uppercase tracking-wider ${
+                governorMode === 'manual' ? 'text-white font-extrabold shadow-sm' : 'text-pm-text-secondary hover:text-pm-text font-semibold'
               }`}
             >
               ⚙️ Manual Settings
