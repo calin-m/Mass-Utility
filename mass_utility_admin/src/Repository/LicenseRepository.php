@@ -102,10 +102,26 @@ class LicenseRepository
 
     public function deleteUser(int $id): bool
     {
-        // Safe 2-step unbind transaction: preserve licenses as standalone unassigned keys
-        $this->db->prepare("UPDATE pm_licenses SET user_id = NULL WHERE user_id = ?")->execute([$id]);
-        $stmt = $this->db->prepare("DELETE FROM pm_users WHERE id = ?");
-        return $stmt->execute([$id]);
+        $this->db->beginTransaction();
+        try {
+            // 1. Delete Client-owned licenses (where company_id IS NULL)
+            $stmtDelLic = $this->db->prepare("DELETE FROM pm_licenses WHERE user_id = ? AND (company_id IS NULL OR company_id = 0)");
+            $stmtDelLic->execute([$id]);
+
+            // 2. Unassign Company-owned licenses (where company_id IS NOT NULL), preserving key with Company
+            $stmtUnbind = $this->db->prepare("UPDATE pm_licenses SET user_id = NULL WHERE user_id = ? AND company_id IS NOT NULL AND company_id > 0");
+            $stmtUnbind->execute([$id]);
+
+            // 3. Delete Client user account
+            $stmtUser = $this->db->prepare("DELETE FROM pm_users WHERE id = ?");
+            $res = $stmtUser->execute([$id]);
+
+            $this->db->commit();
+            return $res;
+        } catch (\Throwable $t) {
+            $this->db->rollBack();
+            throw $t;
+        }
     }
 
     public function createLicense(?int $companyId, ?int $userId, string $tier, ?string $expiry): string
@@ -363,14 +379,31 @@ class LicenseRepository
         $oldRow = $oldStmt->fetch(PDO::FETCH_ASSOC);
         $oldName = $oldRow['company_name'] ?? null;
 
-        if ($oldName) {
-            $this->db->prepare("UPDATE pm_users SET company_name = NULL, company_id = NULL WHERE company_name = ? OR company_id = ?")->execute([$oldName, $id]);
-        } else {
-            $this->db->prepare("UPDATE pm_users SET company_name = NULL, company_id = NULL WHERE company_id = ?")->execute([$id]);
+        $this->db->beginTransaction();
+        try {
+            // 1. Delete all Company-owned licenses AND licenses assigned to the company's users
+            $this->db->prepare("DELETE FROM pm_licenses WHERE company_id = ?")->execute([$id]);
+
+            // 2. Delete all Clients assigned to this company
+            if ($oldName) {
+                // Delete licenses bound to users being deleted
+                $this->db->prepare("DELETE FROM pm_licenses WHERE user_id IN (SELECT id FROM pm_users WHERE company_id = ? OR (company_name IS NOT NULL AND LOWER(company_name) = LOWER(?)))")->execute([$id, $oldName]);
+                $this->db->prepare("DELETE FROM pm_users WHERE company_id = ? OR (company_name IS NOT NULL AND LOWER(company_name) = LOWER(?))")->execute([$id, $oldName]);
+            } else {
+                $this->db->prepare("DELETE FROM pm_licenses WHERE user_id IN (SELECT id FROM pm_users WHERE company_id = ?)")->execute([$id]);
+                $this->db->prepare("DELETE FROM pm_users WHERE company_id = ?")->execute([$id]);
+            }
+
+            // 3. Delete Company record
+            $stmt = $this->db->prepare("DELETE FROM pm_companies WHERE id = ?");
+            $res = $stmt->execute([$id]);
+
+            $this->db->commit();
+            return $res;
+        } catch (\Throwable $t) {
+            $this->db->rollBack();
+            throw $t;
         }
-        $this->db->prepare("UPDATE pm_licenses SET company_id = NULL WHERE company_id = ?")->execute([$id]);
-        $stmt = $this->db->prepare("DELETE FROM pm_companies WHERE id = ?");
-        return $stmt->execute([$id]);
     }
 
     public function extendLicenseExpiration(int $id, ?int $addMonths = null, ?string $customDate = null): bool
