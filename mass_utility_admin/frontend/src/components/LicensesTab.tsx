@@ -17,6 +17,7 @@ import { DirectoryToolbar } from './common/DirectoryToolbar';
 import { LicenseRowCard } from './common/LicenseRowCard';
 import { IssueLicenseModal } from './common/IssueLicenseModal';
 import { LicenseDetailsView } from './licenses/LicenseDetailsView';
+import { StatusBadge } from './common/StatusBadge';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getSortedTierOptions } from '../utils/tierUtils';
 
@@ -428,15 +429,15 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                  <th className="p-3 px-4 w-[22%]">{t('th_license_key')}</th>
-                  <th className="p-3 w-[16%]">{t('th_assigned_user')}</th>
-                  <th className="p-3 w-[16%]">{t('th_company') || 'Company'}</th>
-                  <th className="p-3 w-[9%]">{t('th_tier')}</th>
-                  <th className="p-3 w-[9%]">{t('th_status')}</th>
-                  <th className="p-3 w-[12%]">{t('th_store_url') || 'Store URL'}</th>
-                  <th className="p-3 w-[8%]">{t('th_expires')}</th>
-                  <th className="p-3 text-right w-[8%] min-w-[220px]">{t('th_actions')}</th>
+                <tr className="bg-pm-input/60 text-pm-secondary uppercase tracking-wider font-bold border-b border-pm-border text-[0.7rem]">
+                  <th className="p-3.5 px-4 w-[22%]">{t('th_license_key')}</th>
+                  <th className="p-3.5 w-[16%]">{t('th_assigned_user')}</th>
+                  <th className="p-3.5 w-[16%]">{t('th_company') || 'Company'}</th>
+                  <th className="p-3.5 w-[9%]">{t('th_tier')}</th>
+                  <th className="p-3.5 w-[9%]">{t('th_status')}</th>
+                  <th className="p-3.5 w-[12%]">{t('th_store_url') || 'Store URL'}</th>
+                  <th className="p-3.5 w-[8%]">{t('th_expires')}</th>
+                  <th className="p-3.5 text-right w-[8%] min-w-[220px]">{t('th_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-pm-border">
@@ -511,22 +512,10 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                           />
                         </td>
                         <td className="p-3 align-middle whitespace-nowrap">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/30">
-                            {lic.package_tier || 'basic'}
-                          </span>
+                          <StatusBadge type="tier" label={(lic.package_tier || 'basic').toUpperCase()} />
                         </td>
                         <td className="p-3 align-middle whitespace-nowrap">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                              isSuspended
-                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                                : lic.status === 'active'
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                            }`}
-                          >
-                            {isSuspended ? 'Suspended' : lic.status === 'active' ? 'Active' : lic.status}
-                          </span>
+                          <StatusBadge status={lic.status} />
                         </td>
                         <td className="p-3 font-mono text-xs text-pm-secondary align-middle whitespace-nowrap">
                           {lic.store_url ? (

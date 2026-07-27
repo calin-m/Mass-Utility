@@ -446,19 +446,20 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3 w-[30%]">{t('th_client')}</th>
-                <th className="p-3 w-[22%]">{t('th_company_profile')}</th>
-                <th className="p-3 w-[14%]">{t('th_active_licenses')}</th>
-                <th className="p-3 w-[14%]">{t('th_domains')}</th>
-                <th className="p-3 w-[8%]">{t('th_status')}</th>
-                <th className="p-3 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
+              <tr className="bg-pm-input/60 text-pm-secondary uppercase tracking-wider font-bold border-b border-pm-border text-[0.7rem]">
+                <th className="p-3.5 w-[26%]">{t('th_client')}</th>
+                <th className="p-3.5 w-[20%]">{t('th_company_profile')}</th>
+                <th className="p-3.5 w-[14%]">Package Tier</th>
+                <th className="p-3.5 w-[14%]">{t('th_active_licenses')}</th>
+                <th className="p-3.5 w-[12%]">{t('th_domains')}</th>
+                <th className="p-3.5 w-[8%]">{t('th_status')}</th>
+                <th className="p-3.5 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
               {paginatedUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-pm-secondary italic">
+                  <td colSpan={7} className="p-8 text-center text-pm-secondary italic">
                     {t('empty_clients')}
                   </td>
                 </tr>
@@ -466,6 +467,8 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                 paginatedUsers.map(user => {
                   const metrics = getUserLicenseMetrics(user.id);
                   const isSuspended = user.status === 'suspended';
+                  const userLic = licenses.find(l => l.user_id === user.id);
+                  const userTier = (userLic?.package_tier || 'basic').toUpperCase();
 
                   return (
                     <tr key={user.id} className="h-[49px] align-middle hover:bg-pm-input/50 transition">
@@ -489,6 +492,10 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                           } : undefined}
                           fallbackText={t('lbl_individual_client')}
                         />
+                      </td>
+
+                      <td className="p-3 align-middle whitespace-nowrap">
+                        <StatusBadge type="tier" label={userTier} />
                       </td>
 
                       <td className="p-3 font-mono font-semibold text-xs text-pm-text align-middle whitespace-nowrap">

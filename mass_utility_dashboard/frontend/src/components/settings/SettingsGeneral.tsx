@@ -515,8 +515,8 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
               type="button"
               disabled={!capabilities.governor_autopilot}
               onClick={() => setGovernorMode('auto')}
-              className={`flex-1 py-2 text-center rounded-lg z-10 transition-all uppercase tracking-wider ${
-                governorMode === 'auto' ? 'text-white font-extrabold shadow-sm' : 'text-pm-text-secondary hover:text-pm-text font-semibold'
+              className={`flex-1 py-2 text-center rounded-lg z-10 transition-all uppercase tracking-wider font-semibold ${
+                governorMode === 'auto' ? 'text-white shadow-sm' : 'text-pm-text-secondary hover:text-pm-text'
               }`}
             >
               🤖 Auto-Pilot
@@ -524,8 +524,8 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
             <button
               type="button"
               onClick={() => setGovernorMode('manual')}
-              className={`flex-1 py-2 text-center rounded-lg z-10 transition-all uppercase tracking-wider ${
-                governorMode === 'manual' ? 'text-white font-extrabold shadow-sm' : 'text-pm-text-secondary hover:text-pm-text font-semibold'
+              className={`flex-1 py-2 text-center rounded-lg z-10 transition-all uppercase tracking-wider font-semibold ${
+                governorMode === 'manual' ? 'text-white shadow-sm' : 'text-pm-text-secondary hover:text-pm-text'
               }`}
             >
               ⚙️ Manual Settings
