@@ -745,12 +745,25 @@ if ($isAuthorized) {
         if (file_exists($dbCheckPath)) {
             $pdoCheck = new \PDO('sqlite:' . $dbCheckPath);
             $pdoCheck->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            
+            // 1. Fetch PM_LICENSE_KEY
+            $stmtKey = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSE_KEY'");
+            $stmtKey->execute();
+            $keyVal = $stmtKey->fetchColumn();
+            $licenseKey = $keyVal ? json_decode($keyVal, true) : '';
+
+            // 2. Fetch PM_LICENSE_STATUS
             $stmtCheck = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSE_STATUS'");
             $stmtCheck->execute();
             $valJson = $stmtCheck->fetchColumn();
             $licStatus = $valJson ? json_decode($valJson, true) : 'active';
             
-            if ($licStatus === 'suspended' || $licStatus === 'expired') {
+            if (empty($licenseKey) || $licStatus === 'unlicensed') {
+                // If license key is missing or deleted -> Primary Access Restricted Gate
+                unset($_SESSION['employee_id']);
+                $isAuthorized = false;
+                $suspendedMessage = false;
+            } elseif ($licStatus === 'suspended' || $licStatus === 'expired') {
                 // Try to re-verify status with the central server in case it was reactivated
                 $licServer = 'https://startviziune.ro/mass_utility_admin';
                 $stmtServer = $pdoCheck->prepare("SELECT value FROM tenant_settings WHERE name = 'PM_LICENSING_SERVER_URL'");
@@ -760,42 +773,47 @@ if ($isAuthorized) {
                     $licServer = json_decode($srvVal, true) ?? $licServer;
                 }
                     
-                    $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
-                    $isReactivated = false;
+                $storeUrl = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $isReactivated = false;
+                
+                try {
+                    $ch = curl_init(rtrim($licServer, '/') . '/?action=activate_key');
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                        'license_key' => $licenseKey,
+                        'store_url' => $storeUrl
+                    ]));
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    $res = curl_exec($ch);
+                    curl_close($ch);
                     
-                    try {
-                        $ch = curl_init(rtrim($licServer, '/') . '/?action=activate_key');
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_POST, true);
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-                            'license_key' => $licenseKey,
-                            'store_url' => $storeUrl
-                        ]));
-                        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                        $res = curl_exec($ch);
-                        curl_close($ch);
-                        
-                        if ($res) {
-                            $resData = json_decode($res, true);
-                            if (!empty($resData['success'])) {
-                                $isReactivated = true;
-                                $upStmt = $pdoCheck->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
-                                $upStmt->execute(['PM_LICENSE_STATUS', json_encode('active')]);
-                                $licStatus = 'active';
-                            }
+                    if ($res) {
+                        $resData = json_decode($res, true);
+                        if (!empty($resData['success'])) {
+                            $isReactivated = true;
+                            $upStmt = $pdoCheck->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
+                            $upStmt->execute(['PM_LICENSE_STATUS', json_encode('active')]);
+                            $licStatus = 'active';
                         }
-                    } catch (\Throwable $curlEx) {}
-                    
-                    if (!$isReactivated) {
-                        unset($_SESSION['employee_id']);
-                        $isAuthorized = false;
-                        $suspendedMessage = true;
                     }
+                } catch (\Throwable $curlEx) {}
+                
+                if (!$isReactivated) {
+                    unset($_SESSION['employee_id']);
+                    $isAuthorized = false;
+                    $suspendedMessage = true;
                 }
             }
-        } catch (\Throwable $e) {}
-    }
+        } else {
+            // No SQLite database file created yet -> Primary Access Restricted Gate
+            unset($_SESSION['employee_id']);
+            $isAuthorized = false;
+            $suspendedMessage = false;
+        }
+    } catch (\Throwable $e) {}
+}
 
 // Webhook endpoints do not require session auth
 $isWebhook = ($path === '/webhook/product-updated');
