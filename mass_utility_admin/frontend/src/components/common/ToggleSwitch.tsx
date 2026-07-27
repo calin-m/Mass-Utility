@@ -43,8 +43,8 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         <div
           className={`w-9 h-5 rounded-full transition-colors duration-200 ease-in-out border ${
             checked
-              ? 'bg-purple-600 border-purple-500 shadow-sm shadow-purple-600/30'
-              : 'bg-pm-input border-pm-border'
+              ? 'bg-purple-500 border-purple-400 shadow-md shadow-purple-500/30'
+              : 'bg-slate-700/60 dark:bg-slate-700/50 border-pm-border dark:border-slate-600/50'
           }`}
         >
           <div

@@ -89,7 +89,7 @@ export function SubTabNav<T extends string = string>({
     >
       {/* Sliding GPU-Accelerated Purple Active Pill (0 CLS Initial Mount) */}
       <div
-        className="absolute top-0 left-0 bg-purple-500 rounded-lg shadow-md shadow-purple-500/25 pointer-events-none z-0"
+        className="absolute top-0 left-0 bg-gradient-to-r from-purple-500 to-purple-600 border border-purple-400/30 rounded-lg shadow-md shadow-purple-500/25 pointer-events-none z-0"
         style={{
           transform: `translate3d(${pillStyle.left}px, ${pillStyle.top}px, 0)`,
           width: `${pillStyle.width}px`,
@@ -113,7 +113,7 @@ export function SubTabNav<T extends string = string>({
             className={`relative z-10 h-9 inline-flex items-center gap-2 px-3.5 rounded-lg text-xs font-semibold transition-colors duration-200 whitespace-nowrap ${
               isActive
                 ? 'text-white font-bold'
-                : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/30'
+                : 'text-pm-secondary hover:text-pm-text hover:bg-pm-input/50'
             }`}
           >
             {Icon && <Icon className={`w-3.5 h-3.5 transition-colors duration-200 ${isActive ? 'text-white' : 'text-pm-secondary'}`} />}
