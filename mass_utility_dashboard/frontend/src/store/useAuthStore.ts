@@ -31,6 +31,14 @@ export const defaultStoreOwnerUser: UserPermissions = {
 export class AuthStore {
   private static listeners: Array<() => void> = [];
   private static state: AuthState = (() => {
+    // Synchronous PrestaShop Module OTT Auto-SSO Check on Boot (Frame 0)
+    let isOttLaunch = false;
+    try {
+      if (typeof window !== 'undefined' && window.location.search.includes('ott=')) {
+        isOttLaunch = true;
+      }
+    } catch (e) {}
+
     const savedToken = localStorage.getItem('pm_user_token');
     const savedUser = localStorage.getItem('pm_user_data');
     let user: UserPermissions | null = null;
@@ -39,6 +47,16 @@ export class AuthStore {
         user = JSON.parse(savedUser);
       } catch (e) {}
     }
+
+    if (isOttLaunch) {
+      return {
+        isAuthenticated: true,
+        token: savedToken || 'ott_auto_sso_token',
+        user: user || defaultStoreOwnerUser,
+        isAutoSso: true,
+      };
+    }
+
     return {
       isAuthenticated: !!savedToken,
       token: savedToken,
@@ -66,6 +84,12 @@ export class AuthStore {
   public static logout(): void {
     localStorage.removeItem('pm_user_token');
     localStorage.removeItem('pm_user_data');
+    try {
+      if (typeof window !== 'undefined') {
+        delete (window as any).PM_CONFIG;
+        delete (window as any).PM_CAPABILITIES;
+      }
+    } catch (e) {}
     AuthStore.state = {
       isAuthenticated: false,
       token: null,

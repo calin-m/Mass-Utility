@@ -22,6 +22,7 @@ type TabType = 'governor' | 'database' | 'files' | 'query' | 'history' | 'securi
 
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => AuthStore.getState().isAuthenticated);
+  const [isHydrating, setIsHydrating] = useState<boolean>(true);
   const { showConfirm, showToast } = useModal();
   const [resetToken] = useState<string | null>(() => {
     try {
@@ -34,7 +35,6 @@ function AppContent() {
   });
 
   const [activeTab, setActiveTab] = useState<TabType>(() => {
-    // Preserve tab on reload
     try {
       const saved = sessionStorage.getItem('pm_active_tab_react');
       if (saved) return saved as TabType;
@@ -49,7 +49,7 @@ function AppContent() {
     return unsubscribe;
   }, []);
 
-  // PrestaShop OTT Auto-SSO Parameter Exchange on Boot
+  // PrestaShop OTT Auto-SSO Parameter Exchange & URL Sanitizer on Boot
   useEffect(() => {
     try {
       if (window.location.search.includes('ott=')) {
@@ -61,20 +61,13 @@ function AppContent() {
     } catch (e) {}
   }, []);
 
-  if (resetToken) {
-    return <ResetPasswordPage token={resetToken} />;
-  }
-
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
-
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('pm-theme') !== 'light';
-  });
-
-  // Hydrate PM_CONFIG and PM_CAPABILITIES on boot
+  // Hydrate PM_CONFIG and PM_CAPABILITIES on boot before rendering tabs
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsHydrating(false);
+      return;
+    }
+
     const initData = async () => {
       try {
         const data = await FetchService.post('hydrate_dashboard');
@@ -87,7 +80,6 @@ function AppContent() {
           config.backups = data.backups || [];
           config.settings = data.settings || {};
           
-          // Decode active token
           let caps = {
             backup_destinations: ['local'],
             backup_automation: false,
@@ -108,19 +100,37 @@ function AppContent() {
           (window as any).PM_CAPABILITIES = caps;
           (window as any).PM_CONFIG = config;
         }
-      } catch (e) {}
-    };
-    initData();
-
-    // Instant OTT URL Parameter Sanitizer (Strips ?ott= token from URL bar)
-    try {
-      if (window.location.search.includes('ott=')) {
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.delete('ott');
-        window.history.replaceState({}, document.title, cleanUrl.toString());
+      } catch (e) {
+      } finally {
+        setIsHydrating(false);
       }
-    } catch (e) {}
-  }, []);
+    };
+
+    initData();
+  }, [isAuthenticated]);
+
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('pm-theme') !== 'light';
+  });
+
+  if (resetToken) {
+    return <ResetPasswordPage token={resetToken} />;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  if (isHydrating) {
+    return (
+      <div className="min-h-screen bg-pm-body flex flex-col items-center justify-center p-6 space-y-4">
+        <div className="w-12 h-12 border-3 border-pm-primary/30 border-t-pm-primary rounded-full animate-spin" />
+        <p className="text-xs font-bold tracking-widest text-pm-text-secondary uppercase animate-pulse">
+          ⚡ Hydrating Mass Utility Security Controls...
+        </p>
+      </div>
+    );
+  }
 
   // Sync theme choices to document classes and localStorage
   useEffect(() => {
