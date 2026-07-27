@@ -4,6 +4,7 @@ import { BaseModal } from './BaseModal';
 import { FormSelect } from './FormSelect';
 import { FormInput } from './FormInput';
 import { Button } from './Button';
+import { StatusBadge } from './StatusBadge';
 import { License, UserAccount, Company } from '../../types/adminApi';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 import { useTranslation } from '../../i18n/LanguageContext';
@@ -213,32 +214,11 @@ export const EditLicenseModal: React.FC<EditLicenseModalProps> = ({
 
           {/* Live Preview Status Badges Row */}
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-purple-400" /> {editTier.toUpperCase()} TIER
-            </span>
-
-            {editStatus === 'active' && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" /> ACTIVE
-              </span>
-            )}
-
-            {editStatus === 'suspended' && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
-                <ShieldAlert className="w-3 h-3 text-rose-400" /> SUSPENDED
-              </span>
-            )}
-
-            {editStatus === 'expired' && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-amber-400" /> EXPIRED
-              </span>
-            )}
+            <StatusBadge type="tier" label={`${editTier.toUpperCase()} TIER`} shape="full" />
+            <StatusBadge status={editStatus} shape="full" />
 
             {!editExpiresAt ? (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
-                <InfinityIcon className="w-3 h-3 text-indigo-400" /> LIFETIME
-              </span>
+              <StatusBadge label="LIFETIME" customColor="indigo" shape="full" />
             ) : (
               <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-pm-card text-pm-secondary border border-pm-border flex items-center gap-1 font-mono">
                 <Calendar className="w-3 h-3 text-purple-400" /> EXP: {editExpiresAt}

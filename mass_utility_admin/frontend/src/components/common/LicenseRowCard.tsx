@@ -95,7 +95,8 @@ export const LicenseRowCard: React.FC<LicenseRowCardProps> = ({
           </button>
         </div>
 
-        <div className="shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
+          <StatusBadge type="tier" label={`${license.package_tier || 'basic'} TIER`} />
           <StatusBadge status={license.status || 'active'} />
         </div>
       </div>
@@ -104,8 +105,8 @@ export const LicenseRowCard: React.FC<LicenseRowCardProps> = ({
       <div className="space-y-2 text-xs">
         {/* Tier & Expiry Metadata Row */}
         <div className="flex items-center justify-between gap-2 text-pm-secondary text-[11px]">
-          <span className="font-mono uppercase font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
-            {license.package_tier || 'basic'} Tier
+          <span className="font-mono text-[10px] uppercase font-bold text-pm-secondary">
+            Tier Level: <strong className="text-pm-text">{license.package_tier || 'basic'}</strong>
           </span>
 
           <span className="flex items-center gap-1 font-mono">

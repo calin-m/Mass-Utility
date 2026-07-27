@@ -4,6 +4,7 @@ import { PageHeader } from './common/PageHeader';
 import { Button } from './common/Button';
 import { ConfirmModal } from './common/ConfirmModal';
 import { SubTabNav, SubTabItem } from './common/SubTabNav';
+import { StatusBadge } from './common/StatusBadge';
 import { TierCardGrid } from './package_tiers/TierCardGrid';
 import { TierCapabilitiesForm } from './package_tiers/TierCapabilitiesForm';
 import { CreateTierModal } from './package_tiers/CreateTierModal';
@@ -582,17 +583,12 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
                     return (
                       <tr key={feat.key} className="hover:bg-pm-input/30 transition">
                         <td className="p-3 font-semibold text-pm-text">{feat.label}</td>
-                        <td className="p-3 text-center">
-                          <span
-                            className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border ${
-                              isEnabled
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                : 'bg-pm-input text-pm-secondary border-pm-border'
-                            }`}
-                          >
-                            {isEnabled ? <Check className="w-3 h-3 text-emerald-400" /> : <X className="w-3 h-3 text-pm-secondary/50" />}
-                            <span>{isEnabled ? 'Enabled' : 'Disabled'}</span>
-                          </span>
+                        <td className="p-3 text-center flex justify-center">
+                          <StatusBadge
+                            status={isEnabled ? 'active' : 'suspended'}
+                            label={isEnabled ? 'Enabled' : 'Disabled'}
+                            shape="full"
+                          />
                         </td>
                         <td className="p-3 text-pm-secondary text-[11px]">{feat.desc}</td>
                       </tr>
