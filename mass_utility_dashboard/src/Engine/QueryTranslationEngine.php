@@ -186,11 +186,19 @@ class QueryTranslationEngine
     public function execute(array $astPayload, int $idLang, int $idShop): array
     {
         $sql = $this->compile($astPayload, $idLang, $idShop);
-        if ($this->client && method_exists($this->client, 'query')) {
+        if ($this->client) {
             try {
-                $res = $this->client->query($sql);
-                if (isset($res['data']) && is_array($res['data'])) {
-                    return array_map(fn($row) => (int)($row['id_product'] ?? $row['id'] ?? 0), $res['data']);
+                if (method_exists($this->client, 'request')) {
+                    $res = $this->client->request('db_query', 'POST', ['sql' => $sql, 'method' => 'executeS']);
+                    $rows = $res['result'] ?? $res['data'] ?? [];
+                    if (is_array($rows)) {
+                        return array_values(array_filter(array_map(fn($row) => (int)($row['id_product'] ?? $row['id'] ?? 0), $rows)));
+                    }
+                } elseif (method_exists($this->client, 'query')) {
+                    $res = $this->client->query($sql);
+                    if (isset($res['data']) && is_array($res['data'])) {
+                        return array_values(array_filter(array_map(fn($row) => (int)($row['id_product'] ?? $row['id'] ?? 0), $res['data'])));
+                    }
                 }
             } catch (\Throwable $e) {
                 // Fallback on bridge connection error
