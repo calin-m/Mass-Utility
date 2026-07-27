@@ -508,6 +508,10 @@ class LicenseRepository
                     $dashPdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
                     $dashStmt = $dashPdo->prepare("DELETE FROM pm_licenses WHERE license_key = ?");
                     $dashStmt->execute([$key]);
+
+                    // Also wipe license keys from tenant settings table
+                    $dashDel = $dashPdo->prepare("DELETE FROM tenant_settings WHERE key IN ('PM_LICENSE_KEY', 'PM_LICENSE_TOKEN', 'PM_LICENSE_TIER')");
+                    $dashDel->execute();
                 }
             } catch (\Throwable $t) {}
 
