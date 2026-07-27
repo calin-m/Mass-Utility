@@ -655,9 +655,16 @@ if ($basePath && $basePath !== '/' && strpos($path, $basePath) === 0) {
     $path = substr($path, strlen($basePath));
 }
 
-// Static asset routing for local dev server & subfolder deployments
-if (strpos($path, '/views/') === 0) {
-    $filePath = dirname(__DIR__) . $path;
+// Static asset routing for compiled V2 React SPA assets & views
+if (strpos($path, '/v2/assets/') === 0 || strpos($path, '/assets/') === 0 || strpos($path, '/views/') === 0) {
+    $relativePath = $path;
+    if (strpos($relativePath, '/assets/') === 0) {
+        $relativePath = '/v2' . $relativePath;
+    }
+    $filePath = __DIR__ . $relativePath;
+    if (!file_exists($filePath) || !is_file($filePath)) {
+        $filePath = dirname(__DIR__) . $path;
+    }
     if (file_exists($filePath) && is_file($filePath)) {
         $ext = pathinfo($filePath, PATHINFO_EXTENSION);
         $mimeTypes = [
@@ -674,6 +681,7 @@ if (strpos($path, '/views/') === 0) {
         ];
         $contentType = $mimeTypes[$ext] ?? 'application/octet-stream';
         header('Content-Type: ' . $contentType);
+        header('Cache-Control: public, max-age=31536000, immutable');
         readfile($filePath);
         exit;
     }
@@ -1082,9 +1090,10 @@ if ($path === '/' || $path === '/index.html') {
             $html
         );
         
+        $assetPrefix = !empty($basePath) && $basePath !== '/' ? rtrim($basePath, '/') . '/v2/assets/' : './v2/assets/';
         $html = str_replace(
             './assets/',
-            $basePath . '/v2/assets/',
+            $assetPrefix,
             $html
         );
         
