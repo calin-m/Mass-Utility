@@ -24,10 +24,14 @@ class Mass_Utility extends Module
 
         $this->displayName = $this->l('Mass Utility');
         $this->description = $this->l('Enterprise-grade utility suite featuring a Native Safety Governor, AST Database Mutations, Chunked Backups, and Modular Maintenance Sweepers.');
+
+        // Instant auto-hardening on instantiation (even when unlicensed)
+        $this->autoHardenPermissions();
     }
 
     public function install(): bool
     {
+        $this->autoHardenPermissions();
         return parent::install() && $this->registerHook('actionProductSave');
     }
 
