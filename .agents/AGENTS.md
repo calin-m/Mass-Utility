@@ -20,27 +20,23 @@
 3. **Smart Ephemeral Commits:**
    - The `cli_commit.py` script will automatically ingest the exact contents of `.ai_plan.md` into the Git Commit message.
    - Once the commit succeeds, `cli_commit.py` will delete `.ai_plan.md`.
-4. **Smart Interconnectivity Tracing & Sequential Investigation:**
+4. **Smart Interconnectivity Tracing & Dual-Mode Subagent Fallback Engine:**
    - **Primary Token-Saving Scanner:** You MUST use the custom Python script `.orchestra/.conductor/tools/workspace_inspector.py` as your primary tool to mathematically map architecture, symbols, and dependencies.
-   - **Questions & Diagnostics Mandate:** Whenever the user asks any question about how code works, module layout, or system behaviors, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `lookup "<symbol>"` / `matrix`) to ground your response in live AST symbol maps and generated reports.
-   - **Modification & Feature Request Mandate:** Before drafting any plan or making code changes, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"`, which automatically executes the complete multi-tool chain (`trace`, `frontend_map`, `route_map`, `design_map`, `advisories`) and synthesizes the 360° Architectural Impact Report.
-   - **Strict Sequential Investigation Protocol:** You MUST run `workspace_inspector.py trace` (or `plan`) FIRST. ONLY if `workspace_inspector.py` outputs `[INSPECTOR_FALLBACK_RECOMMENDED]` (e.g., when querying UI/React components, CSS tokens, or literal text strings where no AST symbol is found), are you authorized to use native `grep_search`, restricted strictly by target file globs (`Includes: ["*.tsx", "*.ts"]`) to prevent API context bloat.
-   - **Dual Plan Synchronization Mandate:** Whenever drafting a plan or presenting feature options, you MUST write to `.ai_plan.md` on disk AND simultaneously generate/update the interactive `implementation_plan.md` artifact in the brain folder with `request_feedback=true` and `user_facing=true`.
-   - **Post-Execution Zero-Copy AST Re-Index:** After any code modification or component refactor, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py map` to refresh `symbol_map.json`, `00_auto_generated_oop_map.md`, and `00_auto_generated_frontend_map.md`.
-   - **Scope Pre-Flight Inspection:** Before editing lines within a component or view file, you MUST inspect lines 1–60 (or the top of the file) to verify all imported symbols, prop interfaces, and `useState`/`useEffect` hook variables in scope.
+   - **Mode A (Antigravity Multi-Agent Parallel Mode):** When operating in Antigravity IDE, the primary agent may delegate parallel codebase research, DevSecOps security audits, and isolated sandbox testing to subagents (`research` model / `workspace: 'branch'`). Subagents report findings back via messages; the primary parent agent maintains sole commit authority (`cli_commit.py`) and unified plan writing authority (`.ai_plan.md`).
+   - **Mode B (Standard Single-Agent Fallback Mode):** When operating in environments without multi-agent support (Cursor, Windsurf, Cline, or Terminal CLI), the primary agent executes all 5/6 gates sequentially in series using standard `workspace_inspector.py trace` CLI commands.
+   - **Questions & Diagnostics Mandate:** Whenever the user asks any question about how code works, module layout, or system behaviors, run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `lookup "<symbol>"` / `matrix`) to ground your response in live AST symbol maps.
+   - **Modification & Feature Request Mandate:** Before drafting any plan or making code changes, run `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"`.
+   - **Dual Plan Synchronization Mandate:** Write to `.ai_plan.md` on disk AND simultaneously generate/update the interactive `implementation_plan.md` artifact in the brain folder with `request_feedback=true` and `user_facing=true`.
+   - **Post-Execution Zero-Copy AST Re-Index:** After any code modification or component refactor, run `python .orchestra/.conductor/tools/workspace_inspector.py map`.
+   - **Scope Pre-Flight Inspection:** Before editing lines within a component or view file, inspect lines 1–60 (or the top of the file) to verify all imported symbols, prop interfaces, and state variables in scope.
 5. **Unified Tool Registry & Gitignore Guideline:**
-    - Whenever you create a new JIT tool, compiler, or script inside `.bench/scripts/`, you MUST register it using:
-      `python .orchestra/.conductor/tools/workspace_inspector.py register <name> "<command>" "<description>"`
-    - If dependencies, configuration environment variables, or secrets need validation, run `python .orchestra/.conductor/tools/cli_doctor.py` (or the `"doctor"` script) to verify project environment health.
-    - If you introduce a new core framework tool inside `.orchestra/.conductor/tools/`, you MUST register it in the `tools` array of `install_framework.py` and list it in the file structure tree in `.orchestra/README.md`.
-    - Any directories or file extensions generated by tools (e.g. `__pycache__/`, `*.pyc`, custom databases) must be added to the `ignore_lines` list inside `install_framework.py` to ensure `.gitignore` synchronization.
+    - Whenever you create a new JIT tool, compiler, or script inside `.bench/scripts/`, register it using: `python .orchestra/.conductor/tools/workspace_inspector.py register <name> "<command>" "<description>"`.
+    - Run `python .orchestra/.conductor/tools/cli_doctor.py` to verify project environment health.
+    - Register new core framework tools inside `.orchestra/.conductor/tools/` in `install_framework.py` and `.orchestra/README.md`.
 6. **Workspace Paths & Renaming Rules:**
-    - If the user requests to rename, move, or re-target the project's source or documentation folders, you MUST:
-      1. Physically move/rename the directory.
-      2. Update the `directories` mapping inside `.ai_pipeline.json`.
-      3. Run the installer/doctor script `python .orchestra/.conductor/tools/install_framework.py` to re-syndicate the rules across all IDE configuration files.
+    - If the user requests to rename, move, or re-target project folders, physically move the directory, update `directories` in `.ai_pipeline.json`, and run `install_framework.py`.
 7. **JIT Failure Telemetry (Self-Healing Loop):**
-    - If a validation run fails, check `.bench/agents/custom_rules/_failures.md` for compiler and gate error details. You MUST immediately adapt your implementation plan to resolve the specific compilation/linters errors logged in that file.
+    - If a validation run fails, check `.bench/agents/custom_rules/_failures.md` for compiler and gate error details to adapt your implementation plan automatically.
 </RULE[Antigravity_Pipeline]>
 <!-- RULE-END[Pipeline Rules] -->
 
