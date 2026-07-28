@@ -106,6 +106,19 @@ export class AuthStore {
     };
   }
 
+  public static hasPermission(capability: string): boolean {
+    const user = AuthStore.state.user;
+    if (!AuthStore.state.isAuthenticated || !user) {
+      return false;
+    }
+
+    if (user.role === 'SuperAdmin' || user.role === 'CompanyAdmin') {
+      return true;
+    }
+
+    return (user.permissions || []).includes(capability);
+  }
+
   private static notify(): void {
     AuthStore.listeners.forEach((l) => l());
   }

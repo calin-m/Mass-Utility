@@ -387,9 +387,11 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                       onChange={e => setEditRole(e.target.value)}
                       className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-2 text-xs text-pm-text focus:border-pm-primary focus:outline-none"
                     >
-                      <option value="Owner">Owner / Primary Admin</option>
-                      <option value="Manager">Store Manager</option>
-                      <option value="Developer">Technical Developer</option>
+                      <option value="SuperAdmin">Super Admin (Full Platform Access)</option>
+                      <option value="CompanyAdmin">Company Admin (Manage Organization Users & Licenses)</option>
+                      <option value="CatalogManager">Catalog Manager (Visual Query & Catalog Mutations)</option>
+                      <option value="Operator">Operator (Database & File Tools Only)</option>
+                      <option value="Observer">Observer (Read-Only Monitoring Access)</option>
                     </select>
                   </div>
                 </div>

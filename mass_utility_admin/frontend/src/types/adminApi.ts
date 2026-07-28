@@ -56,6 +56,23 @@ export interface PackageTier {
   created_at?: string | null;
 }
 
+export interface RbacPermission {
+  id?: number;
+  slug: string;
+  group_name?: string;
+  name?: string;
+  description?: string;
+}
+
+export interface RbacRole {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  is_system?: number;
+  permissions: string[];
+}
+
 export interface ApiAdminResponse<T = any> {
   success: boolean;
   error?: string;
@@ -65,4 +82,6 @@ export interface ApiAdminResponse<T = any> {
   users?: UserAccount[];
   companies?: Company[];
   tiers?: PackageTier[];
+  roles?: RbacRole[];
+  permissions?: RbacPermission[];
 }

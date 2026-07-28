@@ -155,8 +155,72 @@ class AdminApiController
     private function roles(): void
     {
         header('Content-Type: application/json');
-        $roles = $this->repo->getAllRoles();
-        echo json_encode(['success' => true, 'roles' => $roles]);
+        $data = $this->repo->getAllRolesWithPermissions();
+        echo json_encode(['success' => true, 'roles' => $data['roles'], 'permissions' => $data['permissions']]);
+    }
+
+    private function role_create(): void
+    {
+        header('Content-Type: application/json');
+        $raw = file_get_contents('php://input');
+        $payload = json_decode((string)$raw, true) ?: $_POST;
+
+        $name = trim($payload['name'] ?? '');
+        $slug = trim($payload['slug'] ?? '');
+        $description = trim($payload['description'] ?? '');
+        $permissions = is_array($payload['permissions'] ?? null) ? $payload['permissions'] : [];
+
+        if (empty($name) || empty($slug)) {
+            echo json_encode(['success' => false, 'error' => 'Role name and slug are required.']);
+            return;
+        }
+
+        try {
+            $created = $this->repo->createRole($name, $slug, $description, $permissions);
+            echo json_encode(['success' => true, 'role' => $created]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function role_update(): void
+    {
+        header('Content-Type: application/json');
+        $raw = file_get_contents('php://input');
+        $payload = json_decode((string)$raw, true) ?: $_POST;
+
+        $roleId = (int)($payload['role_id'] ?? $_GET['role_id'] ?? 0);
+        $permissions = is_array($payload['permissions'] ?? null) ? $payload['permissions'] : [];
+
+        if ($roleId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Valid role ID is required.']);
+            return;
+        }
+
+        try {
+            $this->repo->updateRolePermissions($roleId, $permissions);
+            echo json_encode(['success' => true]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function role_delete(): void
+    {
+        header('Content-Type: application/json');
+        $roleId = (int)($_POST['role_id'] ?? $_GET['role_id'] ?? 0);
+
+        if ($roleId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Valid role ID is required.']);
+            return;
+        }
+
+        try {
+            $this->repo->deleteRole($roleId);
+            echo json_encode(['success' => true]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
     }
 
     private function send_password_reset_link(): void

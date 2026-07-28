@@ -55,6 +55,20 @@ class AuthManager
         ];
     }
 
+    public function getLicenseCapabilities(): array
+    {
+        $token = $this->settingsRepo->get('PM_LICENSE_TOKEN');
+        if (empty($token)) {
+            return [];
+        }
+        try {
+            $payload = json_decode(base64_decode((string)$token), true);
+            return is_array($payload['features']['capabilities'] ?? null) ? $payload['features']['capabilities'] : [];
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
     public function hasPermission(string $capability, ?array $session = null): bool
     {
         $session = $session ?? $this->getActiveSession();
@@ -64,13 +78,26 @@ class AuthManager
 
         $user = $session['user'];
         $role = $user['role'] ?? 'Observer';
+        $permissions = $user['permissions'] ?? [];
 
-        if ($role === 'SuperAdmin' || $role === 'CompanyAdmin') {
-            return true;
+        // 1. Role Permission Gate
+        $rolePermitted = ($role === 'SuperAdmin' || $role === 'CompanyAdmin' || in_array($capability, $permissions, true));
+        if (!$rolePermitted) {
+            return false;
         }
 
-        $permissions = $user['permissions'] ?? [];
-        return in_array($capability, $permissions, true);
+        // 2. License Tier Capability Ceiling Intersection
+        $licenseCaps = $this->getLicenseCapabilities();
+        if (!empty($licenseCaps)) {
+            if ($capability === 'db.drop' && empty($licenseCaps['sweeper_execution']) && empty($licenseCaps['query_visual_execute'])) {
+                return false;
+            }
+            if ($capability === 'ast.mutate' && empty($licenseCaps['query_visual_execute'])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function extractBearerToken(): string

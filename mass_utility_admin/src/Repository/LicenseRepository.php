@@ -784,6 +784,87 @@ class LicenseRepository
 
         return true;
     }
+
+    public function getAllPermissions(): array
+    {
+        $stmt = $this->db->query("SELECT * FROM pm_permissions ORDER BY id ASC");
+        $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($res) ? $res : [];
+    }
+
+    public function getAllRolesWithPermissions(): array
+    {
+        $roles = $this->getAllRoles();
+        $permissions = $this->getAllPermissions();
+
+        foreach ($roles as &$role) {
+            $role['permissions'] = $this->getUserPermissions(0, $role['slug']);
+        }
+
+        return [
+            'roles' => $roles,
+            'permissions' => $permissions
+        ];
+    }
+
+    public function createRole(string $name, string $slug, string $description, array $permissionSlugs): array
+    {
+        $slug = preg_replace('/[^a-zA-Z0-9_]/', '', $slug) ?: 'CustomRole';
+        $stmt = $this->db->prepare("INSERT INTO pm_roles (name, slug, description, is_system) VALUES (?, ?, ?, 0)");
+        $stmt->execute([$name, $slug, $description]);
+        $roleId = (int)$this->db->lastInsertId();
+
+        $this->updateRolePermissions($roleId, $permissionSlugs);
+
+        return [
+            'id' => $roleId,
+            'name' => $name,
+            'slug' => $slug,
+            'description' => $description,
+            'is_system' => 0,
+            'permissions' => $permissionSlugs
+        ];
+    }
+
+    public function updateRolePermissions(int $roleId, array $permissionSlugs): bool
+    {
+        $del = $this->db->prepare("DELETE FROM pm_role_permissions WHERE role_id = ?");
+        $del->execute([$roleId]);
+
+        if (empty($permissionSlugs)) {
+            return true;
+        }
+
+        $inClause = implode(',', array_fill(0, count($permissionSlugs), '?'));
+        $stmt = $this->db->prepare("SELECT id FROM pm_permissions WHERE slug IN ({$inClause})");
+        $stmt->execute($permissionSlugs);
+        $pIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $ins = $this->db->prepare("INSERT INTO pm_role_permissions (role_id, permission_id) VALUES (?, ?)");
+        foreach ($pIds as $pId) {
+            $ins->execute([$roleId, (int)$pId]);
+        }
+
+        return true;
+    }
+
+    public function deleteRole(int $roleId): bool
+    {
+        $chk = $this->db->prepare("SELECT is_system FROM pm_roles WHERE id = ?");
+        $chk->execute([$roleId]);
+        $isSystem = (int)$chk->fetchColumn();
+        if ($isSystem === 1) {
+            throw new \RuntimeException("System roles cannot be deleted.");
+        }
+
+        $delP = $this->db->prepare("DELETE FROM pm_role_permissions WHERE role_id = ?");
+        $delP->execute([$roleId]);
+
+        $delR = $this->db->prepare("DELETE FROM pm_roles WHERE id = ?");
+        $delR->execute([$roleId]);
+
+        return true;
+    }
 }
 
 
