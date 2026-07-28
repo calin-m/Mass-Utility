@@ -31,6 +31,7 @@ class AdminApiController
     }
 
 
+    // @Arch[AdminApiRoute:api_status]
     private function status(): void
     {
         try {
@@ -46,6 +47,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_login]
     private function login(): void
     {
         $username = trim($_POST['username'] ?? '');
@@ -62,6 +64,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_user_login]
     private function user_login(): void
     {
         header('Content-Type: application/json');
@@ -116,6 +119,7 @@ class AdminApiController
         ]);
     }
 
+    // @Arch[AdminApiRoute:api_user_verify]
     private function user_verify(): void
     {
         header('Content-Type: application/json');
@@ -152,6 +156,7 @@ class AdminApiController
         ]);
     }
 
+    // @Arch[AdminApiRoute:api_roles]
     private function roles(): void
     {
         header('Content-Type: application/json');
@@ -165,6 +170,7 @@ class AdminApiController
         ]);
     }
 
+    // @Arch[AdminApiRoute:api_role_create]
     private function role_create(): void
     {
         header('Content-Type: application/json');
@@ -189,6 +195,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_role_update]
     private function role_update(): void
     {
         header('Content-Type: application/json');
@@ -211,6 +218,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_role_delete]
     private function role_delete(): void
     {
         header('Content-Type: application/json');
@@ -229,6 +237,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_user_update_role]
     private function user_update_role(): void
     {
         header('Content-Type: application/json');
@@ -251,6 +260,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_company_roles]
     private function company_roles(): void
     {
         header('Content-Type: application/json');
@@ -268,6 +278,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_package_tiers]
     private function package_tiers(): void
     {
         header('Content-Type: application/json');
@@ -279,6 +290,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_company_role_update]
     private function company_role_update(): void
     {
         header('Content-Type: application/json');
@@ -303,6 +315,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_send_password_reset_link]
     private function send_password_reset_link(): void
     {
         header('Content-Type: application/json');
@@ -362,6 +375,7 @@ class AdminApiController
         ]);
     }
 
+    // @Arch[AdminApiRoute:api_verify_reset_token]
     private function verify_reset_token(): void
     {
         header('Content-Type: application/json');
@@ -380,6 +394,7 @@ class AdminApiController
         echo json_encode(['success' => true, 'email' => $reset['email'], 'name' => $reset['name']]);
     }
 
+    // @Arch[AdminApiRoute:api_complete_password_reset]
     private function complete_password_reset(): void
     {
         header('Content-Type: application/json');
@@ -406,6 +421,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_setup]
     private function setup(): void
     {
         if ($this->auth->hasAnyAdmin()) {
@@ -433,12 +449,14 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_logout]
     private function logout(): void
     {
         $this->auth->logout();
         echo json_encode(['success' => true]);
     }
 
+    // @Arch[AdminApiRoute:api_data]
     private function list(): void
     {
         try {
@@ -452,6 +470,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_create_company]
     private function create_company(): void
     {
         $name = trim($_POST['company_name'] ?? '');
@@ -504,6 +523,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_update_company]
     private function update_company(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -535,6 +555,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_delete_company]
     private function delete_company(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -556,6 +577,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_save_tier]
     private function save_tier(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -580,6 +602,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_delete_tier]
     private function delete_tier(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -596,6 +619,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_create_user]
     private function create_user(): void
     {
         $name = trim($_POST['name'] ?? '') ?: null;
@@ -626,6 +650,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_update_user]
     private function update_user(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -658,6 +683,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_reset_user_password]
     private function reset_user_password(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -679,6 +705,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_delete_user]
     private function delete_user(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -698,6 +725,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_generate]
     private function generate(): void
     {
         $companyId = isset($_POST['company_id']) && $_POST['company_id'] !== '' ? (int)$_POST['company_id'] : null;
@@ -727,6 +755,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_assign_license]
     private function assign_license(): void
     {
         $licenseId = (int)($_POST['license_id'] ?? $_POST['id'] ?? 0);
@@ -755,6 +784,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_update]
     private function update(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -800,6 +830,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_delete_license]
     private function delete_license(): void
     {
         $id = (int)($_POST['id'] ?? 0);
@@ -821,6 +852,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_change_password]
     private function change_password(): void
     {
         $oldPassword = $_POST['old_password'] ?? '';
@@ -853,6 +885,7 @@ class AdminApiController
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
+    // @Arch[AdminApiRoute:api_get_diagnostics]
     private function get_diagnostics(): void
     {
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -986,6 +1019,7 @@ class AdminApiController
         return ['code' => $code, 'body' => $body];
     }
 
+    // @Arch[AdminApiRoute:api_fix_permissions]
     private function fix_permissions(): void
     {
         $adminDir = dirname(dirname(__DIR__));
@@ -1063,6 +1097,7 @@ class AdminApiController
         echo json_encode(['success' => true, 'results' => $results]);
     }
 
+    // @Arch[AdminApiRoute:api_apply_security_headers]
     private function apply_security_headers(): void
     {
         $rootDir = dirname(dirname(dirname(__DIR__)));
@@ -1084,6 +1119,7 @@ class AdminApiController
         echo json_encode(['success' => true, 'message' => 'Security headers applied to root .htaccess successfully!']);
     }
 
+    // @Arch[AdminApiRoute:api_enable_ssl_redirect]
     private function enable_ssl_redirect(): void
     {
         $rootDir = dirname(dirname(dirname(__DIR__)));
@@ -1104,6 +1140,7 @@ class AdminApiController
         echo json_encode(['success' => true, 'message' => 'HTTPS 301 redirect rule injected into root .htaccess successfully!']);
     }
 
+    // @Arch[AdminApiRoute:api_extend_license]
     private function extend_license(): void
     {
         if (!$this->auth->isAuthenticated()) {
@@ -1138,6 +1175,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_update_license_domains]
     private function update_license_domains(): void
     {
         if (!$this->auth->isAuthenticated()) {
@@ -1171,6 +1209,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_get_admin_logs]
     private function get_admin_logs(): void
     {
         if (!$this->auth->isAuthenticated()) {
@@ -1191,6 +1230,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_export_admin_logs_csv]
     private function export_admin_logs_csv(): void
     {
         if (!$this->auth->isAuthenticated()) {
@@ -1228,6 +1268,7 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_clear_admin_logs]
     private function clear_admin_logs(): void
     {
         if (!$this->auth->isAuthenticated()) {
