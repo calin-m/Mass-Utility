@@ -469,7 +469,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             }
                           />
                         </td>
-                        <td className="p-3 align-middle whitespace-nowrap">
+                        <td className="py-2 px-3 align-middle whitespace-nowrap">
                           {lic.user_id ? (
                             <button
                               type="button"
@@ -485,28 +485,28 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             <span className="text-pm-secondary italic">{t('lbl_unassigned') || 'Unassigned'}</span>
                           )}
                         </td>
-                        <td className="p-3 align-middle whitespace-nowrap">
+                        <td className="py-2 px-3 align-middle whitespace-nowrap">
                           <TableCellCompany
                             companyName={companyName}
                             onClick={onInspectCompany && assignedComp ? () => onInspectCompany(assignedComp) : undefined}
                             fallbackText={t('lbl_standalone') || 'Standalone'}
                           />
                         </td>
-                        <td className="p-3 align-middle whitespace-nowrap">
+                        <td className="py-2 px-3 align-middle whitespace-nowrap">
                           <StatusBadge type="tier" label={(lic.package_tier || 'basic').toUpperCase()} />
                         </td>
-                        <td className="p-3 align-middle whitespace-nowrap">
+                        <td className="py-2 px-3 align-middle whitespace-nowrap">
                           <StatusBadge status={lic.status} />
                         </td>
-                        <td className="p-3 align-middle whitespace-nowrap">
+                        <td className="py-2 px-3 align-middle whitespace-nowrap">
                           <DomainPillGroup storeUrl={lic.store_url} />
                         </td>
-                        <td className="p-3 align-middle whitespace-nowrap">
+                        <td className="py-2 px-3 align-middle whitespace-nowrap">
                           <TableCellText
                             text={lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Lifetime'}
                           />
                         </td>
-                        <td className="p-3 text-right align-middle min-w-[220px]">
+                        <td className="py-2 px-3 text-right align-middle min-w-[220px]">
                           <TableCellActions
                             onInspect={() => handleSelectLicense(lic, 'overview')}
                             onEdit={() => handleSelectLicense(lic, 'edit')}

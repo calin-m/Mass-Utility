@@ -1,6 +1,6 @@
 // @Arch[CapabilitySimulator]
 import React, { useState } from 'react';
-import { Eye, EyeOff, Lock, Check, Key, Users as UsersIcon } from 'lucide-react';
+import { Eye, EyeOff, Lock, Check, Key, Users as UsersIcon, BookOpen } from 'lucide-react';
 import { RbacPermission, UserAccount, License } from '../../types/adminApi';
 import { maskLicenseKey } from '../../utils/licenseUtils';
 
@@ -21,6 +21,7 @@ interface CapabilitySimulatorProps {
   onTierSlugChange: (tier: string) => void;
   onRoleSlugChange?: (roleSlug: string) => void;
   onSimModeChange?: (mode: 'user' | 'role') => void;
+  onOpenGlossary?: () => void;
 }
 
 export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
@@ -39,7 +40,8 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
   onUserEmailChange,
   onTierSlugChange,
   onRoleSlugChange,
-  onSimModeChange
+  onSimModeChange,
+  onOpenGlossary
 }) => {
   const [showLicenseKey, setShowLicenseKey] = useState(false);
 
@@ -197,7 +199,22 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-pm-input text-pm-secondary font-bold uppercase text-[10px] border-b border-pm-border">
-              <th className="p-3.5">Capability Permission</th>
+              <th className="p-3.5">
+                <div className="flex items-center justify-between">
+                  <span>Capability Permission</span>
+                  {onOpenGlossary && (
+                    <button
+                      type="button"
+                      onClick={onOpenGlossary}
+                      className="normal-case text-[11px] font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition"
+                      title="Open Capability Glossary Definitions"
+                    >
+                      <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                      <span>(?) Glossary</span>
+                    </button>
+                  )}
+                </div>
+              </th>
               <th className="p-3.5 text-center">Effective Status</th>
             </tr>
           </thead>

@@ -472,14 +472,9 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         subtitle="Manage platform RBAC roles, organization overrides, and simulate live capability enforcement."
         icon={Shield}
         action={
-          <div className="flex gap-2">
-            <Button variant="neutral" size="sm" icon={RefreshCw} onClick={fetchGlobalRoles}>
-              Refresh
-            </Button>
-            <Button variant="primary" size="sm" icon={Plus} onClick={() => setShowAddRole(!showAddRole)}>
-              {showAddRole ? 'Cancel' : 'Add Custom Role'}
-            </Button>
-          </div>
+          <Button variant="neutral" size="sm" icon={RefreshCw} onClick={fetchGlobalRoles}>
+            Refresh
+          </Button>
         }
       />
 
@@ -489,9 +484,6 @@ export const RolesTab: React.FC<RolesTabProps> = ({
           activeTab={activeSubTab}
           onTabChange={setActiveSubTab}
         />
-        <Button variant="neutral" size="sm" icon={BookOpen} onClick={() => setShowGlossaryModal(true)}>
-          Capability Glossary
-        </Button>
       </div>
 
       {showAddRole && (
@@ -625,6 +617,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
             onTierSlugChange={setSimTierSlug}
             onRoleSlugChange={setSimRoleSlug}
             onSimModeChange={setSimMode}
+            onOpenGlossary={() => setShowGlossaryModal(true)}
           />
         </div>
       )}
