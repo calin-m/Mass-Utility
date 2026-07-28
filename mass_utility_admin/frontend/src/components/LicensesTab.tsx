@@ -19,6 +19,7 @@ import { DirectoryToolbar } from './common/DirectoryToolbar';
 import { LicenseRowCard } from './common/LicenseRowCard';
 import { IssueLicenseModal } from './common/IssueLicenseModal';
 import { LicenseDetailsView } from './licenses/LicenseDetailsView';
+import { ReassignLicenseModal } from './licenses/ReassignLicenseModal';
 import { StatusBadge } from './common/StatusBadge';
 import { useTranslation } from '../i18n/LanguageContext';
 import { getSortedTierOptions } from '../utils/tierUtils';
@@ -596,39 +597,15 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
       )}
 
       {/* Reassign Client Modal */}
-      {reassignLic && (
-        <BaseModal
-          isOpen={!!reassignLic}
-          onClose={() => setReassignLic(null)}
-          title="Reassign License Key to Client"
-          icon={User}
-          maxWidth="md"
-        >
-          <form onSubmit={handleReassignSubmit} className="space-y-4">
-            <FormSelect
-              label="Select New Client Owner"
-              icon={User}
-              value={reassignUserId}
-              onChange={(e) => setReassignUserId(Number(e.target.value))}
-              options={[
-                { value: '0', label: '-- Unassign (Standalone Key) --' },
-                ...users.map((u) => ({
-                  value: String(u.id),
-                  label: `${u.name || u.email} (${u.email})`,
-                })),
-              ]}
-            />
-            <div className="flex justify-end gap-3 pt-3 border-t border-pm-border">
-              <Button type="button" variant="neutral" size="md" onClick={() => setReassignLic(null)}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary" size="md" loading={reassignSubmitting}>
-                Confirm Reassignment
-              </Button>
-            </div>
-          </form>
-        </BaseModal>
-      )}
+      <ReassignLicenseModal
+        isOpen={!!reassignLic}
+        onClose={() => setReassignLic(null)}
+        users={users}
+        reassignUserId={reassignUserId}
+        onUserIdChange={setReassignUserId}
+        onSubmit={handleReassignSubmit}
+        submitting={reassignSubmitting}
+      />
 
       {/* Safety Confirm Modal (Suspend / Activate) */}
       {confirmLic && (

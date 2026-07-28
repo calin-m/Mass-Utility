@@ -11,6 +11,7 @@ import { FormInput } from './common/FormInput';
 import { FormSelect } from './common/FormSelect';
 import { PaginationBar } from './common/PaginationBar';
 import { useTranslation } from '../i18n/LanguageContext';
+import { AuditLogPayloadModal } from './audit_logs/AuditLogPayloadModal';
 
 interface AuditLog {
   id: number;
@@ -399,95 +400,14 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
       </div>
 
       {/* Inspect Log Details Modal */}
-      <BaseModal
-        isOpen={!!selectedLog}
+      <AuditLogPayloadModal
+        selectedLog={selectedLog}
         onClose={() => setSelectedLog(null)}
-        title={`Audit Event Telemetry #${selectedLog?.id || ''}`}
-        icon={Terminal}
-        maxWidth="lg"
-      >
-        {selectedLog && (
-          <div className="space-y-4 text-xs">
-            {/* Log Metadata Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-pm-input/50 rounded-xl border border-pm-border font-mono text-[11px]">
-              <div>
-                <div className="text-[10px] text-pm-secondary uppercase font-bold">{t('th_admin_op')}</div>
-                <div className="text-pm-text font-bold pt-0.5">{selectedLog.admin_username || 'system'}</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-pm-secondary uppercase font-bold">{t('th_action_type')}</div>
-                <div className="text-purple-600 dark:text-purple-400 font-bold pt-0.5">{selectedLog.action_type}</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-pm-secondary uppercase font-bold">{t('th_target')}</div>
-                <div className="text-pm-text font-bold pt-0.5">
-                  {selectedLog.target_entity} {selectedLog.target_id ? `#${selectedLog.target_id}` : ''}
-                </div>
-              </div>
-              <div>
-                <div className="text-[10px] text-pm-secondary uppercase font-bold">{t('th_ip')}</div>
-                <div className="text-pm-text font-bold pt-0.5">{selectedLog.ip_address}</div>
-              </div>
-            </div>
-
-            {/* Structured Payload Parameters */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold text-pm-text flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-purple-400" />
-                <span>{t('audit_struct_params')}</span>
-              </h4>
-
-              {Object.keys(selectedLog.details_parsed || {}).length === 0 ? (
-                <div className="p-4 bg-pm-input/30 rounded-xl border border-pm-border text-pm-secondary italic text-center">
-                  {t('audit_no_params')}
-                </div>
-              ) : (
-                <div className="bg-pm-input/40 rounded-xl border border-pm-border divide-y divide-pm-border">
-                  {Object.entries(selectedLog.details_parsed).map(([key, val]) => (
-                    <div key={key} className="p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <span className="font-mono text-[11px] text-pm-secondary font-bold shrink-0">
-                        {formatKeyName(key)}:
-                      </span>
-                      <div className="text-right text-xs font-mono">{formatValue(key, val)}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Light & Dark Mode Adaptive Terminal Box */}
-            <div className="pt-2 border-t border-pm-border">
-              <button
-                onClick={() => setShowRawJson(!showRawJson)}
-                className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1.5"
-              >
-                <Code2 className="w-4 h-4" />
-                <span>{showRawJson ? 'Hide Raw JSON Payload Data' : 'Inspect Raw JSON Payload Data'}</span>
-              </button>
-
-              {showRawJson && (
-                <div className="mt-2 rounded-xl overflow-hidden border border-pm-border shadow-inner">
-                  <div className="bg-pm-card px-3 py-1.5 flex items-center justify-between text-[10px] font-mono text-pm-secondary border-b border-pm-border">
-                    <span className="font-bold flex items-center gap-1">
-                      <Terminal className="w-3 h-3 text-purple-500" /> payload.json
-                    </span>
-                    <span>{selectedLog.created_at}</span>
-                  </div>
-                  <pre className="p-3 bg-pm-input font-mono text-[11px] text-pm-text overflow-x-auto max-h-72 overflow-y-auto">
-                    {JSON.stringify(selectedLog, null, 2)}
-                  </pre>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <Button variant="neutral" size="md" onClick={() => setSelectedLog(null)}>
-                {t('btn_close')}
-              </Button>
-            </div>
-          </div>
-        )}
-      </BaseModal>
+        showRawJson={showRawJson}
+        onToggleRawJson={() => setShowRawJson(!showRawJson)}
+        formatKeyName={formatKeyName}
+        formatValue={formatValue}
+      />
 
       {/* Clear Audit Logs Safety Confirmation Modal */}
       <ConfirmModal
