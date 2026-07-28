@@ -20,10 +20,17 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
+    if (error?.message?.includes('removeChild') || error?.name === 'NotFoundError') {
+      return { hasError: false, error: null, errorInfo: null };
+    }
     return { hasError: true, error, errorInfo: null };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    if (error?.message?.includes('removeChild') || error?.name === 'NotFoundError') {
+      this.setState({ hasError: false, error: null, errorInfo: null });
+      return;
+    }
     console.error('React ErrorBoundary Caught Failure:', error, errorInfo);
     this.setState({ error, errorInfo });
   }

@@ -5,15 +5,28 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   base: './',
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+    dedupe: ['react', 'react-dom'],
+  },
   build: {
     outDir: '../public/v2',
     emptyOutDir: true,
     target: 'es2015',
     minify: 'esbuild',
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor-react';
+          }
+          if (id.includes('src/i18n')) {
+            return 'vendor-i18n';
+          }
+        },
+      },
     },
   },
 });

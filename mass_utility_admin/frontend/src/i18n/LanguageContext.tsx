@@ -53,10 +53,14 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   );
 };
 
+const defaultContextValue: LanguageContextType = {
+  language: 'en',
+  setLanguage: () => {},
+  t: (key: keyof TranslationSchema) => TRANSLATIONS.en[key] || String(key),
+  supportedLanguages: SUPPORTED_LANGUAGES,
+};
+
 export const useTranslation = (): LanguageContextType => {
   const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useTranslation must be used within a LanguageProvider');
-  }
-  return context;
+  return context || defaultContextValue;
 };

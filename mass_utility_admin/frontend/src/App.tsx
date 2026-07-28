@@ -128,8 +128,15 @@ export const App: React.FC = () => {
   const handleLogout = async () => {
     try {
       await fetch(getApiUrl('api_logout'));
+    } catch (e) {
+    } finally {
+      setToast(null);
+      setInspectedClient(null);
+      setInspectedCompany(null);
+      setInspectedLicense(null);
+      setActiveTab('companies');
       setAuthenticated(false);
-    } catch (e) {}
+    }
   };
 
 
