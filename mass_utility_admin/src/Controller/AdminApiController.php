@@ -866,46 +866,14 @@ class AdminApiController
         $dashboardBaseUrl = $scheme . '://' . $host . rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/mass_utility_dashboard';
 
         // 2. Audit Admin .git config exposure
-        $adminGitExposed = false;
-        $ch = curl_init($adminBaseUrl . '/../.git/config');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_NOBODY, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $sslVerifyPeer);
-        curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        if ($code === 200) {
-            $adminGitExposed = true;
-        }
+        $adminGitExposed = $this->checkUrlExposure($adminBaseUrl . '/../.git/config', $sslVerifyPeer)['code'] === 200;
 
         // 3. Audit Dashboard .git config exposure
-        $dashboardGitExposed = false;
-        $ch = curl_init($dashboardBaseUrl . '/../.git/config');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_NOBODY, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $sslVerifyPeer);
-        curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        if ($code === 200) {
-            $dashboardGitExposed = true;
-        }
+        $dashboardGitExposed = $this->checkUrlExposure($dashboardBaseUrl . '/../.git/config', $sslVerifyPeer)['code'] === 200;
 
-        // 4. Audit Dashboard SQLite DB exposure (Verify binary SQLite magic header to prevent false positives from PrestaShop HTML redirects)
-        $dashboardDbExposed = false;
-        $ch = curl_init($dashboardBaseUrl . '/data/pm_cloud_backups.db');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $sslVerifyPeer);
-        $dbBody = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        if ($code === 200 && strpos($dbBody, 'SQLite format 3') === 0) {
-            $dashboardDbExposed = true;
-        }
+        // 4. Audit Dashboard SQLite DB exposure
+        $dbCheck = $this->checkUrlExposure($dashboardBaseUrl . '/data/pm_cloud_backups.db', $sslVerifyPeer);
+        $dashboardDbExposed = ($dbCheck['code'] === 200 && str_starts_with($dbCheck['body'], 'SQLite format 3'));
 
         // 5. File System checks
         $adminDir = dirname(dirname(__DIR__));
@@ -999,10 +967,21 @@ class AdminApiController
                         'current' => $getOctalPerms($dashboardDir . '/data/.htaccess', '0644'),
                         'recommended' => '0644',
                         'is_dir' => false
-                    ]
-                ]
             ]
         ]);
+    }
+
+    private function checkUrlExposure(string $url, bool $sslVerifyPeer): array
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $sslVerifyPeer);
+        $body = (string)curl_exec($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return ['code' => $code, 'body' => $body];
     }
 
     private function fix_permissions(): void

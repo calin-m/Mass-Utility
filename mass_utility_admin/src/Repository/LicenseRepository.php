@@ -4,14 +4,15 @@
 namespace MassUtilityAdmin\Repository;
 
 use PDO;
+use MassUtilityAdmin\Service\SQLiteConnectionManager;
 
 class LicenseRepository
 {
     private PDO $db;
 
-    public function __construct(PDO $db)
+    public function __construct(?PDO $db = null)
     {
-        $this->db = $db;
+        $this->db = $db ?? SQLiteConnectionManager::getConnection();
     }
 
     public function getAllLicenses(): array

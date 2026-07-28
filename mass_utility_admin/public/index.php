@@ -4,37 +4,17 @@
 declare(strict_types=1);
 session_start();
 
+require_once dirname(__DIR__) . '/src/Service/SQLiteConnectionManager.php';
 require_once dirname(__DIR__) . '/src/Service/AdminSettingsManager.php';
 require_once dirname(__DIR__) . '/src/Repository/LicenseRepository.php';
 require_once dirname(__DIR__) . '/src/Controller/AdminApiController.php';
 
+use MassUtilityAdmin\Service\SQLiteConnectionManager;
+
 // Auto-Migration Bootstrapper & First-Time Setup Check
-$dbPath = dirname(__DIR__) . '/data/pm_admin.db';
-$dbDir = dirname($dbPath);
-if (!is_dir($dbDir)) {
-    @mkdir($dbDir, 0755, true);
-}
-@chmod($dbDir, 0755);
-
-$htaccessPath = $dbDir . '/.htaccess';
-if (!file_exists($htaccessPath)) {
-    @file_put_contents($htaccessPath, "Require all denied\nDeny from all\n");
-}
-
-if (file_exists($dbPath)) {
-    @chmod($dbPath, 0644);
-}
-
 $hasAdmin = false;
-if (file_exists($dbPath) && filesize($dbPath) > 0) {
-    try {
-        $pdo = new PDO('sqlite:' . $dbPath);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(PDO::ATTR_TIMEOUT, 10);
-        try {
-            $pdo->exec('PRAGMA journal_mode = WAL;'); // nosec
-            $pdo->exec('PRAGMA busy_timeout = 10000;'); // nosec
-        } catch (\Throwable $t) {}
+try {
+    $pdo = SQLiteConnectionManager::getConnection();
 
         // Ensure pm_package_tiers table exists and is seeded (Self-healing repair)
         try {

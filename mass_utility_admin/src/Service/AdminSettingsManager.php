@@ -3,6 +3,8 @@
 
 namespace MassUtilityAdmin\Service;
 
+use MassUtilityAdmin\Service\SQLiteConnectionManager;
+
 class AdminSettingsManager
 {
     private string $dbPath;
@@ -14,43 +16,8 @@ class AdminSettingsManager
 
     public function getDbConnection(): \PDO
     {
-        $dbDir = dirname($this->dbPath);
-        if (!is_dir($dbDir)) {
-            @mkdir($dbDir, 0755, true);
-        }
-        @chmod($dbDir, 0755);
-
-        // Security check: keep SQLite directory private from direct HTTP downloads
-        $htaccessPath = $dbDir . '/.htaccess';
-        if (!file_exists($htaccessPath)) {
-            @file_put_contents($htaccessPath, "Require all denied\nDeny from all\n");
-        }
-
-        if (file_exists($this->dbPath)) {
-            @chmod($this->dbPath, 0644);
-        }
-
-        if (is_dir($dbDir) && !is_writable($dbDir)) {
-            @chmod($dbDir, 0775);
-            @clearstatcache(true, $dbDir);
-            if (!is_writable($dbDir)) {
-                throw new \RuntimeException("Database directory ('mass_utility_admin/data') is not writable by web server user.");
-            }
-        }
-
-        if (file_exists($this->dbPath) && !is_writable($this->dbPath)) {
-            @chmod($this->dbPath, 0664);
-            @clearstatcache(true, $this->dbPath);
-            if (!is_writable($this->dbPath)) {
-                throw new \RuntimeException("Database file ('pm_admin.db') is not writable.");
-            }
-        }
-
-        $pdo = new \PDO('sqlite:' . $this->dbPath);
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(\PDO::ATTR_TIMEOUT, 10);
+        $pdo = SQLiteConnectionManager::getConnection();
         try {
-            $pdo->exec('PRAGMA journal_mode = WAL;'); // nosec
             $pdo->exec('PRAGMA busy_timeout = 10000;'); // nosec
             $pdo->exec('CREATE TABLE IF NOT EXISTS pm_admins ( /* nosec */
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
