@@ -1,10 +1,23 @@
 <?php
 // @Arch[LicenseVerifyController]
 
+declare(strict_types=1);
+
 namespace MassUtility\Dashboard\Controller\Api;
+
+use MassUtility\Dashboard\Repository\LicenseVerifyRepository;
+
+require_once dirname(__DIR__, 2) . '/Repository/LicenseVerifyRepository.php';
 
 class LicenseVerifyController
 {
+    private LicenseVerifyRepository $repository;
+
+    public function __construct(?LicenseVerifyRepository $repository = null)
+    {
+        $this->repository = $repository ?? new LicenseVerifyRepository();
+    }
+
     public function handleActivate(): void
     {
         header('Content-Type: application/json');
@@ -19,14 +32,8 @@ class LicenseVerifyController
         }
 
         try {
-            $dbPath = dirname(dirname(dirname(__DIR__))) . '/data/pm_cloud_backups.db';
-            $pdo = new \PDO('sqlite:' . $dbPath);
-            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-            // 1. Verify user credentials
-            $stmt = $pdo->prepare("SELECT * FROM pm_users WHERE email = ?");
-            $stmt->execute([$email]);
-            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+            // 1. Verify user credentials via repository
+            $user = $this->repository->findUserByEmail($email);
 
             if (!$user || !password_verify($password, $user['password_hash'])) {
                 echo json_encode(['success' => false, 'error' => 'Invalid email or password credentials.']);
@@ -38,29 +45,12 @@ class LicenseVerifyController
                 exit;
             }
 
-            // 2. Get active license for user and bind domain
-            $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE user_id = ? AND (store_url = ? OR store_url IS NULL)");
-            $stmt->execute([$user['id'], $storeUrl]);
-            $lic = $stmt->fetch(\PDO::FETCH_ASSOC);
+            // 2. Get active license for user and bind domain via repository
+            $lic = $this->repository->findOrBindLicense((int)$user['id'], $storeUrl);
 
             if (!$lic) {
-                // Check if user has an unassigned license key to bind to this domain
-                $stmt = $pdo->prepare("SELECT * FROM pm_licenses WHERE user_id = ? AND (store_url IS NULL OR store_url = '') LIMIT 1");
-                $stmt->execute([$user['id']]);
-                $lic = $stmt->fetch(\PDO::FETCH_ASSOC);
-                
-                if ($lic) {
-                    $stmt = $pdo->prepare("UPDATE pm_licenses SET store_url = ? WHERE id = ?");
-                    $stmt->execute([$storeUrl, $lic['id']]);
-                    $lic['store_url'] = $storeUrl;
-                } else {
-                    echo json_encode(['success' => false, 'error' => 'No active license key found for this store domain. Please contact portal administrator.']);
-                    exit;
-                }
-            } elseif (empty($lic['store_url'])) {
-                $stmt = $pdo->prepare("UPDATE pm_licenses SET store_url = ? WHERE id = ?");
-                $stmt->execute([$storeUrl, $lic['id']]);
-                $lic['store_url'] = $storeUrl;
+                echo json_encode(['success' => false, 'error' => 'No active license key found for this store domain. Please contact portal administrator.']);
+                exit;
             }
 
             $tier = $lic['package_tier'];
