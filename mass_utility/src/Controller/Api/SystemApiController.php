@@ -16,6 +16,7 @@ use Db;
 use MassUtility\Service\ResourceMonitor;
 use MassUtility\Service\BridgeLogger;
 use MassUtility\Service\BridgeProgressTracker;
+use MassUtility\Repository\SystemRepository;
 use Tools;
 use ReflectionClass;
 
@@ -23,6 +24,7 @@ require_once __DIR__ . '/AbstractApiController.php';
 require_once dirname(dirname(__DIR__)) . '/Service/BridgeProgressTracker.php';
 require_once dirname(dirname(__DIR__)) . '/Service/TableBackupManager.php';
 require_once dirname(dirname(__DIR__)) . '/Service/FileBackupEngine.php';
+require_once dirname(dirname(__DIR__)) . '/Repository/SystemRepository.php';
 
 /**
  * Handles diagnostic and environmental polling.
@@ -31,11 +33,13 @@ class SystemApiController extends AbstractApiController
 {
     private BridgeLogger $logger;
     private ResourceMonitor $monitor;
+    private SystemRepository $systemRepository;
 
-    public function __construct(BridgeLogger $logger, ResourceMonitor $monitor)
+    public function __construct(BridgeLogger $logger, ResourceMonitor $monitor, ?SystemRepository $systemRepository = null)
     {
         $this->logger = $logger;
         $this->monitor = $monitor;
+        $this->systemRepository = $systemRepository ?? new SystemRepository();
     }
 
     protected function getGDriveAuthDetails(): void

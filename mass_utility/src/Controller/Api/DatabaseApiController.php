@@ -17,10 +17,12 @@ use MassUtility\Service\BridgeLogger;
 use MassUtility\Service\TableBackupManager;
 use MassUtility\Service\DatabaseProfilerEngine;
 use MassUtility\Service\BridgeProgressTracker;
+use MassUtility\Repository\DatabaseRepository;
 use Tools;
 
 require_once __DIR__ . '/AbstractApiController.php';
 require_once dirname(dirname(__DIR__)) . '/Service/BridgeProgressTracker.php';
+require_once dirname(dirname(__DIR__)) . '/Repository/DatabaseRepository.php';
 
 /**
  * Handles PrestaShop physical table isolation, SQL exports, and SQL imports.
@@ -30,12 +32,18 @@ class DatabaseApiController extends AbstractApiController
     private BridgeLogger $logger;
     private TableBackupManager $backupManager;
     private DatabaseProfilerEngine $profilerEngine;
+    private DatabaseRepository $databaseRepository;
 
-    public function __construct(BridgeLogger $logger, TableBackupManager $backupManager, DatabaseProfilerEngine $profilerEngine)
-    {
+    public function __construct(
+        BridgeLogger $logger,
+        TableBackupManager $backupManager,
+        DatabaseProfilerEngine $profilerEngine,
+        ?DatabaseRepository $databaseRepository = null
+    ) {
         $this->logger = $logger;
         $this->backupManager = $backupManager;
         $this->profilerEngine = $profilerEngine;
+        $this->databaseRepository = $databaseRepository ?? new DatabaseRepository();
     }
 
     protected function downloadBackup(): void
@@ -515,17 +523,10 @@ class DatabaseApiController extends AbstractApiController
     protected function getFragmentationStatus(): void
     {
         try {
-            $sql = "SELECT TABLE_NAME AS name, 
-                           (DATA_LENGTH + INDEX_LENGTH) AS total_size, 
-                           DATA_FREE AS data_free
-                    FROM INFORMATION_SCHEMA.TABLES 
-                    WHERE TABLE_SCHEMA = DATABASE() 
-                      AND ENGINE = 'InnoDB'
-                      AND DATA_FREE > 0";
-            $rows = \Db::getInstance()->executeS($sql);
+            $rows = $this->databaseRepository->getFragmentationStatus();
             $this->sendJsonResponse([
                 'success' => true,
-                'tables' => is_array($rows) ? $rows : []
+                'tables' => $rows
             ]);
         } catch (\Throwable $e) {
             $this->logger->log("Get fragmentation status failed: " . $e->getMessage(), 'ERROR');
