@@ -865,6 +865,12 @@ class LicenseRepository
 
         return true;
     }
+
+    public function updateUserRole(int $userId, string $roleSlug): bool
+    {
+        $stmt = $this->db->prepare("UPDATE pm_users SET role = ? WHERE id = ?");
+        return $stmt->execute([$roleSlug, $userId]);
+    }
 }
 
 

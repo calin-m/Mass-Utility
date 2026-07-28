@@ -223,6 +223,28 @@ class AdminApiController
         }
     }
 
+    private function user_update_role(): void
+    {
+        header('Content-Type: application/json');
+        $raw = file_get_contents('php://input');
+        $payload = json_decode((string)$raw, true) ?: $_POST;
+
+        $userId = (int)($payload['user_id'] ?? $_GET['user_id'] ?? 0);
+        $roleSlug = trim($payload['role'] ?? '');
+
+        if ($userId <= 0 || empty($roleSlug)) {
+            echo json_encode(['success' => false, 'error' => 'User ID and role slug are required.']);
+            return;
+        }
+
+        try {
+            $this->repo->updateUserRole($userId, $roleSlug);
+            echo json_encode(['success' => true]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
     private function send_password_reset_link(): void
     {
         header('Content-Type: application/json');

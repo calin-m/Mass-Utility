@@ -874,9 +874,11 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
           </div>
 
           <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-indigo-400" /> Linked Team Members Directory ({companyMembers.length})
-            </h3>
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-indigo-400" /> Linked Team Members Directory ({companyMembers.length})
+              </h3>
+            </div>
 
             <div className="border border-pm-border rounded-xl overflow-hidden text-xs">
               {companyMembers.length === 0 ? (
@@ -889,9 +891,35 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                         <div className="flex items-center gap-2">
                           <Mail className="w-3.5 h-3.5 text-pm-secondary shrink-0" />
                           <span className="font-bold text-pm-text">{m.email}</span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                            {m.role || 'Owner'}
-                          </span>
+                          <select
+                            value={m.role || 'CompanyAdmin'}
+                            onChange={async (e) => {
+                              const newRole = e.target.value;
+                              try {
+                                const res = await fetch('index.php?action=api_user_update_role', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ user_id: m.id, role: newRole })
+                                });
+                                const data = await res.json();
+                                if (data && data.success) {
+                                  showAlert(`Role updated for ${m.email} -> ${newRole}`, 'success');
+                                  handleRefreshData();
+                                } else {
+                                  showAlert(data.error || 'Failed to update role', 'error');
+                                }
+                              } catch (err: any) {
+                                showAlert(err.message || 'Connection error', 'error');
+                              }
+                            }}
+                            className="bg-pm-input border border-pm-border rounded px-2 py-0.5 text-[11px] font-bold text-indigo-400 focus:outline-none cursor-pointer"
+                          >
+                            <option value="SuperAdmin">SuperAdmin</option>
+                            <option value="CompanyAdmin">CompanyAdmin</option>
+                            <option value="CatalogManager">CatalogManager</option>
+                            <option value="Operator">Operator</option>
+                            <option value="Observer">Observer</option>
+                          </select>
                         </div>
                         <div className="text-[11px] text-pm-secondary font-mono">ID: #{m.id} • Registered: {m.created_at ? new Date(m.created_at).toLocaleDateString() : 'N/A'}</div>
                       </div>
