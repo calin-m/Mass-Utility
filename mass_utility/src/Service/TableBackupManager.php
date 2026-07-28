@@ -11,6 +11,9 @@ if (!defined('_PS_VERSION_')) {
 
 use Db;
 use Exception;
+use MassUtility\Service\BackupDiffEngine;
+
+require_once __DIR__ . '/BackupDiffEngine.php';
 
 /**
  * Responsible for the isolation, streaming, and generation of `.sql` files for specific database tables.
@@ -22,6 +25,7 @@ class TableBackupManager
     private BridgeLogger $logger;
     private ResourceMonitor $resourceMonitor;
     private SettingsManager $settingsManager;
+    private BackupDiffEngine $diffEngine;
 
     public function __construct(BridgeLogger $logger, ?ResourceMonitor $resourceMonitor = null)
     {
@@ -54,6 +58,7 @@ class TableBackupManager
         }
         @chmod($manifestTmp, 0755);
         $this->targetTables = $this->getDefaultTargetTables();
+        $this->diffEngine = new BackupDiffEngine($this->logger, $this->backupDir, $this->targetTables);
     }
 
     public function getTargetTables(): array
@@ -444,438 +449,21 @@ class TableBackupManager
 
     /**
      * Extracts row-level differences for a specific table between a backup and the live database.
-     * 
-     * @param string $backupName The name of the backup
-     * @param string $tableName The specific table to diff
-     * @return array Array containing detailed diffs and statistics
      */
     public function diffTableRows(string $backupName, string $tableName): array
     {
-        $backupName = basename($backupName);
-        $baseName = preg_replace('/(\.sql\.gz|\.log)$/', '', $backupName);
-        $sqlPath = $this->backupDir . $baseName . '/' . $baseName . '.sql.gz';
-
-        if (!file_exists($sqlPath)) {
-            throw new Exception('Target SQL backup file not found.');
-        }
-
-        $db = \Db::getInstance(true);
-        $tableName = pSQL($tableName);
-        
-        // 1. Fetch live row state
-        $activeRows = [];
-        $primaryKey = null;
-        try {
-            // Find primary key
-            $cols = $db->executeS('DESCRIBE `' . $tableName . '`');
-            $columnsOrder = [];
-            if (is_array($cols)) {
-                foreach ($cols as $idx => $col) {
-                    $columnsOrder[$idx] = $col['Field'];
-                    if ($col['Key'] === 'PRI' && $primaryKey === null) {
-                        $primaryKey = $col['Field'];
-                    }
-                }
-            }
-            
-            if (!$primaryKey && count($columnsOrder) > 0) {
-                // Fallback to first column if no PK
-                $primaryKey = $columnsOrder[0];
-            }
-
-            if ($primaryKey) {
-                $liveData = $db->executeS('SELECT * FROM `' . $tableName . '` LIMIT 5000'); // Limit to prevent OOM
-                if (is_array($liveData)) {
-                    foreach ($liveData as $row) {
-                        $activeRows[(string)$row[$primaryKey]] = $row;
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            throw new Exception('Failed to fetch active state for ' . $tableName . ': ' . $e->getMessage());
-        }
-
-        // 2. Stream parse backup for target table
-        $backupRows = [];
-        $gz = @gzopen($sqlPath, 'r');
-        if ($gz !== false) {
-            try {
-                while (!gzeof($gz)) {
-                    $line = gzgets($gz, 65536);
-                    if ($line === false) {
-                        break;
-                    }
-                    
-                    if (stripos($line, 'INSERT INTO `' . $tableName . '` VALUES') !== false) {
-                        while (!gzeof($gz)) {
-                            $valLine = gzgets($gz, 65536);
-                            if ($valLine === false || trim($valLine) === '' || strpos($valLine, ';') === 0) {
-                                break;
-                            }
-                            
-                            $valLine = trim($valLine);
-                            if (strpos($valLine, '(') === 0) {
-                                $rparent = strrpos($valLine, ')');
-                                if ($rparent !== false) {
-                                    $inner = substr($valLine, 1, $rparent - 1);
-                                    $parts = str_getcsv($inner, ',', "'");
-                                    
-                                    if (is_array($parts) && count($parts) > 0) {
-                                        // Build row assoc
-                                        $rowAssoc = [];
-                                        $pkValue = null;
-                                        foreach ($parts as $idx => $val) {
-                                            $colName = $columnsOrder[$idx] ?? 'col_' . $idx;
-                                            $cleanVal = trim($val, "'");
-                                            $rowAssoc[$colName] = $cleanVal;
-                                            if ($colName === $primaryKey) {
-                                                $pkValue = $cleanVal;
-                                            }
-                                        }
-                                        
-                                        if ($pkValue !== null) {
-                                            $backupRows[(string)$pkValue] = $rowAssoc;
-                                        }
-                                    }
-                                }
-                            }
-                            if (strpos($valLine, ';') !== false) {
-                                break;
-                            }
-                        }
-                        // Break after finding and parsing the table's inserts
-                        break; 
-                    }
-                }
-                gzclose($gz);
-            } catch (\Throwable $e) {
-                @gzclose($gz);
-            }
-        }
-
-        // 3. Compute Diffs
-        $added = [];
-        $deleted = [];
-        $modified = [];
-
-        foreach ($activeRows as $pk => $liveRow) {
-            if (!isset($backupRows[$pk])) {
-                $added[] = $liveRow;
-            } else {
-                $backupRow = $backupRows[$pk];
-                $diffs = [];
-                foreach ($liveRow as $col => $liveVal) {
-                    $backVal = $backupRow[$col] ?? null;
-                    if ((string)$liveVal !== (string)$backVal) {
-                        $diffs[$col] = ['backup' => $backVal, 'live' => $liveVal];
-                    }
-                }
-                if (!empty($diffs)) {
-                    $modified[] = [
-                        'pk' => $pk,
-                        'changes' => $diffs
-                    ];
-                }
-            }
-        }
-
-        foreach ($backupRows as $pk => $backupRow) {
-            if (!isset($activeRows[$pk])) {
-                $deleted[] = $backupRow;
-            }
-        }
-
-        return [
-            'table' => $tableName,
-            'primary_key' => $primaryKey,
-            'summary' => [
-                'added' => count($added),
-                'deleted' => count($deleted),
-                'modified' => count($modified),
-            ],
-            'added_rows' => array_slice($added, 0, 50), // Cap to prevent huge payloads
-            'deleted_rows' => array_slice($deleted, 0, 50),
-            'modified_rows' => array_slice($modified, 0, 50),
-        ];
+        return $this->diffEngine->diffTableRows($backupName, $tableName);
     }
 
     /**
-     * Dual Key Transfer Sync: High-performance streaming parser
-     * Compares active catalog products against backup rows and cross-checks telemetry log
+     * Compares active catalog products against backup rows and cross-checks telemetry log.
+     */
+    /**
+     * Compares active catalog products against backup rows and cross-checks telemetry log.
      */
     public function compareBackup(string $backupName): array
     {
-        $backupName = basename($backupName);
-        // 1. Locate backup files within their subfolder
-        $baseName = preg_replace('/(\.sql\.gz|\.log)$/', '', $backupName);
-        $sqlPath = $this->backupDir . $baseName . '/' . $baseName . '.sql.gz';
-        $logPath = $this->backupDir . $baseName . '/' . $baseName . '.log';
-
-        if (!file_exists($sqlPath)) {
-            throw new Exception('Target SQL backup file not found.');
-        }
-
-        $db = Db::getInstance(true);
-
-        // 2. Read the backup telemetry log, parse checksums and row counts FIRST
-        $logMetadata = "No telemetry log file compiled for this backup.";
-        $backupChecksums = [];
-        $backupRowCounts = [];
-        
-        if (file_exists($logPath)) {
-            $logMetadata = @file_get_contents($logPath);
-            
-            // Parse checksums from log
-            if (preg_match_all('/Table `([^`]+)` Checksum:\s*(\d+)/i', $logMetadata, $matches, PREG_SET_ORDER)) {
-                foreach ($matches as $match) {
-                    $backupChecksums[$match[1]] = $match[2];
-                }
-            }
-            
-            // Parse table statistics (row counts) from log
-            if (preg_match_all('/Table `([^`]+)`:\s*(\d+)\s*row/i', $logMetadata, $matches, PREG_SET_ORDER)) {
-                foreach ($matches as $match) {
-                    $backupRowCounts[$match[1]] = (int)$match[2];
-                }
-            }
-        }
-
-        // 3. Resolve target tables to check
-        $targetTablesToCheck = array_keys($backupChecksums);
-        if (empty($targetTablesToCheck)) {
-            // Fallback 1: Resolve from row count keys in log
-            $targetTablesToCheck = array_keys($backupRowCounts);
-        }
-
-        if (empty($targetTablesToCheck)) {
-            // Fallback 2: Scan the SQL file structure directly for dumped table names
-            $gz = @gzopen($sqlPath, 'r');
-            if ($gz !== false) {
-                while (!gzeof($gz)) {
-                    $line = gzgets($gz, 4096);
-                    if ($line === false) {
-                        break;
-                    }
-                    if (preg_match('/DROP TABLE IF EXISTS `([^`]+)`/i', $line, $match)) {
-                        $targetTablesToCheck[] = $match[1];
-                    }
-                }
-                gzclose($gz);
-                $targetTablesToCheck = array_unique($targetTablesToCheck);
-            }
-        }
-
-        if (empty($targetTablesToCheck)) {
-            // Fallback 3: Hardcoded defaults
-            foreach ($this->targetTables as $tableBase) {
-                $targetTablesToCheck[] = _DB_PREFIX_ . $tableBase;
-            }
-        }
-
-        $productTable = _DB_PREFIX_ . 'product';
-        $runKeyCheck = in_array($productTable, $targetTablesToCheck);
-
-        $activeProducts = [];
-        $productCols = [];
-        if ($runKeyCheck) {
-            try {
-                // Determine column indices for backup parsing
-                $cols = $db->executeS('DESCRIBE `' . $productTable . '`');
-                if (is_array($cols)) {
-                    foreach ($cols as $idx => $col) {
-                        $productCols[$col['Field']] = $idx;
-                    }
-                }
-
-                // Fetch active products with rich metadata
-                $langTable = _DB_PREFIX_ . 'product_lang';
-                $langQuery = 'SELECT id_lang FROM `' . _DB_PREFIX_ . 'lang` WHERE active = 1 ORDER BY id_lang ASC LIMIT 1';
-                $sql = 'SELECT p.id_product, p.reference, p.price, pl.name 
-                        FROM `' . $productTable . '` p 
-                        LEFT JOIN `' . $langTable . '` pl 
-                          ON p.id_product = pl.id_product 
-                          AND pl.id_lang = (' . $langQuery . ')';
-                $rows = $db->executeS($sql);
-                if (is_array($rows)) {
-                    foreach ($rows as $r) {
-                        $activeProducts[(int)$r['id_product']] = [
-                            'reference' => $r['reference'] ?? '',
-                            'price' => (float)($r['price'] ?? 0),
-                            'name' => $r['name'] ?? 'Unknown Product'
-                        ];
-                    }
-                }
-            } catch (\Throwable $e) {
-                // Table doesn't exist yet or query failed
-            }
-        }
-
-        $backupProducts = [];
-        if ($runKeyCheck) {
-            $refIdx = $productCols['reference'] ?? 4;
-            $priceIdx = $productCols['price'] ?? 8;
-            $gz = @gzopen($sqlPath, 'r');
-            if ($gz !== false) {
-                try {
-                    while (!gzeof($gz)) {
-                        $line = gzgets($gz, 65536);
-                        if ($line === false) {
-                            break;
-                        }
-                        
-                        // Scan for insert statements of product table
-                        if (stripos($line, 'INSERT INTO `' . $productTable . '` VALUES') !== false) {
-                            while (!gzeof($gz)) {
-                                $valLine = gzgets($gz, 65536);
-                                if ($valLine === false || trim($valLine) === '' || strpos($valLine, ';') === 0) {
-                                    break;
-                                }
-                                
-                                $valLine = trim($valLine);
-                                if (strpos($valLine, '(') === 0) {
-                                    $rparent = strrpos($valLine, ')');
-                                    if ($rparent !== false) {
-                                        $inner = substr($valLine, 1, $rparent - 1);
-                                        $parts = str_getcsv($inner, ',', "'");
-                                        if (is_array($parts) && count($parts) > 0) {
-                                            $id_prod = (int)$parts[0];
-                                            $backupProducts[$id_prod] = [
-                                                'reference' => isset($parts[$refIdx]) ? trim($parts[$refIdx], "'") : '',
-                                                'price' => isset($parts[$priceIdx]) ? (float)trim($parts[$priceIdx], "'") : 0,
-                                                'name' => 'Unknown Product (Backup)' // Will be enriched from active if exists
-                                            ];
-                                        }
-                                    }
-                                }
-                                if (strpos($valLine, ';') !== false) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    gzclose($gz);
-                } catch (\Throwable $e) {
-                    @gzclose($gz);
-                }
-            }
-        }
-
-        // Calculate Dual Key Sync Deltas
-        $added = [];
-        $deleted = [];
-
-        foreach ($activeProducts as $id => $val) {
-            if (!isset($backupProducts[$id])) {
-                $added[] = [
-                    'id_product' => $id,
-                    'reference' => $val['reference'],
-                    'price' => $val['price'],
-                    'name' => $val['name']
-                ];
-            }
-        }
-
-        foreach ($backupProducts as $id => $val) {
-            if (!isset($activeProducts[$id])) {
-                $deleted[] = [
-                    'id_product' => $id,
-                    'reference' => $val['reference'],
-                    'price' => $val['price'],
-                    'name' => 'Deleted Product' // Cannot easily fetch name if strictly deleted
-                ];
-            }
-        }
-
-        // 5. Calculate active checksums and count sum of rows across ALL verified tables
-        $activeChecksums = [];
-        $totalBackupRows = 0;
-        $totalActiveRows = 0;
-
-        foreach ($targetTablesToCheck as $tableName) {
-            // Backup row count
-            $bRows = isset($backupRowCounts[$tableName]) ? $backupRowCounts[$tableName] : 0;
-            $totalBackupRows += $bRows;
-
-            // Active row count
-            $aRows = 0;
-            try {
-                $aRows = (int)$db->getValue('SELECT COUNT(*) FROM `' . $tableName . '`');
-            } catch (\Throwable $e) {}
-            $totalActiveRows += $aRows;
-
-            // Active checksum
-            try {
-                $checksumResult = $db->executeS('CHECKSUM TABLE `' . $tableName . '`');
-                if (!empty($checksumResult) && is_array($checksumResult) && isset($checksumResult[0]['Checksum'])) {
-                    $activeChecksums[$tableName] = $checksumResult[0]['Checksum'];
-                }
-            } catch (\Throwable $e) {}
-        }
-
-        // Build table-specific comparison structure
-        $checksumStatus = [];
-        $checksumDrift = false;
-
-        foreach ($targetTablesToCheck as $tableName) {
-            $backupChk = isset($backupChecksums[$tableName]) ? $backupChecksums[$tableName] : null;
-            $activeChk = isset($activeChecksums[$tableName]) ? $activeChecksums[$tableName] : null;
-            $bRows = isset($backupRowCounts[$tableName]) ? $backupRowCounts[$tableName] : 0;
-            
-            $aRows = 0;
-            try {
-                $aRows = (int)$db->getValue('SELECT COUNT(*) FROM `' . $tableName . '`');
-            } catch (\Throwable $e) {}
-
-            $isVolatile = (bool)preg_match('/(employee_session|customer_session|connections|connections_page|connections_source|guest|page_viewed|log|mail|statssearch|cart|cart_product)$/i', $tableName);
-
-            if ($bRows === 0 && $aRows === 0) {
-                // Empty tables are identical by definition (no rows to differ)
-                $checksumStatus[$tableName] = [
-                    'active' => $activeChk !== null ? $activeChk : '0',
-                    'backup' => $backupChk !== null ? $backupChk : '0',
-                    'match' => true,
-                    'active_rows' => 0,
-                    'backup_rows' => 0,
-                    'volatile' => $isVolatile
-                ];
-            } else if ($backupChk !== null) {
-                $isMatch = ($activeChk !== null && (string)$activeChk === (string)$backupChk);
-                $checksumStatus[$tableName] = [
-                    'active' => $activeChk !== null ? $activeChk : 'MISSING',
-                    'backup' => $backupChk,
-                    'match' => $isMatch,
-                    'active_rows' => $aRows,
-                    'backup_rows' => $bRows,
-                    'volatile' => $isVolatile
-                ];
-                if (!$isMatch && !$isVolatile) {
-                    $checksumDrift = true;
-                }
-            } else {
-                $checksumStatus[$tableName] = [
-                    'active' => $activeChk !== null ? $activeChk : 'UNKNOWN',
-                    'backup' => null,
-                    'match' => null,
-                    'active_rows' => $aRows,
-                    'backup_rows' => $bRows,
-                    'volatile' => $isVolatile
-                ];
-            }
-        }
-
-        return [
-            'success' => true,
-            'backup_name' => $baseName,
-            'backup_rows' => $totalBackupRows,
-            'active_rows' => $totalActiveRows,
-            'added' => $added,
-            'deleted' => $deleted,
-            'added_count' => count($added),
-            'deleted_count' => count($deleted),
-            'checksum_drift' => $checksumDrift,
-            'checksum_status' => $checksumStatus,
-            'log_metadata' => $logMetadata
-        ];
+        return $this->diffEngine->compareBackup($backupName);
     }
 
     /**
