@@ -903,13 +903,13 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                                 });
                                 const data = await res.json();
                                 if (data && data.success) {
-                                  showAlert(`Role updated for ${m.email} -> ${newRole}`, 'success');
-                                  handleRefreshData();
+                                  if (showAlert) showAlert(`Role updated for ${m.email} -> ${newRole}`, 'success');
+                                  onRefresh();
                                 } else {
-                                  showAlert(data.error || 'Failed to update role', 'error');
+                                  if (showAlert) showAlert(data.error || 'Failed to update role', 'error');
                                 }
                               } catch (err: any) {
-                                showAlert(err.message || 'Connection error', 'error');
+                                if (showAlert) showAlert(err.message || 'Connection error', 'error');
                               }
                             }}
                             className="bg-pm-input border border-pm-border rounded px-2 py-0.5 text-[11px] font-bold text-indigo-400 focus:outline-none cursor-pointer"
