@@ -692,15 +692,19 @@ class LicenseRepository
         }
 
         if ($companyId !== null && $companyId > 0) {
-            $compSql = "SELECT p.slug FROM pm_permissions p
-                        JOIN pm_company_role_permissions crp ON p.id = crp.permission_id
-                        WHERE crp.company_id = ? AND crp.role_slug = ?";
-            $compStmt = $this->db->prepare($compSql);
-            $compStmt->execute([$companyId, $roleSlug]);
-            $compPerms = $compStmt->fetchAll(PDO::FETCH_COLUMN);
+            $chkOverride = $this->db->prepare("SELECT COUNT(*) FROM pm_company_role_permissions WHERE company_id = ? AND role_slug = ?");
+            $chkOverride->execute([$companyId, $roleSlug]);
+            $hasOverride = ((int)$chkOverride->fetchColumn() > 0);
 
-            if (!empty($compPerms)) {
-                return array_values(array_unique($compPerms));
+            if ($hasOverride) {
+                $compSql = "SELECT p.slug FROM pm_permissions p
+                            JOIN pm_company_role_permissions crp ON p.id = crp.permission_id
+                            WHERE crp.company_id = ? AND crp.role_slug = ?";
+                $compStmt = $this->db->prepare($compSql);
+                $compStmt->execute([$companyId, $roleSlug]);
+                $compPerms = $compStmt->fetchAll(PDO::FETCH_COLUMN);
+
+                return array_values(array_unique($compPerms ?: []));
             }
         }
 
@@ -730,6 +734,15 @@ class LicenseRepository
 
     public function getCompanyRoleOverrides(int $companyId): array
     {
+        $stmtAll = $this->db->prepare("SELECT DISTINCT role_slug FROM pm_company_role_permissions WHERE company_id = ?");
+        $stmtAll->execute([$companyId]);
+        $rolesWithOverride = $stmtAll->fetchAll(PDO::FETCH_COLUMN);
+
+        $result = [];
+        foreach ($rolesWithOverride as $role) {
+            $result[$role] = [];
+        }
+
         $sql = "SELECT crp.role_slug, p.slug as perm_slug
                 FROM pm_company_role_permissions crp
                 JOIN pm_permissions p ON crp.permission_id = p.id
@@ -738,23 +751,26 @@ class LicenseRepository
         $stmt->execute([$companyId]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $result = [];
         foreach ($rows as $row) {
             $role = $row['role_slug'];
-            if (!isset($result[$role])) {
-                $result[$role] = [];
-            }
             $result[$role][] = $row['perm_slug'];
         }
         return $result;
     }
 
-    public function updateCompanyRolePermissions(int $companyId, string $roleSlug, array $permissionSlugs): bool
+    public function updateCompanyRolePermissions(int $companyId, string $roleSlug, array $permissionSlugs, bool $isReset = false): bool
     {
         $del = $this->db->prepare("DELETE FROM pm_company_role_permissions WHERE company_id = ? AND role_slug = ?");
         $del->execute([$companyId, $roleSlug]);
 
+        if ($isReset) {
+            return true;
+        }
+
         if (empty($permissionSlugs)) {
+            // Store sentinel entry (permission_id = 0) to indicate explicit override with 0 permissions
+            $ins0 = $this->db->prepare("INSERT OR IGNORE INTO pm_company_role_permissions (company_id, role_slug, permission_id) VALUES (?, ?, 0)");
+            $ins0->execute([$companyId, $roleSlug]);
             return true;
         }
 
@@ -868,6 +884,13 @@ class LicenseRepository
     public function createRole(string $name, string $slug, string $description, array $permissionSlugs): array
     {
         $slug = preg_replace('/[^a-zA-Z0-9_]/', '', $slug) ?: 'CustomRole';
+
+        $chk = $this->db->prepare("SELECT COUNT(*) FROM pm_roles WHERE slug = ?");
+        $chk->execute([$slug]);
+        if ((int)$chk->fetchColumn() > 0) {
+            throw new \RuntimeException("Role with slug '{$slug}' already exists.");
+        }
+
         $stmt = $this->db->prepare("INSERT INTO pm_roles (name, slug, description, is_system) VALUES (?, ?, ?, 0)");
         $stmt->execute([$name, $slug, $description]);
         $roleId = (int)$this->db->lastInsertId();
@@ -928,6 +951,20 @@ class LicenseRepository
     {
         $stmt = $this->db->prepare("UPDATE pm_users SET role = ? WHERE id = ?");
         return $stmt->execute([$roleSlug, $userId]);
+    }
+
+    public function getAllPackageTiers(): array
+    {
+        $stmt = $this->db->query("SELECT * FROM pm_package_tiers ORDER BY id ASC");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (is_array($rows)) {
+            foreach ($rows as &$row) {
+                if (!empty($row['capabilities'])) {
+                    $row['capabilities_decoded'] = json_decode($row['capabilities'], true);
+                }
+            }
+        }
+        return is_array($rows) ? $rows : [];
     }
 }
 

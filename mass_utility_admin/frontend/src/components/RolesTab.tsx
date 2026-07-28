@@ -76,6 +76,32 @@ export const RolesTab: React.FC<RolesTabProps> = ({
   // Capability Simulator State
   const [simUserEmail, setSimUserEmail] = useState<string>(users[0]?.email || '');
   const [simTierSlug, setSimTierSlug] = useState<string>('pro');
+  const [simRoleSlug, setSimRoleSlug] = useState<string>('Observer');
+  const [simMode, setSimMode] = useState<'user' | 'role'>('user');
+
+  // Sync selectedCompanyId when companies array resolves asynchronously
+  useEffect(() => {
+    if (companies.length > 0 && (selectedCompanyId <= 0 || !companies.some(c => c.id === selectedCompanyId))) {
+      setSelectedCompanyId(companies[0].id);
+    }
+  }, [companies, selectedCompanyId]);
+
+  // Dynamic Package Tiers Fetch from Backend API
+  const [packageTiers, setPackageTiers] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchPackageTiers = async () => {
+      try {
+        const res = await fetch('index.php?action=api_package_tiers');
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.tiers)) {
+          setPackageTiers(data.tiers);
+        }
+      } catch (e) {
+        // Graceful fallback
+      }
+    };
+    fetchPackageTiers();
+  }, []);
 
   // Auto-detect user's assigned license tier when user selection changes
   useEffect(() => {
@@ -243,13 +269,16 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     if (count > 0) {
       setDeletingRole(role);
     } else {
-      executeDeleteRole(role.id, role.name);
+      executeDeleteRoleWithConfirm(role.id, role.name);
     }
   };
 
-  const executeDeleteRole = async (roleId: number, roleName: string) => {
+  const executeDeleteRoleWithConfirm = async (roleId: number, roleName: string) => {
     if (!window.confirm(`Are you sure you want to delete custom role '${roleName}'?`)) return;
+    await executeDeleteRoleDirect(roleId, roleName);
+  };
 
+  const executeDeleteRoleDirect = async (roleId: number, roleName: string) => {
     setSaving(true);
     try {
       const res = await fetch(`index.php?action=api_role_delete&role_id=${roleId}`, { method: 'POST' });
@@ -280,7 +309,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
           body: JSON.stringify({ user_id: u.id, role: reassignRole })
         });
       }
-      await executeDeleteRole(deletingRole.id, deletingRole.name);
+      await executeDeleteRoleDirect(deletingRole.id, deletingRole.name);
     } catch (e: any) {
       if (showAlert) showAlert(e.message || 'Failed during user reassignment.', 'error');
     } finally {
@@ -339,7 +368,8 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         body: JSON.stringify({
           company_id: selectedCompanyId,
           role: roleSlug,
-          permissions: []
+          permissions: [],
+          reset: true
         })
       });
       const data = await res.json();
@@ -358,12 +388,16 @@ export const RolesTab: React.FC<RolesTabProps> = ({
 
   // Live Effective Capability Simulator Calculation: Role Perms ∩ Tier Caps
   const simulatedCapabilities = useMemo(() => {
-    if (!simUserEmail) return [];
-    const userObj = users.find(u => u.email === simUserEmail);
-    if (!userObj) return [];
+    let roleSlug = simRoleSlug;
+    let compId = 0;
 
-    const roleSlug = userObj.role || 'Observer';
-    const compId = userObj.company_id || 0;
+    if (simMode === 'user') {
+      if (!simUserEmail) return [];
+      const userObj = users.find(u => u.email === simUserEmail);
+      if (!userObj) return [];
+      roleSlug = userObj.role || 'Observer';
+      compId = userObj.company_id || 0;
+    }
 
     const rolePerms = (compId > 0 && companyOverrides[roleSlug] && companyOverrides[roleSlug].length > 0)
       ? companyOverrides[roleSlug]
@@ -372,7 +406,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     const tierCaps = TIER_CAPABILITIES_MAP[simTierSlug.toLowerCase()] || TIER_CAPABILITIES_MAP.basic;
 
     return rolePerms.filter(p => tierCaps.includes(p));
-  }, [simUserEmail, simTierSlug, users, roles, companyOverrides]);
+  }, [simMode, simUserEmail, simRoleSlug, simTierSlug, users, roles, companyOverrides]);
 
   const selectedSimUserObj = useMemo(() => {
     return users.find(u => u.email === simUserEmail);
@@ -396,11 +430,8 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         icon={Shield}
         action={
           <div className="flex gap-2">
-            <Button variant="neutral" size="sm" icon={BookOpen} onClick={() => setShowGlossaryModal(true)}>
-              Capability Glossary
-            </Button>
             <Button variant="neutral" size="sm" icon={RefreshCw} onClick={fetchGlobalRoles}>
-              Refresh Matrix
+              Refresh
             </Button>
             <Button variant="primary" size="sm" icon={Plus} onClick={() => setShowAddRole(!showAddRole)}>
               {showAddRole ? 'Cancel' : 'Add Custom Role'}
@@ -409,11 +440,16 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         }
       />
 
-      <SubTabNav<'global' | 'company'>
-        tabs={subNavItems}
-        activeTab={activeSubTab}
-        onTabChange={setActiveSubTab}
-      />
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+        <SubTabNav<'global' | 'company'>
+          tabs={subNavItems}
+          activeTab={activeSubTab}
+          onTabChange={setActiveSubTab}
+        />
+        <Button variant="neutral" size="sm" icon={BookOpen} onClick={() => setShowGlossaryModal(true)}>
+          Capability Glossary
+        </Button>
+      </div>
 
       {showAddRole && (
         <form onSubmit={handleCreateRole} className="p-5 bg-pm-card border border-pm-border rounded-2xl shadow-sm space-y-4">
@@ -532,14 +568,19 @@ export const RolesTab: React.FC<RolesTabProps> = ({
           <CapabilitySimulator
             users={users}
             licenses={licenses}
+            roles={roles}
             permissions={permissions}
             simUserEmail={simUserEmail}
             simTierSlug={simTierSlug}
+            simRoleSlug={simRoleSlug}
+            simMode={simMode}
             simulatedCapabilities={simulatedCapabilities}
             selectedSimUserObj={selectedSimUserObj}
             selectedSimUserLic={selectedSimUserLic}
             onUserEmailChange={setSimUserEmail}
             onTierSlugChange={setSimTierSlug}
+            onRoleSlugChange={setSimRoleSlug}
+            onSimModeChange={setSimMode}
           />
         </div>
       )}

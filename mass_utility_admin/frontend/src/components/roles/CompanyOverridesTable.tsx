@@ -55,7 +55,19 @@ export const CompanyOverridesTable: React.FC<CompanyOverridesTableProps> = ({
               type="text"
               placeholder="Filter 500+ Companies..."
               value={companySearchQuery}
-              onChange={e => onSearchChange(e.target.value)}
+              onChange={e => {
+                const q = e.target.value;
+                onSearchChange(q);
+                if (q.trim()) {
+                  const matches = filteredCompanies.filter(c => 
+                    (c.company_name && c.company_name.toLowerCase().includes(q.toLowerCase())) ||
+                    String(c.id).includes(q)
+                  );
+                  if (matches.length > 0 && !matches.some(m => m.id === selectedCompanyId)) {
+                    onCompanySelect(matches[0].id);
+                  }
+                }
+              }}
               className="bg-pm-input border border-pm-border rounded-xl pl-8 pr-3 py-1.5 text-xs text-pm-text"
             />
           </div>

@@ -6,27 +6,37 @@ import { RbacPermission, UserAccount, License } from '../../types/adminApi';
 interface CapabilitySimulatorProps {
   users: UserAccount[];
   licenses: License[];
+  roles?: { id: number; name: string; slug: string; permissions: string[] }[];
   permissions: RbacPermission[];
   simUserEmail: string;
   simTierSlug: string;
+  simRoleSlug?: string;
+  simMode?: 'user' | 'role';
   simulatedCapabilities: string[];
   selectedSimUserObj?: UserAccount;
   selectedSimUserLic?: License | null;
   onUserEmailChange: (email: string) => void;
   onTierSlugChange: (tier: string) => void;
+  onRoleSlugChange?: (roleSlug: string) => void;
+  onSimModeChange?: (mode: 'user' | 'role') => void;
 }
 
 export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
   users,
   licenses,
+  roles = [],
   permissions,
   simUserEmail,
   simTierSlug,
+  simRoleSlug = 'Observer',
+  simMode = 'user',
   simulatedCapabilities,
   selectedSimUserObj,
   selectedSimUserLic,
   onUserEmailChange,
-  onTierSlugChange
+  onTierSlugChange,
+  onRoleSlugChange,
+  onSimModeChange
 }) => {
   const [showLicenseKey, setShowLicenseKey] = useState(false);
 
@@ -44,32 +54,72 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
 
   return (
     <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-          <Eye className="w-4 h-4 text-indigo-400" /> Live Effective Capability Simulator
-        </h3>
-        <p className="text-[11px] text-pm-secondary mt-0.5">
-          Simulate exact effective capabilities granted to a client user after applying Role Perms ∩ License Tier Ceiling.
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
+            <Eye className="w-4 h-4 text-indigo-400" /> Live Effective Capability Simulator
+          </h3>
+          <p className="text-[11px] text-pm-secondary mt-0.5">
+            Simulate exact effective capabilities granted after applying Role Perms ∩ License Tier Ceiling.
+          </p>
+        </div>
+
+        {onSimModeChange && (
+          <div className="flex bg-pm-input p-1 rounded-xl border border-pm-border text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => onSimModeChange('user')}
+              className={`px-3 py-1 rounded-lg transition ${simMode === 'user' ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-secondary hover:text-pm-text'}`}
+            >
+              Simulate User
+            </button>
+            <button
+              type="button"
+              onClick={() => onSimModeChange('role')}
+              className={`px-3 py-1 rounded-lg transition ${simMode === 'role' ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-secondary hover:text-pm-text'}`}
+            >
+              Simulate Role
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-pm-input/30 border border-pm-border rounded-xl">
-        <div>
-          <label className="block text-xs font-bold text-pm-secondary mb-1 flex items-center gap-1">
-            <UsersIcon className="w-3.5 h-3.5 text-indigo-400" /> Select Client User:
-          </label>
-          <select
-            value={simUserEmail}
-            onChange={e => onUserEmailChange(e.target.value)}
-            className="w-full bg-pm-card border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text font-bold cursor-pointer"
-          >
-            {users.map(u => (
-              <option key={u.id} value={u.email}>
-                {u.email} (Role: {u.role || 'Observer'})
-              </option>
-            ))}
-          </select>
-        </div>
+        {simMode === 'user' ? (
+          <div>
+            <label className="block text-xs font-bold text-pm-secondary mb-1 flex items-center gap-1">
+              <UsersIcon className="w-3.5 h-3.5 text-indigo-400" /> Select Client User:
+            </label>
+            <select
+              value={simUserEmail}
+              onChange={e => onUserEmailChange(e.target.value)}
+              className="w-full bg-pm-card border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text font-bold cursor-pointer"
+            >
+              {users.map(u => (
+                <option key={u.id} value={u.email}>
+                  {u.email} (Role: {u.role || 'Observer'})
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div>
+            <label className="block text-xs font-bold text-pm-secondary mb-1 flex items-center gap-1">
+              <UsersIcon className="w-3.5 h-3.5 text-indigo-400" /> Select Platform Role:
+            </label>
+            <select
+              value={simRoleSlug}
+              onChange={e => onRoleSlugChange && onRoleSlugChange(e.target.value)}
+              className="w-full bg-pm-card border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text font-bold cursor-pointer"
+            >
+              {roles.map(r => (
+                <option key={r.id} value={r.slug}>
+                  {r.name} ({r.slug})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div>
           <label className="block text-xs font-bold text-pm-secondary mb-1 flex items-center gap-1">
@@ -80,15 +130,15 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
             onChange={e => onTierSlugChange(e.target.value)}
             className="w-full bg-pm-card border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text font-bold cursor-pointer"
           >
-            <option value="basic">Basic Tier (ast.query, db.backup, files.backup)</option>
-            <option value="pro">Pro Tier (ast.query, ast.mutate, db.backup, db.restore, files.backup)</option>
-            <option value="enterprise">Enterprise Tier (Full Capabilities)</option>
-            <option value="developer">Developer Tier (Full Capabilities)</option>
+            <option value="basic">Basic Tier</option>
+            <option value="pro">Pro Tier</option>
+            <option value="enterprise">Enterprise Tier</option>
+            <option value="developer">Developer Tier</option>
           </select>
         </div>
       </div>
 
-      {selectedSimUserObj && (
+      {simMode === 'user' && selectedSimUserObj && (
         <div className="p-3.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-pm-text">Selected User:</span>
@@ -143,7 +193,7 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
                         <Check className="w-3.5 h-3.5" /> Granted
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pm-input text-pm-secondary/50 font-semibold text-[11px]">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold text-[11px]">
                         <Lock className="w-3 h-3" /> Restricted
                       </span>
                     )}

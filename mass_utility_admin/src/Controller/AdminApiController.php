@@ -262,6 +262,17 @@ class AdminApiController
         }
     }
 
+    private function package_tiers(): void
+    {
+        header('Content-Type: application/json');
+        try {
+            $tiers = $this->repo->getAllPackageTiers();
+            echo json_encode(['success' => true, 'tiers' => $tiers]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
     private function company_role_update(): void
     {
         header('Content-Type: application/json');
@@ -271,6 +282,7 @@ class AdminApiController
         $companyId = (int)($payload['company_id'] ?? 0);
         $roleSlug = trim($payload['role'] ?? '');
         $permissions = $payload['permissions'] ?? [];
+        $isReset = !empty($payload['reset']);
 
         if ($companyId <= 0 || empty($roleSlug)) {
             echo json_encode(['success' => false, 'error' => 'Company ID and role slug are required.']);
@@ -278,7 +290,7 @@ class AdminApiController
         }
 
         try {
-            $this->repo->updateCompanyRolePermissions($companyId, $roleSlug, is_array($permissions) ? $permissions : []);
+            $this->repo->updateCompanyRolePermissions($companyId, $roleSlug, is_array($permissions) ? $permissions : [], $isReset);
             echo json_encode(['success' => true]);
         } catch (\Throwable $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
