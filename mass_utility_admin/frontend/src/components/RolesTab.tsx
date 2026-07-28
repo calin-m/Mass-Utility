@@ -144,6 +144,9 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         if (data.permissions && Array.isArray(data.permissions) && data.permissions.length > 0) {
           setPermissions(data.permissions);
         }
+        if (data.package_tiers && Array.isArray(data.package_tiers)) {
+          setPackageTiers(data.package_tiers);
+        }
       }
     } catch (e) {
       // Fallback

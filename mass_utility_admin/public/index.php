@@ -83,7 +83,8 @@ if (file_exists($dbPath) && filesize($dbPath) > 0) {
                 }
             }
         } catch (\Exception $writeEx) {
-            // Silence write permission locks so read-only admin checks still succeed
+            // Log warning if write locks or permissions delay table seeding while allowing read checks to succeed
+            error_log('[Mass Utility Admin] Notice: Auto-seeding pm_package_tiers skipped: ' . $writeEx->getMessage());
         }
 
         // Sanity check on pm_admins table

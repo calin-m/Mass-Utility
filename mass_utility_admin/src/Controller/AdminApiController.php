@@ -156,7 +156,13 @@ class AdminApiController
     {
         header('Content-Type: application/json');
         $data = $this->repo->getAllRolesWithPermissions();
-        echo json_encode(['success' => true, 'roles' => $data['roles'], 'permissions' => $data['permissions']]);
+        $packageTiers = $this->repo->getAllPackageTiers();
+        echo json_encode([
+            'success' => true,
+            'roles' => $data['roles'],
+            'permissions' => $data['permissions'],
+            'package_tiers' => $packageTiers
+        ]);
     }
 
     private function role_create(): void
@@ -847,11 +853,13 @@ class AdminApiController
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
-
     private function get_diagnostics(): void
     {
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $hostNameOnly = strtolower(explode(':', $host)[0]);
+        $isLocalHost = in_array($hostNameOnly, ['localhost', '127.0.0.1', '::1'], true);
+        $sslVerifyPeer = !$isLocalHost;
         
         // 1. Admin Base URLs
         $adminBaseUrl = $scheme . '://' . $host . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
@@ -863,7 +871,7 @@ class AdminApiController
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $sslVerifyPeer);
         curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -877,7 +885,7 @@ class AdminApiController
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $sslVerifyPeer);
         curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -891,7 +899,7 @@ class AdminApiController
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $sslVerifyPeer);
         $dbBody = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
