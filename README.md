@@ -250,12 +250,13 @@ The Mass Utility Framework enforces a unified **V2 React 18 SPA Architecture & D
 - `<SettingsTab>` (`⚙️ Settings`): Dashboard configuration, license key details, Google Drive authentication modal, and connection status settings.
 
 ### 2.3 Super-Admin V2 React Component Architecture (`mass_utility_admin/frontend/src/components/`)
-- `<CompanyListView>` & `<CompanyDetailsView>`: **Companies Directory** featuring real-time license utilization meters (`usedCount` / `max_licenses`), Company Suspend/Activate action button with `<ConfirmModal>` integration, Dual-Mode tab switcher (`[📊 Overview]` vs `[⚙️ Edit Profile & Settings]`), 1-click pool key generator, normalized Onboard Team Member mode toggle onto an animated GPU segmented pill, master `<PaginationBar>`, `<TableCellIdentity>`, `<TableCellActions>`, and employee assignment select dropdowns.
-- `<ClientListView>` & `<ClientDetailsView>`: **Clients Directory** featuring Client Full Name (`name`) support, Company Dropdown client reassignment, sub-page header Company Affiliation badge (`🏢 Company Name` with 1-click navigation), Dual-Mode tab switcher (`[📊 Overview & Keys]` vs `[⚙️ Edit Client & Settings]`), password masking toggles (`<Eye />` / `<EyeOff />`), master `<PaginationBar>`, `<TableCellIdentity>`, `<TableCellActions>`, and Company Pool Ownership badges (`🏢 Owned by Acme Inc Pool`).
-- `<LicensesTab>` & `<LicenseDetailsView>`: **License Registry & Subscriptions** featuring 8-column standardized alignment, `<TableCellIdentity>` (2-row identity cell with normal-weight subtitle: `ID #1 • Created 2026-07-26`), `<TableCellActions>` with 🟠 Amber Suspend and 🟢 Emerald Activate action pills, `<ConfirmModal>` Suspend/Activate safety shield, 4-card telemetry grid, `Company Owner` column, `Assigned Employee` column, nested card `<PaginationBar>`, domain binding inspector, and 1-click key masking.
+- `<CompanyListView>` & `<CompanyDetailsView>`: **Companies Directory** featuring real-time license utilization meters (`usedCount` / `max_licenses`), Company Suspend/Activate action button with `<ConfirmModal>` integration, Dual-Mode tab switcher (`[📊 Overview]` vs `[⚙️ Edit Profile & Settings]`), 1-click pool key generator, normalized Onboard Team Member mode toggle onto an animated GPU segmented pill, extracted `<CompanyHeaderStats>` component for profile capacity metrics, master `<PaginationBar>`, `<TableCellIdentity>`, `<TableCellActions>`, and employee assignment select dropdowns.
+- `<ClientListView>` & `<ClientDetailsView>`: **Clients Directory** featuring Client Full Name (`name`) support, Company Dropdown client reassignment, sub-page header Company Affiliation badge (`🏢 Company Name` with 1-click navigation), Dual-Mode tab switcher (`[📊 Overview & Keys]` vs `[⚙️ Edit Client & Settings]`), extracted `<ClientCredentialsBanner>` for 1-click credential copy dialogs, password masking toggles (`<Eye />` / `<EyeOff />`), master `<PaginationBar>`, `<TableCellIdentity>`, `<TableCellActions>`, and Company Pool Ownership badges.
+- `<LicensesTab>` & `<LicenseDetailsView>`: **License Registry & Subscriptions** featuring high-density 36px data rows (`<LicenseRowCard>`) with expandable drawer chevrons (`▼` / `▲`), extracted `<ReassignLicenseModal>`, 8-column standardized alignment, `<TableCellIdentity>` (2-row identity cell), `<TableCellActions>` with 🟠 Amber Suspend and 🟢 Emerald Activate action pills, `<ConfirmModal>` safety shield, 4-card telemetry grid, `Company Owner` column, `Assigned Employee` column, nested card `<PaginationBar>`, domain binding inspector, and 1-click key masking.
 - `<PackageTiersTab>`: **Package Editor & Tier Matrix** featuring sub-tab label `'Package Editor'`, Tier Overview selector, and dynamic Selected Package Feature & Quota Matrix Card displaying active/inactive capability checkboxes and daily quota limits for `basic`, `pro`, `enterprise` subscription tiers.
-- `<SecurityHealthTab>`: Super Admin 4-Card Security Grid auditing SaaS server infrastructure (HSTS, SSL 301 Redirect Enforcer, Vault Isolation `pm_cloud_backups.db` 403, SaaS Server Filesystem Permissions).
-- `<AuditLogsTab>`: **Operations Audit Trail** featuring search & filter toolbar, **`[Clear Audit Logs]`** with red `<ConfirmModal>` confirmation safety prompt, master `<PaginationBar>`, CSV log exporter link (`?action=api_export_admin_logs_csv`), and Light/Dark adaptive code terminal for raw JSON inspection.
+- `<RolesTab>` & `<CapabilitySimulator>`: **Roles & Security Governance** featuring global RBAC role creation, custom capability permission tables, contextual **`(?) Glossary`** button embedded in section headers, and the **Live Effective Capability Simulator** calculating real-time merged role permissions.
+- `<SecurityHealthTab>`: Super Admin 4-Card Security Grid auditing SaaS server infrastructure (HSTS, SSL 301 Redirect Enforcer, Vault Isolation `pm_cloud_backups.db` 403, SaaS Server Filesystem Permissions) with extracted `<SecurityAuditGrid>`.
+- `<AuditLogsTab>`: **Operations Audit Trail** featuring search & filter toolbar, extracted `<AuditLogPayloadModal>` for raw JSON inspection, **`[Clear Audit Logs]`** with red `<ConfirmModal>` confirmation safety prompt, master `<PaginationBar>`, CSV log exporter link (`?action=api_export_admin_logs_csv`), and Light/Dark adaptive code terminal.
 - `<SettingsTab>`: Full-width 2-column side-by-side password form layout with icon inputs (`<FormInput type="password" icon={Lock} />`).
 
 ### 2.4 Normalized Interactive UX Features & Primitives
@@ -358,14 +359,18 @@ d:/Project Mass/
     │   ├── Repository/
     │   │   └── LicenseRepository.php  # License, company, and user CRUD with B2B retention safeguard
     │   └── Service/
-    │       └── AdminSettingsManager.php # PDO manager & self-healing SQLite schema auto-migrations
+    │       ├── SQLiteConnectionManager.php # Singleton PDO factory for SQLite connection & WAL mode
+    │       └── AdminSettingsManager.php # Settings manager & self-healing SQLite schema auto-migrations
     └── frontend/                   # V2 REACT 18 + TYPESCRIPT + VITE SPA SOURCE
         └── src/
-            ├── components/         # CompaniesTab, ClientsTab, LicensesTab, PackageTiersTab, AuditLogsTab
-            │   ├── clients/        # ClientListView.tsx, ClientDetailsView.tsx
-            │   ├── companies/      # CompanyListView.tsx, CompanyDetailsView.tsx
-            │   ├── licenses/       # LicenseDetailsView.tsx
-            │   └── common/         # TableCellIdentity, TableCellActions, ConfirmModal, EditLicenseModal
+            ├── components/         # CompaniesTab, ClientsTab, LicensesTab, PackageTiersTab, RolesTab, AuditLogsTab
+            │   ├── audit_logs/     # AuditLogPayloadModal.tsx
+            │   ├── clients/        # ClientListView.tsx, ClientDetailsView.tsx, ClientCredentialsBanner.tsx
+            │   ├── companies/      # CompanyListView.tsx, CompanyDetailsView.tsx, CompanyHeaderStats.tsx
+            │   ├── licenses/       # LicenseDetailsView.tsx, ReassignLicenseModal.tsx
+            │   ├── roles/          # CapabilitySimulator.tsx
+            │   ├── security/       # SecurityAuditGrid.tsx
+            │   └── common/         # TableCellIdentity, TableCellActions, ConfirmModal, LicenseRowCard
             ├── hooks/              # useAdminData.ts (Custom React hook encapsulating state)
             ├── types/              # adminApi.ts (Central TypeScript domain models)
             └── utils/              # tierUtils.ts, licenseUtils.ts
