@@ -28,37 +28,46 @@ try {
             );"
             );
 
-            $stmtTiersCount = $pdo->query("SELECT COUNT(*) FROM pm_package_tiers");
-            if ($stmtTiersCount && $stmtTiersCount->fetchColumn() == 0) {
-                $defaultTiers = [
-                    'basic' => [
-                        'backup_destinations' => ['local'],
-                        'backup_automation' => false,
-                        'rollback_history_limit' => 0,
-                        'query_visual_execute' => false,
-                        'governor_autopilot' => false,
-                        'sweeper_execution' => false
-                    ],
-                    'pro' => [
-                        'backup_destinations' => ['local', 'gdrive'],
-                        'backup_automation' => true,
-                        'rollback_history_limit' => 10,
-                        'query_visual_execute' => true,
-                        'governor_autopilot' => true,
-                        'sweeper_execution' => true
-                    ],
-                    'developer' => [
-                        'backup_destinations' => ['local', 'gdrive'],
-                        'backup_automation' => true,
-                        'rollback_history_limit' => 999,
-                        'query_visual_execute' => true,
-                        'governor_autopilot' => true,
-                        'sweeper_execution' => true
-                    ]
-                ];
-                
-                $insertTier = $pdo->prepare("INSERT OR IGNORE INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
-                foreach ($defaultTiers as $name => $caps) {
+            $defaultTiers = [
+                'basic' => [
+                    'backup_destinations' => ['local'],
+                    'backup_automation' => false,
+                    'rollback_history_limit' => 0,
+                    'query_visual_execute' => false,
+                    'governor_autopilot' => false,
+                    'sweeper_execution' => false
+                ],
+                'pro' => [
+                    'backup_destinations' => ['local', 'gdrive'],
+                    'backup_automation' => true,
+                    'rollback_history_limit' => 10,
+                    'query_visual_execute' => true,
+                    'governor_autopilot' => true,
+                    'sweeper_execution' => true
+                ],
+                'enterprise' => [
+                    'backup_destinations' => ['local', 'gdrive'],
+                    'backup_automation' => true,
+                    'rollback_history_limit' => 100,
+                    'query_visual_execute' => true,
+                    'governor_autopilot' => true,
+                    'sweeper_execution' => true
+                ],
+                'developer' => [
+                    'backup_destinations' => ['local', 'gdrive'],
+                    'backup_automation' => true,
+                    'rollback_history_limit' => 999,
+                    'query_visual_execute' => true,
+                    'governor_autopilot' => true,
+                    'sweeper_execution' => true
+                ]
+            ];
+            
+            $chkTier = $pdo->prepare("SELECT COUNT(*) FROM pm_package_tiers WHERE LOWER(name) = LOWER(?)");
+            $insertTier = $pdo->prepare("INSERT OR IGNORE INTO pm_package_tiers (name, capabilities) VALUES (?, ?)");
+            foreach ($defaultTiers as $name => $caps) {
+                $chkTier->execute([$name]);
+                if ((int)$chkTier->fetchColumn() === 0) {
                     $insertTier->execute([$name, json_encode($caps)]);
                 }
             }
