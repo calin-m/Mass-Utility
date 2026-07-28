@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, ShieldAlert, CheckCircle2, CheckCircle, Lock, FileCode, Server, RefreshCw, Activity, AlertTriangle, Key, Terminal, Globe, ExternalLink, HardDrive, Shield, Check, Settings, Database, Cpu, FolderLock, GitBranch } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
+import { Button } from './common/Button';
 import { useTranslation } from '../i18n/LanguageContext';
 import { SecurityAuditGrid } from './security/SecurityAuditGrid';
 
@@ -257,43 +258,51 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
           <div className="flex flex-wrap gap-2 items-center">
             {diagnostics && (
               <>
-                <button 
+                <Button
+                  variant="neutral"
+                  size="sm"
+                  icon={Lock}
                   onClick={applySecurityHeaders}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[175px] shrink-0"
+                  loading={activeAction === 'headers'}
                   title="Inject HSTS, nosniff, and SAMEORIGIN security headers into .htaccess"
                 >
-                  {activeAction === 'headers' ? <RefreshCw className="w-4 h-4 animate-spin text-purple-400" /> : <Lock className="w-4 h-4 text-purple-400" />}
-                  <span>{t('diag_btn_apply_headers')}</span>
-                </button>
-                <button 
+                  {t('diag_btn_apply_headers')}
+                </Button>
+                <Button
+                  variant="warning"
+                  size="sm"
+                  icon={FolderLock}
                   onClick={fixPermissions}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[155px] shrink-0"
+                  loading={activeAction === 'perms'}
                   title="Repair folder permissions to 0755 and file permissions to 0644"
                 >
-                  {activeAction === 'perms' ? <RefreshCw className="w-4 h-4 animate-spin text-amber-400" /> : <FolderLock className="w-4 h-4 text-amber-400" />}
-                  <span>{t('diag_btn_repair_perms')}</span>
-                </button>
-                <button 
+                  {t('diag_btn_repair_perms')}
+                </Button>
+                <Button
+                  variant="success"
+                  size="sm"
+                  icon={Lock}
                   onClick={enableSslRedirect}
                   disabled={loading}
-                  className="pm-btn-neutral px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-emerald-400 min-w-[185px] shrink-0"
+                  loading={activeAction === 'ssl'}
                   title="Inject 301 HTTPS Redirect rule into SaaS server root .htaccess"
                 >
-                  {activeAction === 'ssl' ? <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" /> : <Lock className="w-4 h-4 text-emerald-400" />}
-                  <span>{t('diag_btn_enforce_https')}</span>
-                </button>
+                  {t('diag_btn_enforce_https')}
+                </Button>
               </>
             )}
-            <button 
+            <Button
+              variant="primary"
+              size="sm"
+              icon={Activity}
               onClick={runDiagnostics}
               disabled={loading}
-              className={`pm-btn-primary px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 min-w-[215px] shrink-0 ${activeAction === 'audit' ? 'opacity-85 cursor-wait' : ''}`}
+              loading={activeAction === 'audit'}
             >
-              {activeAction === 'audit' ? <RefreshCw className="w-4 h-4 animate-spin text-white" /> : <Activity className="w-4 h-4 text-white" />}
-              <span>{t('diag_btn_run_audit')}</span>
-            </button>
+              {t('diag_btn_run_audit')}
+            </Button>
           </div>
         </div>
 

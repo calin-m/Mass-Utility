@@ -1,7 +1,7 @@
 // @Arch[ClientCredentialsBanner]
 import React from 'react';
-import { Check, Copy } from 'lucide-react';
-import { Button } from '../common/Button';
+import { Check } from 'lucide-react';
+import { CopyButton } from '../common/CopyButton';
 import { useTranslation } from '../../i18n/LanguageContext';
 
 interface ClientCredentialsBannerProps {
@@ -48,14 +48,14 @@ export const ClientCredentialsBanner: React.FC<ClientCredentialsBannerProps> = (
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <Button
+        <CopyButton
           variant="success"
           size="sm"
-          icon={copiedCreds ? Check : Copy}
-          onClick={onCopyCreds}
-        >
-          {copiedCreds ? t('btn_copied') : t('btn_copy_creds')}
-        </Button>
+          value={`Email: ${lastCreatedCreds.email}\nPassword: ${lastCreatedCreds.pass}${lastCreatedCreds.key ? `\nLicense Key: ${lastCreatedCreds.key}` : ''}`}
+          label={t('btn_copy_creds')}
+          copiedLabel={t('btn_copied')}
+          onCopied={onCopyCreds}
+        />
         <button
           type="button"
           onClick={onDismiss}

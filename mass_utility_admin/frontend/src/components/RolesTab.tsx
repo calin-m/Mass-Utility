@@ -472,7 +472,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         subtitle="Manage platform RBAC roles, organization overrides, and simulate live capability enforcement."
         icon={Shield}
         action={
-          <Button variant="neutral" size="sm" icon={RefreshCw} onClick={fetchGlobalRoles}>
+          <Button variant="neutral" size="sm" icon={RefreshCw} onClick={fetchGlobalRoles} loading={loading}>
             Refresh
           </Button>
         }

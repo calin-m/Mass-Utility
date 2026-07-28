@@ -2,6 +2,7 @@
 import React from 'react';
 import { Lock, ShieldCheck, GitBranch, FolderLock, Database, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useTranslation } from '../../i18n/LanguageContext';
+import { StatusBadge } from '../common/StatusBadge';
 
 interface SecurityAuditGridProps {
   diagnostics: any;
@@ -62,19 +63,19 @@ export const SecurityAuditGrid: React.FC<SecurityAuditGridProps> = ({
             <ul className="space-y-2 text-xs">
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium">HSTS (Strict-Transport-Security)</span>
-                {headers.hsts ? <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">ACTIVE</span> : <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">RECOMMENDED</span>}
+                {headers.hsts ? <StatusBadge label="ACTIVE" customColor="emerald" /> : <StatusBadge label="RECOMMENDED" customColor="amber" />}
               </li>
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium">X-Content-Type-Options (nosniff)</span>
-                {headers.nosniff ? <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">ACTIVE</span> : <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">RECOMMENDED</span>}
+                {headers.nosniff ? <StatusBadge label="ACTIVE" customColor="emerald" /> : <StatusBadge label="RECOMMENDED" customColor="amber" />}
               </li>
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium">X-Frame-Options (SAMEORIGIN)</span>
-                {headers.frame_options ? <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">ACTIVE</span> : <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">RECOMMENDED</span>}
+                {headers.frame_options ? <StatusBadge label="ACTIVE" customColor="emerald" /> : <StatusBadge label="RECOMMENDED" customColor="amber" />}
               </li>
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium">Referrer-Policy</span>
-                {headers.referrer_policy ? <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">ACTIVE</span> : <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">RECOMMENDED</span>}
+                {headers.referrer_policy ? <StatusBadge label="ACTIVE" customColor="emerald" /> : <StatusBadge label="RECOMMENDED" customColor="amber" />}
               </li>
             </ul>
           </div>
@@ -94,15 +95,15 @@ export const SecurityAuditGrid: React.FC<SecurityAuditGridProps> = ({
             <ul className="space-y-2 text-xs">
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium">Admin Endpoint HTTPS</span>
-                {diagnostics.admin_ssl_active ? <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">🟢 HTTPS SECURE</span> : <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">⚠️ HTTP UNENCRYPTED</span>}
+                {diagnostics.admin_ssl_active ? <StatusBadge label="🟢 HTTPS SECURE" customColor="emerald" /> : <StatusBadge label="⚠️ HTTP UNENCRYPTED" customColor="amber" />}
               </li>
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium">Dashboard Endpoint HTTPS</span>
-                {diagnostics.dashboard_ssl_active ? <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">🟢 HTTPS SECURE</span> : <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">⚠️ HTTP UNENCRYPTED</span>}
+                {diagnostics.dashboard_ssl_active ? <StatusBadge label="🟢 HTTPS SECURE" customColor="emerald" /> : <StatusBadge label="⚠️ HTTP UNENCRYPTED" customColor="amber" />}
               </li>
               <li className="flex justify-between items-center pt-1">
                 <span className="text-pm-text font-medium">301 HTTPS Rewrite Rule (.htaccess)</span>
-                {headers.ssl_redirect ? <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">ENFORCED</span> : <span className="text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">DISABLED</span>}
+                {headers.ssl_redirect ? <StatusBadge label="ENFORCED" customColor="emerald" /> : <StatusBadge label="DISABLED" customColor="amber" />}
               </li>
             </ul>
           </div>
@@ -122,15 +123,15 @@ export const SecurityAuditGrid: React.FC<SecurityAuditGridProps> = ({
             <ul className="space-y-2 text-xs">
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium">Admin <code>.git/</code> Repository</span>
-                {diagnostics.admin_git_exposed ? <span className="text-rose-500 font-bold bg-rose-500/10 px-2 py-0.5 rounded">⚠️ EXPOSED</span> : <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">🟢 SECURE</span>}
+                {diagnostics.admin_git_exposed ? <StatusBadge label="⚠️ EXPOSED" customColor="rose" /> : <StatusBadge label="🟢 SECURE" customColor="emerald" />}
               </li>
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium">Dashboard <code>.git/</code> Repository</span>
-                {diagnostics.dashboard_git_exposed ? <span className="text-rose-500 font-bold bg-rose-500/10 px-2 py-0.5 rounded">⚠️ EXPOSED</span> : <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">🟢 SECURE</span>}
+                {diagnostics.dashboard_git_exposed ? <StatusBadge label="⚠️ EXPOSED" customColor="rose" /> : <StatusBadge label="🟢 SECURE" customColor="emerald" />}
               </li>
               <li className="flex justify-between items-center">
                 <span className="text-pm-text font-medium flex items-center gap-1"><Database className="w-3.5 h-3.5"/> SQLite <code>pm_cloud_backups.db</code></span>
-                {diagnostics.dashboard_db_exposed ? <span className="text-rose-500 font-bold bg-rose-500/10 px-2 py-0.5 rounded">⚠️ EXPOSED</span> : <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">🟢 403 PROTECTED</span>}
+                {diagnostics.dashboard_db_exposed ? <StatusBadge label="⚠️ EXPOSED" customColor="rose" /> : <StatusBadge label="🟢 403 PROTECTED" customColor="emerald" />}
               </li>
             </ul>
           </div>
