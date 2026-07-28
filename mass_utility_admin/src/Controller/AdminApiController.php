@@ -967,6 +967,8 @@ class AdminApiController
                         'current' => $getOctalPerms($dashboardDir . '/data/.htaccess', '0644'),
                         'recommended' => '0644',
                         'is_dir' => false
+                    ]
+                ]
             ]
         ]);
     }

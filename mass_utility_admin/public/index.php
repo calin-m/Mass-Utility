@@ -79,9 +79,6 @@ try {
         // If file is locked, allow setup or retry gracefully
         $hasAdmin = false;
     }
-}
-
-
 
 $auth = new \MassUtilityAdmin\Service\AdminSettingsManager();
 
