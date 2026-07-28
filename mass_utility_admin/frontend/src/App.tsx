@@ -4,6 +4,7 @@ import { Key, Package, Settings, ShieldCheck, Shield, Sun, Moon, LogOut, AlertCi
 import { LicensesTab } from './components/LicensesTab';
 import { ClientsTab } from './components/ClientsTab';
 import { CompaniesTab } from './components/CompaniesTab';
+import { RolesTab } from './components/RolesTab';
 import { PackageTiersTab } from './components/PackageTiersTab';
 import { SettingsTab } from './components/SettingsTab';
 import { SecurityHealthTab } from './components/SecurityHealthTab';
@@ -35,15 +36,15 @@ export const App: React.FC = () => {
     getApiUrl,
   } = useAdminData();
 
-  const getTabFromHash = (): 'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit' => {
+  const getTabFromHash = (): 'companies' | 'clients' | 'licenses' | 'roles' | 'tiers' | 'settings' | 'security' | 'audit' => {
     const hash = window.location.hash.replace('#', '').toLowerCase();
-    const validTabs: ('companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit')[] = [
-      'companies', 'clients', 'licenses', 'tiers', 'settings', 'security', 'audit'
+    const validTabs: ('companies' | 'clients' | 'licenses' | 'roles' | 'tiers' | 'settings' | 'security' | 'audit')[] = [
+      'companies', 'clients', 'licenses', 'roles', 'tiers', 'settings', 'security', 'audit'
     ];
     return validTabs.includes(hash as any) ? (hash as any) : 'companies';
   };
 
-  const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'tiers' | 'settings' | 'security' | 'audit'>(getTabFromHash);
+  const [activeTab, setActiveTab] = useState<'companies' | 'clients' | 'licenses' | 'roles' | 'tiers' | 'settings' | 'security' | 'audit'>(getTabFromHash);
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
@@ -223,6 +224,15 @@ export const App: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('roles')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+              activeTab === 'roles' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
+            }`}
+          >
+            <Shield className="w-4 h-4" /> Roles & Security
+          </button>
+
+          <button
             onClick={() => setActiveTab('tiers')}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
               activeTab === 'tiers' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
@@ -308,6 +318,14 @@ export const App: React.FC = () => {
             showAlert={showAlert}
             onInspectClient={handleInspectClient}
             onInspectCompany={handleInspectCompany}
+          />
+        )}
+
+        {activeTab === 'roles' && (
+          <RolesTab
+            companies={companies}
+            tiers={tiers}
+            showAlert={showAlert}
           />
         )}
 

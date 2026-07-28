@@ -237,6 +237,12 @@ class AdminSettingsManager
                 permission_id INTEGER NOT NULL,
                 PRIMARY KEY (role_id, permission_id)
             )');
+            $pdo->exec('CREATE TABLE IF NOT EXISTS pm_company_role_permissions ( /* nosec */
+                company_id INTEGER NOT NULL,
+                role_slug VARCHAR(50) NOT NULL,
+                permission_id INTEGER NOT NULL,
+                PRIMARY KEY (company_id, role_slug, permission_id)
+            )');
             $pdo->exec('CREATE TABLE IF NOT EXISTS pm_user_sessions ( /* nosec */
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,

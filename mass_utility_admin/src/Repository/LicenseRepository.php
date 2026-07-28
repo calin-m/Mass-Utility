@@ -682,9 +682,29 @@ class LicenseRepository
         return null;
     }
 
-    public function getUserPermissions(int $userId, string $roleSlug = 'Observer'): array
+    public function getUserPermissions(int $userId, string $roleSlug = 'Observer', ?int $companyId = null): array
     {
-        // Fetch role permissions via join
+        // 1. Check for Company Custom Role Override if companyId is provided or can be resolved
+        if ($companyId === null && $userId > 0) {
+            $uStmt = $this->db->prepare("SELECT company_id FROM pm_users WHERE id = ?");
+            $uStmt->execute([$userId]);
+            $companyId = (int)$uStmt->fetchColumn() ?: null;
+        }
+
+        if ($companyId !== null && $companyId > 0) {
+            $compSql = "SELECT p.slug FROM pm_permissions p
+                        JOIN pm_company_role_permissions crp ON p.id = crp.permission_id
+                        WHERE crp.company_id = ? AND crp.role_slug = ?";
+            $compStmt = $this->db->prepare($compSql);
+            $compStmt->execute([$companyId, $roleSlug]);
+            $compPerms = $compStmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if (!empty($compPerms)) {
+                return array_values(array_unique($compPerms));
+            }
+        }
+
+        // 2. Fetch Global Role Permissions via join
         $sql = "SELECT p.slug FROM pm_permissions p 
                 JOIN pm_role_permissions rp ON p.id = rp.permission_id 
                 JOIN pm_roles r ON rp.role_id = r.id 
@@ -706,6 +726,44 @@ class LicenseRepository
         }
 
         return array_values(array_unique($perms));
+    }
+
+    public function getCompanyRoleOverrides(int $companyId): array
+    {
+        $sql = "SELECT crp.role_slug, p.slug as perm_slug
+                FROM pm_company_role_permissions crp
+                JOIN pm_permissions p ON crp.permission_id = p.id
+                WHERE crp.company_id = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$companyId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $result = [];
+        foreach ($rows as $row) {
+            $role = $row['role_slug'];
+            if (!isset($result[$role])) {
+                $result[$role] = [];
+            }
+            $result[$role][] = $row['perm_slug'];
+        }
+        return $result;
+    }
+
+    public function updateCompanyRolePermissions(int $companyId, string $roleSlug, array $permissionSlugs): bool
+    {
+        $del = $this->db->prepare("DELETE FROM pm_company_role_permissions WHERE company_id = ? AND role_slug = ?");
+        $del->execute([$companyId, $roleSlug]);
+
+        if (empty($permissionSlugs)) {
+            return true;
+        }
+
+        $ins = $this->db->prepare("INSERT OR IGNORE INTO pm_company_role_permissions (company_id, role_slug, permission_id) 
+                                   SELECT ?, ?, id FROM pm_permissions WHERE slug = ?");
+        foreach ($permissionSlugs as $slug) {
+            $ins->execute([$companyId, $roleSlug, $slug]);
+        }
+        return true;
     }
 
     public function createSessionToken(int $userId, ?string $ipAddress = null, ?string $userAgent = null): string

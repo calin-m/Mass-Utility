@@ -245,6 +245,46 @@ class AdminApiController
         }
     }
 
+    private function company_roles(): void
+    {
+        header('Content-Type: application/json');
+        $companyId = (int)($_GET['company_id'] ?? $_POST['company_id'] ?? 0);
+        if ($companyId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Valid company ID is required.']);
+            return;
+        }
+
+        try {
+            $overrides = $this->repo->getCompanyRoleOverrides($companyId);
+            echo json_encode(['success' => true, 'overrides' => $overrides]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    private function company_role_update(): void
+    {
+        header('Content-Type: application/json');
+        $raw = file_get_contents('php://input');
+        $payload = json_decode((string)$raw, true) ?: $_POST;
+
+        $companyId = (int)($payload['company_id'] ?? 0);
+        $roleSlug = trim($payload['role'] ?? '');
+        $permissions = $payload['permissions'] ?? [];
+
+        if ($companyId <= 0 || empty($roleSlug)) {
+            echo json_encode(['success' => false, 'error' => 'Company ID and role slug are required.']);
+            return;
+        }
+
+        try {
+            $this->repo->updateCompanyRolePermissions($companyId, $roleSlug, is_array($permissions) ? $permissions : []);
+            echo json_encode(['success' => true]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
     private function send_password_reset_link(): void
     {
         header('Content-Type: application/json');
