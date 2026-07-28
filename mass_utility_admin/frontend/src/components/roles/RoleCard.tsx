@@ -27,14 +27,11 @@ export const RoleCard: React.FC<RoleCardProps> = ({
       <div className="space-y-2.5">
         {/* Card Header: Badge & Status */}
         <div className="flex justify-between items-center gap-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" title={`System Role Slug: ${role.slug}`}>
             <StatusBadge
               label={role.name}
               customColor={role.slug === 'SuperAdmin' ? 'purple' : role.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'}
             />
-            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-pm-input border border-pm-border text-pm-secondary font-bold">
-              {role.slug}
-            </span>
           </div>
 
           <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${
