@@ -1,0 +1,12 @@
+// @Arch[ConfirmModalBN_BERO5]
+import{c as i,u as f,j as e,X as u,C as g,a as j}from"./index-D_kso_BN.js";import{B as n}from"./Button-rOOKBtbL.js";import{A as v}from"./StatusBadge-Ch8UWCA7.js";/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const k=i("ChevronLeft",[["path",{d:"m15 18-6-6 6-6",key:"1wnfg3"}]]);/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const V=i("ChevronRight",[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]]),z=({isOpen:o,onClose:a,onConfirm:l,title:d,message:c,confirmText:m,cancelText:x,variant:h="danger",loading:s=!1})=>{const{t}=f();if(!o)return null;const b=m||t("btn_confirm"),p=x||t("btn_cancel"),r=(()=>{switch(h){case"danger":return{icon:e.jsx(j,{className:"w-6 h-6 text-rose-400 shrink-0"}),btnVariant:"danger",border:"border-l-4 border-l-rose-500"};case"warning":return{icon:e.jsx(v,{className:"w-6 h-6 text-amber-400 shrink-0"}),btnVariant:"primary",border:"border-l-4 border-l-amber-500"};case"info":default:return{icon:e.jsx(g,{className:"w-6 h-6 text-purple-400 shrink-0"}),btnVariant:"primary",border:"border-l-4 border-l-purple-500"}}})();return e.jsx("div",{className:"fixed inset-0 top-0 left-0 w-screen h-screen min-h-screen bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-center justify-center p-4 overflow-y-auto",children:e.jsx("div",{className:`bg-pm-card border border-pm-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150 my-auto ${r.border}`,children:e.jsxs("div",{className:"p-6 space-y-4",children:[e.jsxs("div",{className:"flex items-start gap-4",children:[e.jsx("div",{className:"p-3 bg-pm-input rounded-xl border border-pm-border",children:r.icon}),e.jsxs("div",{className:"space-y-1 flex-1",children:[e.jsx("h3",{className:"text-sm font-bold text-pm-text",children:d}),e.jsx("p",{className:"text-xs text-pm-secondary leading-relaxed",children:c})]}),e.jsx("button",{onClick:a,className:"text-pm-secondary hover:text-pm-text transition p-1 rounded-lg hover:bg-pm-input",children:e.jsx(u,{className:"w-4 h-4"})})]}),e.jsxs("div",{className:"flex justify-end gap-2.5 pt-3 border-t border-pm-border",children:[e.jsx(n,{variant:"neutral",size:"sm",onClick:a,disabled:s,children:p}),e.jsx(n,{variant:r.btnVariant,size:"sm",onClick:l,loading:s,children:b})]})]})})})};export{z as C,k as a,V as b};

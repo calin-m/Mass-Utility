@@ -1,20 +1,24 @@
 // @Arch[App]
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Key, Package, Settings, ShieldCheck, Shield, Sun, Moon, LogOut, AlertCircle, CheckCircle, Users, Building2, X } from 'lucide-react';
-import { LicensesTab } from './components/LicensesTab';
-import { ClientsTab } from './components/ClientsTab';
-import { CompaniesTab } from './components/CompaniesTab';
-import { RolesTab } from './components/RolesTab';
-import { PackageTiersTab } from './components/PackageTiersTab';
-import { SettingsTab } from './components/SettingsTab';
-import { SecurityHealthTab } from './components/SecurityHealthTab';
-import { AuditLogsTab } from './components/AuditLogsTab';
-import { LoginView } from './components/LoginView';
-import { SetupView } from './components/SetupView';
 import { ToastNotification } from './components/common/ToastNotification';
+import { TableSkeleton } from './components/common/TableSkeleton';
 import { useTranslation } from './i18n/LanguageContext';
 import { useAdminData } from './hooks/useAdminData';
 import { License, UserAccount, Company } from './types/adminApi';
+import { LoginView } from './components/LoginView';
+import { SetupView } from './components/SetupView';
+
+// Dynamic lazy loaded tabs for chunk optimization
+const CompaniesTab = lazy(() => import('./components/CompaniesTab').then(m => ({ default: m.CompaniesTab })));
+const ClientsTab = lazy(() => import('./components/ClientsTab').then(m => ({ default: m.ClientsTab })));
+const LicensesTab = lazy(() => import('./components/LicensesTab').then(m => ({ default: m.LicensesTab })));
+const RolesTab = lazy(() => import('./components/RolesTab').then(m => ({ default: m.RolesTab })));
+const PackageTiersTab = lazy(() => import('./components/PackageTiersTab').then(m => ({ default: m.PackageTiersTab })));
+const SettingsTab = lazy(() => import('./components/SettingsTab').then(m => ({ default: m.SettingsTab })));
+const SecurityHealthTab = lazy(() => import('./components/SecurityHealthTab').then(m => ({ default: m.SecurityHealthTab })));
+const AuditLogsTab = lazy(() => import('./components/AuditLogsTab').then(m => ({ default: m.AuditLogsTab })));
+
 
 export const App: React.FC = () => {
   const { t } = useTranslation();
@@ -274,87 +278,85 @@ export const App: React.FC = () => {
 
       {/* Main Tab Content Display */}
       <main className="w-full">
-        {activeTab === 'companies' && (
-          <CompaniesTab
-            companies={companies}
-            users={users}
-            licenses={licenses}
-            tiers={tiers}
-            onRefresh={fetchAdminData}
-            showAlert={showAlert}
-            onInspectClient={handleInspectClient}
-            onInspectLicense={handleInspectLicense}
-            onEditLicense={() => setActiveTab('licenses')}
-            initialSelectedCompany={liveCompany}
-            highlightedLicenseKey={highlightedLicenseKey}
-          />
-        )}
+        <Suspense fallback={<TableSkeleton rows={6} columns={5} />}>
+          {activeTab === 'companies' && (
+            <CompaniesTab
+              companies={companies}
+              users={users}
+              licenses={licenses}
+              tiers={tiers}
+              onRefresh={fetchAdminData}
+              showAlert={showAlert}
+              onInspectClient={handleInspectClient}
+              onInspectLicense={handleInspectLicense}
+              onEditLicense={() => setActiveTab('licenses')}
+              initialSelectedCompany={liveCompany}
+              highlightedLicenseKey={highlightedLicenseKey}
+            />
+          )}
 
+          {activeTab === 'clients' && (
+            <ClientsTab
+              users={users}
+              licenses={licenses}
+              companies={companies}
+              tiers={tiers}
+              onRefresh={fetchAdminData}
+              showAlert={showAlert}
+              initialSelectedUser={liveClient}
+              onInspectCompany={handleInspectCompany}
+              onInspectLicense={handleInspectLicense}
+            />
+          )}
 
-        {activeTab === 'clients' && (
-          <ClientsTab
-            users={users}
-            licenses={licenses}
-            companies={companies}
-            tiers={tiers}
-            onRefresh={fetchAdminData}
-            showAlert={showAlert}
-            initialSelectedUser={liveClient}
-            onInspectCompany={handleInspectCompany}
-            onInspectLicense={handleInspectLicense}
-          />
-        )}
+          {activeTab === 'licenses' && (
+            <LicensesTab
+              licenses={licenses}
+              users={users}
+              companies={companies}
+              tiers={tiers}
+              initialSelectedLicense={liveLicense}
+              initialDetailTab={inspectedLicenseTab}
+              onRefresh={fetchAdminData}
+              showAlert={showAlert}
+              onInspectClient={handleInspectClient}
+              onInspectCompany={handleInspectCompany}
+            />
+          )}
 
+          {activeTab === 'roles' && (
+            <RolesTab
+              companies={companies}
+              users={users}
+              licenses={licenses}
+              tiers={tiers}
+              showAlert={showAlert}
+              onFilterUserByRole={(roleSlug) => {
+                setActiveTab('clients');
+              }}
+            />
+          )}
 
-        {activeTab === 'licenses' && (
-          <LicensesTab
-            licenses={licenses}
-            users={users}
-            companies={companies}
-            tiers={tiers}
-            initialSelectedLicense={liveLicense}
-            initialDetailTab={inspectedLicenseTab}
-            onRefresh={fetchAdminData}
-            showAlert={showAlert}
-            onInspectClient={handleInspectClient}
-            onInspectCompany={handleInspectCompany}
-          />
-        )}
+          {activeTab === 'tiers' && (
+            <PackageTiersTab
+              tiers={tiers}
+              onRefresh={fetchAdminData}
+              showAlert={showAlert}
+            />
+          )}
 
-        {activeTab === 'roles' && (
-          <RolesTab
-            companies={companies}
-            users={users}
-            licenses={licenses}
-            tiers={tiers}
-            showAlert={showAlert}
-            onFilterUserByRole={(roleSlug) => {
-              setActiveTab('clients');
-            }}
-          />
-        )}
+          {activeTab === 'settings' && (
+            <SettingsTab showAlert={showAlert} />
+          )}
 
+          {activeTab === 'security' && (
+            <SecurityHealthTab showAlert={showAlert} />
+          )}
 
-
-        {activeTab === 'tiers' && (
-          <PackageTiersTab
-            tiers={tiers}
-            onRefresh={fetchAdminData}
-            showAlert={showAlert}
-          />
-        )}
-
-        {activeTab === 'settings' && (
-          <SettingsTab showAlert={showAlert} />
-        )}
-
-        {activeTab === 'security' && (
-          <SecurityHealthTab showAlert={showAlert} />
-        )}
-
-        {activeTab === 'audit' && (
-          <AuditLogsTab onNotify={showAlert} />
-        )}
+          {activeTab === 'audit' && (
+            <AuditLogsTab onNotify={showAlert} />
+          )}
+        </Suspense>
       </main>
     </div>
   );
