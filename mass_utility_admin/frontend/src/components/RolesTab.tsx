@@ -1,12 +1,18 @@
 // @Arch[RolesTab]
 import React, { useState, useEffect, useMemo } from 'react';
-import { Shield, Plus, Save, Trash2, Loader2, Building2, Layers, RefreshCw, Copy, Search, ExternalLink, Check, Lock, AlertTriangle, Eye, RotateCcw, BookOpen, Key, Users as UsersIcon } from 'lucide-react';
+import { Shield, Plus, RefreshCw, Layers, Building2, Loader2, BookOpen } from 'lucide-react';
 import { SectionHeader } from './common/SectionHeader';
-import { StatusBadge } from './common/StatusBadge';
 import { Button } from './common/Button';
 import { SubTabNav, SubTabItem } from './common/SubTabNav';
-import { BaseModal } from './common/BaseModal';
 import { RbacRole, RbacPermission, Company, UserAccount, License } from '../types/adminApi';
+
+// Extracted Sub-Components
+import { RoleCard } from './roles/RoleCard';
+import { GlobalMatrixTable } from './roles/GlobalMatrixTable';
+import { CompanyOverridesTable } from './roles/CompanyOverridesTable';
+import { CapabilitySimulator } from './roles/CapabilitySimulator';
+import { CapabilityGlossaryModal } from './roles/CapabilityGlossaryModal';
+import { RoleDeletionGuardModal } from './roles/RoleDeletionGuardModal';
 
 interface RolesTabProps {
   companies: Company[];
@@ -36,30 +42,34 @@ const TIER_CAPABILITIES_MAP: Record<string, string[]> = {
   developer: ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage']
 };
 
-export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licenses = [], tiers = [], showAlert, onFilterUserByRole }) => {
+export const RolesTab: React.FC<RolesTabProps> = ({
+  companies,
+  users = [],
+  licenses = [],
+  showAlert,
+  onFilterUserByRole
+}) => {
   const [activeSubTab, setActiveSubTab] = useState<'global' | 'company'>('global');
   const [roles, setRoles] = useState<RbacRole[]>([]);
   const [permissions, setPermissions] = useState<RbacPermission[]>(DEFAULT_PERMISSIONS);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Searchable Company Selection
+  // Searchable Company Overrides State
   const [companySearchQuery, setCompanySearchQuery] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState<number>(companies[0]?.id || 0);
   const [companyOverrides, setCompanyOverrides] = useState<Record<string, string[]>>({});
   const [companyLoading, setCompanyLoading] = useState(false);
 
-  // Role Creation / Cloning Form State
+  // Role Creation Form State
   const [showAddRole, setShowAddRole] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');
   const [newRoleSlug, setNewRoleSlug] = useState('');
   const [newRoleDesc, setNewRoleDesc] = useState('');
   const [clonedPermissions, setClonedPermissions] = useState<string[]>(['ast.query']);
 
-  // Glossary Modal State
+  // Modal States
   const [showGlossaryModal, setShowGlossaryModal] = useState(false);
-
-  // Deletion Guard Modal State
   const [deletingRole, setDeletingRole] = useState<RbacRole | null>(null);
   const [reassignRole, setReassignRole] = useState<string>('Observer');
 
@@ -83,7 +93,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licen
   const filteredCompanies = useMemo(() => {
     if (!companySearchQuery.trim()) return companies;
     const q = companySearchQuery.toLowerCase();
-    return companies.filter(c => 
+    return companies.filter(c =>
       (c.company_name && c.company_name.toLowerCase().includes(q)) ||
       String(c.id).includes(q)
     );
@@ -262,7 +272,6 @@ export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licen
     if (!deletingRole) return;
     setSaving(true);
     try {
-      // 1. Reassign affected users
       const affectedUsers = users.filter(u => (u.role || 'Observer') === deletingRole.slug);
       for (const u of affectedUsers) {
         await fetch('index.php?action=api_user_update_role', {
@@ -271,7 +280,6 @@ export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licen
           body: JSON.stringify({ user_id: u.id, role: reassignRole })
         });
       }
-      // 2. Delete role
       await executeDeleteRole(deletingRole.id, deletingRole.name);
     } catch (e: any) {
       if (showAlert) showAlert(e.message || 'Failed during user reassignment.', 'error');
@@ -331,7 +339,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licen
         body: JSON.stringify({
           company_id: selectedCompanyId,
           role: roleSlug,
-          permissions: [] // Clears override
+          permissions: []
         })
       });
       const data = await res.json();
@@ -348,7 +356,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licen
     }
   };
 
-  // Correct 3-Tier Capability Simulator Calculation: Role Perms ∩ License Tier Ceiling
+  // Live Effective Capability Simulator Calculation: Role Perms ∩ Tier Caps
   const simulatedCapabilities = useMemo(() => {
     if (!simUserEmail) return [];
     const userObj = users.find(u => u.email === simUserEmail);
@@ -357,15 +365,12 @@ export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licen
     const roleSlug = userObj.role || 'Observer';
     const compId = userObj.company_id || 0;
 
-    // Step 1: Resolve Role Permissions (Company Override if set, else Global Role Default)
     const rolePerms = (compId > 0 && companyOverrides[roleSlug] && companyOverrides[roleSlug].length > 0)
       ? companyOverrides[roleSlug]
       : (roles.find(r => r.slug === roleSlug)?.permissions || ['ast.query']);
 
-    // Step 2: Resolve Package Tier Capability Ceiling
     const tierCaps = TIER_CAPABILITIES_MAP[simTierSlug.toLowerCase()] || TIER_CAPABILITIES_MAP.basic;
 
-    // Step 3: Intersection = Role Perms ∩ Tier Caps
     return rolePerms.filter(p => tierCaps.includes(p));
   }, [simUserEmail, simTierSlug, users, roles, companyOverrides]);
 
@@ -461,7 +466,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licen
         </form>
       )}
 
-      {/* Unified Tab 1: Global Platform Roles & Definitions */}
+      {/* Tab 1: Global Platform Roles & Definitions */}
       {activeSubTab === 'global' && (
         <div className="space-y-6">
           {/* Role Definition Cards Section */}
@@ -479,400 +484,84 @@ export const RolesTab: React.FC<RolesTabProps> = ({ companies, users = [], licen
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {roles.map(r => {
-                const count = roleUserCounts[r.slug] || 0;
-                return (
-                  <div key={r.id} className="p-4 bg-pm-input/30 border border-pm-border rounded-xl space-y-3 flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-start">
-                        <StatusBadge label={r.name} customColor={r.slug === 'SuperAdmin' ? 'purple' : r.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'} />
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleCloneRole(r)}
-                            title="Clone Role"
-                            className="px-2 py-1 rounded bg-pm-card hover:bg-pm-border text-[11px] font-bold text-pm-text transition cursor-pointer border border-pm-border flex items-center gap-1"
-                          >
-                            <Copy className="w-3 h-3" /> Clone
-                          </button>
-                          {r.is_system !== 1 && (
-                            <button
-                              onClick={() => initiateDeleteRole(r)}
-                              className="p-1 rounded bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition cursor-pointer border border-rose-500/20"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <p className="text-xs text-pm-secondary line-clamp-2">{r.description || 'Platform security role definition'}</p>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-2 border-t border-pm-border/50 text-xs">
-                      <span className="text-pm-secondary font-semibold flex items-center gap-1">
-                        👥 <strong className="text-pm-text">{count}</strong> User(s)
-                      </span>
-                      {onFilterUserByRole && (
-                        <button
-                          onClick={() => onFilterUserByRole(r.slug)}
-                          className="text-indigo-400 hover:underline flex items-center gap-1 text-[11px] font-bold cursor-pointer"
-                        >
-                          View in Clients <ExternalLink className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              {roles.map(r => (
+                <RoleCard
+                  key={r.id}
+                  role={r}
+                  userCount={roleUserCounts[r.slug] || 0}
+                  onClone={handleCloneRole}
+                  onDelete={initiateDeleteRole}
+                  onFilterUserByRole={onFilterUserByRole}
+                />
+              ))}
             </div>
           </div>
 
           {/* Global Interactive Permission Matrix Section */}
-          <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary">Global System Permission Matrix</h3>
-              <p className="text-[11px] text-pm-secondary mt-0.5">
-                Toggle default capability permissions for each platform role.
-              </p>
-            </div>
-
-            {loading ? (
-              <div className="p-8 text-center text-pm-secondary">
-                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-pm-primary" />
-                <p className="text-xs">Loading Global RBAC Matrix...</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto border border-pm-border rounded-xl">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-pm-input text-pm-secondary font-bold uppercase text-[10px] border-b border-pm-border">
-                      <th className="p-3.5 min-w-[200px]">Capability Permission</th>
-                      {roles.map(r => (
-                        <th key={r.id} className="p-3.5 text-center min-w-[130px]">
-                          <div className="flex flex-col items-center gap-1">
-                            <StatusBadge label={r.name} customColor={r.slug === 'SuperAdmin' ? 'purple' : r.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'} />
-                            <button
-                              onClick={() => handleSaveGlobalRole(r)}
-                              disabled={saving}
-                              className="mt-1.5 px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition text-[10px] font-bold flex items-center gap-1 cursor-pointer border border-indigo-500/20"
-                            >
-                              <Save className="w-3 h-3" /> Save
-                            </button>
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-pm-border">
-                    {permissions.map(p => (
-                      <tr key={p.slug} className="hover:bg-pm-input/30 transition">
-                        <td className="p-3.5">
-                          <div className="font-bold text-pm-text">{p.name || p.slug}</div>
-                          <div className="text-[10px] text-pm-secondary">{p.description}</div>
-                        </td>
-                        {roles.map(r => {
-                          const hasPerm = (r.permissions || []).includes(p.slug);
-                          return (
-                            <td key={r.id} className="p-3.5 text-center align-middle">
-                              <input
-                                type="checkbox"
-                                checked={hasPerm}
-                                onChange={() => toggleGlobalPermission(r.id, p.slug)}
-                                className="w-4 h-4 rounded border-pm-border text-indigo-500 focus:ring-indigo-500 cursor-pointer accent-indigo-500"
-                              />
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+          <GlobalMatrixTable
+            roles={roles}
+            permissions={permissions}
+            loading={loading}
+            saving={saving}
+            onTogglePermission={toggleGlobalPermission}
+            onSaveRole={handleSaveGlobalRole}
+          />
         </div>
       )}
 
-      {/* Unified Tab 2: Company Overrides & Live Simulator */}
+      {/* Tab 2: Company Overrides & Live Simulator */}
       {activeSubTab === 'company' && (
         <div className="space-y-6">
-          {/* Company Overrides Section */}
-          <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary">Company-Specific Role Overrides</h3>
-                <p className="text-[11px] text-pm-secondary mt-0.5">
-                  Customize role permissions for a specific organization. Overrides take precedence over global defaults.
-                </p>
-              </div>
+          <CompanyOverridesTable
+            companies={companies}
+            filteredCompanies={filteredCompanies}
+            selectedCompanyId={selectedCompanyId}
+            companySearchQuery={companySearchQuery}
+            roles={roles}
+            permissions={permissions}
+            companyOverrides={companyOverrides}
+            companyLoading={companyLoading}
+            saving={saving}
+            onSearchChange={setCompanySearchQuery}
+            onCompanySelect={setSelectedCompanyId}
+            onTogglePermission={toggleCompanyPermission}
+            onSaveCompanyRole={handleSaveCompanyRole}
+            onResetCompanyOverride={handleResetCompanyOverride}
+          />
 
-              {/* Searchable Company Selector */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-pm-secondary" />
-                  <input
-                    type="text"
-                    placeholder="Filter 500+ Companies..."
-                    value={companySearchQuery}
-                    onChange={e => setCompanySearchQuery(e.target.value)}
-                    className="bg-pm-input border border-pm-border rounded-xl pl-8 pr-3 py-1.5 text-xs text-pm-text"
-                  />
-                </div>
-
-                <select
-                  value={selectedCompanyId}
-                  onChange={e => setSelectedCompanyId(Number(e.target.value))}
-                  className="bg-pm-input border border-pm-border rounded-xl px-3 py-1.5 text-xs text-pm-text font-bold cursor-pointer min-w-[180px]"
-                >
-                  {filteredCompanies.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.company_name || `Company #${c.id}`} (#{c.id})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {companyLoading ? (
-              <div className="p-8 text-center text-pm-secondary">
-                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-pm-primary" />
-                <p className="text-xs">Loading Company Role Overrides...</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto border border-pm-border rounded-xl">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-pm-input text-pm-secondary font-bold uppercase text-[10px] border-b border-pm-border">
-                      <th className="p-3.5 min-w-[200px]">Capability Permission</th>
-                      {roles.map(r => {
-                        const isOverridden = Boolean(companyOverrides[r.slug]);
-                        return (
-                          <th key={r.id} className="p-3.5 text-center min-w-[140px]">
-                            <div className="flex flex-col items-center gap-1">
-                              <StatusBadge label={r.name} customColor={r.slug === 'SuperAdmin' ? 'purple' : r.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'} />
-                              <div className="text-[9px] font-mono text-pm-secondary mt-0.5">
-                                {isOverridden ? '🟢 Custom Override' : '⚪ Global Default'}
-                              </div>
-                              <div className="flex items-center gap-1 mt-1.5">
-                                <button
-                                  onClick={() => handleSaveCompanyRole(r.slug)}
-                                  disabled={saving}
-                                  className="px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition text-[10px] font-bold flex items-center gap-1 cursor-pointer border border-indigo-500/20"
-                                >
-                                  <Save className="w-3 h-3" /> Save
-                                </button>
-                                {isOverridden && (
-                                  <button
-                                    onClick={() => handleResetCompanyOverride(r.slug)}
-                                    disabled={saving}
-                                    title="Reset Override to Global Default"
-                                    className="p-1 rounded bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition cursor-pointer border border-rose-500/20"
-                                  >
-                                    <RotateCcw className="w-3 h-3" />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-pm-border">
-                    {permissions.map(p => (
-                      <tr key={p.slug} className="hover:bg-pm-input/30 transition">
-                        <td className="p-3.5">
-                          <div className="font-bold text-pm-text">{p.name || p.slug}</div>
-                          <div className="text-[10px] text-pm-secondary">{p.description}</div>
-                        </td>
-                        {roles.map(r => {
-                          const rolePerms = companyOverrides[r.slug] !== undefined
-                            ? companyOverrides[r.slug]
-                            : (r.permissions || []);
-                          const hasPerm = rolePerms.includes(p.slug);
-                          return (
-                            <td key={r.id} className="p-3.5 text-center align-middle">
-                              <input
-                                type="checkbox"
-                                checked={hasPerm}
-                                onChange={() => toggleCompanyPermission(r.slug, p.slug)}
-                                className="w-4 h-4 rounded border-pm-border text-indigo-500 focus:ring-indigo-500 cursor-pointer accent-indigo-500"
-                              />
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Integrated Live Effective Capability Simulator Section */}
-          <div className="bg-pm-card border border-pm-border rounded-2xl p-5 shadow-sm space-y-4">
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-pm-secondary flex items-center gap-1.5">
-                <Eye className="w-4 h-4 text-indigo-400" /> Live Effective Capability Simulator
-              </h3>
-              <p className="text-[11px] text-pm-secondary mt-0.5">
-                Simulate exact effective capabilities granted to a client user after applying Role Perms ∩ License Tier Ceiling.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-pm-input/30 border border-pm-border rounded-xl">
-              <div>
-                <label className="block text-xs font-bold text-pm-secondary mb-1 flex items-center gap-1">
-                  <UsersIcon className="w-3.5 h-3.5 text-indigo-400" /> Select Client User:
-                </label>
-                <select
-                  value={simUserEmail}
-                  onChange={e => setSimUserEmail(e.target.value)}
-                  className="w-full bg-pm-card border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text font-bold cursor-pointer"
-                >
-                  {users.map(u => (
-                    <option key={u.id} value={u.email}>
-                      {u.email} (Role: {u.role || 'Observer'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-pm-secondary mb-1 flex items-center gap-1">
-                  <Key className="w-3.5 h-3.5 text-indigo-400" /> Store License Tier Ceiling:
-                </label>
-                <select
-                  value={simTierSlug}
-                  onChange={e => setSimTierSlug(e.target.value)}
-                  className="w-full bg-pm-card border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text font-bold cursor-pointer"
-                >
-                  <option value="basic">Basic Tier (ast.query, db.backup, files.backup)</option>
-                  <option value="pro">Pro Tier (ast.query, ast.mutate, db.backup, db.restore, files.backup)</option>
-                  <option value="enterprise">Enterprise Tier (Full Capabilities)</option>
-                  <option value="developer">Developer Tier (Full Capabilities)</option>
-                </select>
-              </div>
-            </div>
-
-            {selectedSimUserObj && (
-              <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-pm-text">Selected User:</span>
-                  <span className="font-mono text-indigo-400 font-bold">{selectedSimUserObj.email}</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-300">
-                    {selectedSimUserObj.role || 'Observer'}
-                  </span>
-                </div>
-                <div className="text-[11px] text-pm-secondary">
-                  Assigned Key: <strong className="font-mono text-pm-text">{selectedSimUserLic ? selectedSimUserLic.license_key : 'No License Assigned'}</strong> ({simTierSlug.toUpperCase()})
-                </div>
-              </div>
-            )}
-
-            <div className="border border-pm-border rounded-xl overflow-hidden text-xs">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-pm-input text-pm-secondary font-bold uppercase text-[10px] border-b border-pm-border">
-                    <th className="p-3.5">Capability Permission</th>
-                    <th className="p-3.5 text-center">Effective Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-pm-border">
-                  {permissions.map(p => {
-                    const isGranted = simulatedCapabilities.includes(p.slug);
-                    return (
-                      <tr key={p.slug} className="hover:bg-pm-input/30 transition">
-                        <td className="p-3.5">
-                          <div className="font-bold text-pm-text">{p.name || p.slug}</div>
-                          <div className="text-[10px] text-pm-secondary">{p.description}</div>
-                        </td>
-                        <td className="p-3.5 text-center align-middle">
-                          {isGranted ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px]">
-                              <Check className="w-3.5 h-3.5" /> Granted
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pm-input text-pm-secondary/50 font-semibold text-[11px]">
-                              <Lock className="w-3 h-3" /> Restricted
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <CapabilitySimulator
+            users={users}
+            licenses={licenses}
+            permissions={permissions}
+            simUserEmail={simUserEmail}
+            simTierSlug={simTierSlug}
+            simulatedCapabilities={simulatedCapabilities}
+            selectedSimUserObj={selectedSimUserObj}
+            selectedSimUserLic={selectedSimUserLic}
+            onUserEmailChange={setSimUserEmail}
+            onTierSlugChange={setSimTierSlug}
+          />
         </div>
       )}
 
-      {/* System Capability Glossary Modal */}
-      {showGlossaryModal && (
-        <BaseModal isOpen={showGlossaryModal} onClose={() => setShowGlossaryModal(false)} title="System Capability Definition Registry" icon={BookOpen} maxWidth="lg">
-          <div className="space-y-4">
-            <p className="text-xs text-pm-secondary">
-              Reference guide of all security capability permissions across mass_utility_dashboard.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-1">
-              {permissions.map(p => (
-                <div key={p.slug} className="p-3 bg-pm-input/30 border border-pm-border rounded-xl space-y-1">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-xs text-pm-text">{p.name || p.slug}</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                      {p.slug}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-pm-secondary">{p.description}</p>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end pt-2">
-              <Button variant="neutral" size="sm" onClick={() => setShowGlossaryModal(false)}>
-                Close Glossary
-              </Button>
-            </div>
-          </div>
-        </BaseModal>
-      )}
+      {/* Glossary Modal */}
+      <CapabilityGlossaryModal
+        isOpen={showGlossaryModal}
+        permissions={permissions}
+        onClose={() => setShowGlossaryModal(false)}
+      />
 
-      {/* Deletion Guard Modal */}
-      {deletingRole && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-pm-card border border-pm-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center gap-3 text-amber-400">
-              <AlertTriangle className="w-6 h-6 shrink-0" />
-              <h3 className="text-sm font-bold text-pm-text">Role Deletion Safeguard Notice</h3>
-            </div>
-
-            <p className="text-xs text-pm-secondary leading-relaxed">
-              Role <strong className="text-pm-text">{deletingRole.name}</strong> cannot be deleted directly because it is currently assigned to <strong className="text-indigo-400 font-bold">{roleUserCounts[deletingRole.slug] || 0} active client account(s)</strong>.
-            </p>
-
-            <div className="p-3.5 bg-pm-input/40 border border-pm-border rounded-xl space-y-2 text-xs">
-              <label className="block font-bold text-pm-text">Reassign Affected Users To:</label>
-              <select
-                value={reassignRole}
-                onChange={e => setReassignRole(e.target.value)}
-                className="w-full bg-pm-card border border-pm-border rounded-lg px-3 py-1.5 text-xs text-pm-text font-bold cursor-pointer"
-              >
-                {roles.filter(r => r.slug !== deletingRole.slug).map(r => (
-                  <option key={r.id} value={r.slug}>{r.name} ({r.slug})</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="neutral" size="sm" onClick={() => setDeletingRole(null)}>
-                Cancel
-              </Button>
-              <Button variant="danger" size="sm" onClick={handleReassignAndDeleteRole} disabled={saving}>
-                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Reassign Users & Delete Role'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Role Deletion Guard Modal */}
+      <RoleDeletionGuardModal
+        deletingRole={deletingRole}
+        roles={roles}
+        userCount={deletingRole ? (roleUserCounts[deletingRole.slug] || 0) : 0}
+        reassignRole={reassignRole}
+        saving={saving}
+        onReassignChange={setReassignRole}
+        onConfirm={handleReassignAndDeleteRole}
+        onClose={() => setDeletingRole(null)}
+      />
     </div>
   );
 };
