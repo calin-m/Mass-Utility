@@ -25,7 +25,7 @@
    - **Questions & Diagnostics Mandate:** Whenever the user asks any question about how code works, module layout, or system behaviors, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `lookup "<symbol>"` / `matrix`) to ground your response in live AST symbol maps and generated reports.
    - **Modification & Feature Request Mandate:** Before drafting any plan or making code changes, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"`, which automatically executes the complete multi-tool chain (`trace`, `frontend_map`, `route_map`, `design_map`, `advisories`) and synthesizes the 360° Architectural Impact Report.
    - **Strict Sequential Investigation Protocol:** You MUST run `workspace_inspector.py trace` (or `plan`) FIRST. ONLY if `workspace_inspector.py` outputs `[INSPECTOR_FALLBACK_RECOMMENDED]` (e.g., when querying UI/React components, CSS tokens, or literal text strings where no AST symbol is found), are you authorized to use native `grep_search`, restricted strictly by target file globs (`Includes: ["*.tsx", "*.ts"]`) to prevent API context bloat.
-   - **Dual Plan Synchronization & Architecture Diagram Mandate:** Whenever drafting a plan or presenting feature options, you MUST include Mermaid architecture/sequence diagrams in the plan, write to `.ai_plan.md` on disk AND simultaneously generate/update the interactive `implementation_plan.md` artifact in the brain folder with `request_feedback=true` and `user_facing=true`.
+   - **Dual Plan Synchronization Mandate:** Whenever drafting a plan or presenting feature options, you MUST write to `.ai_plan.md` on disk AND simultaneously generate/update the interactive `implementation_plan.md` artifact in the brain folder with `request_feedback=true` and `user_facing=true`.
    - **Post-Execution Zero-Copy AST Re-Index:** After any code modification or component refactor, you MUST run `python .orchestra/.conductor/tools/workspace_inspector.py map` to refresh `symbol_map.json`, `00_auto_generated_oop_map.md`, and `00_auto_generated_frontend_map.md`.
    - **Scope Pre-Flight Inspection:** Before editing lines within a component or view file, you MUST inspect lines 1–60 (or the top of the file) to verify all imported symbols, prop interfaces, and `useState`/`useEffect` hook variables in scope.
    - Use `python ".orchestra/.conductor/tools/workspace_inspector.py" map` to rebuild and query the unified class/method AST symbol map registry (`.bench/docs/symbol_map.json`).
@@ -45,6 +45,22 @@
 7. **JIT Failure Telemetry (Self-Healing Loop):**
     - If a validation run fails, check `.bench/agents/custom_rules/_failures.md` for compiler and gate error details. You MUST immediately adapt your implementation plan to resolve the specific compilation/linters errors logged in that file.
 </RULE[Antigravity_Pipeline]>
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
 <!-- RULE-END[Pipeline Rules] -->
 
 <!-- RULE-START[Tool Reusability Policy] -->
