@@ -155,6 +155,7 @@ The size of a code transaction must be inversely proportional to its systemic ri
 - **Zero Polling Loops:** When invoking long-running background tasks (such as `run_command` async, `cli_commit.py`, or `git push`), you are strictly forbidden from repeatedly polling `manage_task(status)` in a loop.
 - **Reactive Wakeup:** After launching a background task, immediately stop tool execution and end your turn. Antigravity will automatically wake up and notify the agent upon task completion.
 - **Fast Synchronous Execution:** Fast CLI tools (`cli_doctor.py`, `cli_test_suite.py --fast`, `workspace_inspector.py`) MUST be executed synchronously with standard wait ceilings (`WaitMsBeforeAsync: 2000-3000ms`) to ensure instant completion (<50ms) without spawning unnecessary background task notifications.
+- **Intra-Stage Multi-Threaded Engine:** Orchestra diagnostic tools utilize `ThreadPoolExecutor` parallel worker pools inside Stage 1 and Stage 2 while maintaining 100% sequential inter-stage gating (Gate 0 -> Gate 1 -> Gate 2).
 
 </RULE[Antigravity_Standards]>
 <!-- RULE-END[Enterprise Standards] -->
