@@ -53,14 +53,17 @@ class LicenseVerifyController
                 exit;
             }
 
-            $tier = $lic['package_tier'];
+            $tier = strtolower((string)$lic['package_tier']);
+            $isHighTier = ($tier === 'pro' || $tier === 'enterprise' || $tier === 'developer');
+            $isTopTier = ($tier === 'enterprise' || $tier === 'developer');
+
             $features = [
-                'PM_ENABLE_FILE_TOOLS' => ($tier === 'pro' || $tier === 'developer') ? 1 : 0,
+                'PM_ENABLE_FILE_TOOLS' => $isHighTier ? 1 : 0,
                 'PM_ENABLE_DB_TOOLS' => 1,
-                'PM_ENABLE_QUERY_WIZARD' => ($tier === 'developer') ? 1 : 0,
-                'PM_ENABLE_GHOST_PURGER' => ($tier === 'pro' || $tier === 'developer') ? 1 : 0,
-                'PM_GDRIVE_SYNC' => ($tier === 'pro' || $tier === 'developer') ? 1 : 0,
-                'PM_RETENTION_RULE' => ($tier === 'pro' || $tier === 'developer') ? 1 : 0
+                'PM_ENABLE_QUERY_WIZARD' => $isTopTier ? 1 : 0,
+                'PM_ENABLE_GHOST_PURGER' => $isHighTier ? 1 : 0,
+                'PM_GDRIVE_SYNC' => $isHighTier ? 1 : 0,
+                'PM_RETENTION_RULE' => $isHighTier ? 1 : 0
             ];
 
             $payload = [

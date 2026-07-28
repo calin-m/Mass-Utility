@@ -35,7 +35,7 @@ $db->query("CREATE TABLE IF NOT EXISTS pm_licenses (
     user_id INTEGER NOT NULL,
     license_key VARCHAR(64) UNIQUE NOT NULL,
     store_url VARCHAR(255) NULL,
-    package_tier VARCHAR(32) DEFAULT 'basic', -- basic, pro, developer
+    package_tier VARCHAR(32) DEFAULT 'basic', -- basic, pro, enterprise, developer
     status VARCHAR(32) DEFAULT 'active',      -- active, suspended, expired
     expires_at DATETIME NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
