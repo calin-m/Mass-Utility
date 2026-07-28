@@ -324,8 +324,13 @@ export const App: React.FC = () => {
         {activeTab === 'roles' && (
           <RolesTab
             companies={companies}
+            users={users}
+            licenses={licenses}
             tiers={tiers}
             showAlert={showAlert}
+            onFilterUserByRole={(roleSlug) => {
+              setActiveTab('clients');
+            }}
           />
         )}
 
