@@ -472,7 +472,7 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
                     { value: 'basic', label: 'Basic' },
                     { value: 'pro', label: 'Pro' },
                     { value: 'enterprise', label: 'Enterprise' },
-                    { value: 'ultimate', label: 'Ultimate' },
+                    { value: 'developer', label: 'Developer' },
                   ]}
                 />
               </div>
