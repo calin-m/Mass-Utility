@@ -279,6 +279,14 @@
 <!-- RULE-END[Tool Reusability Policy] -->
 <!-- RULE-END[Pipeline Rules] -->
 
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
 <!-- RULE-START[Enterprise Standards] -->
 <RULE[Antigravity_Standards]>
 # Antigravity Enterprise Engineering Standards
