@@ -66,14 +66,24 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
           <div className="flex bg-pm-input p-1 rounded-xl border border-pm-border text-xs font-bold">
             <button
               type="button"
-              onClick={() => onSimModeChange('user')}
+              onClick={() => {
+                onSimModeChange('user');
+                if (users.length > 0 && !simUserEmail) {
+                  onUserEmailChange(users[0].email);
+                }
+              }}
               className={`px-3 py-1 rounded-lg transition ${simMode === 'user' ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-secondary hover:text-pm-text'}`}
             >
               Simulate User
             </button>
             <button
               type="button"
-              onClick={() => onSimModeChange('role')}
+              onClick={() => {
+                onSimModeChange('role');
+                if (roles.length > 0 && onRoleSlugChange && (!simRoleSlug || simRoleSlug === 'Observer')) {
+                  onRoleSlugChange(roles[0].slug);
+                }
+              }}
               className={`px-3 py-1 rounded-lg transition ${simMode === 'role' ? 'bg-pm-card text-pm-text shadow-sm' : 'text-pm-secondary hover:text-pm-text'}`}
             >
               Simulate Role

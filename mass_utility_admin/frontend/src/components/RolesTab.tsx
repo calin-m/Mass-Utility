@@ -116,6 +116,20 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     }
   }, [simUserEmail, users, licenses]);
 
+  // Auto-hydrate simUserEmail when users prop finishes loading asynchronously
+  useEffect(() => {
+    if (users.length > 0 && (!simUserEmail || !users.some(u => u.email === simUserEmail))) {
+      setSimUserEmail(users[0].email);
+    }
+  }, [users, simUserEmail]);
+
+  // Auto-hydrate simRoleSlug when roles state finishes loading asynchronously
+  useEffect(() => {
+    if (roles.length > 0 && (!simRoleSlug || !roles.some(r => r.slug === simRoleSlug))) {
+      setSimRoleSlug(roles[0].slug);
+    }
+  }, [roles, simRoleSlug]);
+
   const filteredCompanies = useMemo(() => {
     if (!companySearchQuery.trim()) return companies;
     const q = companySearchQuery.toLowerCase();
@@ -402,7 +416,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
       compId = userObj.company_id || 0;
     }
 
-    const rolePerms = (compId > 0 && companyOverrides[roleSlug] && companyOverrides[roleSlug].length > 0)
+    const rolePerms = (compId > 0 && compId === selectedCompanyId && companyOverrides[roleSlug] && companyOverrides[roleSlug].length > 0)
       ? companyOverrides[roleSlug]
       : (roles.find(r => r.slug === roleSlug)?.permissions || ['ast.query']);
 
@@ -435,7 +449,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     }
 
     return rolePerms.filter(p => tierCaps.includes(p));
-  }, [simMode, simUserEmail, simRoleSlug, simTierSlug, users, roles, companyOverrides, packageTiers]);
+  }, [simMode, simUserEmail, simRoleSlug, simTierSlug, users, roles, companyOverrides, packageTiers, selectedCompanyId]);
 
   const selectedSimUserObj = useMemo(() => {
     return users.find(u => u.email === simUserEmail);
