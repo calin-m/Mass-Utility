@@ -403,10 +403,36 @@ export const RolesTab: React.FC<RolesTabProps> = ({
       ? companyOverrides[roleSlug]
       : (roles.find(r => r.slug === roleSlug)?.permissions || ['ast.query']);
 
-    const tierCaps = TIER_CAPABILITIES_MAP[simTierSlug.toLowerCase()] || TIER_CAPABILITIES_MAP.basic;
+    let tierCaps: string[] = TIER_CAPABILITIES_MAP[simTierSlug.toLowerCase()] || [];
+
+    if (packageTiers && packageTiers.length > 0) {
+      const foundTier = packageTiers.find(t => (t.name || '').toLowerCase() === simTierSlug.toLowerCase());
+      if (foundTier && foundTier.capabilities) {
+        let caps = foundTier.capabilities;
+        if (typeof caps === 'string') {
+          try { caps = JSON.parse(caps); } catch (e) { caps = {}; }
+        }
+        if (caps && typeof caps === 'object') {
+          const dynamicCaps: string[] = ['ast.query'];
+          if (caps.query_visual_mutate || caps.PM_ENABLE_DB_TOOLS) dynamicCaps.push('ast.mutate');
+          if (caps.db_tools_backup || caps.PM_ENABLE_DB_TOOLS) dynamicCaps.push('db.backup');
+          if (caps.db_tools_restore) dynamicCaps.push('db.restore');
+          if (caps.db_diff_inspector) dynamicCaps.push('db.drop');
+          if (caps.file_tools_backup || caps.PM_ENABLE_FILE_TOOLS) dynamicCaps.push('files.backup');
+          if (caps.file_diff_inspector) dynamicCaps.push('files.delete');
+          if (caps.governor_autopilot || caps.PM_ENABLE_SECURITY_HEALTH) dynamicCaps.push('settings.update');
+          if (caps.sweeper_execution || caps.multi_shop_scope) dynamicCaps.push('users.manage');
+          tierCaps = Array.from(new Set([...tierCaps, ...dynamicCaps]));
+        }
+      }
+    }
+
+    if (tierCaps.length === 0) {
+      tierCaps = TIER_CAPABILITIES_MAP.basic;
+    }
 
     return rolePerms.filter(p => tierCaps.includes(p));
-  }, [simMode, simUserEmail, simRoleSlug, simTierSlug, users, roles, companyOverrides]);
+  }, [simMode, simUserEmail, simRoleSlug, simTierSlug, users, roles, companyOverrides, packageTiers]);
 
   const selectedSimUserObj = useMemo(() => {
     return users.find(u => u.email === simUserEmail);
@@ -569,6 +595,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
             users={users}
             licenses={licenses}
             roles={roles}
+            packageTiers={packageTiers}
             permissions={permissions}
             simUserEmail={simUserEmail}
             simTierSlug={simTierSlug}

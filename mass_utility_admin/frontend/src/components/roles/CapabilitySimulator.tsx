@@ -2,11 +2,13 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, Check, Key, Users as UsersIcon } from 'lucide-react';
 import { RbacPermission, UserAccount, License } from '../../types/adminApi';
+import { maskLicenseKey } from '../../utils/licenseUtils';
 
 interface CapabilitySimulatorProps {
   users: UserAccount[];
   licenses: License[];
   roles?: { id: number; name: string; slug: string; permissions: string[] }[];
+  packageTiers?: any[];
   permissions: RbacPermission[];
   simUserEmail: string;
   simTierSlug: string;
@@ -25,6 +27,7 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
   users,
   licenses,
   roles = [],
+  packageTiers = [],
   permissions,
   simUserEmail,
   simTierSlug,
@@ -40,16 +43,11 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
 }) => {
   const [showLicenseKey, setShowLicenseKey] = useState(false);
 
-  // Helper to mask key: MASS-2026-••••-••••-8A2F
+  // Standard Security Masking: MASS-••••••••••••••••••••••••••••
   const formatKey = (key?: string) => {
     if (!key) return 'No License Assigned';
     if (showLicenseKey) return key;
-    if (key.length <= 10) return '••••••••••••';
-    const parts = key.split('-');
-    if (parts.length >= 3) {
-      return `${parts[0]}-${parts[1]}-••••-••••-${parts[parts.length - 1]}`;
-    }
-    return `${key.slice(0, 4)}••••••••${key.slice(-4)}`;
+    return maskLicenseKey(key);
   };
 
   return (
@@ -130,10 +128,25 @@ export const CapabilitySimulator: React.FC<CapabilitySimulatorProps> = ({
             onChange={e => onTierSlugChange(e.target.value)}
             className="w-full bg-pm-card border border-pm-border rounded-xl px-3 py-2 text-xs text-pm-text font-bold cursor-pointer"
           >
-            <option value="basic">Basic Tier</option>
-            <option value="pro">Pro Tier</option>
-            <option value="enterprise">Enterprise Tier</option>
-            <option value="developer">Developer Tier</option>
+            {packageTiers && packageTiers.length > 0 ? (
+              packageTiers.map(t => {
+                const tierSlug = (t.name || '').toLowerCase();
+                const rawName = t.name || '';
+                const displayName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : tierSlug;
+                return (
+                  <option key={t.id || tierSlug} value={tierSlug}>
+                    {displayName} Tier
+                  </option>
+                );
+              })
+            ) : (
+              <>
+                <option value="basic">Basic Tier</option>
+                <option value="pro">Pro Tier</option>
+                <option value="enterprise">Enterprise Tier</option>
+                <option value="developer">Developer Tier</option>
+              </>
+            )}
           </select>
         </div>
       </div>
