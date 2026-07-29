@@ -30,7 +30,7 @@ export const RoleCard: React.FC<RoleCardProps> = ({
           <div className="flex items-center gap-2" title={`System Role Slug: ${role.slug}`}>
             <StatusBadge
               label={role.name}
-              customColor={role.slug === 'SuperAdmin' ? 'purple' : role.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'}
+              customColor={role.slug === 'SuperAdmin' || role.slug === 'Owner' || role.slug === 'owner' ? 'purple' : role.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'}
             />
           </div>
 

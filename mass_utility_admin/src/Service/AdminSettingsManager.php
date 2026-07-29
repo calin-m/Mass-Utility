@@ -264,38 +264,46 @@ class AdminSettingsManager
                 }
             }
 
-            // Seed default RBAC roles if empty
-            $roleCount = (int)$pdo->query("SELECT COUNT(*) FROM pm_roles")->fetchColumn();
-            if ($roleCount === 0) {
-                $defaultRoles = [
-                    ['name' => 'Super Admin', 'slug' => 'SuperAdmin', 'description' => 'Full administrative access across all tenant features'],
-                    ['name' => 'Company Admin', 'slug' => 'CompanyAdmin', 'description' => 'Organization administrator with user management rights'],
-                    ['name' => 'Catalog Manager', 'slug' => 'CatalogManager', 'description' => 'Full AST query and mutation capabilities'],
-                    ['name' => 'Operator', 'slug' => 'Operator', 'description' => 'Standard maintenance and backup creation operator'],
-                    ['name' => 'Observer', 'slug' => 'Observer', 'description' => 'Read-only catalog and telemetry monitoring access'],
-                ];
-                $insR = $pdo->prepare("INSERT INTO pm_roles (name, slug, description, is_system) VALUES (?, ?, ?, 1)");
-                foreach ($defaultRoles as $r) {
+            // Seed default RBAC roles idempotently (Auto-healing)
+            $defaultRoles = [
+                ['name' => 'Super Admin', 'slug' => 'SuperAdmin', 'description' => 'Full administrative access across all tenant features'],
+                ['name' => 'Company Owner', 'slug' => 'Owner', 'description' => 'Primary organization owner with full tenant administrative authority'],
+                ['name' => 'Company Admin', 'slug' => 'CompanyAdmin', 'description' => 'Organization administrator with user management rights'],
+                ['name' => 'Catalog Manager', 'slug' => 'CatalogManager', 'description' => 'Full AST query and mutation capabilities'],
+                ['name' => 'Operator', 'slug' => 'Operator', 'description' => 'Standard maintenance and backup creation operator'],
+                ['name' => 'Observer', 'slug' => 'Observer', 'description' => 'Read-only catalog and telemetry monitoring access'],
+            ];
+
+            $chkRole = $pdo->prepare("SELECT COUNT(*) FROM pm_roles WHERE LOWER(slug) = LOWER(?)");
+            $insR = $pdo->prepare("INSERT INTO pm_roles (name, slug, description, is_system) VALUES (?, ?, ?, 1)");
+            foreach ($defaultRoles as $r) {
+                $chkRole->execute([$r['slug']]);
+                if ((int)$chkRole->fetchColumn() === 0) {
                     $insR->execute([$r['name'], $r['slug'], $r['description']]);
                 }
+            }
 
-                // Map default role permissions
-                $allPerms = $pdo->query("SELECT id, slug FROM pm_permissions")->fetchAll(\PDO::FETCH_KEY_PAIR);
-                $rolesMap = $pdo->query("SELECT slug, id FROM pm_roles")->fetchAll(\PDO::FETCH_KEY_PAIR);
+            // Map default role permissions
+            $allPerms = $pdo->query("SELECT id, slug FROM pm_permissions")->fetchAll(\PDO::FETCH_KEY_PAIR);
+            $rolesMap = $pdo->query("SELECT slug, id FROM pm_roles")->fetchAll(\PDO::FETCH_KEY_PAIR);
 
-                $roleAssignments = [
-                    'SuperAdmin' => array_values($allPerms),
-                    'CompanyAdmin' => array_values($allPerms),
-                    'CatalogManager' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query', 'ast.mutate', 'db.backup', 'files.backup'])),
-                    'Operator' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query', 'db.backup', 'files.backup'])),
-                    'Observer' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query'])),
-                ];
+            $roleAssignments = [
+                'SuperAdmin' => array_values($allPerms),
+                'Owner' => array_values($allPerms),
+                'CompanyAdmin' => array_values($allPerms),
+                'CatalogManager' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query', 'ast.mutate', 'db.backup', 'files.backup'])),
+                'Operator' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query', 'db.backup', 'files.backup'])),
+                'Observer' => array_filter($allPerms, fn($s) => in_array($s, ['ast.query'])),
+            ];
 
-                $insRP = $pdo->prepare("INSERT INTO pm_role_permissions (role_id, permission_id) VALUES (?, ?)");
-                foreach ($roleAssignments as $rSlug => $pIds) {
-                    if (isset($rolesMap[$rSlug])) {
-                        $rId = (int)$rolesMap[$rSlug];
-                        foreach ($pIds as $pId) {
+            $chkRP = $pdo->prepare("SELECT COUNT(*) FROM pm_role_permissions WHERE role_id = ? AND permission_id = ?");
+            $insRP = $pdo->prepare("INSERT INTO pm_role_permissions (role_id, permission_id) VALUES (?, ?)");
+            foreach ($roleAssignments as $rSlug => $pIds) {
+                if (isset($rolesMap[$rSlug])) {
+                    $rId = (int)$rolesMap[$rSlug];
+                    foreach ($pIds as $pId) {
+                        $chkRP->execute([$rId, (int)$pId]);
+                        if ((int)$chkRP->fetchColumn() === 0) {
                             $insRP->execute([$rId, (int)$pId]);
                         }
                     }

@@ -48,7 +48,7 @@ export const GlobalMatrixTable: React.FC<GlobalMatrixTableProps> = ({
               {roles.map(r => (
                 <th key={r.id} className="p-3.5 text-center min-w-[130px]">
                   <div className="flex flex-col items-center gap-1.5">
-                    <StatusBadge label={r.name} customColor={r.slug === 'SuperAdmin' ? 'purple' : r.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'} />
+                    <StatusBadge label={r.name} customColor={r.slug === 'SuperAdmin' || r.slug === 'Owner' || r.slug === 'owner' ? 'purple' : r.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'} />
                     <Button
                       variant="neutral"
                       size="sm"

@@ -720,14 +720,17 @@ class LicenseRepository
 
         if (empty($perms)) {
             // Fallback default permissions based on role slug
+            $allPermsList = ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage'];
             $map = [
-                'SuperAdmin' => ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage'],
-                'CompanyAdmin' => ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage'],
+                'SuperAdmin' => $allPermsList,
+                'Owner' => $allPermsList,
+                'owner' => $allPermsList,
+                'CompanyAdmin' => $allPermsList,
                 'CatalogManager' => ['ast.query', 'ast.mutate', 'db.backup', 'files.backup'],
                 'Operator' => ['ast.query', 'db.backup', 'files.backup'],
                 'Observer' => ['ast.query'],
             ];
-            $perms = $map[$roleSlug] ?? ['ast.query'];
+            $perms = $map[$roleSlug] ?? $map[ucfirst($roleSlug)] ?? ['ast.query'];
         }
 
         return array_values(array_unique($perms));

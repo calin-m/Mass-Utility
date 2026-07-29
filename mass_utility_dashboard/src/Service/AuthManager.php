@@ -81,7 +81,7 @@ class AuthManager
         $permissions = $user['permissions'] ?? [];
 
         // 1. Role Permission Gate
-        $rolePermitted = ($role === 'SuperAdmin' || $role === 'CompanyAdmin' || in_array($capability, $permissions, true));
+        $rolePermitted = ($role === 'SuperAdmin' || $role === 'CompanyAdmin' || $role === 'Owner' || $role === 'owner' || in_array($capability, $permissions, true));
         if (!$rolePermitted) {
             return false;
         }
