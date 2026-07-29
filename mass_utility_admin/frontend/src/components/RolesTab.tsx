@@ -420,7 +420,8 @@ export const RolesTab: React.FC<RolesTabProps> = ({
       ? companyOverrides[roleSlug]
       : (roles.find(r => r.slug === roleSlug)?.permissions || ['ast.query']);
 
-    let tierCaps: string[] = TIER_CAPABILITIES_MAP[simTierSlug.toLowerCase()] || [];
+    let tierCaps: string[] = [];
+    let hasFoundLiveTier = false;
 
     if (packageTiers && packageTiers.length > 0) {
       const foundTier = packageTiers.find(t => (t.name || '').toLowerCase() === simTierSlug.toLowerCase());
@@ -430,22 +431,23 @@ export const RolesTab: React.FC<RolesTabProps> = ({
           try { caps = JSON.parse(caps); } catch (e) { caps = {}; }
         }
         if (caps && typeof caps === 'object') {
+          hasFoundLiveTier = true;
           const dynamicCaps: string[] = ['ast.query'];
-          if (caps.query_visual_mutate || caps.PM_ENABLE_DB_TOOLS) dynamicCaps.push('ast.mutate');
+          if (caps.query_visual_mutate || caps.PM_ENABLE_DB_TOOLS || caps.PM_ENABLE_QUERY_WIZARD) dynamicCaps.push('ast.mutate');
           if (caps.db_tools_backup || caps.PM_ENABLE_DB_TOOLS) dynamicCaps.push('db.backup');
-          if (caps.db_tools_restore) dynamicCaps.push('db.restore');
+          if (caps.db_tools_restore !== false && caps.db_tools_restore) dynamicCaps.push('db.restore');
           if (caps.db_diff_inspector) dynamicCaps.push('db.drop');
           if (caps.file_tools_backup || caps.PM_ENABLE_FILE_TOOLS) dynamicCaps.push('files.backup');
           if (caps.file_diff_inspector) dynamicCaps.push('files.delete');
           if (caps.governor_autopilot || caps.PM_ENABLE_SECURITY_HEALTH) dynamicCaps.push('settings.update');
           if (caps.sweeper_execution || caps.multi_shop_scope) dynamicCaps.push('users.manage');
-          tierCaps = Array.from(new Set([...tierCaps, ...dynamicCaps]));
+          tierCaps = Array.from(new Set(dynamicCaps));
         }
       }
     }
 
-    if (tierCaps.length === 0) {
-      tierCaps = TIER_CAPABILITIES_MAP.basic;
+    if (!hasFoundLiveTier) {
+      tierCaps = TIER_CAPABILITIES_MAP[simTierSlug.toLowerCase()] || TIER_CAPABILITIES_MAP.basic;
     }
 
     return rolePerms.filter(p => tierCaps.includes(p));
