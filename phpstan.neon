@@ -9,6 +9,7 @@ parameters:
         - '#Call to static method getInstance\(\)'
         - '#Call to static method getInstance\(\)'
         - '#Call to static method getInstance\(\)'
+        - '#Call to static method getInstance\(\)'
         - '#Call to static method getInstance\(\)#'
     level: 5
     bootstrapFiles:

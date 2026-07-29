@@ -45,33 +45,278 @@
 - Before writing a new python script or manual sequence to perform tasks, read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
 - If a custom tool exists for the task, execute it using: `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
 <!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
 
-<!-- RULE-START[Workspace Constitution] -->
-# Workspace Constitution & Architecture Directives
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks, read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using: `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
 
-## Target Environment & Performance Guardrails
-- **Core Platform:** PrestaShop 8.1.4 (Namespace: `ProjectMass`)
-- **Runtime Engine:** PHP 8.1.34 (Adhere to strict typings and language restrictions)
-- **Infrastructure context:** SiteBunker Shared Hosting (SSD Business Pack)
-  - Runs under CloudLinux LVE Cgroup resource clamps (3 virtual cores CPU limit fallback).
-  - Restricted MariaDB query connection structures and query thread ceilings.
-  - Highly sensitive to memory footprint limits (mandatory zero-RAM file streaming for backup and restorations).
-  - Adaptive processing loops must strictly monitor CPU averages to avoid CloudLinux Cgroup 503 limits or gateway timeouts.
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
 
-## 🎨 User Interface Architecture Policy (V2 React SPA + PrestaShop Launcher)
-- **V2 Standalone React SaaS UI (`mass_utility_dashboard/frontend/src/`):** Primary production UI. React 18 SPA built with Vite, TypeScript, and Vanilla CSS tokens (`var(--pm-*)`), compiled to `public/v2/`.
-- **PrestaShop Back-Office Launcher (`mass_utility_dashboard/views/templates/admin/configure.tpl`):** Native PrestaShop Back-Office launcher card providing 1-click single sign-on (AES-256 OTT) launch link to the V2 Standalone Dashboard.
-- **Active Refactor Scope:** All active styling, telemetry visualizers, AST query tools, and UI component enhancements target the **V2 React SPA**. Never mix or cross-import components between Admin (`mass_utility_admin/frontend/`) and Dashboard (`mass_utility_dashboard/frontend/`).
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
 
-## 📁 OPIS: Workspace Directory Manifest
-This serves as the overarching **Agent Workflow Constitution**:
-* `GEMINI.md`: Primary entry point referencing WORKSPACE.md for workspace rules, directory manifests, and Zero-Trust architecture directives.
-* `.ai_plan.md`: The active, ephemeral pre-flight plan for the current execution.
-* `.bench/docs/roadmap.md`: The persistent queue for future features and tasks. Always read this file to understand long-term context.
-* `.bench/docs/dashboard/`: Architecture diagrams, OOP maps, database schema maps, and CSS token maps for the SaaS Dashboard.
-* `.bench/docs/bridge/`: API pipeline maps, integration matrices, and setting contracts for the PrestaShop Bridge Module.
-* `.bench/docs/admin/`: OOP maps and i18n localization maps for the Super Admin Portal.
-<!-- RULE-END[Workspace Constitution] -->
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->
+<!-- RULE-END[Pipeline Rules] -->
 
 <!-- RULE-START[Enterprise Standards] -->
 <RULE[Antigravity_Standards]>
@@ -159,3 +404,10 @@ The size of a code transaction must be inversely proportional to its systemic ri
 
 </RULE[Antigravity_Standards]>
 <!-- RULE-END[Enterprise Standards] -->
+
+<!-- RULE-START[Tool Reusability Policy] -->
+## Tool Reusability Policy
+- Before writing a new python script or manual sequence to perform tasks (such as dependency checks, code minification, database schema graph compilation), you must read the Central Tools Index ([tools_index.md](file:///.bench/docs/tools_index.md)).
+- If a custom tool exists for the task, execute it using:
+  `python .orchestra/.conductor/tools/workspace_inspector.py run <tool_name>`
+<!-- RULE-END[Tool Reusability Policy] -->

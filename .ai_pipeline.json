@@ -40,6 +40,7 @@
         "complexity_profiler",
         "i18n_linter"
     ],
+    "phpstan_level": "5",
     "phpstan_targets": [
         "mass_utility/src",
         "mass_utility_dashboard/src",
