@@ -433,7 +433,23 @@ function AppContent() {
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => alert('Sandbox Database Reset to Defaults')}
+                          onClick={async () => {
+                            try {
+                              showToast('Resetting Sandbox Database...', 'info');
+                              await FetchService.post('reset_sandbox');
+                              const data = await FetchService.post('hydrate_dashboard');
+                              if (data && data.success) {
+                                const config = (window as any).PM_CONFIG || {};
+                                config.presets = data.presets || [];
+                                config.backups = data.backups || [];
+                                (window as any).PM_CONFIG = config;
+                              }
+                              showToast('🧪 Sandbox state reset to pristine factory defaults!', 'success');
+                              window.dispatchEvent(new Event('pm_sandbox_reset'));
+                            } catch (err: any) {
+                              showToast('Failed to reset sandbox: ' + (err.message || err), 'error');
+                            }
+                          }}
                           className={`px-3 py-1 border rounded-lg text-[11px] font-bold transition-all ${
                             darkMode
                               ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border-purple-500/30'

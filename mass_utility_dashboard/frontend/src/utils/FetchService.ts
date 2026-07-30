@@ -2,7 +2,7 @@
 // @Description: Standalone HTTP client utility that redirects calls to local mock responses when running on Vite dev server (port 5173).
 
 // Local state for mocks
-let mockBackups: any[] = [
+const SEED_BACKUPS: any[] = [
   {
     basename: 'db_backup_2026-07-20_120000.sql.gz',
     sql_filename: 'db_backup_2026-07-20_120000.sql.gz',
@@ -39,7 +39,68 @@ let mockBackups: any[] = [
   }
 ];
 
-let mockPresets = ['Full Catalog Dump', 'Catalog Core Only'];
+const SEED_PRESETS = ['Full Catalog Dump', 'Catalog Core Only'];
+
+const SEED_SWEEPER_STATS = {
+  connections: 45000,
+  connections_page: 120000,
+  connections_source: 15000,
+  guests: 8500,
+  carts: 25000,
+  cart_products: 75000,
+  cart_rules: 5000
+};
+
+const SEED_ORPHAN_IMAGES = [
+  { relative_path: 'img/p/1/2/12-large.jpg' },
+  { relative_path: 'img/p/2/3/23-small.jpg' }
+];
+
+const SEED_MUTATION_HISTORY = [
+  {
+    job_id: 'job_20260720_001',
+    date: '2026-07-20 12:00:00',
+    actions: 'SET price TO 19.99',
+    affected_count: 42,
+    state: 'SUCCESS',
+    has_revert: true,
+    raw_payload: JSON.stringify({
+      'product.price': { type: 'SET', value: 19.99 },
+      'product.active': { type: 'SET', value: 1 }
+    }),
+    revert_payload: JSON.stringify({
+      target_ids: [101, 102, 105, 112],
+      products: {
+        '101': { price: '25.00', active: '1' },
+        '102': { price: '30.00', active: '1' }
+      }
+    })
+  },
+  {
+    job_id: 'job_20260725_002',
+    date: '2026-07-25 15:30:00',
+    actions: 'ADD 5 TO quantity',
+    affected_count: 18,
+    state: 'SUCCESS',
+    has_revert: true,
+    raw_payload: JSON.stringify({
+      'stock.quantity': { type: 'ADD', value: 5 }
+    }),
+    revert_payload: JSON.stringify({
+      target_ids: [201, 202, 203],
+      products: {
+        '201': { quantity: '10' },
+        '202': { quantity: '15' }
+      }
+    })
+  }
+];
+
+let mockBackups: any[] = JSON.parse(JSON.stringify(SEED_BACKUPS));
+let mockPresets: string[] = [...SEED_PRESETS];
+let mockSweeperStats = { ...SEED_SWEEPER_STATS };
+let mockOrphanImages: any[] = [...SEED_ORPHAN_IMAGES];
+let mockMutationHistory: any[] = JSON.parse(JSON.stringify(SEED_MUTATION_HISTORY));
 let mockBackupJob = { progress: 0, status: 'idle' };
 
 export class FetchService {
@@ -244,9 +305,25 @@ export class FetchService {
       case 'upload_gdrive':
         return { success: true, file: payload.file, drive_link: 'https://drive.google.com/file/d/demo_mock_archive/view' };
 
-      case 'create_backup':
+      case 'create_backup': {
         mockBackupJob = { progress: 0, status: 'running' };
-        return { success: true, job_id: 'mock_job_' + Math.random().toString(36).substr(2, 9) };
+        const timeStamp = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
+        const newBackup = {
+          basename: `db_backup_${timeStamp}.sql.gz`,
+          sql_filename: `db_backup_${timeStamp}.sql.gz`,
+          log_filename: `db_backup_${timeStamp}.log`,
+          sql_size: 18432000,
+          log_size: 10240,
+          date: Math.floor(Date.now() / 1000),
+          duration: '8.2s',
+          is_local: true,
+          is_pinned: false,
+          sql_download_url: '#download-sql',
+          log_download_url: '#download-log'
+        };
+        mockBackups.unshift(newBackup);
+        return { success: true, job_id: 'mock_job_' + Math.random().toString(36).substr(2, 9), backups: mockBackups };
+      }
 
       case 'poll_job_progress':
         if (mockBackupJob.progress < 100) {
@@ -295,8 +372,8 @@ export class FetchService {
             fragmentation_ratio_avg: '8.5%',
             tables_count: 5,
             tables: [
-              { name: 'ps_connections', engine: 'InnoDB', rows: 125000, size_pretty: '28.5 MB', overhead_pretty: '2.4 MB', overhead_bytes: 2516582, fragmentation_ratio: '12.4%' },
-              { name: 'ps_cart', engine: 'InnoDB', rows: 45000, size_pretty: '12.2 MB', overhead_pretty: '1.2 MB', overhead_bytes: 1258291, fragmentation_ratio: '9.8%' },
+              { name: 'ps_connections', engine: 'InnoDB', rows: mockSweeperStats.connections, size_pretty: '28.5 MB', overhead_pretty: '2.4 MB', overhead_bytes: 2516582, fragmentation_ratio: '12.4%' },
+              { name: 'ps_cart', engine: 'InnoDB', rows: mockSweeperStats.carts, size_pretty: '12.2 MB', overhead_pretty: '1.2 MB', overhead_bytes: 1258291, fragmentation_ratio: '9.8%' },
               { name: 'ps_product', engine: 'InnoDB', rows: 1500, size_pretty: '1.8 MB', overhead_pretty: '0.4 MB', overhead_bytes: 419430, fragmentation_ratio: '4.2%' },
               { name: 'ps_category', engine: 'InnoDB', rows: 150, size_pretty: '0.2 MB', overhead_pretty: '0.0 MB', overhead_bytes: 0, fragmentation_ratio: '0.0%' },
               { name: 'ps_configuration', engine: 'InnoDB', rows: 850, size_pretty: '0.4 MB', overhead_pretty: '0.0 MB', overhead_bytes: 0, fragmentation_ratio: '0.0%' }
@@ -310,26 +387,52 @@ export class FetchService {
       case 'sweeper_analyze':
         return {
           success: true,
-          stats: { connections: 45000, connections_page: 120000, connections_source: 15000, guests: 8500, total: 188500 },
-          carts: { carts: 25000, cart_products: 75000, cart_rules: 5000, total: 105000 }
+          stats: {
+            connections: mockSweeperStats.connections,
+            connections_page: mockSweeperStats.connections_page,
+            connections_source: mockSweeperStats.connections_source,
+            guests: mockSweeperStats.guests,
+            total: mockSweeperStats.connections + mockSweeperStats.guests
+          },
+          carts: {
+            carts: mockSweeperStats.carts,
+            cart_products: mockSweeperStats.cart_products,
+            cart_rules: mockSweeperStats.cart_rules,
+            total: mockSweeperStats.carts + mockSweeperStats.cart_products + mockSweeperStats.cart_rules
+          }
         };
 
-      case 'sweeper_scan_images':
+      case 'sweeper_scan_images': {
+        const totalSize = mockOrphanImages.reduce((acc, img) => acc + (img.size || 2202009), 0);
         return {
           success: true,
           scanned_files: 12500,
-          orphaned_files: [
-            { relative_path: 'img/p/1/2/12-large.jpg' },
-            { relative_path: 'img/p/2/3/23-small.jpg' }
-          ],
-          total_orphaned_size: 4404019
+          orphaned_files: mockOrphanImages,
+          total_orphaned_size: totalSize
         };
+      }
+
+      case 'sweeper_sweep_carts': {
+        const count = mockSweeperStats.carts;
+        mockSweeperStats.carts = 0;
+        mockSweeperStats.cart_products = 0;
+        mockSweeperStats.cart_rules = 0;
+        return { success: true, deleted: count || 25000, deleted_count: count || 25000, done: true };
+      }
 
       case 'sweeper_sweep_connections':
-      case 'sweeper_sweep_guests':
-      case 'sweeper_sweep_carts':
-      case 'sweeper_purge_images':
-        return { success: true, deleted: 5000, deleted_count: 2, done: true };
+      case 'sweeper_sweep_guests': {
+        const count = mockSweeperStats.guests;
+        mockSweeperStats.guests = 0;
+        mockSweeperStats.connections = 0;
+        return { success: true, deleted: count || 8500, deleted_count: count || 8500, done: true };
+      }
+
+      case 'sweeper_purge_images': {
+        const count = mockOrphanImages.length;
+        mockOrphanImages = [];
+        return { success: true, deleted: count || 2, deleted_count: count || 2, done: true };
+      }
 
       case 'prepare_restore':
         return { success: true, statement_count: 250, was_shop_enabled: true };
@@ -401,6 +504,29 @@ export class FetchService {
         const offset = Number(payload.offset) || 0;
         const limit = Number(payload.limit) || 100;
         const isDone = offset + limit >= 42;
+        if (isDone) {
+          const nowStr = new Date().toISOString().replace('T', ' ').slice(0, 19);
+          const jobId = 'job_' + Date.now().toString(36);
+          const newMutationJob = {
+            job_id: jobId,
+            date: nowStr,
+            actions: payload.summary || 'UPDATE product SET price = price * 1.10',
+            affected_count: 42,
+            state: 'SUCCESS',
+            has_revert: true,
+            raw_payload: typeof payload.ast === 'string' ? payload.ast : JSON.stringify(payload.ast || {
+              'product.price': { type: 'MULTIPLY', value: 1.10 }
+            }),
+            revert_payload: JSON.stringify({
+              target_ids: [101, 102, 105, 112, 120],
+              products: {
+                '101': { price: '19.99', active: '1' },
+                '102': { price: '24.99', active: '1' }
+              }
+            })
+          };
+          mockMutationHistory.unshift(newMutationJob);
+        }
         return {
           success: true,
           done: isDone,
@@ -413,64 +539,60 @@ export class FetchService {
       case 'get_mutation_history':
         return {
           success: true,
-          history: [
-            {
-              job_id: 'job_20260720_001',
-              date: '2026-07-20 12:00:00',
-              actions: 'SET price TO 19.99',
-              affected_count: 42,
-              state: 'SUCCESS',
-              has_revert: true,
-              raw_payload: JSON.stringify({
-                'product.price': { type: 'SET', value: 19.99 },
-                'product.active': { type: 'SET', value: 1 }
-              }),
-              revert_payload: JSON.stringify({
-                target_ids: [101, 102, 105, 112],
-                products: {
-                  '101': { price: '25.00', active: '1' },
-                  '102': { price: '30.00', active: '1' }
-                }
-              })
-            },
-            {
-              job_id: 'job_20260725_002',
-              date: '2026-07-25 15:30:00',
-              actions: 'ADD 5 TO quantity',
-              affected_count: 18,
-              state: 'SUCCESS',
-              has_revert: true,
-              raw_payload: JSON.stringify({
-                'stock.quantity': { type: 'ADD', value: 5 }
-              }),
-              revert_payload: JSON.stringify({
-                target_ids: [201, 202, 203],
-                products: {
-                  '201': { quantity: '10' },
-                  '202': { quantity: '15' }
-                }
-              })
-            }
-          ]
+          history: mockMutationHistory
         };
 
-      case 'rollback_mutation':
+      case 'rollback_mutation': {
+        const jobId = payload.job_id;
+        mockMutationHistory = mockMutationHistory.map(job => {
+          if (job.job_id === jobId) {
+            return { ...job, state: 'ROLLED_BACK' };
+          }
+          return job;
+        });
         return {
           success: true,
           log_content: '[ROLLBACK] Restored active indices. Safe rollbacks completed.'
         };
+      }
 
-      case 'reapply_mutation':
+      case 'reapply_mutation': {
+        const jobId = payload.job_id;
+        mockMutationHistory = mockMutationHistory.map(job => {
+          if (job.job_id === jobId) {
+            return { ...job, state: 'SUCCESS' };
+          }
+          return job;
+        });
         return {
           success: true,
           log_content: '[REAPPLY] Re-applied actions rules. Baseline updated.'
         };
+      }
 
-      case 'delete_mutation_job':
+      case 'delete_mutation_job': {
+        const jobId = payload.job_id;
+        mockMutationHistory = mockMutationHistory.filter(job => job.job_id !== jobId);
         return { success: true };
+      }
 
       case 'clear_mutation_history':
+        mockMutationHistory = [];
         return { success: true };
+
+      case 'reset_sandbox':
+        mockBackups = JSON.parse(JSON.stringify(SEED_BACKUPS));
+        mockPresets = [...SEED_PRESETS];
+        mockSweeperStats = { ...SEED_SWEEPER_STATS };
+        mockOrphanImages = [...SEED_ORPHAN_IMAGES];
+        mockMutationHistory = JSON.parse(JSON.stringify(SEED_MUTATION_HISTORY));
+        mockBackupJob = { progress: 0, status: 'idle' };
+        return {
+          success: true,
+          message: 'Sandbox state reset to pristine factory defaults.',
+          backups: mockBackups,
+          presets: mockPresets
+        };
 
       case 'clear_logs':
         return { success: true };
