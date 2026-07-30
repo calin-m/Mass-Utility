@@ -234,10 +234,11 @@ flowchart TD
 
 The Mass Utility Framework enforces a unified **V2 React 18 SPA Architecture & Design System Policy**:
 
-### 2.1 Single UI & PrestaShop Launcher Integration
+### 2.1 Single UI, PrestaShop Launcher & Standalone Demo Mode Integration
 - **V2 React 18 SPA Dashboard**: Primary merchant interface located in `mass_utility_dashboard/frontend/` and compiled directly to `mass_utility_dashboard/public/v2/`.
 - **V2 React 18 SPA Super-Admin**: Primary licensing & tenant operations interface located in `mass_utility_admin/frontend/` and compiled directly to `mass_utility_admin/public/v2/`.
 - **PrestaShop Back-Office Launcher Card**: Clean, native PrestaShop Smarty template (`mass_utility_dashboard/views/templates/admin/configure.tpl`) providing 1-click AES-256 OTT redirection from PrestaShop Back-Office directly to the V2 Standalone Dashboard.
+- **Standalone Public Demo Mode (`/v2/index.html`)**: Both SPAs feature automatic `/v2/` URL path auto-detection. Requests targeting `/v2/` bypass PrestaShop session checks via PHP Gateway `$isDemoRequest` and execute 100% in browser JS memory (`FetchService.ts` & `AdminFetchAdapter.ts`). Features interactive high-contrast dual-theme amber (`mass_utility_admin`) and purple (`mass_utility_dashboard`) vault status banners with `🔄 Reset Vault` and `🚪 Exit Demo` controls.
 
 ### 2.2 Dashboard V2 React Component Architecture (`mass_utility_dashboard/frontend/src/components/`)
 - `<QueryMutateTab>` & `<QueryWizardTab>` (`🛒 Mass Updates`): Visual AST query builder with live SQL preview, domain preset loadout bar, and execution simulation mode.
@@ -422,6 +423,12 @@ System actions executed across the Super-Admin portal are logged to `pm_audit_lo
 
 ### 4.7 Automated Security Audit Pipeline (`cli_security_audit.py`)
 Integrated into the pre-commit build pipeline, `cli_security_audit.py` scans JavaScript files for unsafe DOM injections (`innerHTML`), verifies `escapeshellarg()` on PHP shell executions, and audits SQLite queries for prepared statement compliance.
+
+### 4.8 Public Demo Sandbox & OWASP Threat Mitigation Architecture
+When deployed on live public web hosts, Standalone Demo Mode (`/v2/index.html`) operates under strict OWASP zero-trust air-gap isolation:
+- **100% Client-Side In-Memory Dispatching:** `FetchService.ts` and `AdminFetchAdapter.ts` trap all AJAX requests (`execute_query`, `start_file_backup`, `rollback_mutation`) inside client browser JS memory. Zero network calls touch the remote PHP backend or store MySQL/SQLite databases (0 server resource impact).
+- **Backend API Authorization Guard:** Raw API requests (`index.php?action=...`) sent directly to the PHP backend lack the `/v2/` URL path, causing `$isDemoRequest` to evaluate to `false`. Unauthenticated API calls are immediately blocked by the PHP Gateway with **HTTP 403 Forbidden**.
+- **Credential Protection:** Client JS bundles contain only synthetic mock demonstration strings (`PM-DEMO-ENTERPRISE-KEY`, `admin@company.com`). Zero production credentials, secrets, or real database passwords exist within client assets.
 
 ---
 
@@ -746,29 +753,35 @@ CREATE TABLE pm_audit_logs (
 | `api_login` | `POST` | No | Authenticates Super Admin credentials against `pm_admins`. |
 | `api_logout` | `POST` | Yes | Destroys Super Admin session and clears auth cookies. |
 | `api_list` | `GET` | Yes | Returns all clients, active licenses, package tiers, and telemetry. |
+| `api_companies` | `GET` / `POST` | Yes | Fetches or manages B2B company directory profiles. |
 | `api_create_company` | `POST` | Yes | Creates new B2B company profile with max license capacity limit. |
 | `api_update_company` | `POST` | Yes | Updates company profile settings, VAT ID, and license cap limits. |
 | `api_delete_company` | `POST` | Yes | Deletes company profile and unlinks associated team members. |
+| `api_users` | `GET` / `POST` | Yes | Lists or manages merchant client user accounts. |
 | `api_create_user` | `POST` | Yes | Creates client account with BCRYPT hashing and company linking. |
 | `api_update_user` | `POST` | Yes | Updates client details. Triggers **B2B Key Retention Safeguard**. |
 | `api_reset_user_password` | `POST` | Yes | Resets client account password with BCRYPT hashing. |
 | `api_delete_user` | `POST` | Yes | Safely unbinds client licenses and deletes client account. |
+| `api_licenses` | `GET` / `POST` | Yes | Lists or manages SaaS license registry entries. |
 | `api_generate` | `POST` | Yes | Issues new license key to a Company Pool or standalone client. |
 | `api_assign_license` | `POST` | Yes | Assigns or unassigns a company pool license key to a team member. |
 | `api_update` | `POST` | Yes | Updates license key parameters (tier, store URL, status). |
 | `api_extend_license` | `POST` | Yes | Extends license key expiration date. |
 | `api_update_license_domains` | `POST` | Yes | Updates or unbinds authorized store domain binding (`store_url`). |
 | `api_delete_license` | `POST` | Yes | Permanently revokes and deletes a license key. |
-| `api_save_tier` | `POST` | Yes | Creates or updates subscription tier quotas (`basic`, `pro`, `enterprise`). |
+| `api_package_tiers` | `GET` / `POST` | Yes | Lists or updates subscription tier definitions (`basic`, `pro`, `enterprise`). |
+| `api_create_tier` | `POST` | Yes | Creates a new custom subscription tier quota definition. |
+| `api_update_tier` | `POST` | Yes | Updates an existing subscription tier definition. |
 | `api_delete_tier` | `POST` | Yes | Deletes a custom subscription tier definition. |
+| `api_roles` | `GET` / `POST` | Yes | Returns RBAC roles, permission definitions, and tier mappings. |
 | `api_get_diagnostics` | `GET` | Yes | Runs 4-Card SaaS Server Infrastructure Security Audit. |
 | `api_apply_security_headers` | `POST` | Yes | Injects HSTS, `nosniff`, `SAMEORIGIN` headers into SaaS root `.htaccess`. |
 | `api_enable_ssl_redirect` | `POST` | Yes | Injects 301 HTTPS Rewrite Rule into SaaS root `.htaccess`. |
 | `api_fix_permissions` | `POST` | Yes | Repairs SaaS server directory (`0755`) and file (`0644`) permissions. |
 | `api_change_password` | `POST` | Yes | Changes active Super-Admin account password. |
-| `api_get_admin_logs` | `GET` | Yes | Returns filterable operations audit log records (`pm_audit_logs`). |
+| `api_audit_logs` | `GET` | Yes | Returns filterable operations audit log records (`pm_audit_logs`). |
+| `api_clear_audit_logs` | `POST` | Yes | Clears operations audit trail (protected by `<ConfirmModal>`). |
 | `api_export_admin_logs_csv` | `GET` | Yes | Exports operations audit trail as a downloadable CSV file. |
-| `api_clear_admin_logs` | `POST` | Yes | Clears operations audit trail (protected by `<ConfirmModal>`). |
 
 ---
 
