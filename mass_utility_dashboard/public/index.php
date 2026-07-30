@@ -237,10 +237,9 @@ if (isset($_GET['ott'])) {
             if ($dec !== false) {
                 $decrypted = $dec;
                 $activeToken = $candidateToken;
-                if ($candidateToken !== $bridgeToken) {
-                    $settingsRepo->set('PM_BRIDGE_TOKEN', $candidateToken);
-                    $bridgeToken = $candidateToken;
-                    logAuthTelemetry('AUTO_HEAL_KEY_SYNC', ['message' => 'Resynchronized stale bridge token from MariaDB']);
+                if ($candidateToken !== $bridgeToken && !empty($payload['secure_token'])) {
+                    $settingsRepo->set('PM_BRIDGE_TOKEN', $payload['secure_token']);
+                    $bridgeToken = $payload['secure_token'];
                 }
                 break;
             }

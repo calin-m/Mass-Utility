@@ -32,3 +32,11 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^(.*)$ public/index.php [QSA,L]
 </IfModule>
+
+# Mass Utility Security Headers Protection
+<IfModule mod_headers.c>
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
