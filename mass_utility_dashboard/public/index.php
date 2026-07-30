@@ -714,6 +714,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 // ----------------------------------------------------
 // SECURE GATEWAY MIDDLEWARE
 // ----------------------------------------------------
+// Detect if request is targeting the V2 Demo Mode SPA
+$isDemoRequest = (
+    strpos($_SERVER['REQUEST_URI'] ?? '', '/v2/') !== false ||
+    isset($_GET['demo']) ||
+    (isset($_GET['action']) && $_GET['action'] === 'demo')
+);
+
 // Enforce 30-minute idle session timeout (1800s)
 if (!empty($_SESSION['employee_id'])) {
     $now = time();
@@ -730,8 +737,8 @@ if (empty($licenseKey)) {
 }
 $hasValidLicenseConfig = !empty($bridgeToken);
 
-// Session authorization check
-$isAuthorized = !empty($_SESSION['employee_id']) && $hasValidLicenseConfig;
+// Session authorization check (Allows Demo Mode SPA requests to load without PrestaShop session)
+$isAuthorized = $isDemoRequest || (!empty($_SESSION['employee_id']) && $hasValidLicenseConfig);
 
 // If X-Bridge-Token header is provided and matches, allow API requests (from the Bridge)
 if (!$isAuthorized && !empty($bridgeToken) && isset($_SERVER['HTTP_X_BRIDGE_TOKEN']) && $_SERVER['HTTP_X_BRIDGE_TOKEN'] === $bridgeToken && $hasValidLicenseConfig) {
@@ -1084,9 +1091,11 @@ if ($path === '/' || $path === '/index.html') {
             'settings' => $settingsRepo->getAll()
         ]);
         
+        $demoScript = $isDemoRequest ? '<script>window.PM_IS_DEMO = true; window.isDemoMode = true; window.PM_CONFIG = ' . $configJson . ';</script>' : '<script>window.PM_CONFIG = ' . $configJson . ';</script>';
+
         $html = str_replace(
             '</head>',
-            '<script>window.PM_CONFIG = ' . $configJson . ';</script></head>',
+            $demoScript . '</head>',
             $html
         );
         
