@@ -101,6 +101,16 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             {loading ? t('btn_refresh') : t('login_btn')}
           </button>
         </form>
+
+        <div className="mt-6 pt-4 border-t border-pm-border text-center">
+          <button
+            type="button"
+            onClick={onLoginSuccess}
+            className="w-full py-2.5 px-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2"
+          >
+            🛡️ Launch Super Admin Demo
+          </button>
+        </div>
       </div>
     </div>
   );
