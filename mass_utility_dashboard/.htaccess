@@ -24,9 +24,9 @@
     # Block direct browser access to source and templates folders (403 Forbidden)
     RewriteRule ^(src|tests|views/templates)($|/) - [F,L]
 
-    # Expose v2 static asset directory while forcing HTML pages through authentication middleware
+    # Expose v2 static assets & html page directly for standalone demo mode
     RewriteRule ^v2/assets/(.*)$ public/v2/assets/$1 [QSA,L]
-    RewriteRule ^v2/index\.html$ public/index.php [QSA,L]
+    RewriteRule ^v2/index\.html$ public/v2/index.html [QSA,L]
 
     # Internal rewrite: forward clean URLs to public/index.php if not a physical file
     RewriteCond %{REQUEST_FILENAME} !-f

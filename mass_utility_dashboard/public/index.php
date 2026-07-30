@@ -1032,7 +1032,7 @@ if (!$isAuthorized && !$isWebhook) {
     }
 }
 
-if ($path === '/' || $path === '/index.html') {
+if ($path === '/' || $path === '/index.html' || strpos($path, '/v2') !== false || $isDemoRequest) {
     if (isset($_GET['action']) && $_GET['action'] === 'stream_job_progress') {
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');
@@ -1081,8 +1081,21 @@ if ($path === '/' || $path === '/index.html') {
     }
 
     // Serve compiled React 18 SPA (V2) for all HTML browser requests by default
-    $reactIndex = dirname(__DIR__) . '/public/v2/index.html';
-    if (file_exists($reactIndex)) {
+    $candidateIndexes = [
+        dirname(__DIR__) . '/public/v2/index.html',
+        __DIR__ . '/v2/index.html',
+        dirname(__DIR__) . '/v2/index.html',
+        __DIR__ . '/public/v2/index.html'
+    ];
+    $reactIndex = null;
+    foreach ($candidateIndexes as $cand) {
+        if (file_exists($cand)) {
+            $reactIndex = $cand;
+            break;
+        }
+    }
+
+    if ($reactIndex && file_exists($reactIndex)) {
         $html = file_get_contents($reactIndex);
         
         $configJson = json_encode([
