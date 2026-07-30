@@ -206,9 +206,9 @@ if (str_starts_with($action, 'api_')) {
 // Compute dynamic basePath for subfolder-safe React SPA asset loading
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 $scriptDir = rtrim(dirname($scriptName), '/\\');
-$basePath = (str_ends_with($scriptDir, '/public') || str_ends_with($scriptDir, '\public'))
-    ? substr($scriptDir, 0, -7)
-    : $scriptDir;
+$publicPrefix = (str_ends_with($scriptDir, '/public') || str_ends_with($scriptDir, '\public'))
+    ? $scriptDir
+    : $scriptDir . '/public';
 
 // Dynamic Asset Discovery (glob scanner for compiled Vite bundles, sorted by newest timestamp)
 $assetsDir = __DIR__ . '/v2/assets';
@@ -227,8 +227,8 @@ $cssFile = !empty($cssFiles) ? basename($cssFiles[0]) : '';
 $jsVersion = !empty($jsFiles) && file_exists($jsFiles[0]) ? filemtime($jsFiles[0]) : time();
 $cssVersion = !empty($cssFiles) && file_exists($cssFiles[0]) ? filemtime($cssFiles[0]) : time();
 
-$jsUrl = $basePath . '/v2/assets/' . $jsFile . '?v=' . $jsVersion;
-$cssUrl = $basePath . '/v2/assets/' . $cssFile . '?v=' . $cssVersion;
+$jsUrl = $publicPrefix . '/v2/assets/' . $jsFile . '?v=' . $jsVersion;
+$cssUrl = $publicPrefix . '/v2/assets/' . $cssFile . '?v=' . $cssVersion;
 
 header('Content-Type: text/html; charset=UTF-8');
 ?>

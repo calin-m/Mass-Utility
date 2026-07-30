@@ -1,0 +1,8 @@
+<Files *>
+    Order Deny,Allow
+    Deny from all
+</Files>
+<Files "api.php">
+    Order Allow,Deny
+    Allow from all
+</Files>

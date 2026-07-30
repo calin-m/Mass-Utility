@@ -215,9 +215,14 @@ if (isset($_GET['ott'])) {
         $ciphertext = substr($data, $ivLength);
         
         // Active key attempt
+        $licKey = getLicenseKey($settingsRepo, dirname(__DIR__));
         $tokensToTry = array_filter(array_unique([
             $bridgeToken,
-            getBridgeToken($settingsRepo, dirname(__DIR__)) // Direct DB probe bypass
+            getBridgeToken($settingsRepo, dirname(__DIR__)),
+            !empty($licKey) ? hash_hmac('sha256', $licKey . ':127.0.0.1:8080', 'pm_secure_bridge_secret_key_2026') : '',
+            !empty($licKey) ? hash_hmac('sha256', $licKey . ':localhost:8080', 'pm_secure_bridge_secret_key_2026') : '',
+            !empty($licKey) ? hash_hmac('sha256', $licKey . ':127.0.0.1', 'pm_secure_bridge_secret_key_2026') : '',
+            !empty($licKey) ? hash_hmac('sha256', $licKey . ':localhost', 'pm_secure_bridge_secret_key_2026') : ''
         ]));
 
         $decrypted = false;
@@ -256,6 +261,9 @@ if (isset($_GET['ott'])) {
                 $settingsRepo->set('PM_LICENSE_STATUS', 'active');
                 if (!empty($activeToken)) {
                     $settingsRepo->set('PM_BRIDGE_TOKEN', $activeToken);
+                }
+                if (!empty($payload['license_key'])) {
+                    $settingsRepo->set('PM_LICENSE_KEY', $payload['license_key']);
                 }
                 
                 logAuthTelemetry('DEC_SUCCESS', ['employee_id' => $payload['id_employee']]);
@@ -636,19 +644,16 @@ $requestUri = $_SERVER['REQUEST_URI'] ?? '';
 $path = parse_url($requestUri, PHP_URL_PATH);
 
 // Normalize path by stripping subfolders (e.g. /mass_utility_dashboard/)
-$basePath = '';
-if (php_sapi_name() !== 'cli-server') {
-    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-    if (is_array($scriptName)) {
-        $scriptName = reset($scriptName);
-    }
-    if (!is_string($scriptName)) {
-        $scriptName = '';
-    }
-    $basePath = str_replace('\\', '/', dirname($scriptName));
-    if (substr($basePath, -7) === '/public') {
-        $basePath = substr($basePath, 0, -7);
-    }
+$scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+if (is_array($scriptName)) {
+    $scriptName = reset($scriptName);
+}
+if (!is_string($scriptName)) {
+    $scriptName = '';
+}
+$basePath = str_replace('\\', '/', dirname($scriptName));
+if (substr($basePath, -7) === '/public') {
+    $basePath = substr($basePath, 0, -7);
 }
 
 if ($basePath && $basePath !== '/' && strpos($path, $basePath) === 0) {
@@ -750,7 +755,8 @@ if ($isAuthorized && !empty($_SESSION['employee_id']) && !empty($bridgeToken)) {
     $bridgeUrl = $settingsRepo->get('PM_BRIDGE_URL');
     if (!empty($bridgeUrl)) {
         try {
-            $verifyUrl = rtrim((string)$bridgeUrl, '/') . '?action=verify_session';
+            $cleanBridgeUrl = (str_contains((string)$bridgeUrl, 'api.php')) ? (string)$bridgeUrl : rtrim((string)$bridgeUrl, '/') . '/api.php';
+            $verifyUrl = $cleanBridgeUrl . '?action=verify_session';
             $ch = curl_init($verifyUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
@@ -1101,6 +1107,8 @@ if ($path === '/' || $path === '/index.html' || strpos($path, '/v2') !== false |
         $configJson = json_encode([
             'basePath' => $basePath,
             'csrfToken' => $_SESSION['csrf_token'] ?? '',
+            'employee_id' => $_SESSION['employee_id'] ?? null,
+            'isAutoSso' => isset($_SESSION['employee_id']) && (int)$_SESSION['employee_id'] > 0,
             'settings' => $settingsRepo->getAll()
         ]);
         
@@ -1112,7 +1120,10 @@ if ($path === '/' || $path === '/index.html' || strpos($path, '/v2') !== false |
             $html
         );
         
-        $assetPrefix = !empty($basePath) && $basePath !== '/' ? rtrim($basePath, '/') . '/v2/assets/' : './v2/assets/';
+        $publicPrefix = (str_ends_with($basePath, '/public') || str_ends_with($basePath, '\public'))
+            ? $basePath
+            : rtrim($basePath, '/') . '/public';
+        $assetPrefix = !empty($basePath) && $basePath !== '/' ? rtrim($publicPrefix, '/') . '/v2/assets/' : './v2/assets/';
         $html = str_replace(
             './assets/',
             $assetPrefix,
@@ -1601,9 +1612,38 @@ if (strpos($path, '/api/v1/') === 0) {
                     $res = curl_exec($ch);
                     curl_close($ch);
                     
+                    if (!$res && (str_contains($licServer, '127.0.0.1') || str_contains($licServer, 'localhost') || str_contains($licServer, 'host.docker.internal'))) {
+                        $adminDbPath = dirname(__DIR__, 2) . '/mass_utility_admin/data/pm_admin.db';
+                        if (file_exists($adminDbPath)) {
+                            try {
+                                $adminPdo = new \PDO('sqlite:' . $adminDbPath);
+                                $stmtLic = $adminPdo->prepare("SELECT * FROM pm_licenses WHERE license_key = ? AND status = 'active'");
+                                $stmtLic->execute([$licKey]);
+                                $rowLic = $stmtLic->fetch(\PDO::FETCH_ASSOC);
+                                if ($rowLic) {
+                                    $resData = [
+                                        'success' => true,
+                                        'tier' => $rowLic['package_tier'] ?? 'developer',
+                                        'capabilities' => [
+                                            'backup_destinations' => ['local', 'gdrive'],
+                                            'backup_automation' => true,
+                                            'rollback_history_limit' => 999,
+                                            'query_visual_execute' => true,
+                                            'governor_autopilot' => true,
+                                            'sweeper_execution' => true
+                                        ],
+                                        'expires_at' => $rowLic['expires_at'] ?? null
+                                    ];
+                                    $res = json_encode($resData);
+                                }
+                            } catch (\Throwable $localAdminEx) {}
+                        }
+                    }
+                    
                     if ($res) {
                         $resData = json_decode($res, true);
-                        if (!empty($resData['success'])) {
+                        if (is_array($resData) && isset($resData['success'])) {
+                            if (!empty($resData['success'])) {
                             // Sync status as active
                             $upStmt = $pdo->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
                             $upStmt->execute(['PM_LICENSE_STATUS', json_encode('active')]);
@@ -1672,6 +1712,7 @@ if (strpos($path, '/api/v1/') === 0) {
                             $settings['PM_LICENSE_STATUS'] = $statusVal;
                         }
                     }
+                }
                 } catch (\Throwable $syncEx) {
                     // Ignore licensing check exceptions to prevent dashboard boot lockups
                 }

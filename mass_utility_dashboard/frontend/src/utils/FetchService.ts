@@ -156,7 +156,8 @@ export class FetchService {
       res = await fetch(url, {
         method: 'POST',
         body: formData,
-        headers
+        headers,
+        credentials: 'same-origin'
       });
     } catch (fetchError) {
       if ((window as any).isDemoMode || (window as any).PM_IS_DEMO || window.location.pathname.includes('/v2/') || localStorage.getItem('pm_demo_mode') === 'true') {

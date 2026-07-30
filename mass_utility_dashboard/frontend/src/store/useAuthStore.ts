@@ -34,8 +34,11 @@ export class AuthStore {
     // Synchronous PrestaShop Module OTT Auto-SSO Check on Boot (Frame 0)
     let isOttLaunch = false;
     try {
-      if (typeof window !== 'undefined' && window.location.search.includes('ott=')) {
-        isOttLaunch = true;
+      if (typeof window !== 'undefined') {
+        const pmConfig = (window as any).PM_CONFIG;
+        if (window.location.search.includes('ott=') || (pmConfig && (pmConfig.isAutoSso || pmConfig.employee_id))) {
+          isOttLaunch = true;
+        }
       }
     } catch (e) {}
 

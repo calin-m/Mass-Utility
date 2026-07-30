@@ -52,11 +52,14 @@ function AppContent() {
   // PrestaShop OTT Auto-SSO Parameter Exchange & URL Sanitizer on Boot
   useEffect(() => {
     try {
-      if (window.location.search.includes('ott=')) {
+      const pmConfig = (window as any).PM_CONFIG;
+      if (window.location.search.includes('ott=') || (pmConfig && (pmConfig.isAutoSso || pmConfig.employee_id))) {
         AuthStore.setSession('ott_auto_sso_token', defaultStoreOwnerUser, true);
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.delete('ott');
-        window.history.replaceState({}, document.title, cleanUrl.toString());
+        if (window.location.search.includes('ott=')) {
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete('ott');
+          window.history.replaceState({}, document.title, cleanUrl.toString());
+        }
       }
     } catch (e) {}
   }, []);

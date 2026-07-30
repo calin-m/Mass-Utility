@@ -327,11 +327,26 @@ class LicenseRepository
         }
 
         $secureToken = hash_hmac('sha256', $lic['license_key'] . ':' . ($lic['store_url'] ?? $url), 'pm_secure_bridge_secret_key_2026');
+
+        // Instantly synchronize newly activated token with Dashboard SQLite DB
+        try {
+            $dashDbPath = dirname(__DIR__, 3) . '/mass_utility_dashboard/data/pm_cloud_backups.db';
+            if (file_exists($dashDbPath)) {
+                $dashPdo = new \PDO('sqlite:' . $dashDbPath);
+                $dashPdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $dashStmt = $dashPdo->prepare("INSERT OR REPLACE INTO tenant_settings (name, value) VALUES (?, ?)");
+                $dashStmt->execute(['PM_LICENSE_KEY', json_encode($key)]);
+                $dashStmt->execute(['PM_BRIDGE_TOKEN', json_encode($secureToken)]);
+                $dashStmt->execute(['PM_LICENSE_STATUS', json_encode('active')]);
+                $dashStmt->execute(['PM_LICENSE_TIER', json_encode($lic['package_tier'])]);
+            }
+        } catch (\Throwable $t) {}
+
         return [
             'valid' => true,
             'tier' => $lic['package_tier'],
             'secure_token' => $secureToken,
-            'capabilities' => $features['capabilities'],
+            'capabilities' => $features['capabilities'] ?? [],
             'features' => $features
         ];
     }

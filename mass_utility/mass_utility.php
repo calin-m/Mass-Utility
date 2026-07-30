@@ -487,6 +487,7 @@ class Mass_Utility extends Module
         if (empty($url)) {
             $url = '../mass_utility_dashboard/';
         }
+        $url = str_replace('host.docker.internal', '127.0.0.1', $url);
         return rtrim($url, '/') . '/';
     }
 
@@ -518,6 +519,7 @@ class Mass_Utility extends Module
         $payload = json_encode([
             'id_employee' => $employeeId,
             'bridge_url' => $this->getApiEndpoint(),
+            'license_key' => class_exists('\Configuration') ? (string)\Configuration::get('PM_LICENSE_KEY') : '',
             'expiry' => time() + $ttlSeconds,
             'nonce' => bin2hex(random_bytes(8))
         ]);
