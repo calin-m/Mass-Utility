@@ -112,7 +112,14 @@ function AppContent() {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('pm-theme') !== 'light';
   });
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
+    return (
+      (window as any).PM_IS_DEMO === true ||
+      (window as any).isDemoMode === true ||
+      window.location.pathname.includes('/v2/') ||
+      localStorage.getItem('pm_demo_mode') === 'true'
+    );
+  });
 
   useEffect(() => {
     (window as any).isDemoMode = isDemoMode;

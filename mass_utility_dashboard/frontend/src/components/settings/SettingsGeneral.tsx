@@ -85,7 +85,17 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
     };
     let tier = 'unlicensed';
 
-    if (settings.PM_LICENSE_TOKEN) {
+    if ((window as any).isDemoMode) {
+      tier = 'enterprise';
+      cap = {
+        backup_destinations: ['local', 'gdrive'],
+        backup_automation: true,
+        rollback_history_limit: 100,
+        query_visual_execute: true,
+        governor_autopilot: true,
+        sweeper_execution: true,
+      };
+    } else if (settings.PM_LICENSE_TOKEN) {
       try {
         const payloadStr = window.atob(settings.PM_LICENSE_TOKEN);
         const payload = JSON.parse(payloadStr);
@@ -257,7 +267,8 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
     <div className="space-y-6">
       {(() => {
         const licStatus = String(settings.PM_LICENSE_STATUS || '').toLowerCase();
-        const isUnlicensed = !settings.PM_LICENSE_KEY || tierName === 'unlicensed' || tierName === 'free' || ['revoked', 'suspended', 'expired'].includes(licStatus);
+        const isDemo = (window as any).isDemoMode === true;
+        const isUnlicensed = !isDemo && (!settings.PM_LICENSE_KEY || tierName === 'unlicensed' || tierName === 'free' || ['revoked', 'suspended', 'expired'].includes(licStatus));
         return (
           <div className="bg-pm-card border border-pm-border rounded-xl p-6 shadow-xl">
             <div className="flex justify-between items-center mb-6">
@@ -266,7 +277,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                 <h3 className="text-md font-bold tracking-wide text-pm-text uppercase">⭐️ License Subscription Details</h3>
               </div>
               <span className={`text-xs font-bold px-3 py-1.5 rounded-lg border uppercase ${isUnlicensed ? 'bg-pm-danger/10 text-pm-danger border-pm-danger/20' : 'bg-pm-success/10 text-pm-success border-pm-success/20'}`}>
-                {isUnlicensed ? 'No Active License' : 'Active License'}
+                {isUnlicensed ? 'No Active License' : 'Active Enterprise Demo License'}
               </span>
             </div>
             
@@ -275,13 +286,13 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
                 <div>
                   <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-1">License Subscription Key</label>
                   <div className="font-mono text-lg font-bold text-pm-warning tracking-wider py-1">
-                    {!isUnlicensed && settings.PM_LICENSE_KEY ? `${settings.PM_LICENSE_KEY.substring(0, 9)}-••••-••••-••••` : 'NO ACTIVE LICENSE'}
+                    {isDemo ? 'PM-DEMO-ENTERPRISE-KEY' : (!isUnlicensed && settings.PM_LICENSE_KEY ? `${settings.PM_LICENSE_KEY.substring(0, 9)}-••••-••••-••••` : 'NO ACTIVE LICENSE')}
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-pm-text-secondary uppercase tracking-wider block mb-1">Subscription Package Tier</label>
                   <div className="text-md font-extrabold text-pm-primary uppercase tracking-wider py-1">
-                    {!isUnlicensed ? `${tierName.toUpperCase()} TIER` : 'NO ACTIVE LICENSE'}
+                    {isDemo ? 'ENTERPRISE TIER' : (!isUnlicensed ? `${tierName.toUpperCase()} TIER` : 'NO ACTIVE LICENSE')}
                   </div>
                 </div>
               </div>

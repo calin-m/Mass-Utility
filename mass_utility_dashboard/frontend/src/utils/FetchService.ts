@@ -131,6 +131,30 @@ export class FetchService {
     console.log(`[MOCK AJAX] Action: ${action}`, payload);
 
     switch (action) {
+      case 'hydrate_dashboard':
+        return {
+          success: true,
+          categories: ['Catalog', 'Stock', 'Pricing', 'Orders', 'System'],
+          manufacturers: ['PrestaShop', 'MassUtility'],
+          profiles: ['custom', 'full', 'db_only', 'files_only'],
+          presets: mockPresets,
+          backups: mockBackups,
+          settings: {
+            PM_LICENSE_KEY: 'PM-DEMO-ENTERPRISE-KEY',
+            PM_LICENSE_STATUS: 'active',
+            PM_LICENSE_TIER: 'enterprise',
+            PM_LICENSE_TOKEN: 'eyJ0aWVyIjoiZW50ZXJwcmlzZSIsImZlYXR1cmVzIjp7ImNhcGFiaWxpdGllcyI6eyJiYWNrdXBfZGVzdGluYXRpb25zIjpbImxvY2FsIiwiZ2RyaXZlIl0sImJhY2t1cF9hdXRvbWF0aW9uIjp0cnVlLCJyb2xsYmFja19oaXN0b3J5X2xpbWl0IjoxMDAsInF1ZXJ5X3Zpc3VhbF9leGVjdXRlIjp0cnVlLCJnb3Zlcm5vcl9hdXRvbXBpbG90Ijp0cnVlLCJzd2VlcGVyX2V4ZWN1dGlvbiI6dHJ1ZX19fQ=='
+          }
+        };
+
+      case 'get_auth_status':
+        return {
+          success: true,
+          authenticated: true,
+          configured: true,
+          synced_files: ['catalog_backup_20260729.sql.gz', 'site_backup_20260728.tar.gz']
+        };
+
       case 'get_server_status':
         return {
           success: true,

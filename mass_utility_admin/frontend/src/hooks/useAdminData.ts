@@ -215,7 +215,14 @@ export const useAdminData = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAdmin, setHasAdmin] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
+    return (
+      (window as any).PM_IS_DEMO === true ||
+      (window as any).isDemoMode === true ||
+      window.location.pathname.includes('/v2/') ||
+      localStorage.getItem('pm_demo_mode') === 'true'
+    );
+  });
 
   const [licenses, setLicenses] = useState<License[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
