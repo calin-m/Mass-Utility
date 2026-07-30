@@ -1380,6 +1380,17 @@ if (strpos($path, '/api/v1/') === 0) {
         
         if ($action === 'api_user_login' || $action === 'user_login') {
             header('Content-Type: application/json');
+            $clientIp = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $attemptKey = 'pm_dash_login_' . md5($clientIp);
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                @session_start();
+            }
+            $attempts = $_SESSION[$attemptKey] ?? ['count' => 0, 'first' => time(), 'until' => 0];
+            if (time() < $attempts['until']) {
+                echo json_encode(['success' => false, 'error' => '⚠️ Too many failed login attempts. Please wait 60 seconds before trying again.']);
+                exit;
+            }
+
             $raw = file_get_contents('php://input');
             $data = [];
             if (!empty($raw)) {
@@ -1435,7 +1446,7 @@ if (strpos($path, '/api/v1/') === 0) {
                         'name' => 'Store Owner',
                         'email' => $email,
                         'role' => 'SuperAdmin',
-                        'company_name' => 'Store Tenant',
+                        'company_name' => 'Default Store',
                         'permissions' => [
                             'ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop',
                             'files.backup', 'files.delete', 'settings.update', 'users.manage'
@@ -1443,6 +1454,19 @@ if (strpos($path, '/api/v1/') === 0) {
                     ];
                 }
             }
+
+            if (!$authenticatedUser) {
+                $attempts['count']++;
+                if ($attempts['count'] >= 5) {
+                    $attempts['until'] = time() + 60;
+                }
+                $_SESSION[$attemptKey] = $attempts;
+                usleep(500000);
+                echo json_encode(['success' => false, 'error' => 'Invalid email address or password.']);
+                exit;
+            }
+
+            unset($_SESSION[$attemptKey]);
 
             if ($authenticatedUser) {
                 $sessionToken = bin2hex(random_bytes(32));

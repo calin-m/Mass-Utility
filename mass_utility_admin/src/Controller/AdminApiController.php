@@ -50,6 +50,12 @@ class AdminApiController
     // @Arch[AdminApiRoute:api_login]
     private function login(): void
     {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        if ($this->auth->isIpLockedOut($ip)) {
+            echo json_encode(['success' => false, 'error' => '⚠️ Too many failed login attempts. Please wait 60 seconds before trying again.']);
+            return;
+        }
+
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
         if (empty($username) || empty($password)) {
@@ -68,6 +74,12 @@ class AdminApiController
     private function user_login(): void
     {
         header('Content-Type: application/json');
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        if ($this->auth->isIpLockedOut($ip)) {
+            echo json_encode(['success' => false, 'error' => '⚠️ Too many failed login attempts. Please wait 60 seconds before trying again.']);
+            return;
+        }
+
         $raw = file_get_contents('php://input');
         $data = [];
         if (!empty($raw)) {
@@ -87,9 +99,12 @@ class AdminApiController
 
         $user = $this->repo->authenticateUser($email, $password);
         if (!$user) {
+            $this->auth->recordFailedAttempt($ip);
             echo json_encode(['success' => false, 'error' => 'Invalid email address or password.']);
             return;
         }
+
+        $this->auth->clearFailedAttempts($ip);
 
         $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
         $agent = $_SERVER['HTTP_USER_AGENT'] ?? '';

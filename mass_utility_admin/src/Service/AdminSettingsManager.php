@@ -374,8 +374,58 @@ class AdminSettingsManager
         return isset($_SESSION['pm_admin_auth']) && $_SESSION['pm_admin_auth'] === true;
     }
 
+    public function isIpLockedOut(string $ip): bool
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            @session_start();
+        }
+        $key = 'pm_login_attempts_' . md5($ip);
+        $attempts = $_SESSION[$key] ?? ['count' => 0, 'first_attempt' => time(), 'locked_until' => 0];
+
+        if (time() < $attempts['locked_until']) {
+            return true;
+        }
+
+        if (time() - $attempts['first_attempt'] > 900) {
+            $_SESSION[$key] = ['count' => 0, 'first_attempt' => time(), 'locked_until' => 0];
+        }
+
+        return false;
+    }
+
+    public function recordFailedAttempt(string $ip): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            @session_start();
+        }
+        $key = 'pm_login_attempts_' . md5($ip);
+        $attempts = $_SESSION[$key] ?? ['count' => 0, 'first_attempt' => time(), 'locked_until' => 0];
+        $attempts['count']++;
+
+        if ($attempts['count'] >= 5) {
+            $attempts['locked_until'] = time() + 60;
+        }
+
+        $_SESSION[$key] = $attempts;
+        usleep(500000);
+    }
+
+    public function clearFailedAttempts(string $ip): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            @session_start();
+        }
+        $key = 'pm_login_attempts_' . md5($ip);
+        unset($_SESSION[$key]);
+    }
+
     public function login(string $username, string $password): bool
     {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        if ($this->isIpLockedOut($ip)) {
+            return false;
+        }
+
         try {
             $pdo = $this->getDbConnection();
             $stmt = $pdo->prepare("SELECT * FROM pm_admins WHERE username = ?");
@@ -388,11 +438,14 @@ class AdminSettingsManager
                 if (function_exists('session_regenerate_id')) {
                     session_regenerate_id(true);
                 }
+                $this->clearFailedAttempts($ip);
                 return true;
             }
         } catch (\Exception $e) {
             // Log error silently
         }
+
+        $this->recordFailedAttempt($ip);
         return false;
     }
 
