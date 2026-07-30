@@ -9,10 +9,12 @@
   - Highly sensitive to memory footprint limits (mandatory zero-RAM file streaming for backup and restorations).
   - Adaptive processing loops must strictly monitor CPU averages to avoid CloudLinux Cgroup 503 limits or gateway timeouts.
 
-## 🎨 User Interface Architecture Policy (V2 React SPA + PrestaShop Launcher)
+## 🎨 User Interface Architecture Policy (V2 React SPA + PrestaShop Launcher + Demo Sandbox)
 - **V2 Standalone React SaaS UI (`mass_utility_dashboard/frontend/src/`):** Primary production UI. React 18 SPA built with Vite, TypeScript, and Vanilla CSS tokens (`var(--pm-*)`), compiled to `public/v2/`.
+- **V2 Super-Admin Licensing Portal (`mass_utility_admin/frontend/src/`):** Primary system operations UI. React 18 SPA built with Vite, TypeScript, and Vanilla CSS tokens, compiled to `public/v2/`.
 - **PrestaShop Back-Office Launcher (`mass_utility_dashboard/views/templates/admin/configure.tpl`):** Native PrestaShop Back-Office launcher card providing 1-click single sign-on (AES-256 OTT) launch link to the V2 Standalone Dashboard.
-- **Active Refactor Scope:** All active styling, telemetry visualizers, AST query tools, and UI component enhancements target the **V2 React SPA**.
+- **Standalone Public Demo Mode (`/v2/index.html`)**: Requests targeting `/v2/` bypass PrestaShop session checks via PHP Gateway `$isDemoRequest` and execute 100% in browser JS memory (`FetchService.ts` & `AdminFetchAdapter.ts`), insulating backend databases from public traffic.
+- **Active Refactor Scope:** All active styling, telemetry visualizers, AST query tools, and UI component enhancements target the **V2 React SPAs**.
 
 
 ## 🔍 Agent Investigation & Planning Protocol
