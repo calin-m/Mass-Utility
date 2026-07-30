@@ -493,8 +493,13 @@ export const useAdminData = () => {
       addLicense,
       deleteLicense,
       createTier: (tier: any) => {
+        if (tiers.length >= 6) {
+          showAlert('⚠️ Demo Quota Exceeded: Maximum 6 subscription package tiers allowed. Reset vault to clear.', 'error');
+          return null;
+        }
         const newTier = { id: tiers.length + 1, ...tier };
         setTiers(prev => [...prev, newTier]);
+        showAlert(`📦 Subscription Tier "${newTier.display_name || newTier.name}" Created (Demo Sandbox)`, 'success');
         return newTier;
       },
       deleteTier: (id: number) => {

@@ -737,6 +737,14 @@ export const QueryMutateTab: React.FC = () => {
     );
   };
 
+  const countRulesInTree = (g: Group): number => {
+    let count = g.rules.length;
+    g.groups?.forEach(subG => {
+      count += countRulesInTree(subG);
+    });
+    return count;
+  };
+
   // Rendering Helper: Recursive Group Node
   const renderGroupNode = (group: Group, isRoot = false) => {
     return (
@@ -751,10 +759,10 @@ export const QueryMutateTab: React.FC = () => {
                 const updated = handleUpdateGroupOperator(group.id, e.target.value as any, queryTree);
                 setQueryTree(updated);
               }}
-              className="bg-pm-input border border-pm-border text-xs font-bold text-pm-text-secondary rounded-lg px-2.5 py-1.5 focus:outline-none"
+              className="pm-form-select text-[11px] font-bold py-1 px-2.5 rounded-lg"
             >
-              <option value="AND">AND (All match)</option>
-              <option value="OR">OR (Any match)</option>
+              <option value="AND">AND (All conditions must match)</option>
+              <option value="OR">OR (At least one matches)</option>
               <option value="NAND">NAND (Not all match)</option>
               <option value="NOR">NOR (None match)</option>
               <option value="XOR">XOR (Exactly one matches)</option>
@@ -765,6 +773,10 @@ export const QueryMutateTab: React.FC = () => {
             <button
               type="button"
               onClick={() => {
+                if (countRulesInTree(queryTree) >= 10) {
+                  showToast('⚠️ Maximum 10 condition rules per query limit reached in demo mode.', 'error');
+                  return;
+                }
                 const updated = handleAddRule(group.id, queryTree);
                 setQueryTree(updated);
               }}
@@ -775,6 +787,10 @@ export const QueryMutateTab: React.FC = () => {
             <button
               type="button"
               onClick={() => {
+                if (countRulesInTree(queryTree) >= 10) {
+                  showToast('⚠️ Maximum 10 condition rules per query limit reached in demo mode.', 'error');
+                  return;
+                }
                 const updated = handleAddGroup(group.id, queryTree);
                 setQueryTree(updated);
               }}

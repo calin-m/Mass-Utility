@@ -247,6 +247,11 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     e.preventDefault();
     if (!newRoleName.trim() || !newRoleSlug.trim()) return;
 
+    if (roles.length >= 8) {
+      if (showAlert) showAlert('⚠️ Demo Quota Exceeded: Maximum 8 RBAC roles allowed. Reset vault to clear.', 'error');
+      return;
+    }
+
     setSaving(true);
     try {
       const res = await AdminFetchAdapter.request(getApiUrl('api_role_create'), {

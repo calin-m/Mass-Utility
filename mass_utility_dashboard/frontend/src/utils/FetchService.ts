@@ -288,6 +288,9 @@ export class FetchService {
       case 'save_preset': {
         const name = payload.name;
         if (!mockPresets.includes(name)) {
+          if (mockPresets.length >= 10) {
+            throw new Error('⚠️ Demo Quota Exceeded: Maximum 10 presets allowed in sandbox mode. Reset Sandbox to clear.');
+          }
           mockPresets.push(name);
         }
         return { success: true };
@@ -322,6 +325,9 @@ export class FetchService {
           log_download_url: '#download-log'
         };
         mockBackups.unshift(newBackup);
+        if (mockBackups.length > 15) {
+          mockBackups = mockBackups.slice(0, 15);
+        }
         return { success: true, job_id: 'mock_job_' + Math.random().toString(36).substr(2, 9), backups: mockBackups };
       }
 
@@ -526,6 +532,9 @@ export class FetchService {
             })
           };
           mockMutationHistory.unshift(newMutationJob);
+          if (mockMutationHistory.length > 20) {
+            mockMutationHistory = mockMutationHistory.slice(0, 20);
+          }
         }
         return {
           success: true,
