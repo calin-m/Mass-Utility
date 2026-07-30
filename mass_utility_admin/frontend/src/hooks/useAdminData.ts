@@ -202,9 +202,9 @@ const MOCK_LICENSES: License[] = [
     user_id: 3,
     user_email: 'bob@nexuscommerce.ro',
     user_name: 'Bob Operator',
-    license_key: 'MASS-UTIL-STARTER-2026-S11Z',
+    license_key: 'MASS-UTIL-BASIC-2026-S11Z',
     store_url: 'https://nexuscommerce.ro',
-    package_tier: 'Starter Tier',
+    package_tier: 'Basic Tier',
     status: 'expiring',
     expires_at: '2026-08-15',
     created_at: '2026-05-22'

@@ -181,21 +181,21 @@ export const App: React.FC = () => {
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       {isDemoMode && (
-        <div className="mb-6 p-3 bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold rounded-xl flex items-center justify-between shadow-inner">
+        <div className="mb-6 p-3 bg-amber-500/20 dark:bg-amber-500/15 border border-amber-500/40 dark:border-amber-500/30 text-amber-900 dark:text-amber-300 text-xs font-semibold rounded-xl flex items-center justify-between shadow-inner">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span>🛡️ <b>SUPER ADMIN DEMO VAULT ACTIVE</b> — Sandboxed Client Directory, Tiers Matrix &amp; License Generator</span>
+            <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse"></span>
+            <span>🛡️ <b className="font-bold">SUPER ADMIN DEMO VAULT ACTIVE</b> — Sandboxed Client Directory, Tiers Matrix &amp; License Generator</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={resetDemoData}
-              className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 rounded-lg text-[11px] font-bold transition-all"
+              className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 dark:text-amber-200 border border-amber-500/40 rounded-lg text-[11px] font-bold transition-all"
             >
               🔄 Reset Vault
             </button>
             <button
               onClick={disableDemoMode}
-              className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-lg text-[11px] font-bold transition-all"
+              className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-900 dark:text-rose-300 border border-rose-500/40 rounded-lg text-[11px] font-bold transition-all"
             >
               🚪 Exit Demo
             </button>
