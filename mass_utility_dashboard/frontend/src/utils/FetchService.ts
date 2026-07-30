@@ -408,8 +408,35 @@ export class FetchService {
               affected_count: 42,
               state: 'SUCCESS',
               has_revert: true,
-              raw_payload: '{"condition_tree":{"logical_operator":"AND","rules":[{"field":"product.active","operator":"EQUAL","value":1}],"groups":[]}}',
-              revert_payload: '{"reverts":[{"table":"ps_product","pk":"101","changes":{"price":{"original":"25.00","new":"19.99"}}}]}'
+              raw_payload: JSON.stringify({
+                'product.price': { type: 'SET', value: 19.99 },
+                'product.active': { type: 'SET', value: 1 }
+              }),
+              revert_payload: JSON.stringify({
+                target_ids: [101, 102, 105, 112],
+                products: {
+                  '101': { price: '25.00', active: '1' },
+                  '102': { price: '30.00', active: '1' }
+                }
+              })
+            },
+            {
+              job_id: 'job_20260725_002',
+              date: '2026-07-25 15:30:00',
+              actions: 'ADD 5 TO quantity',
+              affected_count: 18,
+              state: 'SUCCESS',
+              has_revert: true,
+              raw_payload: JSON.stringify({
+                'stock.quantity': { type: 'ADD', value: 5 }
+              }),
+              revert_payload: JSON.stringify({
+                target_ids: [201, 202, 203],
+                products: {
+                  '201': { quantity: '10' },
+                  '202': { quantity: '15' }
+                }
+              })
             }
           ]
         };
