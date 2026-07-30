@@ -514,12 +514,13 @@ class Mass_Utility extends Module
         return $protocol . $host . $this->_path . 'api.php';
     }
 
-    private function encryptToken(int $employeeId, string $bridgeToken, int $ttlSeconds = 300): string
+    public function encryptToken(int $employeeId, string $bridgeToken, int $ttlSeconds = 3600): string
     {
         $payload = json_encode([
             'id_employee' => $employeeId,
             'bridge_url' => $this->getApiEndpoint(),
             'license_key' => class_exists('\Configuration') ? (string)\Configuration::get('PM_LICENSE_KEY') : '',
+            'secure_token' => $bridgeToken,
             'expiry' => time() + $ttlSeconds,
             'nonce' => bin2hex(random_bytes(8))
         ]);

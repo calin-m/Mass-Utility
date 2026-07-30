@@ -259,8 +259,8 @@ if (isset($_GET['ott'])) {
                 
                 // Resynchronize active license status & active bridge token in SQLite storage
                 $settingsRepo->set('PM_LICENSE_STATUS', 'active');
-                if (!empty($activeToken)) {
-                    $settingsRepo->set('PM_BRIDGE_TOKEN', $activeToken);
+                if (!empty($payload['secure_token'])) {
+                    $settingsRepo->set('PM_BRIDGE_TOKEN', $payload['secure_token']);
                 }
                 if (!empty($payload['license_key'])) {
                     $settingsRepo->set('PM_LICENSE_KEY', $payload['license_key']);
