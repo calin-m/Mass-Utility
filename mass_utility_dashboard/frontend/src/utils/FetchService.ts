@@ -158,26 +158,39 @@ export class FetchService {
       case 'get_server_status':
         return {
           success: true,
-          diagnostics: {
-            db_locks: 'HEALTHY',
-            disk_free: '14.2 GB',
-            memory_free: '768 MB',
-            write_permissions: 'WRITABLE'
+          load_state: 'OPTIMAL',
+          cpu_load: '8.4%',
+          chunk_size: 2500,
+          sleep_delay: 0,
+          probe_status: 'OPTIMAL (0.01ms)',
+          probe_latency: '0.01ms',
+          memory_usage: '42.5 MB / 512 MB',
+          cores: 8,
+          db_max_connections: 150,
+          memory_floor: 128,
+          ps_version: '8.1.2',
+          mysql_version: '10.6.15-MariaDB',
+          cpu_model: 'AMD EPYC 7763 (Virtualized Sandbox)',
+          allocated_cpu_speed: '3.20 GHz',
+          cpu_speed: '3.20 GHz',
+          php_version: '8.2.14',
+          opcache_enabled: 'Enabled',
+          opcache_active: true,
+          checklist: {
+            overall: true,
+            db_locks: { status: 'OK', message: 'No blocking database transactions detected' },
+            disk_space: { status: 'OK', message: '45.8 GB free storage available' },
+            memory: { status: 'OK', message: '469.5 MB free PHP RAM allocated' },
+            file_permissions: { status: 'OK', message: 'Root & backup directories writable (0755)' }
           },
-          limits: {
-            max_execution_time: '120s',
-            max_input_time: '60s',
-            default_socket_timeout: '60s',
+          ini: {
+            max_execution_time: 120,
+            max_input_time: 60,
+            default_socket_timeout: 60,
             upload_max_filesize: '64M',
             post_max_size: '64M',
-            memory_limit: '256M',
-            session_gc_maxlifetime: '1440s'
-          },
-          cgroup: {
-            cpu_usage: 12.5,
-            memory_usage: 45.2,
-            db_connections: 18,
-            php_version: '8.1.18'
+            memory_limit: '512M',
+            session_gc_maxlifetime: 14400
           }
         };
 
