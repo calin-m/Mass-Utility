@@ -17,6 +17,7 @@ import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 import { CompanyHeaderStats } from './CompanyHeaderStats';
+import { AdminFetchAdapter, getApiUrl } from '../../utils/AdminFetchAdapter';
 
 
 interface CompanyDetailsViewProps {
@@ -32,9 +33,11 @@ interface CompanyDetailsViewProps {
   onEditLicense?: (license: any) => void;
   highlightedLicenseKey?: string;
   tiers?: any[];
+  isDemoMode?: boolean;
+  onToggleCompanyStatus?: (id: number) => void;
 }
 
-export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, onInspectLicense, onEditLicense, highlightedLicenseKey, tiers = [] }) => {
+export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company, users, licenses, initialTab, onBack, onRefresh, showAlert, onInspectClient, onInspectLicense, onEditLicense, highlightedLicenseKey, tiers = [], isDemoMode, onToggleCompanyStatus }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'licenses' | 'members' | 'settings'>(initialTab || 'overview');
 
@@ -111,7 +114,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
       formData.append('license_id', String(licenseId));
       formData.append('user_id', userIdStr);
 
-      const res = await fetch('index.php?action=api_assign_license', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_assign_license'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert('🔑 License key assigned to team member!', 'success');
@@ -264,6 +267,15 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
   const handleToggleStatus = async () => {
     const newStatus = isSuspended ? 'active' : 'suspended';
     setSubmitting(true);
+
+    if (isDemoMode || onToggleCompanyStatus) {
+      if (onToggleCompanyStatus) {
+        onToggleCompanyStatus(company.id);
+      }
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('id', String(company.id));
@@ -799,7 +811,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
                             onChange={async (e) => {
                               const newRole = e.target.value;
                               try {
-                                const res = await fetch('index.php?action=api_user_update_role', {
+                                const res = await AdminFetchAdapter.request(getApiUrl('api_user_update_role'), {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({ user_id: m.id, role: newRole })

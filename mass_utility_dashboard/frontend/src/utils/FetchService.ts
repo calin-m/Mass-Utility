@@ -44,10 +44,11 @@ let mockBackupJob = { progress: 0, status: 'idle' };
 
 export class FetchService {
   static async post(action: string, payload: any = {}): Promise<any> {
-    // Detect Vite local development server HMR
+    // Detect Vite local development server HMR or active Demo Mode
     const isLocalDev = window.location.port === '5173';
+    const isDemo = (window as any).isDemoMode || (window as any).PM_IS_DEMO || window.location.pathname.includes('/v2/') || localStorage.getItem('pm_demo_mode') === 'true';
 
-    if (isLocalDev) {
+    if (isLocalDev || isDemo) {
       return this.handleMockRequest(action, payload);
     }
 
@@ -89,11 +90,19 @@ export class FetchService {
       }
     } catch (e) {}
 
-    const res = await fetch(url, {
-      method: 'POST',
-      body: formData,
-      headers
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers
+      });
+    } catch (fetchError) {
+      if ((window as any).isDemoMode || (window as any).PM_IS_DEMO || window.location.pathname.includes('/v2/') || localStorage.getItem('pm_demo_mode') === 'true') {
+        return this.handleMockRequest(action, payload);
+      }
+      throw fetchError;
+    }
 
     if (res.status === 401 || res.status === 403) {
       window.location.reload();
@@ -191,6 +200,12 @@ export class FetchService {
         mockPresets = mockPresets.filter(p => p !== name);
         return { success: true };
       }
+
+      case 'cloud_restore':
+        return { success: true, message: `Cloud restore for ${payload.file || 'archive'} completed in sandbox.` };
+
+      case 'upload_gdrive':
+        return { success: true, file: payload.file, drive_link: 'https://drive.google.com/file/d/demo_mock_archive/view' };
 
       case 'create_backup':
         mockBackupJob = { progress: 0, status: 'running' };
@@ -394,6 +409,76 @@ export class FetchService {
         return { success: true };
 
       case 'clear_logs':
+        return { success: true };
+
+      // --- SECURITY & HEALTH DIAGNOSTICS ROUTING ---
+      case 'get_diagnostics':
+        return {
+          success: true,
+          diagnostics: {
+            headers: {
+              hsts: true,
+              nosniff: true,
+              frame_options: true,
+              referrer_policy: true
+            },
+            vaults: {
+              git_exposed: false,
+              env_exposed: false
+            },
+            prestashop: {
+              dev_mode_disabled: true,
+              ssl_active: true
+            },
+            admin_git_exposed: false,
+            dashboard_git_exposed: false,
+            dashboard_db_exposed: false,
+            admin_ssl_active: true,
+            dashboard_ssl_active: true,
+            paths: {
+              config: { path: 'config/', current: '0755', recommended: '0755', is_dir: true },
+              modules: { path: 'modules/', current: '0755', recommended: '0755', is_dir: true },
+              override: { path: 'override/', current: '0755', recommended: '0755', is_dir: true }
+            }
+          }
+        };
+
+      case 'apply_security_headers':
+        return { success: true, message: '✨ Security headers applied to .htaccess successfully!' };
+
+      case 'fix_diagnostics_permissions':
+        return { success: true, message: 'File permissions successfully repaired!' };
+
+      case 'enable_ssl':
+        return { success: true, message: '🔒 SSL / HTTPS successfully enforced on PrestaShop store!' };
+
+      // --- FILE TOOLS ROUTING ---
+      case 'get_directory_tree':
+        return {
+          success: true,
+          directories: [
+            { path: 'admin', name: 'admin', is_excluded: false, file_count: 1250, size_formatted: '42 MB' },
+            { path: 'classes', name: 'classes', is_excluded: false, file_count: 340, size_formatted: '18 MB' },
+            { path: 'controllers', name: 'controllers', is_excluded: false, file_count: 210, size_formatted: '14 MB' },
+            { path: 'modules', name: 'modules', is_excluded: false, file_count: 4500, size_formatted: '35 MB' },
+            { path: 'override', name: 'override', is_excluded: false, file_count: 45, size_formatted: '2 MB' },
+            { path: 'config', name: 'config', is_excluded: false, file_count: 85, size_formatted: '1 MB' },
+            { path: 'img', name: 'img', is_excluded: true, file_count: 12400, size_formatted: '12 MB' }
+          ]
+        };
+
+      case 'save_exclusions':
+        return { success: true, message: 'File exclusion filters saved.' };
+
+      case 'start_file_backup':
+        return { success: true, job_id: 'mock_file_job_' + Math.random().toString(36).substr(2, 9) };
+
+      case 'verify_backup_integrity':
+        return { success: true, checksum: 'sha256:8f4a9c2e1b3d5f7a', is_valid: true };
+
+      case 'delete_file_backup':
+      case 'toggle_pin_file_backup':
+      case 'clear_file_backups':
         return { success: true };
 
       default:

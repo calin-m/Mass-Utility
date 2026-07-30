@@ -30,6 +30,7 @@ import { SubTabItem } from '../common/SubTabNav';
 import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { maskLicenseKey, copyLicenseKeyToClipboard } from '../../utils/licenseUtils';
 import { getSortedTierOptions } from '../../utils/tierUtils';
+import { AdminFetchAdapter, getApiUrl } from '../../utils/AdminFetchAdapter';
 import { parseDomains, formatDomainsForInput } from '../../utils/domainUtils';
 import { DomainTagSelector } from '../common/DomainTagSelector';
 
@@ -97,7 +98,7 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
       formData.append('id', String(license.id));
       formData.append('store_url', storeUrlInput.trim());
 
-      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_update_license'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert('✨ Bound store URL updated successfully!', 'success');
@@ -120,7 +121,7 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
       formData.append('id', String(license.id));
       formData.append('months', String(extendMonths));
 
-      const res = await fetch('?action=api_extend_license', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_extend_license'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`✨ License validity extended by ${extendMonths} months!`, 'success');
@@ -166,7 +167,7 @@ export const LicenseDetailsView: React.FC<LicenseDetailsViewProps> = ({
       formData.append('company_id', editCompanyId || '');
       formData.append('user_id', editUserId || '');
 
-      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_update_license'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert('✨ License key details updated successfully!', 'success');

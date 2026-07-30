@@ -5,9 +5,10 @@ import { useTranslation } from '../i18n/LanguageContext';
 
 interface LoginViewProps {
   onLoginSuccess: () => void;
+  onDemoLogin?: () => void;
 }
 
-export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
+export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onDemoLogin }) => {
   const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -48,9 +49,9 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <Lock className="w-6 h-6" />
           </div>
           <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-indigo-500 bg-clip-text text-transparent">
-            {t('login_title')}
+            {t('portal_title')}
           </h2>
-          <p className="text-xs text-pm-secondary mt-1">{t('login_subtitle')}</p>
+          <p className="text-xs text-pm-secondary mt-1">Super Admin Authentication Gateway</p>
         </div>
 
         {error && (
@@ -62,7 +63,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">{t('login_username_label')}</label>
+            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Username</label>
             <div className="relative">
               <User className="w-4 h-4 text-pm-secondary absolute left-3 top-3" />
               <input
@@ -70,7 +71,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                 required
                 autoComplete="username"
                 className="w-full bg-pm-input border border-pm-border rounded-xl pl-9 pr-3 py-2.5 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                placeholder={t('login_username_placeholder')}
+                placeholder="admin"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
               />
@@ -78,7 +79,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">{t('login_password_label')}</label>
+            <label className="block text-xs font-semibold uppercase text-pm-secondary mb-1">Password</label>
             <div className="relative">
               <KeyRound className="w-4 h-4 text-pm-secondary absolute left-3 top-3" />
               <input
@@ -86,7 +87,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                 required
                 autoComplete="current-password"
                 className="w-full bg-pm-input border border-pm-border rounded-xl pl-9 pr-3 py-2.5 text-sm text-pm-text focus:border-pm-primary focus:outline-none"
-                placeholder={t('login_password_placeholder')}
+                placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
               />
@@ -98,14 +99,14 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             disabled={loading}
             className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-purple-500/20 disabled:opacity-50"
           >
-            {loading ? t('btn_refresh') : t('login_btn')}
+            {loading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
 
         <div className="mt-6 pt-4 border-t border-pm-border text-center">
           <button
             type="button"
-            onClick={onLoginSuccess}
+            onClick={() => onDemoLogin ? onDemoLogin() : onLoginSuccess()}
             className="w-full py-2.5 px-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2"
           >
             🛡️ Launch Super Admin Demo

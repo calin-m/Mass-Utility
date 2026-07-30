@@ -12,11 +12,13 @@ import { FormSelect } from './common/FormSelect';
 import { PaginationBar } from './common/PaginationBar';
 import { useTranslation } from '../i18n/LanguageContext';
 import { AuditLogPayloadModal } from './audit_logs/AuditLogPayloadModal';
+import { AdminFetchAdapter, getApiUrl } from '../utils/AdminFetchAdapter';
 
 interface AuditLog {
   id: number;
   admin_username: string;
   action_type: string;
+  action?: string;
   target_entity: string;
   target_id: string | null;
   details: string;
@@ -55,7 +57,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
       if (search) params.append('search', search);
       if (actionFilter && actionFilter !== 'ALL') params.append('action_type', actionFilter);
 
-      const res = await fetch(`?action=api_get_admin_logs&${params.toString()}`);
+      const res = await AdminFetchAdapter.request(`${getApiUrl('api_audit_logs')}&${params.toString()}`);
       const data = await res.json();
       if (data.success) {
         setLogs(data.logs || []);
@@ -83,7 +85,7 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   const handleClearLogs = async () => {
     setClearing(true);
     try {
-      const res = await fetch('?action=api_clear_admin_logs', { method: 'POST' });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_clear_audit_logs'), { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         onNotify('🗑️ All audit log entries purged successfully!', 'success');
@@ -116,15 +118,15 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
   // Telemetry Aggregations
   const totalOperations = logs.length;
   const licenseMutations = useMemo(
-    () => logs.filter((l) => l.action_type.includes('LICENSE')).length,
+    () => logs.filter((l) => (l.action_type || l.action || '').includes('LICENSE')).length,
     [logs]
   );
   const accountCompanyActions = useMemo(
-    () => logs.filter((l) => l.action_type.includes('USER') || l.action_type.includes('COMPANY')).length,
+    () => logs.filter((l) => (l.action_type || l.action || '').includes('USER') || (l.action_type || l.action || '').includes('COMPANY')).length,
     [logs]
   );
   const securityEvents = useMemo(
-    () => logs.filter((l) => l.action_type.includes('PASSWORD') || l.action_type.includes('LOGIN')).length,
+    () => logs.filter((l) => (l.action_type || l.action || '').includes('PASSWORD') || (l.action_type || l.action || '').includes('LOGIN')).length,
     [logs]
   );
 
@@ -136,17 +138,18 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
     return logs.slice(start, start + pageSize);
   }, [logs, currentPage, pageSize]);
 
-  const renderBadge = (actionType: string) => {
+  const renderBadge = (rawActionType: string) => {
+    const actionType = rawActionType || '';
     if (actionType.includes('LICENSE')) {
-      return <StatusBadge label={actionType} type="license" customColor="sky" />;
+      return <StatusBadge label={actionType || 'LICENSE'} type="license" customColor="sky" />;
     }
     if (actionType.includes('COMPANY')) {
-      return <StatusBadge label={actionType} type="company" customColor="emerald" />;
+      return <StatusBadge label={actionType || 'COMPANY'} type="company" customColor="emerald" />;
     }
     if (actionType.includes('USER') || actionType.includes('PASSWORD')) {
-      return <StatusBadge label={actionType} type="user" customColor="amber" />;
+      return <StatusBadge label={actionType || 'USER'} type="user" customColor="amber" />;
     }
-    return <StatusBadge label={actionType} type="security" customColor="purple" />;
+    return <StatusBadge label={actionType || 'AUDIT'} type="security" customColor="purple" />;
   };
 
   const formatKeyName = (key: string): string => {

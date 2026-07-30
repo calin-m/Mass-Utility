@@ -10,6 +10,7 @@ import { TierCardGrid } from './package_tiers/TierCardGrid';
 import { TierCapabilitiesForm } from './package_tiers/TierCapabilitiesForm';
 import { CreateTierModal } from './package_tiers/CreateTierModal';
 import { useTranslation } from '../i18n/LanguageContext';
+import { AdminFetchAdapter, getApiUrl } from '../utils/AdminFetchAdapter';
 
 export interface PackageTierCapabilities {
   // Essential Operations & History
@@ -298,7 +299,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
       formData.append('name', saveName);
       formData.append('capabilities', JSON.stringify(capabilities));
 
-      const res = await fetch('index.php?action=api_save_tier', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_create_tier'), {
         method: 'POST',
         body: formData,
       });
@@ -333,7 +334,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
       formData.append('name', name);
       formData.append('capabilities', JSON.stringify(clonedCaps));
 
-      const res = await fetch('index.php?action=api_save_tier', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_create_tier'), {
         method: 'POST',
         body: formData,
       });
@@ -366,7 +367,7 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
         formData.append('id', String(tierToDelete.id));
       }
 
-      const res = await fetch('index.php?action=api_delete_tier', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_delete_tier'), {
         method: 'POST',
         body: formData,
       });

@@ -114,6 +114,10 @@ function AppContent() {
   });
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
+  useEffect(() => {
+    (window as any).isDemoMode = isDemoMode;
+  }, [isDemoMode]);
+
   // Sync theme choices to document classes and localStorage
   useEffect(() => {
     if (darkMode) {
@@ -192,8 +196,8 @@ function AppContent() {
     return <ResetPasswordPage token={resetToken} />;
   }
 
-  if (!isAuthenticated) {
-    return <LoginPage />;
+  if (!isAuthenticated && !isDemoMode) {
+    return <LoginPage onDemoClick={() => setIsDemoMode(true)} />;
   }
 
   if (isHydrating) {
@@ -265,7 +269,7 @@ function AppContent() {
         const config = (window as any).PM_CONFIG || {};
         const licKey = config.settings?.PM_LICENSE_KEY;
         const licStatus = config.settings?.PM_LICENSE_STATUS;
-        const isUnlicensed = !licKey || ['revoked', 'suspended', 'expired', 'unlicensed'].includes(String(licStatus).toLowerCase());
+        const isUnlicensed = !isDemoMode && (!licKey || ['revoked', 'suspended', 'expired', 'unlicensed'].includes(String(licStatus).toLowerCase()));
 
         return (
           <>

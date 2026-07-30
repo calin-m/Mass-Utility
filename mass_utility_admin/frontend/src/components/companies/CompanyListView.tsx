@@ -18,6 +18,7 @@ import { PaginationBar } from '../common/PaginationBar';
 import { useTranslation } from '../../i18n/LanguageContext';
 
 import { Company } from '../../types/adminApi';
+import { AdminFetchAdapter } from '../../utils/AdminFetchAdapter';
 export type { Company };
 
 
@@ -29,9 +30,26 @@ interface CompanyListViewProps {
   onRefresh: () => void;
   showAlert?: (msg: string, type?: 'success' | 'error') => void;
   onSelectCompany: (company: Company, tab?: 'overview' | 'licenses' | 'members' | 'settings') => void;
+  isDemoMode?: boolean;
+  onAddCompany?: (company: Partial<Company>) => Company | null;
+  onUpdateCompany?: (id: number, data: Partial<Company>) => void;
+  onToggleCompanyStatus?: (id: number) => void;
+  onDeleteCompany?: (id: number) => void;
 }
 
-export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, users, licenses, onRefresh, showAlert, onSelectCompany }) => {
+export const CompanyListView: React.FC<CompanyListViewProps> = ({
+  companies,
+  users,
+  licenses,
+  onRefresh,
+  showAlert,
+  onSelectCompany,
+  isDemoMode,
+  onAddCompany,
+  onUpdateCompany,
+  onToggleCompanyStatus,
+  onDeleteCompany,
+}) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
@@ -62,6 +80,16 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
     if (!suspendingCompany) return;
     setSubmitting(true);
     const newStatus = suspendingCompany.status === 'suspended' ? 'active' : 'suspended';
+
+    if (isDemoMode || onToggleCompanyStatus) {
+      if (onToggleCompanyStatus) {
+        onToggleCompanyStatus(suspendingCompany.id);
+      }
+      setSuspendingCompany(null);
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const res = await fetch(getApiUrl('api_update_company'), {
         method: 'POST',
@@ -146,6 +174,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
     e.preventDefault();
     if (!name.trim()) return;
     setSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append('company_name', name.trim());
@@ -157,7 +186,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
         formData.append('owner_password', ownerPassword);
       }
 
-      const res = await fetch(getApiUrl('api_create_company'), { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_create_company'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         const ownerMsg = data.owner_created && data.owner_email ? ` 👤 Owner account '${data.owner_email}' provisioned!` : '';
@@ -184,6 +213,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
     e.preventDefault();
     if (!selectedCompany || !name.trim()) return;
     setSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(selectedCompany.id));
@@ -192,7 +222,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
       formData.append('max_licenses', String(maxLicenses));
       formData.append('status', editStatus);
 
-      const res = await fetch(getApiUrl('api_update_company'), { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_update_company'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert(`🏢 Company '${name}' updated successfully!`, 'success');
@@ -212,11 +242,12 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({ companies, use
   const handleDelete = async () => {
     if (!selectedCompany) return;
     setSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(selectedCompany.id));
 
-      const res = await fetch(getApiUrl('api_delete_company'), { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_delete_company'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert(`🏢 Company '${selectedCompany.company_name}' deleted successfully!`, 'success');

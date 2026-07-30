@@ -20,6 +20,7 @@ import { FormSelect } from '../common/FormSelect';
 import { PaginationBar } from '../common/PaginationBar';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
+import { AdminFetchAdapter, getApiUrl } from '../../utils/AdminFetchAdapter';
 import { DomainPillGroup } from '../common/DomainPillGroup';
 import { ClientCredentialsBanner } from './ClientCredentialsBanner';
 
@@ -32,9 +33,15 @@ interface ClientListViewProps {
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   onSelectClient: (user: UserAccount, tab?: 'profile' | 'licenses' | 'governance') => void;
   onInspectCompany?: (company: any) => void;
+  isDemoMode?: boolean;
+  onAddUser?: (user: Partial<UserAccount>) => UserAccount | null;
+  onUpdateUser?: (id: number, data: Partial<UserAccount>) => void;
+  onToggleUserStatus?: (id: number) => void;
+  onDeleteUser?: (id: number) => void;
+  onAddLicense?: (license: Partial<License>) => License | null;
 }
 
-export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, companies = [], tiers = [], onRefresh, showAlert, onSelectClient, onInspectCompany }) => {
+export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses, companies = [], tiers = [], onRefresh, showAlert, onSelectClient, onInspectCompany, isDemoMode, onAddUser, onUpdateUser, onToggleUserStatus, onDeleteUser, onAddLicense }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all');
@@ -133,6 +140,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     }
 
     setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append('email', createEmail.trim());
@@ -140,40 +148,26 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
       formData.append('company_name', createCompany.trim());
       formData.append('role', createRole || 'CompanyAdmin');
       formData.append('status', 'active');
+      if (issueKeyImmediately) {
+        formData.append('provision_license', '1');
+        formData.append('package_tier', selectedIssueTier || 'Professional Tier');
+      }
 
-      const res = await fetch('index.php?action=api_create_user', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('index.php?action=api_create_user', { method: 'POST', body: formData });
       const data = await res.json();
 
       if (data.success) {
-        let generatedKey: string | undefined;
-
-        if (issueKeyImmediately && data.user && data.user.id) {
-          try {
-            const genData = new FormData();
-            genData.append('user_id', String(data.user.id));
-            genData.append('package_tier', selectedIssueTier);
-            genData.append('store_url', '');
-            genData.append('expires_at', '');
-
-            const genRes = await fetch('index.php?action=api_generate', { method: 'POST', body: genData });
-            const genJson = await genRes.json();
-            if (genJson.success && genJson.license_key) {
-              generatedKey = genJson.license_key;
-            }
-          } catch (e) {}
-        }
-
         setLastCreatedCreds({
           email: createEmail.trim(),
           pass: createPassword,
-          key: generatedKey
+          key: data.license_key || undefined
         });
 
         clearDraftMemory();
         setShowCreateModal(false);
 
         showAlert(
-          `🎉 Client account ${createEmail} created successfully! ${generatedKey ? '🔑 License Key issued!' : ''}`,
+          `🎉 Client account ${createEmail} created successfully! ${data.license_key ? '🔑 License Key issued!' : ''}`,
           'success'
         );
         onRefresh();
@@ -192,12 +186,13 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     if (!resetUser || !resetPassword) return;
 
     setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append('user_id', String(resetUser.id));
       formData.append('new_password', resetPassword);
 
-      const res = await fetch('index.php?action=api_reset_user_password', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('index.php?action=api_reset_user_password', { method: 'POST', body: formData });
       const data = await res.json();
 
       if (data.success) {
@@ -218,11 +213,12 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     if (!deletingUser) return;
 
     setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(deletingUser.id));
 
-      const res = await fetch('index.php?action=api_delete_user', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('index.php?action=api_delete_user', { method: 'POST', body: formData });
       const data = await res.json();
 
       if (data.success) {
@@ -242,6 +238,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   const handleToggleStatus = async (user: UserAccount) => {
     const newStatus = user.status === 'suspended' ? 'active' : 'suspended';
     setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(user.id));
@@ -249,7 +246,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
       formData.append('company_name', user.company_name || '');
       formData.append('status', newStatus);
 
-      const res = await fetch('index.php?action=api_update_user', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('index.php?action=api_update_user', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`Account ${user.email} marked as ${newStatus.toUpperCase()}`, 'success');
@@ -268,24 +265,23 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
     e.preventDefault();
     if (!editingUser) return;
     setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(editingUser.id));
-      formData.append('email', editingUser.email);
-      formData.append('company_name', editCompany);
-      formData.append('status', editingUser.status || 'active');
+      formData.append('company_name', editCompany.trim());
 
-      const res = await fetch('index.php?action=api_update_user', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('index.php?action=api_update_user', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
-        showAlert(`Company profile for ${editingUser.email} updated`, 'success');
+        showAlert(`Profile for ${editingUser.email} updated`, 'success');
         setEditingUser(null);
         onRefresh();
       } else {
-        showAlert(data.error || 'Failed to update company profile', 'error');
+        showAlert(data.error || 'Failed to update profile', 'error');
       }
     } catch (err: any) {
-      showAlert('Failed to update company profile: ' + err.message, 'error');
+      showAlert('Failed to update profile: ' + err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -742,7 +738,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                   try {
                     const formData = new FormData();
                     formData.append('user_id', String(resetUser.id));
-                    const res = await fetch('index.php?action=api_send_password_reset_link', { method: 'POST', body: formData });
+                    const res = await AdminFetchAdapter.request(getApiUrl('api_send_password_reset_link'), { method: 'POST', body: formData });
                     const data = await res.json();
                     if (data.success) {
                       showAlert(data.message || 'Password reset link sent to user.', 'success');

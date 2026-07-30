@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import { AuthStore } from '../../store/useAuthStore';
 import { FetchService } from '../../utils/FetchService';
 
-export const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  onDemoClick?: () => void;
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ onDemoClick }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -93,14 +97,7 @@ export const LoginPage: React.FC = () => {
     setForgotMsg(null);
 
     try {
-      const formData = new FormData();
-      formData.append('email', forgotEmail.trim());
-
-      const res = await fetch('../mass_utility_admin/public/index.php?action=api_send_password_reset_link', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
+      const data = await FetchService.post('api_send_password_reset_link', { email: forgotEmail.trim() });
       if (data.success) {
         setForgotMsg(data.message || 'Password reset link sent to your email.');
       } else {
@@ -242,6 +239,16 @@ export const LoginPage: React.FC = () => {
             )}
           </button>
         </form>
+
+        <div className="mt-6 pt-4 border-t border-pm-border text-center">
+          <button
+            type="button"
+            onClick={onDemoClick}
+            className="w-full py-2.5 px-4 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2"
+          >
+            🧪 Launch Interactive Dashboard Demo
+          </button>
+        </div>
 
       </main>
 

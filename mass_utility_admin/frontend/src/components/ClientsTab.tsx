@@ -14,9 +14,15 @@ interface ClientsTabProps {
   initialSelectedUser?: UserAccount | null;
   onInspectCompany?: (company: any) => void;
   onInspectLicense?: (license: License, tab?: 'overview' | 'edit') => void;
+  isDemoMode?: boolean;
+  onAddUser?: (user: Partial<UserAccount>) => UserAccount | null;
+  onUpdateUser?: (id: number, data: Partial<UserAccount>) => void;
+  onToggleUserStatus?: (id: number) => void;
+  onDeleteUser?: (id: number) => void;
+  onAddLicense?: (license: Partial<License>) => License | null;
 }
 
-export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, companies = [], tiers = [], onRefresh, showAlert, initialSelectedUser, onInspectCompany, onInspectLicense }) => {
+export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, companies = [], tiers = [], onRefresh, showAlert, initialSelectedUser, onInspectCompany, onInspectLicense, isDemoMode, onAddUser, onUpdateUser, onToggleUserStatus, onDeleteUser, onAddLicense }) => {
   const [activeSubView, setActiveSubView] = useState<'list' | 'details'>(initialSelectedUser ? 'details' : 'list');
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(initialSelectedUser || null);
   const [selectedTab, setSelectedTab] = useState<'profile' | 'licenses' | 'governance'>('profile');
@@ -66,7 +72,12 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({ users, licenses, compani
       showAlert={showAlert}
       onSelectClient={handleSelectClient}
       onInspectCompany={onInspectCompany}
+      isDemoMode={isDemoMode}
+      onAddUser={onAddUser}
+      onUpdateUser={onUpdateUser}
+      onToggleUserStatus={onToggleUserStatus}
+      onDeleteUser={onDeleteUser}
+      onAddLicense={onAddLicense}
     />
   );
 };
-

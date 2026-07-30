@@ -27,6 +27,20 @@ export const App: React.FC = () => {
     hasAdmin,
     authenticated,
     setAuthenticated,
+    isDemoMode,
+    enableDemoMode,
+    disableDemoMode,
+    resetDemoData,
+    addCompany,
+    updateCompany,
+    toggleCompanyStatus,
+    deleteCompany,
+    addUser,
+    updateUser,
+    deleteUser,
+    toggleUserStatus,
+    addLicense,
+    deleteLicense,
     licenses,
     companies,
     tiers,
@@ -158,13 +172,36 @@ export const App: React.FC = () => {
 
 
   if (!authenticated) {
-    return <LoginView onLoginSuccess={() => { setAuthenticated(true); fetchAdminData(); }} />;
+    return <LoginView onLoginSuccess={() => { setAuthenticated(true); fetchAdminData(); }} onDemoLogin={enableDemoMode} />;
   }
 
   return (
     <div className="min-h-screen bg-pm-bg text-pm-text p-4 md:p-8 transition-colors duration-200">
       {/* Toast Notification */}
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
+
+      {isDemoMode && (
+        <div className="mb-6 p-3 bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold rounded-xl flex items-center justify-between shadow-inner">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>🛡️ <b>SUPER ADMIN DEMO VAULT ACTIVE</b> — Sandboxed Client Directory, Tiers Matrix &amp; License Generator</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={resetDemoData}
+              className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 rounded-lg text-[11px] font-bold transition-all"
+            >
+              🔄 Reset Vault
+            </button>
+            <button
+              onClick={disableDemoMode}
+              className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-lg text-[11px] font-bold transition-all"
+            >
+              🚪 Exit Demo
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Admin Navigation Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-pm-border">
@@ -299,6 +336,11 @@ export const App: React.FC = () => {
               onEditLicense={() => setActiveTab('licenses')}
               initialSelectedCompany={liveCompany}
               highlightedLicenseKey={highlightedLicenseKey}
+              isDemoMode={isDemoMode}
+              onAddCompany={addCompany}
+              onUpdateCompany={updateCompany}
+              onToggleCompanyStatus={toggleCompanyStatus}
+              onDeleteCompany={deleteCompany}
             />
           )}
 
@@ -313,6 +355,12 @@ export const App: React.FC = () => {
               initialSelectedUser={liveClient}
               onInspectCompany={handleInspectCompany}
               onInspectLicense={handleInspectLicense}
+              isDemoMode={isDemoMode}
+              onAddUser={addUser}
+              onUpdateUser={updateUser}
+              onToggleUserStatus={toggleUserStatus}
+              onDeleteUser={deleteUser}
+              onAddLicense={addLicense}
             />
           )}
 
@@ -328,6 +376,9 @@ export const App: React.FC = () => {
               showAlert={showAlert}
               onInspectClient={handleInspectClient}
               onInspectCompany={handleInspectCompany}
+              isDemoMode={isDemoMode}
+              onAddLicense={addLicense}
+              onDeleteLicense={deleteLicense}
             />
           )}
 

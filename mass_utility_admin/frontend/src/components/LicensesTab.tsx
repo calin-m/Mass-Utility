@@ -27,6 +27,7 @@ import { parseDomains } from '../utils/domainUtils';
 import { DomainPillGroup } from './common/DomainPillGroup';
 
 import { License, UserAccount } from '../types/adminApi';
+import { AdminFetchAdapter } from '../utils/AdminFetchAdapter';
 export type { License, UserAccount };
 
 interface LicensesTabProps {
@@ -40,6 +41,9 @@ interface LicensesTabProps {
   showAlert: (msg: string, type?: 'success' | 'error') => void;
   onInspectClient?: (client: UserAccount) => void;
   onInspectCompany?: (company: any, licenseKey?: string | null) => void;
+  isDemoMode?: boolean;
+  onAddLicense?: (lic: Partial<License>) => License | null;
+  onDeleteLicense?: (id: number) => void;
 }
 
 export const LicensesTab: React.FC<LicensesTabProps> = ({
@@ -53,6 +57,9 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   showAlert,
   onInspectClient,
   onInspectCompany,
+  isDemoMode,
+  onAddLicense,
+  onDeleteLicense,
 }) => {
   const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -74,6 +81,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const handleBackToList = () => {
     setActiveSubView('list');
     setSelectedLicense(null);
+    setInitialDetailTab('overview');
   };
 
   // Keep selectedLicense synchronized with refreshed licenses array
@@ -105,7 +113,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
 
   // Extend Modal State
   const [extendingLic, setExtendingLic] = useState<License | null>(null);
-  const [extendMonths, setExtendMonths] = useState<number>(12);
+  const [extendMonths, setExtendMonths] = useState<number>(3);
   const [extendCustomDate, setExtendCustomDate] = useState<string>('');
   const [extendSubmitting, setExtendSubmitting] = useState(false);
 
@@ -141,7 +149,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
     formData.append('expires_at', expires);
     formData.append('store_url', storeUrl.trim());
 
-    const res = await fetch('?action=api_generate', { method: 'POST', body: formData });
+    const res = await AdminFetchAdapter.request('?action=api_generate', { method: 'POST', body: formData });
     const data = await res.json();
     if (data.success) {
       showAlert(`🔑 License key generated successfully: ${data.license_key}`, 'success');
@@ -160,12 +168,13 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const handleExecuteStatusToggle = async () => {
     if (!confirmLic) return;
     setConfirmSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(confirmLic.id));
       formData.append('status', confirmActionType === 'suspend' ? 'suspended' : 'active');
 
-      const res = await fetch('index.php?action=api_update', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('index.php?action=api_update', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`License status marked as ${confirmActionType.toUpperCase()}`, 'success');
@@ -185,6 +194,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
     e.preventDefault();
     if (!extendingLic) return;
     setExtendSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(extendingLic.id));
@@ -194,7 +204,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
         formData.append('months', String(extendMonths));
       }
 
-      const res = await fetch('?action=api_extend_license', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('?action=api_extend_license', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`License expiration extended successfully!`, 'success');
@@ -215,12 +225,13 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
     e.preventDefault();
     if (!reassignLic) return;
     setReassignSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(reassignLic.id));
       formData.append('user_id', String(reassignUserId));
 
-      const res = await fetch('?action=api_assign_license', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('?action=api_assign_license', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`License reassigned successfully!`, 'success');
@@ -239,11 +250,12 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const handleDeleteSubmit = async () => {
     if (!deletingLic) return;
     setDeleteSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append('id', String(deletingLic.id));
 
-      const res = await fetch('?action=api_delete_license', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request('?action=api_delete_license', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`License key deleted successfully!`, 'success');

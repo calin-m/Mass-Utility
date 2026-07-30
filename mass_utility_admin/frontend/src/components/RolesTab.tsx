@@ -5,6 +5,7 @@ import { SectionHeader } from './common/SectionHeader';
 import { Button } from './common/Button';
 import { SubTabNav, SubTabItem } from './common/SubTabNav';
 import { RbacRole, RbacPermission, Company, UserAccount, License } from '../types/adminApi';
+import { AdminFetchAdapter, getApiUrl } from '../utils/AdminFetchAdapter';
 
 // Extracted Sub-Components
 import { RoleCard } from './roles/RoleCard';
@@ -37,8 +38,15 @@ const DEFAULT_PERMISSIONS: RbacPermission[] = [
 
 const TIER_CAPABILITIES_MAP: Record<string, string[]> = {
   basic: ['ast.query', 'db.backup', 'files.backup'],
+  starter: ['ast.query', 'db.backup', 'files.backup'],
+  tier_starter: ['ast.query', 'db.backup', 'files.backup'],
+  'starter tier': ['ast.query', 'db.backup', 'files.backup'],
   pro: ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'files.backup'],
+  tier_pro: ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'files.backup'],
+  'professional tier': ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'files.backup'],
   enterprise: ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage'],
+  tier_enterprise: ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage'],
+  'enterprise tier': ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage'],
   developer: ['ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.drop', 'files.backup', 'files.delete', 'settings.update', 'users.manage']
 };
 
@@ -91,7 +99,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
   useEffect(() => {
     const fetchPackageTiers = async () => {
       try {
-        const res = await fetch('index.php?action=api_package_tiers');
+        const res = await AdminFetchAdapter.request(getApiUrl('api_package_tiers'));
         const data = await res.json();
         if (data && data.success && Array.isArray(data.tiers)) {
           setPackageTiers(data.tiers);
@@ -111,6 +119,8 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         const userLic = licenses.find(l => Number(l.user_id) === Number(userObj.id) || (userObj.company_id && Number(l.company_id) === Number(userObj.company_id)));
         if (userLic && userLic.package_tier) {
           setSimTierSlug(userLic.package_tier.toLowerCase());
+        } else {
+          setSimTierSlug('basic');
         }
       }
     }
@@ -151,7 +161,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
   const fetchGlobalRoles = async () => {
     setLoading(true);
     try {
-      const res = await fetch('index.php?action=api_roles');
+      const res = await AdminFetchAdapter.request(getApiUrl('api_roles'));
       const data = await res.json();
       if (data && data.success) {
         if (data.roles && Array.isArray(data.roles)) setRoles(data.roles);
@@ -173,7 +183,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     if (compId <= 0) return;
     setCompanyLoading(true);
     try {
-      const res = await fetch(`index.php?action=api_company_roles&company_id=${compId}`);
+      const res = await AdminFetchAdapter.request(`${getApiUrl('api_company_roles')}&company_id=${compId}`);
       const data = await res.json();
       if (data && data.success && data.overrides) {
         setCompanyOverrides(data.overrides);
@@ -215,7 +225,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
   const handleSaveGlobalRole = async (role: RbacRole) => {
     setSaving(true);
     try {
-      const res = await fetch('index.php?action=api_role_update', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_role_update'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role_id: role.id, permissions: role.permissions })
@@ -239,7 +249,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
 
     setSaving(true);
     try {
-      const res = await fetch('index.php?action=api_role_create', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_role_create'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -298,7 +308,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
   const executeDeleteRoleDirect = async (roleId: number, roleName: string) => {
     setSaving(true);
     try {
-      const res = await fetch(`index.php?action=api_role_delete&role_id=${roleId}`, { method: 'POST' });
+      const res = await AdminFetchAdapter.request(`${getApiUrl('api_role_delete')}&role_id=${roleId}`, { method: 'POST' });
       const data = await res.json();
       if (data && data.success) {
         if (showAlert) showAlert(`Custom role '${roleName}' deleted!`, 'success');
@@ -320,7 +330,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     try {
       const affectedUsers = users.filter(u => (u.role || 'Observer') === deletingRole.slug);
       for (const u of affectedUsers) {
-        await fetch('index.php?action=api_user_update_role', {
+        await AdminFetchAdapter.request(getApiUrl('api_user_update_role'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: u.id, role: reassignRole })
@@ -352,7 +362,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     setSaving(true);
     try {
       const permsToSave = companyOverrides[roleSlug] || [];
-      const res = await fetch('index.php?action=api_company_role_update', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_company_role_update'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -379,7 +389,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     if (selectedCompanyId <= 0) return;
     setSaving(true);
     try {
-      const res = await fetch('index.php?action=api_company_role_update', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_company_role_update'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -416,15 +426,25 @@ export const RolesTab: React.FC<RolesTabProps> = ({
       compId = userObj.company_id || 0;
     }
 
-    const rolePerms = (compId > 0 && compId === selectedCompanyId && companyOverrides[roleSlug] && companyOverrides[roleSlug].length > 0)
+    const normalizedRoleSlug = roleSlug.toLowerCase().replace(/\s+/g, '');
+    const matchedRole = roles.find(r => 
+      r.slug.toLowerCase().replace(/\s+/g, '') === normalizedRoleSlug ||
+      r.name.toLowerCase().replace(/\s+/g, '') === normalizedRoleSlug
+    );
+
+    const rolePerms = (companyOverrides[roleSlug] && companyOverrides[roleSlug].length > 0)
       ? companyOverrides[roleSlug]
-      : (roles.find(r => r.slug === roleSlug)?.permissions || ['ast.query']);
+      : (matchedRole?.permissions || ['ast.query']);
 
     let tierCaps: string[] = [];
     let hasFoundLiveTier = false;
 
     if (packageTiers && packageTiers.length > 0) {
-      const foundTier = packageTiers.find(t => (t.name || '').toLowerCase() === simTierSlug.toLowerCase());
+      const foundTier = packageTiers.find(t => 
+        (t.name || '').toLowerCase() === simTierSlug.toLowerCase() ||
+        (t.display_name || '').toLowerCase() === simTierSlug.toLowerCase() ||
+        (t.slug || '').toLowerCase() === simTierSlug.toLowerCase()
+      );
       if (foundTier && foundTier.capabilities) {
         let caps = foundTier.capabilities;
         if (typeof caps === 'string') {
@@ -433,12 +453,12 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         if (caps && typeof caps === 'object') {
           hasFoundLiveTier = true;
           const dynamicCaps: string[] = ['ast.query'];
-          if (caps.query_visual_mutate || caps.PM_ENABLE_DB_TOOLS || caps.PM_ENABLE_QUERY_WIZARD) dynamicCaps.push('ast.mutate');
-          if (caps.db_tools_backup || caps.PM_ENABLE_DB_TOOLS) dynamicCaps.push('db.backup');
-          if (caps.db_tools_restore !== false && caps.db_tools_restore) dynamicCaps.push('db.restore');
-          if (caps.db_diff_inspector) dynamicCaps.push('db.drop');
-          if (caps.file_tools_backup || caps.PM_ENABLE_FILE_TOOLS) dynamicCaps.push('files.backup');
-          if (caps.file_diff_inspector) dynamicCaps.push('files.delete');
+          if (caps.query_visual_execute || caps.query_visual_mutate || caps.PM_ENABLE_DB_TOOLS || caps.PM_ENABLE_QUERY_WIZARD) dynamicCaps.push('ast.mutate');
+          if ((Array.isArray(caps.backup_destinations) && caps.backup_destinations.length > 0) || caps.db_tools_backup || caps.PM_ENABLE_DB_TOOLS) dynamicCaps.push('db.backup');
+          if ((typeof caps.rollback_history_limit === 'number' && caps.rollback_history_limit > 0) || (caps.db_tools_restore !== false && caps.db_tools_restore)) dynamicCaps.push('db.restore');
+          if (caps.db_diff_inspector || caps.rollback_history_limit >= 100) dynamicCaps.push('db.drop');
+          if ((Array.isArray(caps.backup_destinations) && caps.backup_destinations.length > 0) || caps.file_tools_backup || caps.PM_ENABLE_FILE_TOOLS) dynamicCaps.push('files.backup');
+          if (caps.file_diff_inspector || caps.rollback_history_limit >= 100) dynamicCaps.push('files.delete');
           if (caps.governor_autopilot || caps.PM_ENABLE_SECURITY_HEALTH) dynamicCaps.push('settings.update');
           if (caps.sweeper_execution || caps.multi_shop_scope) dynamicCaps.push('users.manage');
           tierCaps = Array.from(new Set(dynamicCaps));

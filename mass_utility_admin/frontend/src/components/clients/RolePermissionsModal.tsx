@@ -5,6 +5,7 @@ import { BaseModal } from '../common/BaseModal';
 import { StatusBadge } from '../common/StatusBadge';
 import { Button } from '../common/Button';
 import { RbacRole, RbacPermission } from '../../types/adminApi';
+import { AdminFetchAdapter, getApiUrl } from '../../utils/AdminFetchAdapter';
 
 interface RolePermissionsModalProps {
   isOpen: boolean;
@@ -39,7 +40,7 @@ export const RolePermissionsModal: React.FC<RolePermissionsModalProps> = ({ isOp
   const fetchRoles = async () => {
     setLoading(true);
     try {
-      const res = await fetch('index.php?action=api_roles');
+      const res = await AdminFetchAdapter.request(getApiUrl('api_roles'));
       const data = await res.json();
       if (data && data.success) {
         if (data.roles && Array.isArray(data.roles)) {
@@ -81,7 +82,7 @@ export const RolePermissionsModal: React.FC<RolePermissionsModalProps> = ({ isOp
     setSaving(true);
     setMessage(null);
     try {
-      const res = await fetch('index.php?action=api_role_update', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_role_update'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -109,7 +110,7 @@ export const RolePermissionsModal: React.FC<RolePermissionsModalProps> = ({ isOp
     setSaving(true);
     setMessage(null);
     try {
-      const res = await fetch('index.php?action=api_role_create', {
+      const res = await AdminFetchAdapter.request(getApiUrl('api_role_create'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -142,7 +143,7 @@ export const RolePermissionsModal: React.FC<RolePermissionsModalProps> = ({ isOp
 
     setSaving(true);
     try {
-      const res = await fetch(`index.php?action=api_role_delete&role_id=${roleId}`, { method: 'POST' });
+      const res = await AdminFetchAdapter.request(`${getApiUrl('api_role_delete')}&role_id=${roleId}`, { method: 'POST' });
       const data = await res.json();
       if (data && data.success) {
         setMessage({ text: `Custom role '${roleName}' deleted!`, type: 'success' });

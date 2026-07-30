@@ -13,6 +13,7 @@ import { StatusBadge } from '../common/StatusBadge';
 import { DetailSubViewLayout } from '../common/DetailSubViewLayout';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
+import { AdminFetchAdapter, getApiUrl } from '../../utils/AdminFetchAdapter';
 
 
 interface ClientDetailsViewProps {
@@ -79,7 +80,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       formData.append('user_id', String(user.id));
       formData.append('package_tier', selectedTier);
 
-      const res = await fetch('index.php?action=api_generate', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_generate'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`✨ ${selectedTier.toUpperCase()} License key issued to ${user.email}!`, 'success');
@@ -108,7 +109,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       formData.append('status', user.status || 'active');
 
 
-      const res = await fetch('index.php?action=api_update_user', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_update_user'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert('👤 Client profile updated successfully!', 'success');
@@ -133,7 +134,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       formData.append('company_name', user.company_name || '');
       formData.append('status', newStatus);
 
-      const res = await fetch('index.php?action=api_update_user', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_update_user'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`Account ${user.email} marked as ${newStatus.toUpperCase()}`, 'success');
@@ -157,7 +158,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       formData.append('id', String(user.id));
       formData.append('password', resetPassword.trim());
 
-      const res = await fetch('index.php?action=api_reset_user_password', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_reset_user_password'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`Password reset for ${user.email} successfully!`, 'success');
@@ -180,7 +181,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
       const formData = new FormData();
       formData.append('id', String(user.id));
 
-      const res = await fetch('index.php?action=api_delete_user', { method: 'POST', body: formData });
+      const res = await AdminFetchAdapter.request(getApiUrl('api_delete_user'), { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
         showAlert(`Client account ${user.email} deleted`, 'success');
@@ -621,7 +622,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
                 try {
                   const formData = new FormData();
                   formData.append('user_id', String(user.id));
-                  const res = await fetch('index.php?action=api_send_password_reset_link', { method: 'POST', body: formData });
+                  const res = await AdminFetchAdapter.request(getApiUrl('api_send_password_reset_link'), { method: 'POST', body: formData });
                   const data = await res.json();
                   if (data.success) {
                     showAlert(data.message || 'Password reset link sent to client email.', 'success');

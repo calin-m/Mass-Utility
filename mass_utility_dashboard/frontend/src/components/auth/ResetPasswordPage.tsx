@@ -1,5 +1,6 @@
 // @Arch[ResetPasswordPage]
 import React, { useState, useEffect } from 'react';
+import { FetchService } from '../../utils/FetchService';
 
 interface ResetPasswordPageProps {
   token: string;
@@ -19,8 +20,7 @@ export const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ token }) =
     const verifyToken = async () => {
       setVerifying(true);
       try {
-        const response = await fetch(`../mass_utility_admin/public/index.php?action=api_verify_reset_token&token=${encodeURIComponent(token)}`);
-        const data = await response.json();
+        const data = await FetchService.post('api_verify_reset_token', { token });
         if (data.success) {
           setUserInfo({ email: data.email, name: data.name });
         } else {
@@ -56,13 +56,7 @@ export const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ token }) =
     setError(null);
 
     try {
-      const response = await fetch('../mass_utility_admin/public/index.php?action=api_complete_password_reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password })
-      });
-
-      const data = await response.json();
+      const data = await FetchService.post('api_complete_password_reset', { token, password });
       if (data.success) {
         setSuccess(true);
       } else {

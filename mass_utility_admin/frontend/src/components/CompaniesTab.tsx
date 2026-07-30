@@ -17,6 +17,11 @@ interface CompaniesTabProps {
   onEditLicense?: (license: any) => void;
   initialSelectedCompany?: Company | null;
   highlightedLicenseKey?: string | null;
+  isDemoMode?: boolean;
+  onAddCompany?: (company: Partial<Company>) => Company | null;
+  onUpdateCompany?: (id: number, data: Partial<Company>) => void;
+  onToggleCompanyStatus?: (id: number) => void;
+  onDeleteCompany?: (id: number) => void;
 }
 
 export const CompaniesTab: React.FC<CompaniesTabProps> = ({
@@ -31,6 +36,11 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
   onEditLicense,
   initialSelectedCompany,
   highlightedLicenseKey,
+  isDemoMode,
+  onAddCompany,
+  onUpdateCompany,
+  onToggleCompanyStatus,
+  onDeleteCompany,
 }) => {
   const [activeSubView, setActiveSubView] = useState<'list' | 'details'>(initialSelectedCompany ? 'details' : 'list');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(initialSelectedCompany || null);
@@ -69,10 +79,9 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
           onInspectLicense={onInspectLicense}
           onEditLicense={onEditLicense}
           highlightedLicenseKey={highlightedLicenseKey || undefined}
+          isDemoMode={isDemoMode}
+          onToggleCompanyStatus={onToggleCompanyStatus}
         />
-
-
-
       ) : (
         <CompanyListView
           companies={companies}
@@ -81,6 +90,11 @@ export const CompaniesTab: React.FC<CompaniesTabProps> = ({
           onRefresh={onRefresh}
           showAlert={showAlert}
           onSelectCompany={handleSelectCompany}
+          isDemoMode={isDemoMode}
+          onAddCompany={onAddCompany}
+          onUpdateCompany={onUpdateCompany}
+          onToggleCompanyStatus={onToggleCompanyStatus}
+          onDeleteCompany={onDeleteCompany}
         />
       )}
     </div>
