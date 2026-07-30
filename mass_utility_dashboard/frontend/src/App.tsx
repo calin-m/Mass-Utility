@@ -422,21 +422,33 @@ function AppContent() {
               ) : (
                 <>
                   {isDemoMode && (
-                    <div className="mb-4 p-3 bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-semibold rounded-xl flex items-center justify-between shadow-inner">
+                    <div className={`mb-4 p-3 border text-xs font-semibold rounded-xl flex items-center justify-between shadow-inner transition-colors ${
+                      darkMode
+                        ? 'bg-purple-500/15 border-purple-500/30 text-purple-300'
+                        : 'bg-purple-100 border-purple-300 text-purple-950 font-bold'
+                    }`}>
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-                        <span>🧪 <b>DEMO MODE ACTIVE</b> — Connected to Isolated Sandbox Catalog &amp; Mock File Vault</span>
+                        <span className={`w-2 h-2 rounded-full animate-pulse ${darkMode ? 'bg-purple-400' : 'bg-purple-600'}`}></span>
+                        <span>🧪 <b className="font-bold">DEMO MODE ACTIVE</b> — Connected to Isolated Sandbox Catalog &amp; Mock File Vault</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => alert('Sandbox Database Reset to Defaults')}
-                          className="px-3 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30 rounded-lg text-[11px] font-bold transition-all"
+                          className={`px-3 py-1 border rounded-lg text-[11px] font-bold transition-all ${
+                            darkMode
+                              ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border-purple-500/30'
+                              : 'bg-purple-200 hover:bg-purple-300 text-purple-950 border-purple-400'
+                          }`}
                         >
                           🔄 Reset Sandbox
                         </button>
                         <button
                           onClick={() => setIsDemoMode(false)}
-                          className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-lg text-[11px] font-bold transition-all"
+                          className={`px-3 py-1 border rounded-lg text-[11px] font-bold transition-all ${
+                            darkMode
+                              ? 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border-rose-500/30'
+                              : 'bg-rose-200 hover:bg-rose-300 text-rose-950 border-rose-400'
+                          }`}
                         >
                           🚪 Exit Demo
                         </button>
