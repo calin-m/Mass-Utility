@@ -376,7 +376,16 @@ export const useAdminData = () => {
   }, [showAlert]);
 
   const checkAuth = useCallback(async () => {
-    if (isDemoMode) return;
+    if (isDemoMode) {
+      setHasAdmin(true);
+      setAuthenticated(true);
+      setAuthChecked(true);
+      setCompanies([...MOCK_COMPANIES]);
+      setUsers([...MOCK_USERS]);
+      setTiers([...MOCK_TIERS]);
+      setLicenses([...MOCK_LICENSES]);
+      return;
+    }
     try {
       const res = await fetch(getApiUrl('api_status'));
       const data = await res.json();

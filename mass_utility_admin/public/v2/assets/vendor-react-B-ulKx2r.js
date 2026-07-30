@@ -1,4 +1,3 @@
-// @Arch[vendorreactBulKx2r]
 var ac=Object.defineProperty,cc=Object.defineProperties;var fc=Object.getOwnPropertyDescriptors;var tr=Object.getOwnPropertySymbols;var Fo=Object.prototype.hasOwnProperty,Io=Object.prototype.propertyIsEnumerable;var jo=(e,t,n)=>t in e?ac(e,t,{enumerable:!0,configurable:!0,writable:!0,value:n}):e[t]=n,wl=(e,t)=>{for(var n in t||(t={}))Fo.call(t,n)&&jo(e,n,t[n]);if(tr)for(var n of tr(t))Io.call(t,n)&&jo(e,n,t[n]);return e},Uo=(e,t)=>cc(e,fc(t));var $o=(e,t)=>{var n={};for(var r in e)Fo.call(e,r)&&t.indexOf(r)<0&&(n[r]=e[r]);if(e!=null&&tr)for(var r of tr(e))t.indexOf(r)<0&&Io.call(e,r)&&(n[r]=e[r]);return n};function dc(e){return e&&e.__esModule&&Object.prototype.hasOwnProperty.call(e,"default")?e.default:e}var Gi={exports:{}},tl={},qi={exports:{}},N={};/**
  * @license React
  * react.production.min.js
