@@ -1,6 +1,8 @@
 // @Arch[PackageTiersTab]
 import React, { useState } from 'react';
-import { PackageCheck, RefreshCw, Plus, Edit, ChevronLeft, ChevronRight, ChevronDown, Check, X, ShieldCheck, Sliders } from 'lucide-react';
+import { PackageCheck, RefreshCw, Plus, Edit, ChevronLeft, ChevronRight, ChevronDown, Check, X, ShieldCheck, Sliders, Key, Crown, Cloud, Layers } from 'lucide-react';
+import { SectionHeader } from './common/SectionHeader';
+import { StatSummaryGrid } from './common/StatSummaryGrid';
 import { PageHeader } from './common/PageHeader';
 import { Button } from './common/Button';
 import { ConfirmModal } from './common/ConfirmModal';
@@ -447,23 +449,37 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
     </div>
   );
 
+  const totalActiveKeys = displayTiers.reduce((acc, t) => acc + (t.active_licenses || 0), 0);
+  const highestTierName = (displayTiers[displayTiers.length - 1]?.name || 'Enterprise').toUpperCase();
+
   return (
     <div className="space-y-6">
-      {/* Shared Page Header */}
-      <PageHeader
-        icon={PackageCheck}
+      {/* Shared Section Header */}
+      <SectionHeader
         title="Package Tier Presets & Capabilities Matrix"
-        description="Configure feature access flags, AST multi-step tools, and daily usage limits for software license keys."
-      >
-        <Button
-          variant="neutral"
-          size="sm"
-          icon={RefreshCw}
-          loading={isRefreshing}
-          onClick={handleRefresh}
-        >
-          Reload Matrix
-        </Button>
+        subtitle="Configure feature access flags, AST multi-step tools, and daily usage limits for software license keys."
+        icon={PackageCheck}
+        action={
+          <Button
+            variant="neutral"
+            size="sm"
+            icon={RefreshCw}
+            loading={isRefreshing}
+            onClick={handleRefresh}
+          >
+            Refresh
+          </Button>
+        }
+      />
+
+      {/* Sub-Tab Navigation Bar & Action Toolbar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <SubTabNav
+          tabs={subTabs}
+          activeTab={subTab}
+          onTabChange={setSubTab}
+        />
+
         <Button
           variant="primary"
           size="sm"
@@ -474,16 +490,9 @@ export const PackageTiersTab: React.FC<PackageTiersTabProps> = ({ tiers, onRefre
             setIsCreateModalOpen(true);
           }}
         >
-          Add Custom Tier
+          Add Package Tier
         </Button>
-      </PageHeader>
-
-      {/* Sub-Tab Navigation Bar */}
-      <SubTabNav
-        tabs={subTabs}
-        activeTab={subTab}
-        onTabChange={setSubTab}
-      />
+      </div>
 
       {/* Sub-Tab 1: Package Catalog & Compact Feature Matrix */}
       {subTab === 'overview' && (
