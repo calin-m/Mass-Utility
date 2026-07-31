@@ -91,12 +91,16 @@ export const App: React.FC = () => {
 
   // Sync window.location.hash on tab change and trigger targeted section data sync
   useEffect(() => {
+    if (!authenticated) {
+      if (window.location.hash !== '') {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+      return;
+    }
     if (window.location.hash !== `#${activeTab}`) {
       window.history.replaceState(null, '', `#${activeTab}`);
     }
-    if (authenticated) {
-      fetchAdminData();
-    }
+    fetchAdminData();
   }, [activeTab, authenticated]);
 
   // Listen to browser hashchange for Back/Forward support
