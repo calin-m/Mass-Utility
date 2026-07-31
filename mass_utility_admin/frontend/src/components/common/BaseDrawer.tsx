@@ -28,22 +28,23 @@ export const BaseDrawer: React.FC<BaseDrawerProps> = ({
     if (isOpen) {
       setShouldRender(true);
       setIsClosing(false);
-    } else if (shouldRender && !isClosing) {
+    } else if (shouldRender) {
       setIsClosing(true);
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-        setIsClosing(false);
-      }, 260);
-      return () => clearTimeout(timer);
     }
-    return undefined;
   }, [isOpen]);
 
   const handleRequestClose = () => {
+    if (isClosing) return;
     setIsClosing(true);
-    setTimeout(() => {
+  };
+
+  const handleAnimationEnd = (e: React.AnimationEvent<HTMLDivElement>) => {
+    // When the drawer slide-out exit animation finishes, unmount immediately & notify parent
+    if (isClosing && (e.animationName === 'drawerSlideOut' || e.animationName.includes('Out'))) {
+      setShouldRender(false);
+      setIsClosing(false);
       onClose();
-    }, 260);
+    }
   };
 
   // ESC key listener
@@ -72,12 +73,15 @@ export const BaseDrawer: React.FC<BaseDrawerProps> = ({
   }[width];
 
   return (
-    <div className={`fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/60 dark:bg-slate-950/75 backdrop-blur-sm z-[9999999] flex justify-end ${isClosing ? 'animate-backdrop-fade-out' : 'animate-backdrop-fade'}`}>
+    <div className={`fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/60 dark:bg-slate-950/75 backdrop-blur-sm z-[9999999] flex justify-end ${isClosing ? 'pointer-events-none animate-backdrop-fade-out' : 'animate-backdrop-fade'}`}>
       {/* Backdrop overlay click handler */}
       <div className="absolute inset-0" onClick={handleRequestClose} />
 
       {/* Slide-In / Slide-Out Panel */}
-      <div className={`relative bg-pm-card border-l border-pm-border ${widthClasses} w-full h-full shadow-2xl flex flex-col justify-between z-10 ${isClosing ? 'animate-drawer-slide-out' : 'animate-drawer-slide'}`}>
+      <div
+        onAnimationEnd={handleAnimationEnd}
+        className={`relative bg-pm-card border-l border-pm-border ${widthClasses} w-full h-full shadow-2xl flex flex-col justify-between z-10 ${isClosing ? 'animate-drawer-slide-out' : 'animate-drawer-slide'}`}
+      >
         {/* Drawer Header */}
         <div className="p-5 border-b border-pm-border bg-pm-input/20 flex items-start justify-between gap-4 shrink-0">
           <div className="flex items-start gap-3">
