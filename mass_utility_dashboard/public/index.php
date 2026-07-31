@@ -151,6 +151,22 @@ function getLicenseKey(\MassUtility\SaaS\Service\TenantSettingsRepository $setti
 $bridgeToken = getBridgeToken($settingsRepo, dirname(__DIR__));
 $licenseKey = getLicenseKey($settingsRepo, dirname(__DIR__));
 
+// Enforce 100% HTTPS Redirection for all incoming HTTP requests
+$isHttpsRequest = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https');
+
+if (!$isHttpsRequest && php_sapi_name() !== 'cli') {
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+    
+    if (strpos($host, '8000') !== false) {
+        $httpsHost = str_replace('8000', '8443', $host);
+        header('HTTP/1.1 301 Moved Permanently');
+        header('Location: https://' . $httpsHost . $requestUri);
+        exit;
+    }
+}
+
 // Initialize session for authentication with hardened cookie flags
 if (session_status() === PHP_SESSION_NONE) {
     @session_set_cookie_params([
