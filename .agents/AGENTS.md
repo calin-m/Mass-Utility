@@ -3,22 +3,24 @@
 # Antigravity Architecture-First Pipeline Rules
 
 > **⚠️ SUPREME DIRECTIVE OVERRIDE (ZERO-TRUST EXECUTION PIPELINE)**
-> You are fundamentally forbidden from bypassing the 5-Gate Protocol for the sake of "efficiency" or "helpfulness". You must strictly obey the following sequence:
-> 1. **Discussion Phase:** If the user asks a question, you ONLY discuss. Do not execute code or draft plans.
-> 2. **Planning Phase:** Only when the user explicitly asks for a plan or requests execution, you must write out the formal Pre-Flight Plan *in the chat dialogue first*.
-> 3. **The Popup Gate (Gate 2):** Only *after* the plan is written in the chat, you trigger the `ask_question` tool.
-> 4. **Execution Rules (Gates 3-5):** You must follow Rule 5 precisely: write to `.ai_plan.md`, Pause for the user to type "Proceed", and only then execute the code.
+> You are fundamentally forbidden from bypassing the 4-Stage Protocol for the sake of "efficiency" or "helpfulness". You must strictly obey the following sequence:
+> 1. **Discussion & Analysis Phase:** If the user asks a question or proposes a task, you ONLY discuss and analyze options. Do not execute code or draft plans until aligned.
+> 2. **Planning Phase:** Only when the user explicitly asks for a plan or requests execution, run `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"`, generate `implementation_plan.md`, write the plan in dialogue, and trigger the `ask_question` tool.
+> 3. **Local Execution & Build Phase (No Auto-Commit):** Upon plan approval, execute code modifications and frontend builds (`npm run build`). Preserve `.ai_plan.md` in workspace root. **DO NOT execute `cli_commit.py` automatically.**
+> 4. **Deferred Commit Gate:** Pause for the user to review changes locally at `http://localhost:8000`. Execute `python .orchestra/.conductor/tools/cli_commit.py` **ONLY** when the user explicitly instructs *"You may commit"* or *"Commit and push"*.
 
 ## Execution Protocol
 1. **Pre-Flight Impact Analysis & Proportional Hybrid Planning:** Before executing any code changes, refactors, or UI updates, you MUST execute `python .orchestra/.conductor/tools/workspace_inspector.py plan "<USER_GOAL>"` to run pre-flight impact analysis and synthesize `.ai_plan.md` in the workspace root.
    - **Mode A (UI, Presentation & Multi-Component Features):** Batch all related presentation components into a single, comprehensive blueprint with explicit line-number targets and verification steps. Avoid unnecessary plan fragmentation so the user can review the complete feature end-to-end.
    - **Mode B (High-Risk Backend, DB Schema & Core Security):** Slices high-risk database alterations, authentication API contracts, or core state changes into microscopic atomic phases (Phase 1, Phase 2) with verification gates between each phase.
    - Each phase strictly defines the "Target" (specific file and line numbers) and the "Action" (DOM/JS/PHP modifications).
-2. **The Zero-Draft Atomic Pipeline:**
+2. **The 4-Stage Deferred Commit Protocol:**
    - **No PENDING states:** Ensure your logic is complete.
-   - **Single Atomic Operation:** When a task or phase is complete, update all `.md` dictionaries, and then immediately execute `python .orchestra/.conductor/tools/cli_commit.py`. `cli_commit.py` automatically handles staging (`git add .`), running pre-commit static audits, compiling frontend assets (`npm run build`), committing, and auto-deploying. You do not need to execute a manual `git push` command after invoking `cli_commit.py`.
+   - **Local Execution & Build:** Execute code edits locally and compile frontend assets (`npm run build` in admin & dashboard). Keep `.ai_plan.md` intact in workspace root.
+   - **User Local Review:** Allow the user to test changes locally at `http://localhost:8000`.
+   - **Explicit Commit Trigger:** Execute `python .orchestra/.conductor/tools/cli_commit.py` ONLY when the user gives explicit commit approval ("You may commit"). `cli_commit.py` automatically handles staging (`git add .`), running pre-commit static audits, ingesting `.ai_plan.md` into commit messages, deleting `.ai_plan.md`, committing, and auto-deploying.
 3. **Smart Ephemeral Commits:**
-   - The `cli_commit.py` script will automatically ingest the exact contents of `.ai_plan.md` into the Git Commit message.
+   - The `cli_commit.py` script will automatically ingest the exact contents of `.ai_plan.md` into the Git Commit message when invoked.
    - Once the commit succeeds, `cli_commit.py` will delete `.ai_plan.md`.
 4. **Smart Interconnectivity Tracing & Dual-Mode Subagent Fallback Engine:**
    - **Primary Token-Saving Scanner:** You MUST use the custom Python script `.orchestra/.conductor/tools/workspace_inspector.py` as your primary tool to mathematically map architecture, symbols, and dependencies.

@@ -21,9 +21,10 @@
 1. **Strict Sequential AST-First Investigation Protocol**: Run `python .orchestra/.conductor/tools/workspace_inspector.py trace "<keyword>"` (or `caller` for reverse call-graph lookups, `lookup`, `plan`) FIRST. ONLY if `workspace_inspector.py` outputs `[INSPECTOR_FALLBACK_RECOMMENDED]`, execute native `grep_search` restricted strictly by target file globs (`Includes: ["*.tsx", "*.ts"]`).
 2. **Dual Plan Synchronization**: Whenever drafting a plan or presenting feature options, write to `.ai_plan.md` on disk AND simultaneously generate/update the interactive `implementation_plan.md` artifact in the brain folder with `request_feedback=true` and `user_facing=true`.
 3. **Post-Execution Zero-Copy AST Re-Index**: Run `python .orchestra/.conductor/tools/workspace_inspector.py map` after code edits to re-build symbol, frontend, and route maps in zero-copy memory.
-5. **Phase-Aware Ephemeral Commit Protocol**:
-   - **Mode A (UI, Presentation & Accessibility Batches):** Batch all related frontend components, a11y labels, and layout updates into a single comprehensive blueprint. Execute **1 single atomic commit** at feature completion.
-   - **Mode B (High-Risk Backend & Security State):** Execute 1 atomic commit per phase (`cli_commit.py`). `.ai_plan.md` is preserved across phases until all phases marked `[COMPLETED]` before final deletion.
+5. **4-Stage Deferred Commit Protocol**:
+   - **Local Execution & Build:** Execute code edits locally and compile frontend assets (`npm run build` in admin & dashboard). Keep `.ai_plan.md` intact in workspace root.
+   - **User Local Review:** Allow the user to test changes locally at `http://localhost:8000`.
+   - **Explicit Commit Trigger:** Execute `python .orchestra/.conductor/tools/cli_commit.py` ONLY when the user gives explicit commit approval ("You may commit"). `cli_commit.py` automatically handles staging (`git add .`), running pre-commit static audits, ingesting `.ai_plan.md` into commit messages, deleting `.ai_plan.md`, committing, and auto-deploying.
 
 ## 📁 OPIS: Workspace Directory Manifest
 This `WORKSPACE.md` file serves purely as the overarching **Agent Workflow Constitution** (How to commit, sync docs, run tests). 
