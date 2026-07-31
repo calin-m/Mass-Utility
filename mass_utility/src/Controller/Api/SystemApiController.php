@@ -558,7 +558,7 @@ class SystemApiController extends AbstractApiController
             $definesContent = file_exists($definesPath) ? (file_get_contents($definesPath) ?: '') : '';
             $psDevModeDisabled = (bool)preg_match("/define\('_PS_DEV_MODE_',\s*false\);/i", $definesContent) || !preg_match("/define\('_PS_DEV_MODE_',\s*true\);/i", $definesContent);
 
-            $psSslActive = (bool)Configuration::get('PS_SSL_ENABLED');
+            $psSslActive = (bool)$this->systemRepository->getConfiguration('PS_SSL_ENABLED');
 
             $getOctalPerms = function(string $path, string $recommended = '0755'): string {
                 if (!file_exists($path)) return 'N/A';

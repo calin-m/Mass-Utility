@@ -1,5 +1,6 @@
 // @Arch[overlay]
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 type ModalType = 'alert' | 'confirm' | 'prompt';
 
@@ -200,7 +201,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         ))}
       </div>
 
-      {state.isOpen && (
+      {state.isOpen && createPortal(
         <div className="pm-modal-overlay fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-[99999] transition-opacity duration-300">
           <div className="pm-modal-card rounded-2xl p-6 shadow-2xl w-full max-w-lg mx-4 relative animate-fade-in border border-pm-border">
             <div className="pm-modal-header flex justify-between items-center pb-3 mb-4 border-b border-pm-border/30">
@@ -254,7 +255,8 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </ModalContext.Provider>
   );
