@@ -59,6 +59,8 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
+  const [density, setDensity] = useState<'compact' | 'comfortable'>('comfortable');
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -338,70 +340,61 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
             setIsCreateOpen(true);
           }
         }}
+        density={density}
+        onDensityChange={setDensity}
       />
 
       {/* Companies Directory Table */}
       <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs border-collapse table-fixed">
+            <colgroup>
+              <col className="w-[38%]" />
+              <col className="w-[26%]" />
+              <col className="w-[18%]" />
+              <col className="w-[18%]" />
+            </colgroup>
             <thead>
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3 w-[28%]">{t('th_company')}</th>
-                <th className="p-3 w-[18%]">{t('th_vat')}</th>
-                <th className="p-3 w-[15%]">{t('th_users')}</th>
-                <th className="p-3 w-[17%]">{t('th_pool')}</th>
-                <th className="p-3 w-[10%]">{t('th_status')}</th>
-                <th className="p-3 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
+                <th className="p-3">{t('th_company')}</th>
+                <th className="p-3">Members & License Pool</th>
+                <th className="p-3">{t('th_status')}</th>
+                <th className="p-3 text-right">{t('th_actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
               {paginatedCompanies.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-pm-secondary italic">
+                  <td colSpan={4} className="p-8 text-center text-pm-secondary italic">
                     {t('empty_companies')}
                   </td>
                 </tr>
               ) : (
                 paginatedCompanies.map(c => (
-                  <tr key={c.id} className="h-[49px] align-middle hover:bg-pm-input/50 transition">
-                    <td className="p-3 align-middle">
+                  <tr key={c.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition`}>
+                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle`}>
                       <TableCellIdentity
                         icon={Building2}
                         title={c.company_name}
                         onTitleClick={() => onSelectCompany(c, 'overview')}
-                        subtitle={`ID #${c.id}${c.created_at ? ` • Joined ${c.created_at.split(' ')[0]}` : ''}`}
+                        subtitle={`ID #${c.id}${c.tax_id ? ` • VAT: ${c.tax_id}` : ''}${c.created_at ? ` • Joined ${c.created_at.split(' ')[0]}` : ''}`}
                       />
                     </td>
-                    <td className="p-3 align-middle whitespace-nowrap">
-                      <TableCellText
-                        text={c.tax_id}
-                        fallbackText={t('lbl_unspecified')}
-                        rightAction={
-                          c.tax_id ? (
-                            <button
-                              onClick={() => copyVat(c.tax_id!, c.id)}
-                              className="p-1 rounded hover:bg-pm-input text-pm-secondary hover:text-pm-text transition"
-                              title="Copy Tax / VAT ID"
-                            >
-                              {copiedVatId === c.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                            </button>
-                          ) : undefined
-                        }
-                      />
-                    </td>
-                    <td className="p-3 font-bold text-pm-text text-xs align-middle whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-purple-400" />
-                        <span>{c.user_count || 0} {t('lbl_members')}</span>
+                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1.5 font-bold text-pm-text text-xs">
+                          <Users className="w-3.5 h-3.5 text-purple-400" />
+                          <span>{c.user_count || 0} {t('lbl_members')}</span>
+                        </div>
+                        <div className="text-[11px] font-mono text-pm-secondary">
+                          <span className="text-purple-400 font-extrabold">{c.license_count || 0}</span> / {c.max_licenses} {t('lbl_allocated')}
+                        </div>
                       </div>
                     </td>
-                    <td className="p-3 font-mono font-semibold text-xs text-pm-text align-middle whitespace-nowrap">
-                      <span className="text-purple-600 dark:text-purple-400 font-extrabold">{c.license_count || 0}</span> / {c.max_licenses} {t('lbl_allocated')}
-                    </td>
-                    <td className="p-3 align-middle whitespace-nowrap">
+                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
                       <StatusBadge status={c.status} />
                     </td>
-                    <td className="p-3 text-right align-middle min-w-[220px]">
+                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle`}>
                       <TableCellActions
                         onInspect={() => onSelectCompany(c, 'overview')}
                         inspectLabel="Inspect"

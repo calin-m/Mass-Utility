@@ -1,2 +1,0 @@
-// @Arch[TableCellTextDqPyXeeW]
-import{j as s}from"./vendor-react-DCF5-MQh.js";const m=({text:e,fallbackText:n,mono:r=!0,rightAction:a,className:i=""})=>e==null||e===""?n?s.jsx("span",{className:"italic text-pm-secondary/70",children:n}):null:s.jsxs("div",{className:`flex items-center gap-1.5 align-middle whitespace-nowrap ${i}`,children:[s.jsx("span",{className:`${r?"font-mono":""} text-[0.72rem] text-pm-secondary font-medium`,children:e}),a]});export{m as T};

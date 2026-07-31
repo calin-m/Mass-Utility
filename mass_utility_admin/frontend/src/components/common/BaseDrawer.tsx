@@ -1,5 +1,6 @@
 // @Arch[BaseDrawer]
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { LucideIcon, X } from 'lucide-react';
 
 interface BaseDrawerProps {
@@ -72,7 +73,7 @@ export const BaseDrawer: React.FC<BaseDrawerProps> = ({
     '5xl': 'max-w-5xl'
   }[width];
 
-  return (
+  return createPortal(
     <div className={`fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/60 dark:bg-slate-950/75 backdrop-blur-sm z-[9999999] flex justify-end ${isClosing ? 'pointer-events-none animate-backdrop-fade-out' : 'animate-backdrop-fade'}`}>
       {/* Backdrop overlay click handler */}
       <div className="absolute inset-0" onClick={handleRequestClose} />
@@ -109,6 +110,7 @@ export const BaseDrawer: React.FC<BaseDrawerProps> = ({
         {/* Drawer Scrollable Body Content */}
         <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

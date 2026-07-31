@@ -27,6 +27,8 @@ export interface DirectoryToolbarProps {
   primaryAction?: PrimaryActionOption;
   viewMode?: 'grid' | 'table';
   onViewModeChange?: (mode: 'grid' | 'table') => void;
+  density?: 'compact' | 'comfortable';
+  onDensityChange?: (density: 'compact' | 'comfortable') => void;
 }
 
 export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
@@ -40,6 +42,8 @@ export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
   primaryAction,
   viewMode,
   onViewModeChange,
+  density,
+  onDensityChange,
 }) => {
   const hasActiveFilters = Boolean(searchTerm || (activeFilter && activeFilter !== 'all' && activeFilter !== 'ALL'));
 
@@ -63,29 +67,25 @@ export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
           />
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto" role="group" aria-label="Status filters">
-          {statusFilters.map((f) => {
-            const isActive = activeFilter === f.key;
+        {/* Status Filter Badges */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" role="tablist" aria-label="Status filters">
+          {statusFilters.map((sf) => {
+            const isActive = activeFilter === sf.key;
             return (
               <button
-                key={f.key}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => onFilterChange(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border ${
+                key={sf.key}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => onFilterChange(sf.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                   isActive
-                    ? 'bg-purple-500 border-purple-500 text-white shadow-sm'
-                    : 'bg-pm-input border-pm-border text-pm-secondary hover:text-pm-text hover:bg-pm-card/60'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'bg-pm-input text-pm-secondary hover:text-pm-text hover:bg-pm-input/80'
                 }`}
               >
-                <span>{f.label}</span>
-                <span
-                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-pm-card text-pm-secondary'
-                  }`}
-                >
-                  {f.count}
+                <span>{sf.label}</span>
+                <span className={`px-1.5 py-0.2 text-[10px] rounded-full ${isActive ? 'bg-purple-700 text-white' : 'bg-pm-card text-pm-secondary'}`}>
+                  {sf.count}
                 </span>
               </button>
             );
@@ -107,8 +107,36 @@ export const DirectoryToolbar: React.FC<DirectoryToolbarProps> = ({
         )}
       </div>
 
-      {/* Right Controls: View Mode Switcher + Primary Action Button */}
+      {/* Right Controls: View Mode & Density Switchers + Primary Action Button */}
       <div className="flex items-center gap-3 shrink-0 w-full md:w-auto justify-between md:justify-end">
+        {/* Row Density Switcher */}
+        {density && onDensityChange && (
+          <div className="flex items-center gap-0.5 bg-pm-input p-1 rounded-lg border border-pm-border" role="group" aria-label="Row density">
+            <button
+              type="button"
+              aria-pressed={density === 'compact'}
+              onClick={() => onDensityChange('compact')}
+              className={`px-2 py-1 rounded text-[11px] font-bold transition ${
+                density === 'compact' ? 'bg-purple-600 text-white shadow-sm' : 'text-pm-secondary hover:text-pm-text'
+              }`}
+              title="Compact High-Density Rows"
+            >
+              Compact
+            </button>
+            <button
+              type="button"
+              aria-pressed={density === 'comfortable'}
+              onClick={() => onDensityChange('comfortable')}
+              className={`px-2 py-1 rounded text-[11px] font-bold transition ${
+                density === 'comfortable' ? 'bg-purple-600 text-white shadow-sm' : 'text-pm-secondary hover:text-pm-text'
+              }`}
+              title="Comfortable Spacious Rows"
+            >
+              Comfortable
+            </button>
+          </div>
+        )}
+
         {viewMode && onViewModeChange && (
           <div className="flex items-center gap-1 bg-pm-input p-1 rounded-lg border border-pm-border" role="group" aria-label="View mode">
             <button

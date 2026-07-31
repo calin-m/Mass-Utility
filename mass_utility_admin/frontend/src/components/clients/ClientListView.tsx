@@ -103,6 +103,8 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
   const [editCompany, setEditCompany] = useState('');
 
+  const [density, setDensity] = useState<'compact' | 'comfortable'>('comfortable');
+
   const setCreateEmail = (val: string) => {
     setCreateEmailState(val);
     try { localStorage.setItem('pm_draft_client_email', val); } catch (e) {}
@@ -411,6 +413,8 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
           icon: UserPlus,
           onClick: () => setShowCreateModal(true)
         }}
+        density={density}
+        onDensityChange={setDensity}
       />
 
       {/* Post-Creation Quick Credentials Banner */}
@@ -426,22 +430,25 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
       {/* Clients Directory Table */}
       <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs border-collapse table-fixed">
+            <colgroup>
+              <col className="w-[38%]" />
+              <col className="w-[22%]" />
+              <col className="w-[22%]" />
+              <col className="w-[18%]" />
+            </colgroup>
             <thead>
               <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                <th className="p-3 w-[26%]">{t('th_client')}</th>
-                <th className="p-3 w-[20%]">{t('th_company_profile')}</th>
-                <th className="p-3 w-[14%]">Package Tier</th>
-                <th className="p-3 w-[14%]">{t('th_active_licenses')}</th>
-                <th className="p-3 w-[12%]">Store URL</th>
-                <th className="p-3 w-[8%]">{t('th_status')}</th>
-                <th className="p-3 text-right w-[12%] min-w-[220px]">{t('th_actions')}</th>
+                <th className="p-3">{t('th_client')}</th>
+                <th className="p-3">Plan Tier & Status</th>
+                <th className="p-3">Bound Store Domains</th>
+                <th className="p-3 text-right">{t('th_actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pm-border">
               {paginatedUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-pm-secondary italic">
+                  <td colSpan={4} className="p-8 text-center text-pm-secondary italic">
                     {t('empty_clients')}
                   </td>
                 </tr>
@@ -453,50 +460,59 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                   const userTier = (userLic?.package_tier || 'basic').toUpperCase();
 
                   return (
-                    <tr key={user.id} className="h-[49px] align-middle hover:bg-pm-input/50 transition">
-                      <td className="p-3 align-middle">
+                    <tr key={user.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition`}>
+                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle`}>
                         <TableCellIdentity
                           icon={Mail}
                           title={user.name ? `${user.name} (${user.email})` : user.email}
                           onTitleClick={() => onSelectClient(user, 'profile')}
-                          subtitle={`${user.email} • ID #${user.id}${user.created_at ? ` • Joined ${user.created_at.split(' ')[0]}` : ''}`}
+                          subtitle={
+                            <span className="flex items-center gap-1.5 inline-flex flex-wrap">
+                              {user.company_name ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (onInspectCompany) {
+                                        const assignedComp = user.company_id 
+                                          ? companies.find(c => c.id === user.company_id) 
+                                          : companies.find(c => c.company_name?.toLowerCase() === user.company_name?.toLowerCase());
+                                        onInspectCompany(assignedComp || { id: user.company_id, company_name: user.company_name });
+                                      }
+                                    }}
+                                    className="font-semibold text-pm-secondary hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer flex items-center gap-1"
+                                    title={`Inspect Company "${user.company_name}"`}
+                                  >
+                                    🏢 {user.company_name}
+                                  </button>
+                                  <span>•</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-pm-secondary/70 italic">👤 Individual Client</span>
+                                  <span>•</span>
+                                </>
+                              )}
+                              <span>ID #{user.id}</span>
+                              {user.created_at && <span>• Joined {user.created_at.split(' ')[0]}</span>}
+                            </span>
+                          }
                         />
                       </td>
 
-                      <td className="p-3 align-middle whitespace-nowrap">
-                        <TableCellCompany
-                          companyName={user.company_name}
-                          onClick={onInspectCompany && user.company_name ? () => {
-                            const assignedComp = user.company_id 
-                              ? companies.find(c => c.id === user.company_id) 
-                              : companies.find(c => c.company_name?.toLowerCase() === user.company_name?.toLowerCase());
-                            onInspectCompany(assignedComp || { id: user.company_id, company_name: user.company_name });
-                          } : undefined}
-                          fallbackText={t('lbl_individual_client')}
-                        />
+                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                        <div className="flex items-center gap-1.5">
+                          <StatusBadge type="tier" label={userTier} />
+                          <StatusBadge status={user.status} />
+                        </div>
                       </td>
 
-                      <td className="p-3 align-middle whitespace-nowrap">
-                        <StatusBadge type="tier" label={userTier} />
-                      </td>
-
-                      <td className="p-3 align-middle whitespace-nowrap">
-                        {metrics.total === 0 ? (
-                          <span className="italic text-pm-secondary/70">{t('lbl_no_licenses')}</span>
-                        ) : (
-                          <StatusBadge label={`ACTIVE - ${metrics.active}`} customColor="emerald" />
-                        )}
-                      </td>
-
-                      <td className="p-3 align-middle whitespace-nowrap">
+                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
                         <DomainPillGroup storeUrl={metrics.boundDomains.join(', ')} />
                       </td>
 
-                      <td className="p-3 align-middle whitespace-nowrap">
-                        <StatusBadge status={user.status} />
-                      </td>
-
-                      <td className="p-3 text-right align-middle min-w-[220px]">
+                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle`}>
                         <TableCellActions
                           onInspect={() => onSelectClient(user, 'profile')}
                           inspectLabel="Inspect"

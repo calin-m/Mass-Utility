@@ -70,6 +70,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const [selectedLicense, setSelectedLicense] = useState<License | null>(initialSelectedLicense || null);
   const [initialDetailTab, setInitialDetailTab] = useState<'overview' | 'edit'>(propDetailTab);
 
+  const [density, setDensity] = useState<'compact' | 'comfortable'>('comfortable');
   const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
 
   const handleSelectLicense = (lic: License, initialTab: 'overview' | 'edit' = 'overview') => {
@@ -396,6 +397,8 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
         }
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        density={density}
+        onDensityChange={setDensity}
         primaryAction={{
           label: 'Issue New Key',
           icon: PlusCircle,
@@ -420,23 +423,25 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
       ) : (
         <div className="bg-pm-card border border-pm-border rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse table-fixed">
+              <colgroup>
+                <col className="w-[38%]" />
+                <col className="w-[22%]" />
+                <col className="w-[22%]" />
+                <col className="w-[18%]" />
+              </colgroup>
               <thead>
                 <tr className="bg-pm-input text-pm-secondary uppercase font-bold border-b border-pm-border text-[10px]">
-                  <th className="p-3 w-[22%]">{t('th_license_key')}</th>
-                  <th className="p-3 w-[16%]">{t('th_assigned_user')}</th>
-                  <th className="p-3 w-[16%]">Company Profile</th>
-                  <th className="p-3 w-[9%]">{t('th_tier')}</th>
-                  <th className="p-3 w-[9%]">{t('th_status')}</th>
-                  <th className="p-3 w-[12%]">{t('th_store_url') || 'Store URL'}</th>
-                  <th className="p-3 w-[8%]">{t('th_expires')}</th>
-                  <th className="p-3 text-right w-[8%] min-w-[220px]">{t('th_actions')}</th>
+                  <th className="p-3">{t('th_license_key')}</th>
+                  <th className="p-3">Plan Tier & Status</th>
+                  <th className="p-3">Bound Store Domains</th>
+                  <th className="p-3 text-right">{t('th_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-pm-border">
                 {paginatedLicenses.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-pm-secondary italic">
+                    <td colSpan={4} className="p-8 text-center text-pm-secondary italic">
                       No license keys found matching the current search & filter query.
                     </td>
                   </tr>
@@ -452,13 +457,47 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                       : null;
 
                     return (
-                      <tr key={lic.id} className="h-[49px] align-middle hover:bg-pm-input/50 transition">
-                        <td className="p-3 align-middle">
+                      <tr key={lic.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition`}>
+                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle`}>
                           <TableCellIdentity
                             icon={Key}
                             title={isVisible ? lic.license_key : '••••-••••-••••-••••'}
                             onTitleClick={() => handleSelectLicense(lic)}
-                            subtitle={`ID #${lic.id}${lic.created_at ? ` • Created ${lic.created_at.split(' ')[0]}` : ''}`}
+                            subtitle={
+                              <span className="flex items-center gap-1.5 inline-flex flex-wrap">
+                                {assignedUser ? (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (onInspectClient) onInspectClient(assignedUser);
+                                    }}
+                                    className="font-semibold text-pm-secondary hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer"
+                                    title={`Inspect Client "${assignedUser.email}"`}
+                                  >
+                                    👤 {lic.user_name || lic.user_email || `User #${lic.user_id}`}
+                                  </button>
+                                ) : null}
+                                {companyName ? (
+                                  <>
+                                    {assignedUser && <span>•</span>}
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onInspectCompany && assignedComp) onInspectCompany(assignedComp);
+                                      }}
+                                      className="font-semibold text-pm-secondary hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer"
+                                      title={`Inspect Company "${companyName}"`}
+                                    >
+                                      🏢 {companyName}
+                                    </button>
+                                  </>
+                                ) : null}
+                                {!assignedUser && !companyName && <span className="text-pm-secondary/70 italic">Unassigned</span>}
+                                <span>• ID #{lic.id}</span>
+                              </span>
+                            }
                             rightContent={
                               <div className="flex items-center gap-1">
                                 <button
@@ -481,44 +520,19 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             }
                           />
                         </td>
-                        <td className="py-2 px-3 align-middle whitespace-nowrap">
-                          {lic.user_id ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const targetUser = users.find((u) => u.id === lic.user_id);
-                                if (targetUser && onInspectClient) onInspectClient(targetUser);
-                              }}
-                              className="font-bold text-pm-text hover:text-purple-400 transition text-left"
-                            >
-                              {lic.user_name || lic.user_email || `User #${lic.user_id}`}
-                            </button>
-                          ) : (
-                            <span className="text-pm-secondary italic">{t('lbl_unassigned') || 'Unassigned'}</span>
-                          )}
+
+                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                          <div className="flex items-center gap-1.5">
+                            <StatusBadge type="tier" label={(lic.package_tier || 'basic').toUpperCase()} />
+                            <StatusBadge status={lic.status} />
+                          </div>
                         </td>
-                        <td className="py-2 px-3 align-middle whitespace-nowrap">
-                          <TableCellCompany
-                            companyName={companyName}
-                            onClick={onInspectCompany && assignedComp ? () => onInspectCompany(assignedComp) : undefined}
-                            fallbackText={t('lbl_standalone') || 'Standalone'}
-                          />
-                        </td>
-                        <td className="py-2 px-3 align-middle whitespace-nowrap">
-                          <StatusBadge type="tier" label={(lic.package_tier || 'basic').toUpperCase()} />
-                        </td>
-                        <td className="py-2 px-3 align-middle whitespace-nowrap">
-                          <StatusBadge status={lic.status} />
-                        </td>
-                        <td className="py-2 px-3 align-middle whitespace-nowrap">
+
+                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
                           <DomainPillGroup storeUrl={lic.store_url} />
                         </td>
-                        <td className="py-2 px-3 align-middle whitespace-nowrap">
-                          <TableCellText
-                            text={lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : 'Lifetime'}
-                          />
-                        </td>
-                        <td className="py-2 px-3 text-right align-middle min-w-[220px]">
+
+                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle`}>
                           <TableCellActions
                             onInspect={() => handleSelectLicense(lic, 'overview')}
                             onEdit={() => handleSelectLicense(lic, 'edit')}
