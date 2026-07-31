@@ -7,7 +7,7 @@ interface BaseModalProps {
   onClose: () => void;
   title: string;
   icon?: LucideIcon;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   variant?: 'primary' | 'danger';
   children: React.ReactNode;
 }
@@ -41,6 +41,8 @@ export const BaseModal: React.FC<BaseModalProps> = ({
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
   }[maxWidth];
 
   const borderClass = variant === 'danger' ? 'border-rose-500/30' : 'border-pm-border';

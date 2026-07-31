@@ -7,6 +7,8 @@ import { SubTabNav, SubTabItem } from './common/SubTabNav';
 import { RbacRole, RbacPermission, Company, UserAccount, License } from '../types/adminApi';
 import { AdminFetchAdapter, getApiUrl } from '../utils/AdminFetchAdapter';
 
+import { BaseModal } from './common/BaseModal';
+
 // Extracted Sub-Components
 import { RoleCard } from './roles/RoleCard';
 import { GlobalMatrixTable } from './roles/GlobalMatrixTable';
@@ -513,9 +515,14 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         />
       </div>
 
-      {showAddRole && (
-        <form onSubmit={handleCreateRole} className="p-5 bg-pm-card border border-pm-border rounded-2xl shadow-sm space-y-4">
-          <h4 className="text-xs font-bold text-pm-text uppercase tracking-wider">Create / Clone Platform Role</h4>
+      <BaseModal
+        isOpen={showAddRole}
+        onClose={() => setShowAddRole(false)}
+        title="Create / Clone Security Role"
+        icon={Plus}
+        maxWidth="lg"
+      >
+        <form onSubmit={handleCreateRole} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-semibold text-pm-secondary mb-1">Role Name</label>
@@ -553,7 +560,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
               className="w-full bg-pm-input border border-pm-border rounded-xl px-3.5 py-2 text-xs text-pm-text"
             />
           </div>
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex justify-end gap-2 pt-2 border-t border-pm-border">
             <Button type="button" variant="neutral" size="sm" onClick={() => setShowAddRole(false)}>
               Cancel
             </Button>
@@ -562,7 +569,7 @@ export const RolesTab: React.FC<RolesTabProps> = ({
             </Button>
           </div>
         </form>
-      )}
+      </BaseModal>
 
       {/* Tab 1: Global Platform Roles & Definitions */}
       {activeSubTab === 'global' && (

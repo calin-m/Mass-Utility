@@ -162,3 +162,90 @@ html:not(.dark) .shadow-sm {
   }
 }
 
+/* 🎬 Slide-Over Drawer Keyframe Animations */
+@keyframes drawerSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes drawerSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backdropFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes formExpandDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes formCollapseUp {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+}
+
+.animate-drawer-slide {
+  animation: drawerSlideIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-drawer-slide-out {
+  animation: drawerSlideOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.animate-backdrop-fade {
+  animation: backdropFadeIn 0.25s ease-out forwards;
+}
+
+.animate-backdrop-fade-out {
+  animation: backdropFadeOut 0.25s ease-in forwards;
+}
+
+.animate-form-expand {
+  animation: formExpandDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-form-collapse {
+  animation: formCollapseUp 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
