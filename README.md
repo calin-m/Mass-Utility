@@ -818,6 +818,14 @@ python .orchestra/.conductor/tools/workspace_inspector.py matrix
 python .orchestra/.conductor/tools/cli_security_audit.py
 ```
 
+### 12.4 Zero-Trust Governance & 4-Stage Deferred Commit Pipeline
+Mass Utility enforces an architecture-first, zero-trust deployment protocol:
+1. **Stage 1 (Discussion & Analysis):** Interactive option alignment prior to drafting code or plans.
+2. **Stage 2 (Planning & Pre-Flight Analysis):** `workspace_inspector.py plan "<GOAL>"` runs pre-flight impact analysis and synthesizes `.ai_plan.md` in RAM while auto-refreshing `05_route_contract_map.md` & `openapi.json`.
+3. **Stage 3 (Local Execution & Build):** Code edits and SPA builds (`npm run build`) execute locally on disk. All changes remain uncommitted for local testing at `http://localhost:8000`.
+4. **Stage 4 (Deferred Commit Gate):** `cli_commit.py` is invoked ONLY when explicitly instructed *"You may commit"*. `cli_commit.py` stages files, runs static pre-commit audits, ingests `.ai_plan.md` into the commit message, updates `.bench/docs/roadmap.md`, deletes `.ai_plan.md`, and auto-deploys cleanly.
+
+
 ---
 
 ## 🔧 13. Troubleshooting & Emergency Protocols

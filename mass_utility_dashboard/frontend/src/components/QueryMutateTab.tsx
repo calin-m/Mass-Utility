@@ -8,21 +8,7 @@ import { useModal } from '../utils/overlay';
 import { QueryPresetManager } from './query/QueryPresetManager';
 import { QueryResultsGrid } from './query/QueryResultsGrid';
 import { MutationRulesEditor } from './query/MutationRulesEditor';
-
-interface Rule {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  forceManualMode?: boolean;
-}
-
-interface Group {
-  id: string;
-  logical_operator: 'AND' | 'OR' | 'NAND' | 'NOR' | 'XOR';
-  rules: Rule[];
-  groups: Group[];
-}
+import { Rule, Group } from '../utils/astCompiler';
 
 interface MutationAction {
   id: string;
@@ -77,7 +63,7 @@ export const QueryMutateTab: React.FC = () => {
 
   // Recalculate Live Sentence whenever query tree changes
   useEffect(() => {
-    const node = translateGroup(queryTree);
+    const node = translateGroupToReact(queryTree);
     if (node) {
       setLiveExplanation(
         <span>
@@ -93,7 +79,7 @@ export const QueryMutateTab: React.FC = () => {
   }, [queryTree]);
 
   // Recursively compile group sentence into React JSX Nodes
-  const translateGroup = (group: Group): React.ReactNode => {
+  const translateGroupToReact = (group: Group): React.ReactNode => {
     const rules = group.rules || [];
     const subGroups = group.groups || [];
 
@@ -146,7 +132,7 @@ export const QueryMutateTab: React.FC = () => {
 
     const subGroupNodes: React.ReactNode[] = subGroups
       .map((sg, idx) => {
-        const sub = translateGroup(sg);
+        const sub = translateGroupToReact(sg);
         return sub ? <span key={`sg-${sg.id || idx}`}>({sub})</span> : null;
       })
       .filter(Boolean);
