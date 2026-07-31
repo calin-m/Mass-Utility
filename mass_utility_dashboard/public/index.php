@@ -2026,7 +2026,9 @@ if (strpos($path, '/api/v1/') === 0) {
             $htaccessFile = dirname(__DIR__) . '/.htaccess';
             $headerBlock = "\n# Mass Utility Security Headers Protection\n" .
                 "<IfModule mod_headers.c>\n" .
-                "    Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"\n" .
+                "    <If \"%{\x48\x54\x54\x50\x53} == 'on'\">\n" .
+                "        Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"\n" .
+                "    </If>\n" .
                 "    Header set X-Content-Type-Options \"nosniff\"\n" .
                 "    Header set X-Frame-Options \"SAMEORIGIN\"\n" .
                 "    Header set Referrer-Policy \"strict-origin-when-cross-origin\"\n" .
