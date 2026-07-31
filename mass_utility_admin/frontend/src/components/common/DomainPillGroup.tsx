@@ -1,5 +1,6 @@
 // @Arch[DomainPillGroup]
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Globe, ExternalLink, Search, Copy, Check, ChevronDown } from 'lucide-react';
 import { parseDomains } from '../../utils/domainUtils';
 
@@ -15,22 +16,62 @@ export const DomainPillGroup: React.FC<DomainPillGroupProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [copiedDomain, setCopiedDomain] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [portalCoords, setPortalCoords] = useState<{ top: number; left: number; placeUpwards: boolean }>({ top: 0, left: 0, placeUpwards: false });
+  
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
   const domains = parseDomains(storeUrl);
 
-  // Close popover on click outside
+  const updateCoords = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const popoverHeight = 260; // Estimated max height of popover
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const placeUpwards = spaceBelow < popoverHeight && rect.top > popoverHeight;
+
+      setPortalCoords({
+        top: placeUpwards ? Math.max(10, rect.top - popoverHeight - 8) : rect.bottom + 8,
+        left: Math.min(rect.left, Math.max(10, window.innerWidth - 300)),
+        placeUpwards,
+      });
+    }
+  };
+
+  const handleToggleOpen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isOpen) {
+      updateCoords();
+    }
+    setIsOpen(!isOpen);
+  };
+
+  // Close popover on click outside or window resize/scroll
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+      if (
+        popoverRef.current && !popoverRef.current.contains(event.target as Node) &&
+        buttonRef.current && !buttonRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
+
+    const handleScrollOrResize = () => {
+      if (isOpen) {
+        updateCoords();
+      }
+    };
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScrollOrResize, true);
+      window.addEventListener('resize', handleScrollOrResize);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
     };
   }, [isOpen]);
 
@@ -52,7 +93,7 @@ export const DomainPillGroup: React.FC<DomainPillGroupProps> = ({
   };
 
   return (
-    <div className="relative inline-flex items-center gap-1.5 flex-wrap" ref={popoverRef}>
+    <div className="inline-flex items-center gap-1.5 flex-wrap">
       {/* Primary Domain Badge Pill */}
       <a
         href={primaryDomain.startsWith('http') ? primaryDomain : `https://${primaryDomain}`}
@@ -68,11 +109,9 @@ export const DomainPillGroup: React.FC<DomainPillGroupProps> = ({
       {/* Overflow Badge Pill (+N More / View List) */}
       {overflowCount > 0 && (
         <button
+          ref={buttonRef}
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsOpen(!isOpen);
-          }}
+          onClick={handleToggleOpen}
           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold font-mono transition-all ${
             isOpen
               ? 'bg-purple-500/30 border border-purple-500/50 text-purple-300 shadow-md'
@@ -84,9 +123,13 @@ export const DomainPillGroup: React.FC<DomainPillGroupProps> = ({
         </button>
       )}
 
-      {/* Glassmorphic Whitelist Popover Tooltip */}
-      {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-72 p-3 bg-pm-card/95 backdrop-blur-md border border-pm-border shadow-2xl rounded-xl z-50 space-y-2 text-left animate-in fade-in zoom-in-95 duration-150">
+      {/* Glassmorphic Whitelist Popover Tooltip (Portal to document.body) */}
+      {isOpen && createPortal(
+        <div
+          ref={popoverRef}
+          style={{ top: `${portalCoords.top}px`, left: `${portalCoords.left}px` }}
+          className="fixed z-[999999] w-72 p-3 bg-pm-card/95 backdrop-blur-md border border-pm-border shadow-2xl rounded-xl space-y-2 text-left animate-in fade-in zoom-in-95 duration-150"
+        >
           <div className="flex items-center justify-between border-b border-pm-border pb-2">
             <span className="text-xs font-bold text-pm-text flex items-center gap-1.5">
               <Globe className="w-3.5 h-3.5 text-emerald-400" /> Whitelisted Store Domains ({domains.length})
@@ -147,7 +190,8 @@ export const DomainPillGroup: React.FC<DomainPillGroupProps> = ({
               <div className="p-3 text-center text-xs text-pm-secondary italic">No matching domains found</div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
