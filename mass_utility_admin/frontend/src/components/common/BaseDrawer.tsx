@@ -72,7 +72,7 @@ export const BaseDrawer: React.FC<BaseDrawerProps> = ({
   }[width];
 
   return (
-    <div className={`fixed inset-0 top-0 left-0 w-screen h-screen min-h-screen bg-slate-950/60 dark:bg-slate-950/75 backdrop-blur-sm z-[9999999] flex justify-end ${isClosing ? 'animate-backdrop-fade-out' : 'animate-backdrop-fade'}`}>
+    <div className={`fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/60 dark:bg-slate-950/75 backdrop-blur-sm z-[9999999] flex justify-end ${isClosing ? 'animate-backdrop-fade-out' : 'animate-backdrop-fade'}`}>
       {/* Backdrop overlay click handler */}
       <div className="absolute inset-0" onClick={handleRequestClose} />
 

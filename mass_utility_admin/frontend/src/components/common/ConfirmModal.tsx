@@ -60,8 +60,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   const config = getVariantConfig();
 
   return (
-    <div className="fixed inset-0 top-0 left-0 w-screen h-screen min-h-screen bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-center justify-center p-4 overflow-y-auto">
-      <div className={`bg-pm-card border border-pm-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150 my-auto ${config.border}`}>
+    <div className="fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-start justify-center pt-16 pb-8 px-4 overflow-y-auto">
+      <div className={`bg-pm-card border border-pm-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150 ${config.border}`}>
         <div className="p-6 space-y-4">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-pm-input rounded-xl border border-pm-border">

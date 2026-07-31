@@ -50,20 +50,20 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   const titleColorClass = variant === 'danger' ? 'text-rose-500' : 'text-pm-text';
 
   return (
-    <div className="fixed inset-0 top-0 left-0 w-screen h-screen min-h-screen bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-start justify-center pt-12 pb-8 px-4 overflow-y-auto">
       <div
-        className={`bg-pm-card border ${borderClass} rounded-xl ${maxWidthClasses} w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto max-h-[90vh] flex flex-col justify-between gap-4`}
+        className={`bg-pm-card border ${borderClass} rounded-2xl ${maxWidthClasses} w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col justify-between overflow-hidden`}
       >
         {/* Modal Header */}
-        <div className="flex justify-between items-center pb-3 border-b border-pm-border shrink-0">
-          <h3 className={`text-base font-bold ${titleColorClass} flex items-center gap-2`}>
-            {Icon && <Icon className={`w-5 h-5 ${iconColorClass}`} />}
+        <div className="p-4 bg-pm-input/20 border-b border-pm-border flex justify-between items-center shrink-0">
+          <h3 className={`text-sm font-bold ${titleColorClass} flex items-center gap-2`}>
+            {Icon && <Icon className={`w-4.5 h-4.5 ${iconColorClass}`} />}
             {title}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-pm-secondary hover:text-pm-text p-1 rounded-lg hover:bg-pm-input transition text-xs"
+            className="text-pm-secondary hover:text-pm-text p-1 rounded-lg hover:bg-pm-input transition text-xs cursor-pointer"
             title="Close (ESC)"
           >
             ✕
@@ -71,7 +71,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         </div>
 
         {/* Modal Body Content */}
-        <div className="overflow-y-auto flex-1 pr-1">{children}</div>
+        <div className="p-5 overflow-y-auto flex-1 custom-scrollbar">{children}</div>
       </div>
     </div>
   );

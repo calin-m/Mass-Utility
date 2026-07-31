@@ -254,7 +254,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onDemoClick }) => {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 pb-8 px-4 bg-black/60 backdrop-blur-md animate-fadeIn">
           <div className="w-full max-w-sm bg-pm-card/95 backdrop-blur-2xl border border-pm-border/80 rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="text-center space-y-1">
               <h2 className="text-lg font-bold text-pm-text-primary">Request Password Reset</h2>
