@@ -83,8 +83,8 @@ export const FolderSelector: React.FC<FolderSelectorProps> = ({
 
       <div className="border border-pm-border rounded-xl bg-pm-input/30 p-4 max-h-[420px] overflow-y-auto">
         {folders.length === 0 ? (
-          <div className="flex items-center justify-center py-6 text-xs text-pm-text-secondary">
-            ⏳ Scanning filesystem and calculating directory sizes...
+          <div className="flex flex-col items-center justify-center py-6 text-xs text-pm-text-secondary gap-1">
+            <span>📁 No directories detected in root folder scan.</span>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">

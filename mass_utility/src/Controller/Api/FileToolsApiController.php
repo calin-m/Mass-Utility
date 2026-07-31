@@ -278,7 +278,7 @@ class FileToolsApiController extends AbstractApiController
             $rootDir = _PS_ROOT_DIR_;
             $rootDir = rtrim(str_replace('\\', '/', $rootDir), '/') . '/';
             
-            $exclusionsRaw = Configuration::get('PM_FILE_EXCLUSIONS') ?? '';
+            $exclusionsRaw = (string)(Configuration::get('PM_FILE_EXCLUSIONS') ?: '');
             $activeExclusions = array_filter(array_map('trim', explode("\n", $exclusionsRaw)));
             $normalizedExclusions = [];
             foreach ($activeExclusions as $ex) {
