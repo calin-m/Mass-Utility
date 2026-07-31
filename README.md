@@ -280,6 +280,13 @@ All V2 React components inherit from unified CSS design tokens (`var(--pm-*)`):
   - **Tier 2 (Secondary Actions)**: `.pm-btn-neutral` (Subtle theme pills for non-destructive actions like `👁️ Inspect`, `📥 Download`, `📌 Pin`).
   - **Tier 3 (Destructive / Warning Actions)**: `variant="warning"` (Amber Orange pill), `variant="success"` (Emerald Green pill), `.pm-btn-danger-outline` / `variant="danger"` (Rose Red pill for `🗑️ Delete`).
 
+### 2.6 Frontend Utility & Detached Portal Engines
+- **React Portals Detached Overlay Engine (`overlay.tsx` & `createPortal`)**: Intercepts modal and toast rendering by attaching elements directly to `document.body` via `ReactDOM.createPortal(modalJSX, document.body)`. Bypasses CSS container overflow and stacking context bounds, guaranteeing `z-[9999999]` edge-to-edge full-screen backdrop blur (`backdrop-blur-md`) and 100% vertical & horizontal centering (`flex items-center justify-center`).
+- **Frontend Visual AST Compiler (`astCompiler.ts`)**: Pure TypeScript visual condition compiler (`translateGroup`, `compileAst`, `formatVal`) translating complex nested condition rule groups (`AND`, `OR`, `NAND`, `NOR`, `XOR`) into standardized MariaDB SQL `WHERE` clauses and human-readable expressions.
+- **Super-Admin Offline Demo Adapter & Vault (`AdminFetchAdapter.ts` & `DemoVault`)**: In-memory state vault (`DemoVault`) and network adapter (`AdminFetchAdapter.ts`) that intercepts network calls when `$isDemoRequest` is active, simulating realistic 150ms network latency and supporting full offline CRUD mutations.
+- **Domain & Subscription Utilities (`domainUtils.ts`, `tierUtils.ts`, `licenseUtils.ts`)**: `domainUtils.ts` parses multi-line store URL bindings and builds popover pill groups; `tierUtils.ts` normalizes subscription tier badges and quota thresholds; `licenseUtils.ts` formats 16-character license keys with masking toggles.
+- **Slide-Out Drawer Primitive (`BaseDrawer.tsx`)**: Event-driven drawer panel listening to CSS animation keyframes (`onAnimationEnd`) to slide in/out smooth metadata drawers for inspecting client account profiles and license key details.
+
 ---
 
 ## 📁 3. Monorepo Repository Structure
@@ -310,6 +317,9 @@ d:/Project Mass/
 │       ├── Engine/
 │       │   ├── DatabaseDiffEngine.php      # Checksum drift comparison & table diff engine
 │       │   └── QueryTranslationEngine.php  # AST compiler, query whitelist, rollback compiler
+│       ├── Repository/
+│       │   ├── DatabaseRepository.php      # Catalog queries & raw SQL execution repository
+│       │   └── SystemRepository.php        # Configuration & system status lookup repository
 │       └── Service/
 │           ├── BridgeLogger.php            # Structured JSON & file logger
 │           ├── BridgeProgressTracker.php   # Long-running job state & progress telemetry
@@ -329,15 +339,15 @@ d:/Project Mass/
 │   ├── frontend/                   # V2 REACT 18 + TYPESCRIPT + VITE SPA SOURCE
 │   │   ├── src/
 │   │   │   ├── components/         # React Tab Orchestrators & Feature Panels
-│   │   │   │   ├── database/       # DatabaseToolsTab.tsx (Diff modal, query runner, profiler)
+│   │   │   │   ├── database/       # DatabaseToolsTab.tsx (BackupToolsPanel, RestoreRunnerPanel, ProfilerPanel, SweeperPanel)
 │   │   │   │   ├── file_tools/     # FileToolsTab.tsx, BackupsGrid.tsx, FolderSelector.tsx
 │   │   │   │   ├── governor/       # GovernorTab.tsx, BackupProgress.tsx
 │   │   │   │   ├── history/        # MutationHistoryTab.tsx, EventLogsTab.tsx
 │   │   │   │   ├── query/          # QueryMutateTab.tsx, PresetLoadoutBar.tsx
 │   │   │   │   ├── security/       # MerchantSecurityTab.tsx (4-Card inspector & 1-click repairs)
 │   │   │   │   ├── settings/       # SettingsTab.tsx, SettingsGeneral.tsx, SettingsSecurity.tsx
-│   │   │   │   └── common/         # Atomic UI Primitives (SectionHeader, BaseModal, DataTable)
-│   │   │   ├── utils/              # sqlReconstructor.ts, FetchService.ts
+│   │   │   │   └── common/         # Atomic UI Primitives (SectionHeader, BaseModal, DataTable, ProgressHUD)
+│   │   │   ├── utils/              # astCompiler.ts, sqlReconstructor.ts, FetchService.ts, overlay.tsx
 │   │   │   └── index.css           # Design tokens, cross-browser scrollbars (.pm-scrollbar)
 │   │   ├── package.json            # Vite build scripts
 │   │   └── vite.config.ts          # Vite build configuration (outputs to public/v2/)
@@ -345,8 +355,13 @@ d:/Project Mass/
 │   │   ├── index.php               # Front Router, OTT decryptor, Session Guard & Download Interceptor
 │   │   └── v2/                     # Compiled V2 React SPA static assets (index.html, JS, CSS)
 │   └── src/
-│       ├── Controller/Api/         # Dashboard API endpoints
+│       ├── Controller/Api/         # Dashboard API endpoints (LicenseVerifyController.php)
+│       ├── Repository/
+│       │   ├── CatalogRepository.php   # PrestaShop catalog telemetry & structure queries
+│       │   └── LicenseVerifyRepository.php # Local license cache verification repository
 │       └── Service/
+│           ├── MassUpdateLogRepository.php # AST mutation history repository
+│           ├── PresetRepository.php        # Saved query preset manager
 │           ├── SQLiteConnectionManager.php # SQLite PDO manager with busy timeout & WAL fallback
 │           └── TenantSettingsRepository.php# Settings repository with KV cache
 │
@@ -358,6 +373,8 @@ d:/Project Mass/
     │   ├── Controller/
     │   │   └── AdminApiController.php # Admin API dispatcher (login, list, create/update company/user/tier)
     │   ├── Repository/
+    │   │   ├── CompanyRepository.php  # Company profiles & license quota limits repository
+    │   │   ├── UserRepository.php     # Client user accounts & company linking repository
     │   │   └── LicenseRepository.php  # License, company, and user CRUD with B2B retention safeguard
     │   └── Service/
     │       ├── SQLiteConnectionManager.php # Singleton PDO factory for SQLite connection & WAL mode
@@ -369,12 +386,12 @@ d:/Project Mass/
             │   ├── clients/        # ClientListView.tsx, ClientDetailsView.tsx, ClientCredentialsBanner.tsx
             │   ├── companies/      # CompanyListView.tsx, CompanyDetailsView.tsx, CompanyHeaderStats.tsx
             │   ├── licenses/       # LicenseDetailsView.tsx, ReassignLicenseModal.tsx
-            │   ├── roles/          # CapabilitySimulator.tsx
+            │   ├── roles/          # CapabilitySimulator.tsx, CapabilityGlossaryModal.tsx, RoleDeletionGuardModal.tsx
             │   ├── security/       # SecurityAuditGrid.tsx
-            │   └── common/         # TableCellIdentity, TableCellActions, ConfirmModal, LicenseRowCard
+            │   └── common/         # BaseDrawer, BaseModal, ConfirmModal, TableCellIdentity, TableCellActions, DomainPillGroup, PaginationBar, IssueLicenseModal
             ├── hooks/              # useAdminData.ts (Custom React hook encapsulating state)
             ├── types/              # adminApi.ts (Central TypeScript domain models)
-            └── utils/              # tierUtils.ts, licenseUtils.ts
+            └── utils/              # AdminFetchAdapter.ts (DemoVault), domainUtils.ts, tierUtils.ts, licenseUtils.ts
 ```
 
 ---
@@ -752,6 +769,10 @@ CREATE TABLE pm_audit_logs (
 | `api_setup` | `POST` | No | Initializes master Super-Admin credentials on first launch. |
 | `api_login` | `POST` | No | Authenticates Super Admin credentials against `pm_admins`. |
 | `api_logout` | `POST` | Yes | Destroys Super Admin session and clears auth cookies. |
+| `api_user_verify` | `POST` | No | Verifies client user credentials and returns session token. |
+| `api_send_password_reset_link` | `POST` | No | Generates and sends password reset token link for client accounts. |
+| `api_verify_reset_token` | `POST` | No | Validates password reset token authenticity and expiration. |
+| `api_complete_password_reset` | `POST` | No | Finalizes password reset with BCRYPT password hashing. |
 | `api_list` | `GET` | Yes | Returns all clients, active licenses, package tiers, and telemetry. |
 | `api_companies` | `GET` / `POST` | Yes | Fetches or manages B2B company directory profiles. |
 | `api_create_company` | `POST` | Yes | Creates new B2B company profile with max license capacity limit. |
@@ -770,17 +791,23 @@ CREATE TABLE pm_audit_logs (
 | `api_update_license_domains` | `POST` | Yes | Updates or unbinds authorized store domain binding (`store_url`). |
 | `api_delete_license` | `POST` | Yes | Permanently revokes and deletes a license key. |
 | `api_package_tiers` | `GET` / `POST` | Yes | Lists or updates subscription tier definitions (`basic`, `pro`, `enterprise`). |
-| `api_create_tier` | `POST` | Yes | Creates a new custom subscription tier quota definition. |
+| `api_create_tier` / `api_save_tier` | `POST` | Yes | Creates or updates subscription tier quota definitions. |
 | `api_update_tier` | `POST` | Yes | Updates an existing subscription tier definition. |
 | `api_delete_tier` | `POST` | Yes | Deletes a custom subscription tier definition. |
 | `api_roles` | `GET` / `POST` | Yes | Returns RBAC roles, permission definitions, and tier mappings. |
+| `api_create_role` / `api_role_create` | `POST` | Yes | Creates custom RBAC security role definition. |
+| `api_update_role` / `api_role_update` | `POST` | Yes | Updates permission mappings for an RBAC security role. |
+| `api_delete_role` / `api_role_delete` | `POST` | Yes | Deletes custom RBAC security role definition. |
+| `api_user_update_role` | `POST` | Yes | Assigns specific RBAC role to a client user account. |
+| `api_company_roles` | `GET` | Yes | Returns RBAC role assignments scoped to a specific company. |
+| `api_company_role_update` | `POST` | Yes | Updates or resets company-specific RBAC permission overrides. |
 | `api_get_diagnostics` | `GET` | Yes | Runs 4-Card SaaS Server Infrastructure Security Audit. |
 | `api_apply_security_headers` | `POST` | Yes | Injects HSTS, `nosniff`, `SAMEORIGIN` headers into SaaS root `.htaccess`. |
 | `api_enable_ssl_redirect` | `POST` | Yes | Injects 301 HTTPS Rewrite Rule into SaaS root `.htaccess`. |
 | `api_fix_permissions` | `POST` | Yes | Repairs SaaS server directory (`0755`) and file (`0644`) permissions. |
 | `api_change_password` | `POST` | Yes | Changes active Super-Admin account password. |
-| `api_audit_logs` | `GET` | Yes | Returns filterable operations audit log records (`pm_audit_logs`). |
-| `api_clear_audit_logs` | `POST` | Yes | Clears operations audit trail (protected by `<ConfirmModal>`). |
+| `api_audit_logs` / `api_get_admin_logs` | `GET` | Yes | Returns filterable operations audit log records (`pm_audit_logs`). |
+| `api_clear_audit_logs` / `api_clear_admin_logs` | `POST` | Yes | Clears operations audit trail (protected by `<ConfirmModal>`). |
 | `api_export_admin_logs_csv` | `GET` | Yes | Exports operations audit trail as a downloadable CSV file. |
 
 ---
@@ -808,14 +835,24 @@ npm run build
 ```
 *Outputs compiled assets (`index-*.js`, `index-*.css`) to `mass_utility_admin/public/v2/`.*
 
-### 12.3 Running Automated Security & System Audits
-Verify project health and compliance:
+### 12.3 Orchestra Conductor Suite & Diagnostic Tooling
+The workspace includes a complete Python RAM engine suite for static audits, lockfile verification, and automated roadmap management:
+
 ```bash
-# Run 360 Workspace Inspector Telemetry Matrix
+# 1. Environment & Framework Health Diagnostic (Verifies PHP, SQLite WAL, Node, Git, & lockfile)
+python .orchestra/.conductor/tools/cli_doctor.py
+
+# 2. 360 Workspace Inspector Telemetry Matrix (AST symbol maps & REST route contract maps)
 python .orchestra/.conductor/tools/workspace_inspector.py matrix
 
-# Run Automated Security Audit Pipeline
+# 3. Rapid Test Suite (Static audits, WCAG 2.1 AA accessibility linter, & contract guards)
+python .orchestra/.conductor/tools/cli_test_suite.py --fast
+
+# 4. Security & Vulnerability Audit
 python .orchestra/.conductor/tools/cli_security_audit.py
+
+# 5. Automated Roadmap Lifecycle Manager
+python .orchestra/.conductor/tools/roadmap_manager.py list
 ```
 
 ### 12.4 Zero-Trust Governance & 4-Stage Deferred Commit Pipeline

@@ -75,6 +75,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
 
   // Delete Modal State
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isSuspendConfirmOpen, setIsSuspendConfirmOpen] = useState(false);
 
   // Inline Add Team Member Form State
   const [newMemberEmail, setNewMemberEmail] = useState('');
@@ -355,7 +356,7 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
             variant={isSuspended ? 'success' : 'warning'}
             size="sm"
             icon={isSuspended ? ShieldCheck : ShieldAlert}
-            onClick={handleToggleStatus}
+            onClick={() => setIsSuspendConfirmOpen(true)}
             disabled={submitting}
           >
             {isSuspended ? 'Re-Activate' : 'Suspend'}
@@ -858,6 +859,23 @@ export const CompanyDetailsView: React.FC<CompanyDetailsViewProps> = ({ company,
       )}
 
 
+
+      {/* Suspend Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isSuspendConfirmOpen}
+        onClose={() => setIsSuspendConfirmOpen(false)}
+        onConfirm={async () => {
+          setIsSuspendConfirmOpen(false);
+          await handleToggleStatus();
+        }}
+        title={isSuspended ? "Re-Activate Company Account?" : "Suspend Company Account?"}
+        message={isSuspended 
+          ? `Re-activating company profile "${company.company_name}" will restore access for all associated team members and active licenses.` 
+          : `Suspending company profile "${company.company_name}" will temporarily block API access for all associated team members.`}
+        confirmText={isSuspended ? "Confirm Re-Activate" : "Confirm Suspend"}
+        variant={isSuspended ? "primary" : "warning"}
+        loading={submitting}
+      />
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

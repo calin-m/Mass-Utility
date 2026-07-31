@@ -1,5 +1,6 @@
 // @Arch[BaseModal]
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { LucideIcon } from 'lucide-react';
 
 interface BaseModalProps {
@@ -25,16 +26,18 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   const previousFocusRef = React.useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (isOpen && !previousFocusRef.current) {
-      previousFocusRef.current = document.activeElement as HTMLElement | null;
+    if (isOpen && !previousFocusRef.current && document.activeElement instanceof HTMLElement) {
+      previousFocusRef.current = document.activeElement;
     }
+  }, [isOpen]);
 
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       if (e.key === 'Escape') {
         onClose();
       } else if (e.key === 'Tab') {
-        const modalEl = document.querySelector('.bg-pm-card.shadow-2xl');
+        const modalEl = document.querySelector('[role="dialog"]');
         if (!modalEl) return;
         const focusables = modalEl.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -85,10 +88,10 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   const iconColorClass = variant === 'danger' ? 'text-rose-500' : 'text-purple-600 dark:text-purple-400';
   const titleColorClass = variant === 'danger' ? 'text-rose-500' : 'text-pm-text';
 
-  return (
-    <div className="fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-start justify-center pt-12 pb-8 px-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  return createPortal(
+    <div className="fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div
-        className={`bg-pm-card border ${borderClass} rounded-2xl ${maxWidthClasses} w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col justify-between overflow-hidden`}
+        className={`bg-pm-card border ${borderClass} rounded-2xl ${maxWidthClasses} w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col justify-between overflow-hidden my-auto`}
       >
         {/* Modal Header */}
         <div className="p-4 bg-pm-input/20 border-b border-pm-border flex justify-between items-center shrink-0">
@@ -110,6 +113,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         {/* Modal Body Content */}
         <div className="p-5 overflow-y-auto flex-1 custom-scrollbar">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

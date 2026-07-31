@@ -55,6 +55,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
 
   // Password Reset Modal State
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
   const [resetPassword, setResetPassword] = useState('');
   const [showResetPassword, setShowResetPassword] = useState(false);
 
@@ -258,7 +259,7 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
             variant={isSuspended ? 'success' : 'warning'}
             size="sm"
             icon={isSuspended ? ShieldCheck : ShieldAlert}
-            onClick={handleToggleStatus}
+            onClick={() => setShowStatusModal(true)}
             disabled={submitting}
           >
             {isSuspended ? 'Re-Activate' : 'Suspend'}
@@ -656,6 +657,23 @@ export const ClientDetailsView: React.FC<ClientDetailsViewProps> = ({ user, lice
           </div>
         </form>
       </BaseModal>
+
+      {/* Status Toggle Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showStatusModal}
+        onClose={() => setShowStatusModal(false)}
+        onConfirm={async () => {
+          setShowStatusModal(false);
+          await handleToggleStatus();
+        }}
+        title={isSuspended ? "Re-Activate Client Account?" : "Suspend Client Account?"}
+        message={isSuspended
+          ? `Re-activating client account "${user.email}" will restore login access to assigned company management.`
+          : `Suspending client account "${user.email}" will temporarily disable authentication for this user.`}
+        confirmText={isSuspended ? "Confirm Re-Activate" : "Confirm Suspend"}
+        variant={isSuspended ? "primary" : "warning"}
+        loading={submitting}
+      />
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

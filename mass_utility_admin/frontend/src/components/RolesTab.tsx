@@ -8,6 +8,7 @@ import { RbacRole, RbacPermission, Company, UserAccount, License } from '../type
 import { AdminFetchAdapter, getApiUrl } from '../utils/AdminFetchAdapter';
 
 import { BaseModal } from './common/BaseModal';
+import { ConfirmModal } from './common/ConfirmModal';
 
 // Extracted Sub-Components
 import { RoleCard } from './roles/RoleCard';
@@ -81,6 +82,8 @@ export const RolesTab: React.FC<RolesTabProps> = ({
   // Modal States
   const [showGlossaryModal, setShowGlossaryModal] = useState(false);
   const [deletingRole, setDeletingRole] = useState<RbacRole | null>(null);
+  const [roleToDeleteState, setRoleToDeleteState] = useState<{ id: number; name: string } | null>(null);
+  const [resetCompanyConfirmRole, setResetCompanyConfirmRole] = useState<string | null>(null);
   const [reassignRole, setReassignRole] = useState<string>('Observer');
 
   // Capability Simulator State
@@ -307,9 +310,8 @@ export const RolesTab: React.FC<RolesTabProps> = ({
     }
   };
 
-  const executeDeleteRoleWithConfirm = async (roleId: number, roleName: string) => {
-    if (!window.confirm(`Are you sure you want to delete custom role '${roleName}'?`)) return;
-    await executeDeleteRoleDirect(roleId, roleName);
+  const executeDeleteRoleWithConfirm = (roleId: number, roleName: string) => {
+    setRoleToDeleteState({ id: roleId, name: roleName });
   };
 
   const executeDeleteRoleDirect = async (roleId: number, roleName: string) => {
@@ -661,6 +663,24 @@ export const RolesTab: React.FC<RolesTabProps> = ({
         isOpen={showGlossaryModal}
         permissions={permissions}
         onClose={() => setShowGlossaryModal(false)}
+      />
+
+      {/* Custom Role Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!roleToDeleteState}
+        onClose={() => setRoleToDeleteState(null)}
+        onConfirm={async () => {
+          if (roleToDeleteState) {
+            const { id, name } = roleToDeleteState;
+            setRoleToDeleteState(null);
+            await executeDeleteRoleDirect(id, name);
+          }
+        }}
+        title="Delete Custom Role?"
+        message={`Are you sure you want to permanently delete custom role "${roleToDeleteState?.name}"?`}
+        confirmText="Confirm Delete"
+        variant="danger"
+        loading={saving}
       />
 
       {/* Role Deletion Guard Modal */}

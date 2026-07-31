@@ -1,5 +1,6 @@
 // @Arch[ConfirmModal]
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, ShieldAlert, CheckCircle, X } from 'lucide-react';
 import { Button } from './Button';
 import { useTranslation } from '../../i18n/LanguageContext';
@@ -12,7 +13,7 @@ interface ConfirmModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'danger' | 'warning' | 'info';
+  variant?: 'danger' | 'warning' | 'info' | 'primary';
   loading?: boolean;
 }
 
@@ -47,6 +48,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           btnVariant: 'primary' as const,
           border: 'border-l-4 border-l-amber-500',
         };
+      case 'primary':
       case 'info':
       default:
         return {
@@ -59,9 +61,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
   const config = getVariantConfig();
 
-  return (
-    <div className="fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-start justify-center pt-16 pb-8 px-4 overflow-y-auto">
-      <div className={`bg-pm-card border border-pm-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150 ${config.border}`}>
+  return createPortal(
+    <div className="fixed inset-0 top-0 left-0 w-full h-full bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md z-[9999999] flex items-center justify-center p-4 overflow-y-auto">
+      <div className={`bg-pm-card border border-pm-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150 my-auto ${config.border}`}>
         <div className="p-6 space-y-4">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-pm-input rounded-xl border border-pm-border">
@@ -94,6 +96,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
