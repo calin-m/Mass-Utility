@@ -1283,6 +1283,34 @@ class AdminApiController
         }
     }
 
+    // @Arch[AdminApiRoute:api_audit_logs]
+    private function audit_logs(): void
+    {
+        header('Content-Type: application/json');
+        if (!$this->auth->isAuthenticated()) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+
+        $search = isset($_GET['search']) ? trim((string)$_GET['search']) : null;
+        $actionType = isset($_GET['action_type']) ? trim((string)$_GET['action_type']) : null;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 500;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
+        try {
+            $logs = $this->repo->getAdminLogs($search, $actionType, $limit, $offset);
+            echo json_encode(['success' => true, 'logs' => $logs]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    // @Arch[AdminApiRoute:api_clear_audit_logs]
+    private function clear_audit_logs(): void
+    {
+        $this->clear_admin_logs();
+    }
+
     // @Arch[AdminApiRoute:api_clear_admin_logs]
     private function clear_admin_logs(): void
     {
