@@ -8,7 +8,7 @@ interface BaseDrawerProps {
   title: string;
   subtitle?: string;
   icon?: LucideIcon;
-  width?: 'md' | 'lg' | 'xl' | '2xl';
+  width?: 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
   children: React.ReactNode;
 }
 
@@ -65,7 +65,10 @@ export const BaseDrawer: React.FC<BaseDrawerProps> = ({
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
-    '2xl': 'max-w-2xl'
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl'
   }[width];
 
   return (

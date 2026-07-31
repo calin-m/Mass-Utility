@@ -216,7 +216,7 @@ export const RolePermissionsModal: React.FC<RolePermissionsModalProps> = ({ isOp
       title="RBAC Roles & Permissions Matrix"
       subtitle="Inspect platform security roles, user privileges, and granted capability permissions"
       icon={Shield}
-      width="2xl"
+      width="4xl"
     >
       <div className="space-y-5">
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
@@ -315,9 +315,9 @@ export const RolePermissionsModal: React.FC<RolePermissionsModalProps> = ({ isOp
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-pm-input text-pm-secondary font-bold uppercase text-[10px] border-b border-pm-border">
-                  <th className="p-4 min-w-[240px] sticky left-0 bg-pm-input z-10 border-r border-pm-border/50">Capability Permission</th>
+                  <th className="p-3 min-w-[210px] sticky left-0 bg-pm-input z-10 border-r border-pm-border/50">Capability Permission</th>
                   {roles.map(r => (
-                    <th key={r.id} className="p-4 text-center min-w-[140px]">
+                    <th key={r.id} className="p-3 text-center min-w-[115px]">
                       <div className="flex flex-col items-center gap-1.5">
                         <StatusBadge label={r.name} customColor={r.slug === 'SuperAdmin' ? 'purple' : r.slug === 'CompanyAdmin' ? 'indigo' : 'emerald'} />
                         <div className="flex items-center gap-1 mt-1">
