@@ -28,7 +28,7 @@ interface DemoVault {
   deleteLicense: (id: number) => void;
   createTier: (tier: any) => any;
   deleteTier: (id: number) => void;
-  clearAuditLogs: () => void;
+  clearAuditLogs: () => any;
 }
 
 let activeVault: DemoVault | null = null;
@@ -238,9 +238,10 @@ export class AdminFetchAdapter {
       case 'api_audit_logs':
         return { success: true, logs: activeVault.getAuditLogs() };
 
-      case 'api_clear_audit_logs':
-        activeVault.clearAuditLogs();
-        return { success: true, logs: [] };
+      case 'api_clear_audit_logs': {
+        const clearedLogs = activeVault.clearAuditLogs() || [];
+        return { success: true, logs: clearedLogs };
+      }
 
       case 'api_system_status':
         return {

@@ -211,6 +211,42 @@ const MOCK_LICENSES: License[] = [
   }
 ];
 
+const MOCK_AUDIT_LOGS = [
+  {
+    id: 1,
+    admin_username: 'superadmin',
+    action_type: 'LICENSE_GENERATED',
+    target_entity: 'LICENSE',
+    target_id: 'MASS-8F4A-9C2E',
+    details: 'Generated Enterprise Tier license key for Acme Enterprise Store',
+    details_parsed: { tier: 'enterprise', company: 'Acme Enterprise Store' },
+    ip_address: '127.0.0.1',
+    created_at: '2026-07-30 08:30:00'
+  },
+  {
+    id: 2,
+    admin_username: 'superadmin',
+    action_type: 'COMPANY_CREATED',
+    target_entity: 'COMPANY',
+    target_id: 'PrestaShop Global Direct',
+    details: 'Created new B2B company profile',
+    details_parsed: { max_licenses: 5 },
+    ip_address: '127.0.0.1',
+    created_at: '2026-07-30 09:15:00'
+  },
+  {
+    id: 3,
+    admin_username: 'superadmin',
+    action_type: 'USER_ROLE_UPDATED',
+    target_entity: 'USER',
+    target_id: 'john@acmestore.com',
+    details: 'Assigned SuperAdmin role to client account',
+    details_parsed: { role: 'SuperAdmin' },
+    ip_address: '127.0.0.1',
+    created_at: '2026-07-30 10:45:00'
+  }
+];
+
 export const useAdminData = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [hasAdmin, setHasAdmin] = useState(true);
@@ -220,14 +256,15 @@ export const useAdminData = () => {
       (window as any).PM_IS_DEMO === true ||
       (window as any).isDemoMode === true ||
       window.location.pathname.includes('/v2/') ||
-      localStorage.getItem('pm_demo_mode') === 'true'
+      localStorage.getItem('pm_admin_demo_mode') === 'true'
     );
   });
 
-  const [licenses, setLicenses] = useState<License[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [licenses, setLicenses] = useState<License[]>([]);
   const [tiers, setTiers] = useState<PackageTier[]>([]);
   const [users, setUsers] = useState<UserAccount[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>(MOCK_AUDIT_LOGS);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<ToastAlert | null>(null);
 
@@ -241,6 +278,7 @@ export const useAdminData = () => {
     setUsers([...MOCK_USERS]);
     setTiers([...MOCK_TIERS]);
     setLicenses([...MOCK_LICENSES]);
+    setAuditLogs([...MOCK_AUDIT_LOGS]);
     showAlert('🔄 Demo Vault Reset to Seed Defaults', 'success');
   }, [showAlert]);
 
@@ -253,6 +291,7 @@ export const useAdminData = () => {
     setUsers([...MOCK_USERS]);
     setTiers([...MOCK_TIERS]);
     setLicenses([...MOCK_LICENSES]);
+    setAuditLogs([...MOCK_AUDIT_LOGS]);
     showAlert('🛡️ Super Admin Demo Mode Activated', 'success');
   }, [showAlert]);
 
@@ -447,41 +486,7 @@ export const useAdminData = () => {
         { id: 8, slug: 'settings.update', group_name: 'System Settings', description: 'Configure cron automation and governor rules' },
         { id: 9, slug: 'users.manage', group_name: 'User Access', description: 'Manage company users and role assignments' }
       ],
-      getAuditLogs: () => [
-        {
-          id: 1,
-          admin_username: 'superadmin',
-          action_type: 'LICENSE_GENERATED',
-          target_entity: 'LICENSE',
-          target_id: 'MASS-8F4A-9C2E',
-          details: 'Generated Enterprise Tier license key for Acme Enterprise Store',
-          details_parsed: { tier: 'enterprise', company: 'Acme Enterprise Store' },
-          ip_address: '127.0.0.1',
-          created_at: '2026-07-30 08:30:00'
-        },
-        {
-          id: 2,
-          admin_username: 'superadmin',
-          action_type: 'COMPANY_CREATED',
-          target_entity: 'COMPANY',
-          target_id: 'PrestaShop Global Direct',
-          details: 'Created new B2B company profile',
-          details_parsed: { max_licenses: 5 },
-          ip_address: '127.0.0.1',
-          created_at: '2026-07-30 09:15:00'
-        },
-        {
-          id: 3,
-          admin_username: 'superadmin',
-          action_type: 'USER_ROLE_UPDATED',
-          target_entity: 'USER',
-          target_id: 'john@acmestore.com',
-          details: 'Assigned SuperAdmin role to client account',
-          details_parsed: { role: 'SuperAdmin' },
-          ip_address: '127.0.0.1',
-          created_at: '2026-07-30 10:45:00'
-        }
-      ],
+      getAuditLogs: () => auditLogs,
       addCompany,
       updateCompany,
       toggleCompanyStatus,
@@ -505,9 +510,25 @@ export const useAdminData = () => {
       deleteTier: (id: number) => {
         setTiers(prev => prev.filter(t => t.id !== id));
       },
-      clearAuditLogs: () => {}
+      clearAuditLogs: () => {
+        const clearedLog = [
+          {
+            id: 1,
+            admin_username: 'superadmin',
+            action_type: 'CLEAR_AUDIT_LOGS',
+            target_entity: 'audit_trail',
+            target_id: null,
+            details: 'Purged operations audit log history in sandbox',
+            details_parsed: { status: 'cleared' },
+            ip_address: '127.0.0.1',
+            created_at: new Date().toISOString().replace('T', ' ').slice(0, 19)
+          }
+        ];
+        setAuditLogs(clearedLog);
+        return clearedLog;
+      }
     });
-  }, [isDemoMode, companies, users, licenses, tiers, addCompany, updateCompany, toggleCompanyStatus, deleteCompany, addUser, updateUser, toggleUserStatus, deleteUser, addLicense, deleteLicense]);
+  }, [isDemoMode, companies, users, licenses, tiers, auditLogs, addCompany, updateCompany, toggleCompanyStatus, deleteCompany, addUser, updateUser, toggleUserStatus, deleteUser, addLicense, deleteLicense]);
 
   useEffect(() => {
     checkAuth();

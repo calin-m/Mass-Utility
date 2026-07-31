@@ -90,7 +90,11 @@ export const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ onNotify }) => {
       if (data.success) {
         onNotify('🗑️ All audit log entries purged successfully!', 'success');
         setIsClearModalOpen(false);
-        fetchLogs();
+        if (Array.isArray(data.logs)) {
+          setLogs(data.logs);
+        } else {
+          fetchLogs();
+        }
       } else {
         onNotify(data.error || 'Failed to clear audit logs.', 'error');
       }
