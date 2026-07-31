@@ -18,6 +18,7 @@ import { Button } from '../common/Button';
 import { FormInput } from '../common/FormInput';
 import { FormSelect } from '../common/FormSelect';
 import { PaginationBar } from '../common/PaginationBar';
+import { useTableDensity } from '../../hooks/useTableDensity';
 import { useTranslation } from '../../i18n/LanguageContext';
 import { getSortedTierOptions } from '../../utils/tierUtils';
 import { AdminFetchAdapter, getApiUrl } from '../../utils/AdminFetchAdapter';
@@ -103,7 +104,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
   const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
   const [editCompany, setEditCompany] = useState('');
 
-  const [density, setDensity] = useState<'compact' | 'comfortable'>('comfortable');
+  const [density, setDensity] = useTableDensity('comfortable');
 
   const setCreateEmail = (val: string) => {
     setCreateEmailState(val);
@@ -467,7 +468,7 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                           title={user.name ? `${user.name} (${user.email})` : user.email}
                           onTitleClick={() => onSelectClient(user, 'profile')}
                           subtitle={
-                            <span className="flex items-center gap-1.5 inline-flex flex-wrap">
+                            <span className="flex items-center gap-1.5 inline-flex whitespace-nowrap truncate max-w-full">
                               {user.company_name ? (
                                 <>
                                   <button

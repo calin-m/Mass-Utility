@@ -33,6 +33,7 @@ export const TableCellActions: React.FC<TableCellActionsProps> = ({
           variant="neutral"
           size="sm"
           icon={Eye}
+          noScale
           onClick={onInspect}
         >
           {inspectLabel}
@@ -44,6 +45,7 @@ export const TableCellActions: React.FC<TableCellActionsProps> = ({
           variant="neutral"
           size="sm"
           icon={Edit}
+          noScale
           onClick={onEdit}
         >
           {editLabel}
@@ -55,6 +57,8 @@ export const TableCellActions: React.FC<TableCellActionsProps> = ({
           variant={isSuspended ? 'success' : 'warning'}
           size="sm"
           icon={isSuspended ? ShieldCheck : ShieldAlert}
+          noScale
+          className="w-[78px] justify-center px-0 shrink-0"
           onClick={onToggleSuspend}
           loading={suspendLoading}
           title={isSuspended ? 'Activate Account' : 'Suspend Account'}
@@ -68,6 +72,7 @@ export const TableCellActions: React.FC<TableCellActionsProps> = ({
           variant="danger"
           size="sm"
           icon={Trash2}
+          noScale
           onClick={onDelete}
           loading={deleteLoading}
         >

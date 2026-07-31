@@ -23,24 +23,24 @@ export const TableCellIdentity: React.FC<TableCellIdentityProps> = ({
         <Icon className="w-4 h-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 h-5">
           {onTitleClick ? (
             <button
               type="button"
               onClick={onTitleClick}
-              className="font-extrabold text-sm text-pm-text hover:text-purple-400 transition-colors text-left truncate block"
+              className="font-extrabold text-sm text-pm-text hover:text-purple-400 transition-colors text-left truncate block leading-tight"
             >
               {title}
             </button>
           ) : (
-            <span className="font-extrabold text-sm text-pm-text truncate block">
+            <span className="font-extrabold text-sm text-pm-text truncate block leading-tight">
               {title}
             </span>
           )}
           {rightContent}
         </div>
         {subtitle && (
-          <div className="text-xs font-normal font-mono text-pm-secondary/80 mt-0.5 truncate">
+          <div className="text-xs font-normal font-mono text-pm-secondary/80 mt-0.5 truncate leading-none">
             {subtitle}
           </div>
         )}

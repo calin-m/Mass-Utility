@@ -15,6 +15,7 @@ import { Button } from '../common/Button';
 import { FormInput } from '../common/FormInput';
 import { FormSelect } from '../common/FormSelect';
 import { PaginationBar } from '../common/PaginationBar';
+import { useTableDensity } from '../../hooks/useTableDensity';
 import { useTranslation } from '../../i18n/LanguageContext';
 
 import { Company } from '../../types/adminApi';
@@ -59,7 +60,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
-  const [density, setDensity] = useState<'compact' | 'comfortable'>('comfortable');
+  const [density, setDensity] = useTableDensity('comfortable');
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -350,8 +351,8 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
           <table className="w-full text-left text-xs border-collapse table-fixed">
             <colgroup>
               <col className="w-[38%]" />
-              <col className="w-[26%]" />
-              <col className="w-[18%]" />
+              <col className="w-[22%]" />
+              <col className="w-[22%]" />
               <col className="w-[18%]" />
             </colgroup>
             <thead>

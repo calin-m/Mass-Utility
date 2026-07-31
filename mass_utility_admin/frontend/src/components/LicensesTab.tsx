@@ -22,6 +22,7 @@ import { LicenseDetailsView } from './licenses/LicenseDetailsView';
 import { ReassignLicenseModal } from './licenses/ReassignLicenseModal';
 import { StatusBadge } from './common/StatusBadge';
 import { useTranslation } from '../i18n/LanguageContext';
+import { useTableDensity } from '../hooks/useTableDensity';
 import { getSortedTierOptions } from '../utils/tierUtils';
 import { parseDomains } from '../utils/domainUtils';
 import { DomainPillGroup } from './common/DomainPillGroup';
@@ -70,7 +71,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
   const [selectedLicense, setSelectedLicense] = useState<License | null>(initialSelectedLicense || null);
   const [initialDetailTab, setInitialDetailTab] = useState<'overview' | 'edit'>(propDetailTab);
 
-  const [density, setDensity] = useState<'compact' | 'comfortable'>('comfortable');
+  const [density, setDensity] = useTableDensity('comfortable');
   const tierOptions = useMemo(() => getSortedTierOptions(tiers), [tiers]);
 
   const handleSelectLicense = (lic: License, initialTab: 'overview' | 'edit' = 'overview') => {
@@ -464,7 +465,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                             title={isVisible ? lic.license_key : '••••-••••-••••-••••'}
                             onTitleClick={() => handleSelectLicense(lic)}
                             subtitle={
-                              <span className="flex items-center gap-1.5 inline-flex flex-wrap">
+                              <span className="flex items-center gap-1.5 inline-flex whitespace-nowrap truncate max-w-full">
                                 {assignedUser ? (
                                   <button
                                     type="button"

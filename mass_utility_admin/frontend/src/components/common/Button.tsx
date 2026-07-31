@@ -7,6 +7,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   size?: 'sm' | 'md' | 'lg';
   icon?: LucideIcon;
   loading?: boolean;
+  noScale?: boolean;
   children?: React.ReactNode;
 }
 
@@ -15,6 +16,7 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'md',
   icon: Icon,
   loading = false,
+  noScale = false,
   children,
   className = '',
   disabled,
@@ -53,7 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center transition-all duration-150 active:scale-[0.98] ${getVariantStyles()} ${getSizeStyles()} ${
+      className={`inline-flex items-center justify-center transition-all duration-150 ${noScale ? '' : 'active:scale-[0.98]'} ${getVariantStyles()} ${getSizeStyles()} ${
         disabled || loading ? 'opacity-60 cursor-not-allowed' : ''
       } ${className}`}
       {...props}
