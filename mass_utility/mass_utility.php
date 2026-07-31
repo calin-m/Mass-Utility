@@ -484,10 +484,18 @@ class Mass_Utility extends Module
         if (class_exists('\Configuration')) {
             $url = \Configuration::get('PM_SAAS_DASHBOARD_URL');
         }
+        
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $isLocalhost = ($host === 'localhost' || strpos($host, '127.0.0.1') === 0 || strpos($host, 'localhost:') === 0 || strpos($host, '127.0.0.1:') === 0);
+
+        if ($isLocalhost) {
+            return 'http://localhost:8000/mass_utility_dashboard/';
+        }
+
         if (empty($url)) {
             $url = '../mass_utility_dashboard/';
         }
-        $url = str_replace('host.docker.internal', '127.0.0.1', $url);
+
         return rtrim($url, '/') . '/';
     }
 
