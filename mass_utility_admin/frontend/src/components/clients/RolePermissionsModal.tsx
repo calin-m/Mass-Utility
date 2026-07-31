@@ -75,7 +75,7 @@ export const RolePermissionsModal: React.FC<RolePermissionsModalProps> = ({ isOp
     setLoading(true);
     setMessage(null);
     try {
-      const res = await AdminFetchAdapter.request(getApiUrl('api_rbac_roles'));
+      const res = await AdminFetchAdapter.request(getApiUrl('api_roles'));
       const data = await res.json();
       if (data.success) {
         setRoles(data.roles || []);

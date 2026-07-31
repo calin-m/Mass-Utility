@@ -202,6 +202,7 @@ export class AdminFetchAdapter {
 
       // --- ROLES & GOVERNANCE ROUTING ---
       case 'api_roles':
+      case 'api_rbac_roles':
         return {
           success: true,
           roles: activeVault.getRoles(),

@@ -23,6 +23,18 @@ class AdminApiController
         if ($method === 'data') {
             $method = 'list';
         }
+        if ($method === 'rbac_roles') {
+            $method = 'roles';
+        }
+        if ($method === 'create_role') {
+            $method = 'role_create';
+        }
+        if ($method === 'update_role') {
+            $method = 'role_update';
+        }
+        if ($method === 'delete_role') {
+            $method = 'role_delete';
+        }
         if (method_exists($this, $method)) {
             $this->$method();
         } else {
