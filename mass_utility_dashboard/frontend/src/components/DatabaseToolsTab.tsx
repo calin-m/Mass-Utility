@@ -1107,12 +1107,12 @@ export const DatabaseToolsTab: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] p-4 rounded-xl">
                   <span className="text-[var(--pm-text-secondary)] block mb-1 uppercase font-bold text-[0.65rem] tracking-wider">Backup Tables Rows</span>
-                  <div className="text-2xl font-bold font-sans text-[var(--pm-text-primary)]">{driftModalData.backup_rows.toLocaleString()}</div>
+                  <div className="text-2xl font-bold font-sans text-[var(--pm-text-primary)]">{(driftModalData.backup_rows ?? 0).toLocaleString()}</div>
                 </div>
 
                 <div className="bg-[var(--pm-body-bg)] border border-[var(--pm-border-color)] p-4 rounded-xl">
                   <span className="text-[var(--pm-text-secondary)] block mb-1 uppercase font-bold text-[0.65rem] tracking-wider">Active Tables Rows</span>
-                  <div className="text-2xl font-bold font-sans text-[var(--pm-text-primary)]">{driftModalData.active_rows.toLocaleString()}</div>
+                  <div className="text-2xl font-bold font-sans text-[var(--pm-text-primary)]">{(driftModalData.active_rows ?? 0).toLocaleString()}</div>
                 </div>
 
                 <div

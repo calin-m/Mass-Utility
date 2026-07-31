@@ -349,6 +349,9 @@ class BackupDiffEngine
         }
 
         $tableDrift = [];
+        $checksumStatus = [];
+        $totalBackupRows = 0;
+        $totalActiveRows = 0;
         $checksumDriftFound = false;
 
         foreach ($targetTablesToCheck as $fullTableName) {
@@ -362,12 +365,26 @@ class BackupDiffEngine
                 $liveCount = isset($cntRow['total']) ? (int)$cntRow['total'] : 0;
 
                 $backupChecksum = $backupChecksums[$fullTableName] ?? $backupChecksums[$cleanName] ?? null;
-                $backupCount = $backupRowCounts[$cleanName] ?? $backupRowCounts[$fullTableName] ?? null;
+                $backupCount = $backupRowCounts[$cleanName] ?? $backupRowCounts[$fullTableName] ?? 0;
+
+                $totalBackupRows += $backupCount;
+                $totalActiveRows += $liveCount;
 
                 $checksumMatch = ($backupChecksum !== null) ? ((string)$backupChecksum === $liveChecksum) : true;
                 if (!$checksumMatch) {
                     $checksumDriftFound = true;
                 }
+
+                $isVolatile = in_array($cleanName, ['connections', 'connections_source', 'guest', 'cart', 'log'], true);
+
+                $checksumStatus[$fullTableName] = [
+                    'match' => $checksumMatch,
+                    'backup_rows' => $backupCount,
+                    'active_rows' => $liveCount,
+                    'volatile' => $isVolatile,
+                    'backup' => $backupChecksum ?? 'N/A',
+                    'active' => $liveChecksum
+                ];
 
                 $tableDrift[] = [
                     'table' => $cleanName,
@@ -385,11 +402,17 @@ class BackupDiffEngine
         }
 
         return [
+            'success' => true,
             'backup_name' => $backupName,
             'checksum_drift' => $checksumDriftFound,
+            'backup_rows' => $totalBackupRows,
+            'active_rows' => $totalActiveRows,
+            'checksum_status' => $checksumStatus,
             'table_drift' => $tableDrift,
             'added_products' => $addedProducts,
             'deleted_products' => $deletedProducts,
+            'added' => $addedProducts,
+            'deleted' => $deletedProducts,
             'added_count' => count($addedProducts),
             'deleted_count' => count($deletedProducts),
             'log_metadata' => $logMetadata

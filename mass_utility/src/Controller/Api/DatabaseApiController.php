@@ -171,6 +171,7 @@ class DatabaseApiController extends AbstractApiController
             $file = Tools::getValue('file');
             $this->logger->log("Auditing DB drift against backup: " . $file, 'INFO');
             $comparison = $this->backupManager->compareBackup($file);
+            $comparison['success'] = true;
             $this->logger->log("DB drift check completed for " . $file . ". Result matches: " . (!$comparison['checksum_drift'] ? 'IDENTICAL' : 'DRIFT DETECTED'), 'INFO');
             $this->sendJsonResponse($comparison);
         } catch (Exception $e) {
