@@ -380,8 +380,8 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
                 </tr>
               ) : (
                 paginatedCompanies.map(c => (
-                  <tr key={c.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition`}>
-                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle`}>
+                  <tr key={c.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition-all duration-200 ease-out`}>
+                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle transition-all duration-200 ease-out`}>
                       <TableCellIdentity
                         icon={Building2}
                         title={c.company_name}
@@ -389,7 +389,7 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
                         subtitle={`ID #${c.id}${c.tax_id ? ` • VAT: ${c.tax_id}` : ''}${c.created_at ? ` • Joined ${c.created_at.split(' ')[0]}` : ''}`}
                       />
                     </td>
-                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap transition-all duration-200 ease-out`}>
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5 font-bold text-pm-text text-xs">
                           <Users className="w-3.5 h-3.5 text-purple-400" />
@@ -400,10 +400,10 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
                         </div>
                       </div>
                     </td>
-                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap transition-all duration-200 ease-out`}>
                       <StatusBadge status={c.status} />
                     </td>
-                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle`}>
+                    <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle transition-all duration-200 ease-out`}>
                       <TableCellActions
                         onInspect={() => onSelectCompany(c, 'overview')}
                         inspectLabel="Inspect"

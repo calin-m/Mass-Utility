@@ -461,8 +461,8 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                   const userTier = (userLic?.package_tier || 'basic').toUpperCase();
 
                   return (
-                    <tr key={user.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition`}>
-                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle`}>
+                    <tr key={user.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition-all duration-200 ease-out`}>
+                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle transition-all duration-200 ease-out`}>
                         <TableCellIdentity
                           icon={Mail}
                           title={user.name ? `${user.name} (${user.email})` : user.email}
@@ -502,18 +502,18 @@ export const ClientListView: React.FC<ClientListViewProps> = ({ users, licenses,
                         />
                       </td>
 
-                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap transition-all duration-200 ease-out`}>
                         <div className="flex items-center gap-1.5">
                           <StatusBadge type="tier" label={userTier} />
                           <StatusBadge status={user.status} />
                         </div>
                       </td>
 
-                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap transition-all duration-200 ease-out`}>
                         <DomainPillGroup storeUrl={metrics.boundDomains.join(', ')} />
                       </td>
 
-                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle`}>
+                      <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle transition-all duration-200 ease-out`}>
                         <TableCellActions
                           onInspect={() => onSelectClient(user, 'profile')}
                           inspectLabel="Inspect"

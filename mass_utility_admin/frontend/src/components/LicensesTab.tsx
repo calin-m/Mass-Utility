@@ -458,8 +458,8 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                       : null;
 
                     return (
-                      <tr key={lic.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition`}>
-                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle`}>
+                      <tr key={lic.id} className={`${density === 'compact' ? 'min-h-[40px]' : 'min-h-[52px]'} align-middle hover:bg-pm-input/50 transition-all duration-200 ease-out`}>
+                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle transition-all duration-200 ease-out`}>
                           <TableCellIdentity
                             icon={Key}
                             title={isVisible ? lic.license_key : '••••-••••-••••-••••'}
@@ -522,18 +522,18 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({
                           />
                         </td>
 
-                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap transition-all duration-200 ease-out`}>
                           <div className="flex items-center gap-1.5">
                             <StatusBadge type="tier" label={(lic.package_tier || 'basic').toUpperCase()} />
                             <StatusBadge status={lic.status} />
                           </div>
                         </td>
 
-                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap`}>
+                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} align-middle whitespace-nowrap transition-all duration-200 ease-out`}>
                           <DomainPillGroup storeUrl={lic.store_url} />
                         </td>
 
-                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle`}>
+                        <td className={`${density === 'compact' ? 'py-1.5 px-3' : 'py-3 px-3'} text-right align-middle transition-all duration-200 ease-out`}>
                           <TableCellActions
                             onInspect={() => handleSelectLicense(lic, 'overview')}
                             onEdit={() => handleSelectLicense(lic, 'edit')}
