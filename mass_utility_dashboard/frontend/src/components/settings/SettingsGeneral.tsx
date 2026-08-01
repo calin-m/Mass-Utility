@@ -448,26 +448,38 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
         {/* General Backup Configs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-pm-border mb-6">
           <div>
-            <label className="text-xs font-semibold text-pm-text block mb-1.5">Default Download Source</label>
+            <label className={`text-xs font-semibold block mb-1.5 ${!gdriveState.authenticated ? 'text-pm-text-secondary' : 'text-pm-text'}`}>Default Download Source</label>
             <select
-              value={gdriveDefaultDownload}
+              disabled={!isHistoryEnabled || !gdriveState.authenticated}
+              value={!gdriveState.authenticated ? 'local' : gdriveDefaultDownload}
               onChange={e => setGdriveDefaultDownload(e.target.value)}
-              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
               <option value="cloud">Cloud (Google Drive)</option>
               <option value="local">Local Filesystem</option>
             </select>
+            {!gdriveState.authenticated && (
+              <p className="text-[0.7rem] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1 font-medium">
+                🔒 Requires an active Google Cloud connection.
+              </p>
+            )}
           </div>
           <div>
-            <label className="text-xs font-semibold text-pm-text block mb-1.5">Delete local copy after successful Cloud Sync</label>
+            <label className={`text-xs font-semibold block mb-1.5 ${!gdriveState.authenticated ? 'text-pm-text-secondary' : 'text-pm-text'}`}>Delete local copy after successful Cloud Sync</label>
             <select
-              value={cleanupBackups}
+              disabled={!isHistoryEnabled || !gdriveState.authenticated}
+              value={!gdriveState.authenticated ? '0' : cleanupBackups}
               onChange={e => setCleanupBackups(e.target.value)}
-              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50"
+              className="bg-pm-input border border-pm-border rounded-lg px-3 py-2 text-sm text-pm-text w-full focus:outline-none focus:border-pm-primary/50 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
               <option value="1">Yes (Delete local file immediately on successful upload)</option>
               <option value="0">No (Retain local copies, manage via Local Retention)</option>
             </select>
+            {!gdriveState.authenticated && (
+              <p className="text-[0.7rem] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1 font-medium">
+                🔒 Requires an active Google Cloud connection.
+              </p>
+            )}
           </div>
         </div>
 
