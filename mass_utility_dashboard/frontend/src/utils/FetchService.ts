@@ -339,9 +339,11 @@ export class FetchService {
         return {
           success: true,
           progress: mockBackupJob.progress,
-          status_text: mockBackupJob.progress >= 100 ? 'Backup completed successfully.' : `Compiling catalog tables: ${mockBackupJob.progress}%`,
+          status_text: mockBackupJob.progress >= 100 ? 'Backup completed successfully.' : `Compiling items: ${mockBackupJob.progress}%`,
           status: mockBackupJob.progress >= 100 ? 'completed' : 'running',
-          backups: mockBackups
+          backups: mockBackups,
+          processed_items: Math.round((mockBackupJob.progress / 100) * 14500),
+          total_items: 14500
         };
 
       case 'cancel_job':
@@ -666,8 +668,29 @@ export class FetchService {
       case 'save_exclusions':
         return { success: true, message: 'File exclusion filters saved.' };
 
-      case 'start_file_backup':
+      case 'start_file_backup': {
+        mockBackupJob = { progress: 0, status: 'running' };
+        const timeStamp = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
+        const profileName = payload.profile || 'full';
+        const newFileBackup = {
+          basename: `site_backup_${profileName}_${timeStamp}.tar.gz`,
+          sql_filename: `site_backup_${profileName}_${timeStamp}.tar.gz`,
+          log_filename: `site_backup_${profileName}_${timeStamp}.log`,
+          sql_size: 44564480,
+          log_size: 10240,
+          date: Math.floor(Date.now() / 1000),
+          duration: '12.4s',
+          is_local: true,
+          is_pinned: false,
+          sql_download_url: '#download-archive',
+          log_download_url: '#download-log'
+        };
+        mockBackups.unshift(newFileBackup);
+        if (mockBackups.length > 15) {
+          mockBackups = mockBackups.slice(0, 15);
+        }
         return { success: true, job_id: 'mock_file_job_' + Math.random().toString(36).substr(2, 9) };
+      }
 
       case 'verify_backup_integrity':
         return { success: true, checksum: 'sha256:8f4a9c2e1b3d5f7a', is_valid: true };

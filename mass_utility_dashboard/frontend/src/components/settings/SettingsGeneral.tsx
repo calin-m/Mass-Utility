@@ -218,7 +218,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
 
   const { showAlert, showConfirm } = useModal();
   const handleDisconnectGdrive = async () => {
-    showConfirm('Disconnect Cloud Storage', 'Are you sure you want to disconnect Google Drive? This will reset cloud cache configurations.', 'DISCONNECT', async () => {
+    showConfirm('Disconnect Cloud Storage', 'Are you sure you want to disconnect Google Drive? This will reset cloud cache configurations.', null, async () => {
       setIsGdriveDisconnecting(true);
       try {
         await FetchService.post('disconnect_google_drive');
@@ -229,7 +229,7 @@ export const SettingsGeneral: React.FC<SettingsGeneralProps> = ({ settings, onSa
       } finally {
         setIsGdriveDisconnecting(false);
       }
-    });
+    }, 'warning');
   };
 
   const handleSave = () => {

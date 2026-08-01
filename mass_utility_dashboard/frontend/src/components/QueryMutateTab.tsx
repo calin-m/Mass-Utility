@@ -454,7 +454,7 @@ export const QueryMutateTab: React.FC = () => {
       } catch (err: any) {
         showAlert('Delete Failed', err.message || 'Error deleting preset.', 'error');
       }
-    });
+    }, 'warning');
   };
 
   // Run Recursive Batch Mutation Loop

@@ -163,7 +163,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
   };
 
   const handleCloudRestore = async (name: string) => {
-    showConfirm('Restore Cloud Backup', `Restore local copy of <strong>${name}</strong> from Google Drive storage?`, 'RESTORE', async () => {
+    showConfirm('Restore Cloud Backup', `Restore local copy of <strong>${name}</strong> from Google Drive storage?`, null, async () => {
       setRestoringFile(name);
       try {
         const data = await FetchService.post('cloud_restore', { file: name, type: 'file' });
@@ -176,7 +176,7 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
       } finally {
         setRestoringFile(null);
       }
-    }, 'danger');
+    }, 'warning');
   };
 
   const formatDate = (timestamp: number) => {

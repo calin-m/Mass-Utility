@@ -118,7 +118,7 @@ export const FileToolsTab: React.FC = () => {
   };
 
   const handleClearAllBackups = async () => {
-    showConfirm('Clear All Backups', 'Are you sure you want to permanently delete all generated ZIP/TAR archives? This cannot be undone.', 'DELETE ALL', async () => {
+    showConfirm('Clear All Backups', 'Are you sure you want to permanently delete all generated ZIP/TAR archives? This cannot be undone.', null, async () => {
       try {
         const data = await FetchService.post('clear_file_backups');
         setBackups(data.backups || []);
@@ -126,7 +126,7 @@ export const FileToolsTab: React.FC = () => {
       } catch (err: any) {
         showAlert('Clear Failed', 'Failed to clear backups repository: ' + err.message, 'error');
       }
-    }, 'danger');
+    }, 'warning');
   };
 
   // SSE and Polling worker routines

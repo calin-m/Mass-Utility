@@ -277,7 +277,7 @@ export const DatabaseToolsTab: React.FC = () => {
           setSelectedTables([]);
         }
       } catch (e) {}
-    });
+    }, 'warning');
   };
 
   // Table selection logic helpers
@@ -373,7 +373,7 @@ export const DatabaseToolsTab: React.FC = () => {
 
   // Restore logic execution chunked loops
   const handleStartRestore = (backupName: string) => {
-    showConfirm('Restore Catalog', `WARNING: This will overwrite active catalog tables using the backup "${backupName}". Is it 100% safe to proceed?`, 'RESTORE', async () => {
+    showConfirm('Restore Catalog', `WARNING: This will overwrite active catalog tables using the backup "<strong>${backupName}</strong>". Is it 100% safe to proceed?`, null, async () => {
       setIsRestoreRunning(true);
       setRestoreProgressPercent(0);
       setRestoreProgressText('Preparing SQL staging area...');
@@ -446,7 +446,7 @@ export const DatabaseToolsTab: React.FC = () => {
         setIsRestoreRunning(false);
         showAlert('Restore Pre-flight Error', e.message, 'error');
       }
-    });
+    }, 'warning');
   };
 
   const handleTakeStoreLive = async () => {
@@ -598,13 +598,13 @@ export const DatabaseToolsTab: React.FC = () => {
       } catch (e: any) {
         showAlert('Optimization Error', e.message || `Error optimizing ${tableName}`, 'error');
       }
-    });
+    }, 'warning');
   };
 
   const handleOptimizeAllTables = async () => {
     if (!profilerReport || profilerReport.tables.length === 0) return;
     const count = profilerReport.tables.length;
-    showConfirm('Optimize All Fragmented Tables', `Optimize all <strong>${count} fragmented tables</strong> sequentially to reclaim disk space and rebuild indexes?`, 'OPTIMIZE ALL', async () => {
+    showConfirm('Optimize All Fragmented Tables', `Optimize all <strong>${count} fragmented tables</strong> sequentially to reclaim disk space and rebuild indexes?`, null, async () => {
       setIsBulkOptimizing(true);
       let successCount = 0;
       for (let i = 0; i < profilerReport.tables.length; i++) {
@@ -619,7 +619,7 @@ export const DatabaseToolsTab: React.FC = () => {
       setBulkOptimizeProgress('');
       showAlert('Bulk Optimization Complete', `Optimized ${successCount} of ${count} fragmented tables.`, 'success');
       handleFetchProfilerReport();
-    });
+    }, 'warning');
   };
 
   // 4. Data Sweeper logic chunked purge loops
@@ -661,7 +661,7 @@ export const DatabaseToolsTab: React.FC = () => {
       return;
     }
 
-    showConfirm('Data Sweeper Purge', `You are about to permanently sweep ${totalExpected.toLocaleString()} items. This operation cannot be undone. Proceed?`, 'SWEEP', () => {
+    showConfirm('Data Sweeper Purge', `You are about to permanently sweep <strong>${totalExpected.toLocaleString()} items</strong>. This operation cannot be undone. Proceed?`, null, () => {
       setIsSweeperRunning(true);
       sweeperAbortedRef.current = false;
       setSweeperProgressPercent(0);
@@ -812,7 +812,7 @@ export const DatabaseToolsTab: React.FC = () => {
     };
 
     setTimeout(runNextSweepChunk, 500);
-  });
+  }, 'warning');
 };
 
   // Compare Drift Modals Detail View
@@ -854,7 +854,7 @@ export const DatabaseToolsTab: React.FC = () => {
   };
 
   const handleDeleteBackup = (backupName: string) => {
-    showConfirm('Delete Backup', `Delete local backup archive ${backupName}?`, null, async () => {
+    showConfirm('Delete Backup', `Delete local backup archive <strong>${backupName}</strong>?`, null, async () => {
       try {
         const res = await FetchService.post('delete_backup', { file: backupName });
         if (res && res.success) {
@@ -862,11 +862,11 @@ export const DatabaseToolsTab: React.FC = () => {
           fetchBackups();
         }
       } catch (e) {}
-    });
+    }, 'warning');
   };
 
   const handleClearBackupHistory = () => {
-    showConfirm('Clear History', 'Clear all backup history? This will delete all local archives permanently.', 'DELETE ALL', async () => {
+    showConfirm('Clear History', 'Clear all backup history? This will delete all local archives permanently.', null, async () => {
       try {
         const res = await FetchService.post('clear_backup_history');
         if (res && res.success) {
@@ -874,7 +874,7 @@ export const DatabaseToolsTab: React.FC = () => {
           fetchBackups();
         }
       } catch (e) {}
-    }, 'danger');
+    }, 'warning');
   };
 
   // Compute stats inside comparison modal
