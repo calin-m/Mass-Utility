@@ -265,6 +265,11 @@ export const useAdminData = () => {
   const [tiers, setTiers] = useState<PackageTier[]>([]);
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>(MOCK_AUDIT_LOGS);
+  const [securityState, setSecurityState] = useState({
+    headers_applied: false,
+    perms_repaired: false,
+    ssl_enforced: false
+  });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<ToastAlert | null>(null);
 
@@ -279,6 +284,11 @@ export const useAdminData = () => {
     setTiers([...MOCK_TIERS]);
     setLicenses([...MOCK_LICENSES]);
     setAuditLogs([...MOCK_AUDIT_LOGS]);
+    setSecurityState({
+      headers_applied: false,
+      perms_repaired: false,
+      ssl_enforced: false
+    });
     showAlert('🔄 Demo Vault Reset to Seed Defaults', 'success');
   }, [showAlert]);
 
@@ -292,6 +302,11 @@ export const useAdminData = () => {
     setTiers([...MOCK_TIERS]);
     setLicenses([...MOCK_LICENSES]);
     setAuditLogs([...MOCK_AUDIT_LOGS]);
+    setSecurityState({
+      headers_applied: false,
+      perms_repaired: false,
+      ssl_enforced: false
+    });
     showAlert('🛡️ Super Admin Demo Mode Activated', 'success');
   }, [showAlert]);
 
@@ -526,9 +541,44 @@ export const useAdminData = () => {
         ];
         setAuditLogs(clearedLog);
         return clearedLog;
+      },
+      getSecurityDiagnostics: () => ({
+        admin_git_exposed: false,
+        dashboard_git_exposed: false,
+        dashboard_db_exposed: false,
+        admin_ssl_active: securityState.ssl_enforced,
+        dashboard_ssl_active: securityState.ssl_enforced,
+        php_version: '8.2.14',
+        headers: {
+          hsts: securityState.headers_applied,
+          nosniff: securityState.headers_applied,
+          frame_options: securityState.headers_applied
+        },
+        permissions: {
+          admin_dir: securityState.perms_repaired ? '0755' : '0777',
+          dashboard_dir: securityState.perms_repaired ? '0755' : '0777'
+        },
+        paths: {
+          admin_dir: { path: 'mass_utility_admin/', current: securityState.perms_repaired ? '0755' : '0777', recommended: '0755' },
+          dashboard_dir: { path: 'mass_utility_dashboard/', current: securityState.perms_repaired ? '0755' : '0777', recommended: '0755' },
+          module_dir: { path: 'mass_utility/', current: securityState.perms_repaired ? '0755' : '0777', recommended: '0755' },
+          database_vault: { path: 'mass_utility_dashboard/data/pm_cloud_backups.db', current: securityState.perms_repaired ? '0644' : '0666', recommended: '0644' }
+        }
+      }),
+      applySecurityHeaders: () => {
+        setSecurityState(prev => ({ ...prev, headers_applied: true }));
+        showAlert('✨ Security headers applied to .htaccess successfully!', 'success');
+      },
+      fixPermissions: () => {
+        setSecurityState(prev => ({ ...prev, perms_repaired: true }));
+        showAlert('📁 File permissions automatically repaired on host!', 'success');
+      },
+      enableSslRedirect: () => {
+        setSecurityState(prev => ({ ...prev, ssl_enforced: true }));
+        showAlert('🔒 HTTPS 301 Redirect rule applied to root .htaccess!', 'success');
       }
     });
-  }, [isDemoMode, companies, users, licenses, tiers, auditLogs, addCompany, updateCompany, toggleCompanyStatus, deleteCompany, addUser, updateUser, toggleUserStatus, deleteUser, addLicense, deleteLicense]);
+  }, [isDemoMode, companies, users, licenses, tiers, auditLogs, securityState, addCompany, updateCompany, toggleCompanyStatus, deleteCompany, addUser, updateUser, toggleUserStatus, deleteUser, addLicense, deleteLicense, showAlert]);
 
   useEffect(() => {
     checkAuth();

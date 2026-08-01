@@ -29,6 +29,10 @@ interface DemoVault {
   createTier: (tier: any) => any;
   deleteTier: (id: number) => void;
   clearAuditLogs: () => any;
+  getSecurityDiagnostics?: () => any;
+  applySecurityHeaders?: () => any;
+  fixPermissions?: () => any;
+  enableSslRedirect?: () => any;
 }
 
 let activeVault: DemoVault | null = null;
@@ -255,6 +259,39 @@ export class AdminFetchAdapter {
             active_connections: 4
           }
         };
+
+      case 'api_get_diagnostics':
+        return {
+          success: true,
+          diagnostics: activeVault.getSecurityDiagnostics ? activeVault.getSecurityDiagnostics() : {
+            admin_git_exposed: false,
+            dashboard_git_exposed: false,
+            dashboard_db_exposed: false,
+            admin_ssl_active: false,
+            dashboard_ssl_active: false,
+            php_version: '8.2.14',
+            headers: { hsts: false, nosniff: false, frame_options: false },
+            permissions: { admin_dir: '0777', dashboard_dir: '0777' },
+            paths: {
+              admin_dir: { path: 'mass_utility_admin/', current: '0777', recommended: '0755' },
+              dashboard_dir: { path: 'mass_utility_dashboard/', current: '0777', recommended: '0755' },
+              module_dir: { path: 'mass_utility/', current: '0777', recommended: '0755' },
+              database_vault: { path: 'mass_utility_dashboard/data/pm_cloud_backups.db', current: '0666', recommended: '0644' }
+            }
+          }
+        };
+
+      case 'api_apply_security_headers':
+        if (activeVault.applySecurityHeaders) activeVault.applySecurityHeaders();
+        return { success: true, message: 'Security headers applied to .htaccess successfully!' };
+
+      case 'api_fix_permissions':
+        if (activeVault.fixPermissions) activeVault.fixPermissions();
+        return { success: true, message: 'File permissions automatically repaired on host!' };
+
+      case 'api_enable_ssl_redirect':
+        if (activeVault.enableSslRedirect) activeVault.enableSslRedirect();
+        return { success: true, message: 'HTTPS 301 Redirect rule applied to root .htaccess!' };
 
       case 'api_settings':
       case 'api_save_settings':

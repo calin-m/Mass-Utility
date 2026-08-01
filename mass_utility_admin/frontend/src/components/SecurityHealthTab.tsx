@@ -5,6 +5,7 @@ import { SectionHeader } from './common/SectionHeader';
 import { Button } from './common/Button';
 import { useTranslation } from '../i18n/LanguageContext';
 import { SecurityAuditGrid } from './security/SecurityAuditGrid';
+import { AdminFetchAdapter, getApiUrl } from '../utils/AdminFetchAdapter';
 
 interface SecurityHealthTabProps {
   showAlert: (msg: string, type?: 'success' | 'error') => void;
@@ -17,15 +18,10 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
 
   const loading = activeAction !== null;
 
-  const getApiUrl = (action: string) => {
-    const path = window.location.pathname;
-    return `${path}?action=${action}`;
-  };
-
   const runDiagnostics = async () => {
     setActiveAction('audit');
     try {
-      const res = await fetch(getApiUrl('api_get_diagnostics'));
+      const res = await AdminFetchAdapter.request(getApiUrl('api_get_diagnostics'));
       const data = await res.json();
       if (data.success) {
         setDiagnostics(data.diagnostics);
@@ -43,7 +39,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
   const fixPermissions = async () => {
     setActiveAction('perms');
     try {
-      const res = await fetch(getApiUrl('api_fix_permissions'));
+      const res = await AdminFetchAdapter.request(getApiUrl('api_fix_permissions'));
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert('File permissions automatically repaired on host!', 'success');
@@ -61,7 +57,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
   const applySecurityHeaders = async () => {
     setActiveAction('headers');
     try {
-      const res = await fetch(getApiUrl('api_apply_security_headers'));
+      const res = await AdminFetchAdapter.request(getApiUrl('api_apply_security_headers'));
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert('✨ Security headers applied to .htaccess successfully!', 'success');
@@ -79,7 +75,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
   const enableSslRedirect = async () => {
     setActiveAction('ssl');
     try {
-      const res = await fetch(getApiUrl('api_enable_ssl_redirect'));
+      const res = await AdminFetchAdapter.request(getApiUrl('api_enable_ssl_redirect'));
       const data = await res.json();
       if (data.success) {
         if (showAlert) showAlert('🔒 HTTPS 301 Redirect rule applied to root .htaccess!', 'success');
@@ -98,7 +94,7 @@ export const SecurityHealthTab: React.FC<SecurityHealthTabProps> = ({ showAlert 
     const autoAuditOnLoad = async () => {
       setActiveAction('audit');
       try {
-        const res = await fetch(getApiUrl('api_get_diagnostics'));
+        const res = await AdminFetchAdapter.request(getApiUrl('api_get_diagnostics'));
         const data = await res.json();
         if (data.success) {
           setDiagnostics(data.diagnostics);
