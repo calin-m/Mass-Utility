@@ -239,14 +239,14 @@ export const App: React.FC = () => {
 
       {/* Tab Navigation */}
       <nav className="flex w-full justify-between mb-8 border-b border-pm-border pb-4 overflow-x-auto gap-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <button
             onClick={() => {
               setInspectedCompany(null);
               setHighlightedLicenseKey(null);
               setActiveTab('companies');
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition ${
               activeTab === 'companies' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
@@ -259,7 +259,7 @@ export const App: React.FC = () => {
               setInspectedClient(null);
               setActiveTab('clients');
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition ${
               activeTab === 'clients' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
@@ -268,7 +268,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('licenses')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition ${
               activeTab === 'licenses' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
@@ -277,7 +277,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('roles')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition ${
               activeTab === 'roles' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
@@ -286,7 +286,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('tiers')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition ${
               activeTab === 'tiers' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
@@ -294,10 +294,10 @@ export const App: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <button
             onClick={() => setActiveTab('settings')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition ${
               activeTab === 'settings' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
@@ -306,7 +306,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('security')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition ${
               activeTab === 'security' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >
@@ -315,7 +315,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('audit')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition ${
               activeTab === 'audit' ? 'pm-btn-primary shadow-md' : 'pm-btn-neutral'
             }`}
           >

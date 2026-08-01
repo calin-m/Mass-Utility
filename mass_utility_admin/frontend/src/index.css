@@ -123,6 +123,7 @@ html:not(.dark) .shadow-sm {
 .pm-btn-primary {
   background: linear-gradient(135deg, var(--pm-primary) 0%, var(--pm-primary-dark) 100%);
   color: #ffffff;
+  border: 1px solid transparent;
   font-weight: 600;
 }
 .pm-btn-primary:hover {
