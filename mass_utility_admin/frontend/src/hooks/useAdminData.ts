@@ -552,7 +552,9 @@ export const useAdminData = () => {
         headers: {
           hsts: securityState.headers_applied,
           nosniff: securityState.headers_applied,
-          frame_options: securityState.headers_applied
+          frame_options: securityState.headers_applied,
+          referrer_policy: securityState.headers_applied,
+          ssl_redirect: securityState.ssl_enforced
         },
         permissions: {
           admin_dir: securityState.perms_repaired ? '0755' : '0777',

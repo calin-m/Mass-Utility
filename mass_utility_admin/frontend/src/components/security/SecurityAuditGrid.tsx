@@ -156,7 +156,7 @@ export const SecurityAuditGrid: React.FC<SecurityAuditGridProps> = ({
                   </span>
                   <div className="flex items-center gap-1.5">
                     <span className="text-pm-secondary text-[0.7rem]" title="Current Perms">({info.current})</span>
-                    {info.current === info.recommended || (info.current === '0666' && info.recommended === '0644') || (info.current === '0777' && info.recommended === '0755') ? (
+                    {info.current === info.recommended ? (
                       <span className="text-emerald-500 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded text-[0.65rem]">OK</span>
                     ) : (
                       <span className="text-amber-500 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded text-[0.65rem]">WARN</span>
