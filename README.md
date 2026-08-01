@@ -860,32 +860,21 @@ npm run build
 ```
 *Outputs compiled assets (`index-*.js`, `index-*.css`) to `mass_utility_admin/public/v2/`.*
 
-### 12.3 Orchestra Conductor Suite & Diagnostic Tooling
-The workspace includes a complete Python RAM engine suite for static audits, lockfile verification, and automated roadmap management:
+### 12.3 Mass Utility Verification & Build Validation
+Mass Utility operations and build verification commands:
 
 ```bash
-# 1. Environment & Framework Health Diagnostic (Verifies PHP, SQLite WAL, Node, Git, & lockfile)
+# 1. Environment & Stack Health Diagnostic
 python .orchestra/.conductor/tools/cli_doctor.py
 
-# 2. 360 Workspace Inspector Telemetry Matrix (AST symbol maps & REST route contract maps)
-python .orchestra/.conductor/tools/workspace_inspector.py matrix
-
-# 3. Rapid Test Suite (Static audits, WCAG 2.1 AA accessibility linter, & contract guards)
+# 2. Automated Product Test Suite (Static Audits, API Contracts & WCAG 2.1 AA)
 python .orchestra/.conductor/tools/cli_test_suite.py --fast
 
-# 4. Security & Vulnerability Audit
+# 3. Security & Credential Leak Audit
 python .orchestra/.conductor/tools/cli_security_audit.py
-
-# 5. Automated Roadmap Lifecycle Manager
-python .orchestra/.conductor/tools/roadmap_manager.py list
 ```
 
-### 12.4 Zero-Trust Governance & 4-Stage Deferred Commit Pipeline
-Mass Utility enforces an architecture-first, zero-trust deployment protocol:
-1. **Stage 1 (Discussion & Analysis):** Interactive option alignment prior to drafting code or plans.
-2. **Stage 2 (Planning & Pre-Flight Analysis):** `workspace_inspector.py plan "<GOAL>"` runs pre-flight impact analysis and synthesizes `.ai_plan.md` in RAM while auto-refreshing `05_route_contract_map.md` & `openapi.json`.
-3. **Stage 3 (Local Execution & Build):** Code edits and SPA builds (`npm run build`) execute locally on disk. All changes remain uncommitted for local testing at `http://localhost:8000`.
-4. **Stage 4 (Deferred Commit Gate):** `cli_commit.py` is invoked ONLY when explicitly instructed *"You may commit"*. `cli_commit.py` stages files, runs static pre-commit audits, ingests `.ai_plan.md` into the commit message, updates `.bench/docs/roadmap.md`, deletes `.ai_plan.md`, and auto-deploys cleanly.
+> ℹ️ For complete documentation on the **Orchestra Conductor Engine**, 4-Stage Deferred Commit Protocol, AST Inspectors, and Zero-Trust Governance Pipeline, refer directly to the [.orchestra/README.md](file:///d:/Project%20Mass/.orchestra/README.md) engineering manual.
 
 
 ---
