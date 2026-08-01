@@ -57,15 +57,26 @@ class BridgeProgressTracker
      */
     public function updateProgress(string $jobId, int $processedItems, ?array $additionalData = null): bool
     {
-        return $this->atomicUpdateState($jobId, function ($data) use ($processedItems, $additionalData) {
-            $total = max(1, $data['total_items']);
+        return $this->atomicUpdateState($jobId, function ($data) use ($jobId, $processedItems, $additionalData) {
+            if (!is_array($data)) {
+                $data = [
+                    'job_id' => $jobId,
+                    'type' => 'file',
+                    'total_items' => 1,
+                    'processed_items' => 0,
+                    'progress' => 0,
+                    'status' => 'running'
+                ];
+            }
+            $total = max(1, (int)($data['total_items'] ?? 1));
             $progress = min(100.0, round(($processedItems / $total) * 100.0, 2));
 
             $data['processed_items'] = $processedItems;
             $data['progress'] = $progress;
             $data['updated_at'] = time();
 
-            if ($data['total_items'] > 0 && $processedItems >= $data['total_items']) {
+            $totalItems = (int)($data['total_items'] ?? 0);
+            if ($totalItems > 0 && $processedItems >= $totalItems) {
                 $data['status'] = 'completed';
             }
 

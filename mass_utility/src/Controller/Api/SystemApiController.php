@@ -443,7 +443,8 @@ class SystemApiController extends AbstractApiController
     private function formatBackupResponse(array $backups): array
     {
         $formattedBackups = [];
-        $adminModulesUrl = Context::getContext()->link->getAdminLink('AdminModules', true);
+        $link = Context::getContext()->link ?? null;
+        $adminModulesUrl = ($link && method_exists($link, 'getAdminLink')) ? $link->getAdminLink('AdminModules', true) : 'index.php?controller=AdminModules';
         $defaultDownload = Configuration::get('PM_GDRIVE_DEFAULT_DOWNLOAD') ?: 'cloud';
         $isGoogleDriveConnected = !empty(Configuration::get('PM_GD_REFRESH_TOKEN')) || !empty(Configuration::get('PM_GD_ACCESS_TOKEN'));
         if (!$isGoogleDriveConnected) {
@@ -493,7 +494,8 @@ class SystemApiController extends AbstractApiController
 
     private function formatFileBackupsResponse(array $backups): array
     {
-        $adminModulesUrl = Context::getContext()->link->getAdminLink('AdminModules', true);
+        $link = Context::getContext()->link ?? null;
+        $adminModulesUrl = ($link && method_exists($link, 'getAdminLink')) ? $link->getAdminLink('AdminModules', true) : 'index.php?controller=AdminModules';
         $defaultDownload = Configuration::get('PM_GDRIVE_DEFAULT_DOWNLOAD') ?: 'cloud';
         $isGoogleDriveConnected = !empty(Configuration::get('PM_GD_REFRESH_TOKEN')) || !empty(Configuration::get('PM_GD_ACCESS_TOKEN'));
         if (!$isGoogleDriveConnected) {

@@ -117,6 +117,7 @@ class FileToolsApiController extends AbstractApiController
                 if (!is_dir($bDir)) continue;
 
                 $candidatePaths = [
+                    $bDir . 'files/' . $baseName . '/' . $baseName . '.tar.log',
                     $bDir . 'files/' . $baseName . '/' . $baseName . '.log',
                     $bDir . 'files/' . $baseName . '/' . $logFileName,
                     $bDir . 'files/' . $logFileName
@@ -169,7 +170,13 @@ class FileToolsApiController extends AbstractApiController
             $scriptPath = _PS_MODULE_DIR_ . 'mass_utility/bin/cli_backup_worker.php';
             $args = '--type=file --job_id=' . escapeshellarg($jobId) . ' --token=' . escapeshellarg($secureToken) . ' --profile=' . escapeshellarg($profile);
 
-            $phpBinary = defined('PHP_BINARY') && PHP_BINARY ? PHP_BINARY : 'php';
+            $phpBinary = 'php';
+            if (defined('PHP_BINARY') && !empty(PHP_BINARY)) {
+                $candidate = str_replace('php-cgi', 'php', PHP_BINARY);
+                if (file_exists($candidate) && is_file($candidate)) {
+                    $phpBinary = $candidate;
+                }
+            }
             
             $isWindows = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
             $requiredFunc = $isWindows ? 'popen' : 'exec';
@@ -498,7 +505,8 @@ class FileToolsApiController extends AbstractApiController
         try {
             $backups = $this->fileBackupEngine->getBackupList();
             $formatted = $this->formatBackups($backups);
-            $adminModulesUrl = Context::getContext()->link->getAdminLink('AdminModules', true);
+            $link = Context::getContext()->link ?? null;
+            $adminModulesUrl = ($link && method_exists($link, 'getAdminLink')) ? $link->getAdminLink('AdminModules', true) : 'index.php?controller=AdminModules';
             $this->sendJsonResponse([
                 'success' => true,
                 'backups' => $formatted,

@@ -135,7 +135,13 @@ class DatabaseApiController extends AbstractApiController
                 $args .= ' --tables=' . escapeshellarg($tablesList);
             }
 
-            $phpBinary = defined('PHP_BINARY') && PHP_BINARY ? PHP_BINARY : 'php';
+            $phpBinary = 'php';
+            if (defined('PHP_BINARY') && !empty(PHP_BINARY)) {
+                $candidate = str_replace('php-cgi', 'php', PHP_BINARY);
+                if (file_exists($candidate) && is_file($candidate)) {
+                    $phpBinary = $candidate;
+                }
+            }
 
             $isWindows = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
             $requiredFunc = $isWindows ? 'popen' : 'exec';

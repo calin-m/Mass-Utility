@@ -67,8 +67,8 @@ class ResourceMonitor
             if (!empty($matches[0])) {
                 $physCores = count($matches[0]);
             }
-        } elseif (function_exists('shell_exec')) {
-            $nproc = trim((string)shell_exec('nproc')); // nosec
+        } elseif (function_exists('shell_exec') && (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')) {
+            $nproc = trim((string)@shell_exec('nproc 2>/dev/null')); // nosec
             if (is_numeric($nproc)) {
                 $physCores = (int)$nproc;
             }

@@ -307,7 +307,10 @@ export class FetchService {
         return { success: true, message: `Cloud restore for ${payload.file || 'archive'} completed in sandbox.` };
 
       case 'upload_gdrive':
-        return { success: true, file: payload.file, drive_link: 'https://drive.google.com/file/d/demo_mock_archive/view' };
+        return {
+          success: false,
+          error: 'Google Drive offsite storage is not configured or not logged in. Please open Settings -> Google Drive to connect your account and authorize backup sync.'
+        };
 
       case 'create_backup': {
         mockBackupJob = { progress: 0, status: 'running' };
@@ -694,6 +697,9 @@ export class FetchService {
 
       case 'verify_backup_integrity':
         return { success: true, checksum: 'sha256:8f4a9c2e1b3d5f7a', is_valid: true };
+
+      case 'get_file_backups':
+        return { success: true, backups: mockBackups };
 
       case 'delete_file_backup':
       case 'toggle_pin_file_backup':

@@ -107,14 +107,18 @@ export const BackupsGrid: React.FC<BackupsGridProps> = ({
           showToast('Backup archive pushed to Google Drive offsite storage.', 'success');
           onRefresh(data.backups || []);
         } else {
-          showAlert('Upload Failed', data.error || 'Failed to upload backup to cloud.', 'error');
+          showAlert(
+            'Cloud Storage Not Configured',
+            data.error || 'Google Drive offsite storage is not configured or not logged in. Please open Settings -> Google Drive to connect your account.',
+            'info'
+          );
         }
       } catch (err: any) {
         showAlert('Cloud Upload Error', err.message || 'Could not upload backup archive.', 'error');
       } finally {
         setPushingCloudFile(null);
       }
-    }, 'primary');
+    }, 'warning');
   };
 
   const handleCopyText = (text: string) => {

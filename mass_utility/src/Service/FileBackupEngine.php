@@ -420,10 +420,17 @@ class FileBackupEngine
 
         if (!is_dir($this->backupDir)) return $list;
 
-        $dirs = glob($this->backupDir . 'site_backup_*', GLOB_ONLYDIR);
-        if (is_array($dirs)) {
-            foreach ($dirs as $dir) {
-                $baseName = basename($dir);
+        $entries = @scandir($this->backupDir);
+        if (is_array($entries)) {
+            foreach ($entries as $entry) {
+                if ($entry === '.' || $entry === '..' || strpos($entry, 'site_backup_') !== 0) {
+                    continue;
+                }
+                $dir = $this->backupDir . $entry;
+                if (!is_dir($dir)) {
+                    continue;
+                }
+                $baseName = $entry;
                 $tarFile = $dir . '/' . $baseName . '.tar';
                 
                 if (file_exists($tarFile)) {

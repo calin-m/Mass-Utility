@@ -27,16 +27,30 @@ export const FileToolsTab: React.FC = () => {
   const sseRef = useRef<EventSource | null>(null);
   const pollTimerRef = useRef<any>(null);
 
-  // Initialize backups from window config injection
+  // Initialize backups from window config injection and fetch latest via API
   useEffect(() => {
     const configBackups = (window as any).PM_CONFIG?.fileBackups || [];
-    setBackups(configBackups);
+    if (configBackups.length > 0) {
+      setBackups(configBackups);
+    }
+    loadBackups();
     loadDirectoryTree();
 
     return () => {
       cleanupJobMonitoring();
     };
   }, []);
+
+  const loadBackups = async () => {
+    try {
+      const data = await FetchService.post('get_file_backups');
+      if (data && data.backups) {
+        setBackups(data.backups);
+      }
+    } catch (err: any) {
+      console.error('Failed to load file backups:', err);
+    }
+  };
 
   const loadDirectoryTree = async () => {
     setIsLoadingTree(true);

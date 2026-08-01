@@ -81,6 +81,32 @@ class SettingsManager
         self::PM_LICENSE_SIGNATURE => "",
     ];
 
+    private function configGet(string $key)
+    {
+        if (class_exists('Configuration')) {
+            if (method_exists('Configuration', 'getGlobalValue')) {
+                return \Configuration::getGlobalValue($key);
+            }
+            if (method_exists('Configuration', 'get')) {
+                return \Configuration::get($key);
+            }
+        }
+        return false;
+    }
+
+    private function configUpdate(string $key, string $val): bool
+    {
+        if (class_exists('Configuration')) {
+            if (method_exists('Configuration', 'updateGlobalValue')) {
+                return (bool)\Configuration::updateGlobalValue($key, $val);
+            }
+            if (method_exists('Configuration', 'updateValue')) {
+                return (bool)\Configuration::updateValue($key, $val);
+            }
+        }
+        return false;
+    }
+
     /**
      * Retrieve all settings injected with their fallbacks if missing.
      */
@@ -88,8 +114,8 @@ class SettingsManager
     {
         $settings = [];
         foreach (self::$defaults as $key => $defaultValue) {
-            $val = Configuration::getGlobalValue($key);
-            $settings[$key] = ($val !== false) ? $val : $defaultValue;
+            $val = $this->configGet($key);
+            $settings[$key] = ($val !== false && $val !== null) ? $val : $defaultValue;
         }
 
         $status = $this->getLicenseStatus();
@@ -108,7 +134,7 @@ class SettingsManager
     {
         foreach ($newSettings as $key => $val) {
             if (array_key_exists($key, self::$defaults)) {
-                Configuration::updateGlobalValue($key, (string)$val);
+                $this->configUpdate($key, (string)$val);
             }
         }
         return true;
@@ -128,14 +154,14 @@ class SettingsManager
             return "0"; // Force override to disabled
         }
 
-        $val = Configuration::getGlobalValue($key);
-        return (string)(($val !== false) ? $val : self::$defaults[$key]);
+        $val = $this->configGet($key);
+        return (string)(($val !== false && $val !== null) ? $val : self::$defaults[$key]);
     }
 
     public function getLicenseStatus(): array
     {
-        $token = Configuration::getGlobalValue(self::PM_LICENSE_TOKEN);
-        $signature = Configuration::getGlobalValue(self::PM_LICENSE_SIGNATURE);
+        $token = (string)$this->configGet(self::PM_LICENSE_TOKEN);
+        $signature = (string)$this->configGet(self::PM_LICENSE_SIGNATURE);
 
         if (empty($token) || empty($signature)) {
             return $this->getUnlicensedDefaults();
