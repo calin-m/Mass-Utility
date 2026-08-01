@@ -466,9 +466,10 @@ System actions executed across the Super-Admin portal are logged to `pm_audit_lo
 ### 4.7 Automated Security Audit Pipeline (`cli_security_audit.py`)
 Integrated into the pre-commit build pipeline, `cli_security_audit.py` scans JavaScript files for unsafe DOM injections (`innerHTML`), verifies `escapeshellarg()` on PHP shell executions, and audits SQLite queries for prepared statement compliance.
 
-### 4.8 Public Demo Sandbox & OWASP Threat Mitigation Architecture
-When deployed on live public web hosts, Standalone Demo Mode (`/v2/index.html`) operates under strict OWASP zero-trust air-gap isolation:
+### 4.8 Public Demo Sandbox, Clean URL Routing & OWASP Threat Mitigation Architecture
+When deployed on live public web hosts, Standalone Demo Mode operates under strict OWASP zero-trust air-gap isolation:
 - **100% Client-Side In-Memory Dispatching:** `FetchService.ts` and `AdminFetchAdapter.ts` trap all AJAX requests (`execute_query`, `start_file_backup`, `rollback_mutation`) inside client browser JS memory. Zero network calls touch the remote PHP backend or store MySQL/SQLite databases (0 server resource impact).
+- **Clean Root Path URL Routing (`/#page`):** Exiting demo mode or navigating between tabs automatically sanitizes `window.location.pathname` across both `mass_utility_admin` and `mass_utility_dashboard`. It strips `/demo`, `/v2/`, `/public/`, and `index.php` from the browser address bar, maintaining ultra-clean root directory deep-link URLs (`mass_utility_admin/#tiers` and `mass_utility_dashboard/#settings`) while preserving hash deep-linking (`#tab`) and browser back/forward navigation.
 - **Backend API Authorization Guard:** Raw API requests (`index.php?action=...`) sent directly to the PHP backend lack the `/v2/` URL path, causing `$isDemoRequest` to evaluate to `false`. Unauthenticated API calls are immediately blocked by the PHP Gateway with **HTTP 403 Forbidden**.
 - **Credential Protection:** Client JS bundles contain only synthetic mock demonstration strings (`PM-DEMO-ENTERPRISE-KEY`, `admin@company.com`). Zero production credentials, secrets, or real database passwords exist within client assets.
 

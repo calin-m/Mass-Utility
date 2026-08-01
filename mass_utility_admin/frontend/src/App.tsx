@@ -91,14 +91,20 @@ export const App: React.FC = () => {
 
   // Sync window.location.hash on tab change and trigger targeted section data sync
   useEffect(() => {
+    const cleanPath = window.location.pathname
+      .replace(/\/public\/index\.php$/, '/')
+      .replace(/\/public\/?$/, '/')
+      .replace(/\/index\.php$/, '/');
+
     if (!authenticated) {
-      if (window.location.hash !== '') {
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      if (window.location.hash !== '' || cleanPath !== window.location.pathname) {
+        window.history.replaceState(null, '', cleanPath + window.location.search);
       }
       return;
     }
-    if (window.location.hash !== `#${activeTab}`) {
-      window.history.replaceState(null, '', `#${activeTab}`);
+    const targetUrl = cleanPath !== window.location.pathname ? `${cleanPath}#${activeTab}` : `#${activeTab}`;
+    if (window.location.hash !== `#${activeTab}` || cleanPath !== window.location.pathname) {
+      window.history.replaceState(null, '', targetUrl);
     }
     fetchAdminData();
   }, [activeTab, authenticated]);

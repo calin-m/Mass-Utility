@@ -312,8 +312,24 @@ export const useAdminData = () => {
 
   const disableDemoMode = useCallback(() => {
     setIsDemoMode(false);
-    setAuthenticated(false);
-    showAlert('🚪 Exited Admin Demo Mode', 'success');
+    setDemoActiveFlag(false);
+    localStorage.removeItem('pm_admin_demo_mode');
+    sessionStorage.removeItem('pm_admin_demo_mode');
+
+    let currentPath = window.location.pathname;
+    let cleanPath = currentPath
+      .replace(/\/demo\/?$/, '/')
+      .replace(/\/v2\/?$/, '/')
+      .replace(/\/public\/index\.php$/, '/')
+      .replace(/\/public\/?$/, '/')
+      .replace(/\/index\.php$/, '/');
+
+    if (cleanPath !== currentPath || currentPath.includes('demo') || currentPath.includes('v2') || currentPath.includes('public')) {
+      window.location.href = cleanPath + window.location.hash;
+    } else {
+      setAuthenticated(false);
+      showAlert('🚪 Exited Admin Demo Mode', 'success');
+    }
   }, [showAlert]);
 
   // Demo Mutators for Interactive Sandbox Actions with Anti-Spam Safeguards

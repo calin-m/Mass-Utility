@@ -462,7 +462,23 @@ function AppContent() {
                           🔄 Reset Sandbox
                         </button>
                         <button
-                          onClick={() => setIsDemoMode(false)}
+                          onClick={() => {
+                            setIsDemoMode(false);
+                            localStorage.removeItem('pm_demo_mode');
+                            sessionStorage.removeItem('pm_demo_mode');
+
+                            let currentPath = window.location.pathname;
+                            let cleanPath = currentPath
+                              .replace(/\/demo\/?$/, '/')
+                              .replace(/\/v2\/?$/, '/')
+                              .replace(/\/public\/index\.php$/, '/')
+                              .replace(/\/public\/?$/, '/')
+                              .replace(/\/index\.php$/, '/');
+
+                            if (cleanPath !== currentPath || currentPath.includes('demo') || currentPath.includes('v2') || currentPath.includes('public')) {
+                              window.location.href = cleanPath + window.location.hash;
+                            }
+                          }}
                           className={`px-3 py-1 border rounded-lg text-[11px] font-bold transition-all ${
                             darkMode
                               ? 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border-rose-500/30'
