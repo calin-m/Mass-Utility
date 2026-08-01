@@ -1,23 +1,43 @@
 // @Arch[AccountTab]
-import React from 'react';
-import { AuthStore, UserPermissions } from '../../store/useAuthStore';
+import React, { useState } from 'react';
+import { AuthStore, UserPermissions, defaultDemoUser } from '../../store/useAuthStore';
 import { SectionHeader } from '../common/SectionHeader';
+import { DemoSimulatorBanner, demoRoleCapabilities } from '../common/DemoSimulatorBanner';
 
-export const AccountTab: React.FC = () => {
-  const user: UserPermissions | null = AuthStore.getState().user;
+export interface AccountTabProps {
+  darkMode?: boolean;
+}
+
+export const AccountTab: React.FC<AccountTabProps> = ({ darkMode = true }) => {
+  const isDemoMode = typeof window !== 'undefined' && ((window as any).PM_IS_DEMO || (window as any).isDemoMode || window.location.pathname.includes('/demo'));
+  const activeStoreUser = AuthStore.getState().user;
   const isAutoSso = AuthStore.getState().isAutoSso;
 
-  if (!user) return null;
+  // Fallback to defaultDemoUser in demo mode if state user is null
+  const [currentUser, setCurrentUser] = useState<UserPermissions>(
+    activeStoreUser || defaultDemoUser
+  );
 
   const roleColors: Record<string, string> = {
-    SuperAdmin: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-    CompanyAdmin: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-    CatalogManager: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    Operator: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    Observer: 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30',
+    SuperAdmin: 'bg-purple-500/10 text-purple-800 dark:text-purple-400 border-purple-300 dark:border-purple-500/30 font-semibold',
+    CompanyAdmin: 'bg-blue-500/10 text-blue-800 dark:text-blue-400 border-blue-300 dark:border-blue-500/30 font-semibold',
+    CatalogManager: 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-500/30 font-semibold',
+    Operator: 'bg-amber-500/10 text-amber-900 dark:text-amber-400 border-amber-300 dark:border-amber-500/30 font-semibold',
+    Observer: 'bg-slate-500/10 text-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-500/30 font-semibold',
   };
 
-  const activeRoleStyle = roleColors[user.role] || roleColors.Observer;
+  const activeRoleStyle = roleColors[currentUser.role] || roleColors.Observer;
+
+  const handleRoleSimulate = (roleName: string) => {
+    const caps = demoRoleCapabilities[roleName] || demoRoleCapabilities.Observer;
+    const updated = {
+      ...currentUser,
+      role: roleName,
+      permissions: caps
+    };
+    setCurrentUser(updated);
+    AuthStore.setSession('demo_token_session', updated, false);
+  };
 
   const handleSignOut = () => {
     AuthStore.logout();
@@ -32,7 +52,7 @@ export const AccountTab: React.FC = () => {
         />
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-medium transition-all cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:border-red-500/30 dark:text-red-400 text-sm font-medium transition-all cursor-pointer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
@@ -40,6 +60,15 @@ export const AccountTab: React.FC = () => {
           <span>Sign Out / Switch Account</span>
         </button>
       </div>
+
+      {/* Demo Mode Interactive Role Simulation Banner */}
+      {isDemoMode && (
+        <DemoSimulatorBanner
+          darkMode={darkMode}
+          currentUserRole={currentUser.role}
+          onRoleSimulate={handleRoleSimulate}
+        />
+      )}
 
       {/* Primary Identity Summary Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -53,11 +82,11 @@ export const AccountTab: React.FC = () => {
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-pm-text-primary">{user.name}</h3>
-            <p className="text-xs text-pm-text-muted">{user.email}</p>
+            <h3 className="text-lg font-bold text-pm-text-primary">{currentUser.name}</h3>
+            <p className="text-xs text-pm-text-muted">{currentUser.email}</p>
           </div>
           {isAutoSso && (
-            <span className="inline-block text-[11px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">
+            <span className="inline-block text-[11px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-500/20 font-mono">
               PrestaShop Auto-SSO Session
             </span>
           )}
@@ -72,8 +101,8 @@ export const AccountTab: React.FC = () => {
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-pm-text-primary">{user.company_name || 'Standalone Store Tenant'}</h3>
-            <p className="text-xs text-pm-text-muted">Company ID: #{user.company_id || 1}</p>
+            <h3 className="text-lg font-bold text-pm-text-primary">{currentUser.company_name || 'Standalone Store Tenant'}</h3>
+            <p className="text-xs text-pm-text-muted">Company ID: #{currentUser.company_id || 402}</p>
           </div>
         </div>
 
@@ -86,8 +115,8 @@ export const AccountTab: React.FC = () => {
             </svg>
           </div>
           <div>
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs font-semibold ${activeRoleStyle}`}>
-              <span>{user.role}</span>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border text-xs ${activeRoleStyle}`}>
+              <span>{currentUser.role}</span>
             </span>
           </div>
         </div>
@@ -100,20 +129,20 @@ export const AccountTab: React.FC = () => {
             <h4 className="text-sm font-semibold text-pm-text-primary flex items-center gap-2">
               <span>Granted Capabilities &amp; Feature Permissions</span>
             </h4>
-            <p className="text-xs text-pm-text-muted">Capabilities assigned to your role from Mass Utility Admin</p>
+            <p className="text-xs text-pm-text-muted">Capabilities assigned to your active role from Mass Utility Admin</p>
           </div>
           <span className="text-xs font-mono text-pm-accent bg-pm-accent/10 px-2.5 py-1 rounded-md border border-pm-accent/20">
-            {user.permissions?.length || 0} Granted Slugs
+            {currentUser.permissions?.length || 0} Granted Slugs
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {(user.permissions || []).map((slug: string) => (
-            <div key={slug} className="flex items-center gap-2.5 p-3 rounded-lg bg-pm-input/30 border border-pm-border/50 text-xs">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4 text-emerald-400 shrink-0">
+          {(currentUser.permissions || []).map((slug: string) => (
+            <div key={slug} className="flex items-center gap-2.5 p-3 rounded-lg bg-pm-input border border-pm-border text-xs">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-mono text-pm-text-primary">{slug}</span>
+              <span className="font-mono text-pm-text-primary font-medium">{slug}</span>
             </div>
           ))}
         </div>

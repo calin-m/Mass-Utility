@@ -475,7 +475,7 @@ function AppContent() {
                     </div>
                   )}
                   {activeTab === 'settings' && <SettingsTab />}
-                  {activeTab === 'account' && <AccountTab />}
+                  {activeTab === 'account' && <AccountTab darkMode={darkMode} />}
                   {activeTab === 'files' && <FileToolsTab />}
                   {activeTab === 'governor' && <GovernorTab />}
                   {activeTab === 'database' && <DatabaseToolsTab />}

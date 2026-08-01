@@ -28,16 +28,34 @@ export const defaultStoreOwnerUser: UserPermissions = {
   ]
 };
 
+export const defaultDemoUser: UserPermissions = {
+  id: 402,
+  name: 'Demo Administrator',
+  email: 'demo.admin@massutility.com',
+  role: 'CompanyAdmin',
+  company_name: 'Acme SaaS Enterprise Corp (Demo Tenant #402)',
+  company_id: 402,
+  permissions: [
+    'ast.query', 'ast.mutate', 'db.backup', 'db.restore', 'db.diff',
+    'file.browse', 'file.backup', 'sweeper.execute', 'security.audit',
+    'settings.update', 'users.manage'
+  ]
+};
+
 export class AuthStore {
   private static listeners: Array<() => void> = [];
   private static state: AuthState = (() => {
     // Synchronous PrestaShop Module OTT Auto-SSO Check on Boot (Frame 0)
     let isOttLaunch = false;
+    let isDemoMode = false;
     try {
       if (typeof window !== 'undefined') {
         const pmConfig = (window as any).PM_CONFIG;
         if (window.location.search.includes('ott=') || (pmConfig && (pmConfig.isAutoSso || pmConfig.employee_id))) {
           isOttLaunch = true;
+        }
+        if ((window as any).PM_IS_DEMO || (window as any).isDemoMode || window.location.pathname.includes('/demo')) {
+          isDemoMode = true;
         }
       }
     } catch (e) {}
@@ -57,6 +75,15 @@ export class AuthStore {
         token: savedToken || 'ott_auto_sso_token',
         user: user || defaultStoreOwnerUser,
         isAutoSso: true,
+      };
+    }
+
+    if (isDemoMode) {
+      return {
+        isAuthenticated: true,
+        token: 'demo_token_session',
+        user: user || defaultDemoUser,
+        isAutoSso: false,
       };
     }
 
