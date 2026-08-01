@@ -716,11 +716,25 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 }
 
 // ----------------------------------------------------
-// SECURE GATEWAY MIDDLEWARE
+// SECURE GATEWAY MIDDLEWARE & ROUTING GUARD
 // ----------------------------------------------------
-// Detect if request is targeting the V2 Demo Mode SPA
+$requestUri = $_SERVER['REQUEST_URI'] ?? '';
+$requestPath = parse_url($requestUri, PHP_URL_PATH) ?? '';
+
+// 301 Fallback Redirect Guard: Intercept direct physical requests to v2/index.html
+if (preg_match('#/(?:public/)?v2/(?:index\.html)?$#i', $requestPath)) {
+    $redirectUrl = preg_replace('#/(?:public/)?v2/(?:index\.html)?$#i', '/demo', $requestPath);
+    if (!empty($_SERVER['QUERY_STRING'])) {
+        $redirectUrl .= '?' . $_SERVER['QUERY_STRING'];
+    }
+    header("HTTP/1.1 301 Moved Permanently");
+    header("Location: " . $redirectUrl);
+    exit;
+}
+
+// Detect if request is targeting the V2 Demo Mode SPA or clean /demo route
 $isDemoRequest = (
-    strpos($_SERVER['REQUEST_URI'] ?? '', '/v2/') !== false ||
+    preg_match('#/demo(?:/|\?|$)#i', $requestPath) ||
     isset($_GET['demo']) ||
     (isset($_GET['action']) && $_GET['action'] === 'demo')
 );

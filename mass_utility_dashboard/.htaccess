@@ -18,15 +18,36 @@
     RewriteRule ^public/(.*)$ %1 [R=301,L]
 
     # Redirect direct requests for index.php to the clean root folder URL
+# Secure Files: Block access to .env, db, tpl, log, yml, json, ini files globally
+<FilesMatch "^\.env$|\.(db|tpl|json|yml|yaml|xml|log|ini|lock)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Routing and Directory Hiding
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Prevent direct access to public/ folder in URL (Redirect to root clean URL folder-agnostically)
+    RewriteCond %{THE_REQUEST} \s.*/public/([^\s?]*) [NC]
+    RewriteRule ^public/(.*)$ %1 [R=301,L]
+
+    # Redirect direct requests for index.php to the clean root folder URL
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ .*/index\.php\ HTTP/ [NC]
     RewriteRule ^index\.php$ ./ [R=301,L]
 
     # Block direct browser access to source and templates folders (403 Forbidden)
     RewriteRule ^(src|tests|views/templates)($|/) - [F,L]
 
-    # Expose v2 static assets & html page directly for standalone demo mode
+    # Expose v2 static assets & redirect physical index.html to clean demo route
     RewriteRule ^v2/assets/(.*)$ public/v2/assets/$1 [QSA,L]
-    RewriteRule ^v2/index\.html$ public/v2/index.html [QSA,L]
+    RewriteRule ^v2/index\.html$ demo [R=301,L]
+    RewriteRule ^demo/?$ public/index.php?demo=1 [QSA,L]
 
     # Internal rewrite: forward clean URLs to public/index.php if not a physical file
     RewriteCond %{REQUEST_FILENAME} !-f

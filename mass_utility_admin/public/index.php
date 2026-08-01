@@ -203,6 +203,28 @@ if (str_starts_with($action, 'api_')) {
     exit;
 }
 
+// ROUTING GUARD & DEMO MODE MIDDLEWARE
+$requestUri = $_SERVER['REQUEST_URI'] ?? '';
+$requestPath = parse_url($requestUri, PHP_URL_PATH) ?? '';
+
+// 301 Fallback Redirect Guard: Intercept direct physical requests to v2/index.html
+if (preg_match('#/(?:public/)?v2/(?:index\.html)?$#i', $requestPath)) {
+    $redirectUrl = preg_replace('#/(?:public/)?v2/(?:index\.html)?$#i', '/demo', $requestPath);
+    if (!empty($_SERVER['QUERY_STRING'])) {
+        $redirectUrl .= '?' . $_SERVER['QUERY_STRING'];
+    }
+    header("HTTP/1.1 301 Moved Permanently");
+    header("Location: " . $redirectUrl);
+    exit;
+}
+
+// Detect if request is targeting Demo Mode via /demo route or URL parameter
+$isDemoRequest = (
+    preg_match('#/demo(?:/|\?|$)#i', $requestPath) ||
+    isset($_GET['demo']) ||
+    (isset($_GET['action']) && $_GET['action'] === 'demo')
+);
+
 // Compute dynamic basePath for subfolder-safe React SPA asset loading
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 $scriptDir = rtrim(dirname($scriptName), '/\\');
@@ -246,6 +268,10 @@ header('Content-Type: text/html; charset=UTF-8');
         } else {
           document.documentElement.classList.remove('dark');
         }
+        <?php if ($isDemoRequest): ?>
+        window.PM_IS_DEMO = true;
+        window.isDemoMode = true;
+        <?php endif; ?>
       })();
     </script>
     <?php if ($cssFile): ?>
