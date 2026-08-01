@@ -147,9 +147,17 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
     return filteredCompanies.slice(start, start + pageSize);
   }, [filteredCompanies, currentPage, pageSize]);
 
+  const getCompanyMembersCount = (c: Company) => {
+    return c.user_count ?? c.users_count ?? users.filter(u => u.company_name === c.company_name || u.company_id === c.id).length;
+  };
+
+  const getCompanyLicensesCount = (c: Company) => {
+    return c.license_count ?? c.licenses_count ?? licenses.filter(l => l.company_name === c.company_name || l.company_id === c.id).length;
+  };
+
   const activeCount = companies.filter(c => c.status === 'active').length;
-  const totalMembers = companies.reduce((acc, c) => acc + (c.user_count || 0), 0);
-  const totalCompanyLicenses = companies.reduce((acc, c) => acc + (c.license_count || 0), 0);
+  const totalMembers = companies.reduce((acc, c) => acc + getCompanyMembersCount(c), 0);
+  const totalCompanyLicenses = companies.reduce((acc, c) => acc + getCompanyLicensesCount(c), 0);
 
   const getApiUrl = (action: string) => `${window.location.pathname}?action=${action}`;
 
@@ -385,10 +393,10 @@ export const CompanyListView: React.FC<CompanyListViewProps> = ({
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5 font-bold text-pm-text text-xs">
                           <Users className="w-3.5 h-3.5 text-purple-400" />
-                          <span>{c.user_count || 0} {t('lbl_members')}</span>
+                          <span>{getCompanyMembersCount(c)} {t('lbl_members')}</span>
                         </div>
                         <div className="text-[11px] font-mono text-pm-secondary">
-                          <span className="text-purple-400 font-extrabold">{c.license_count || 0}</span> / {c.max_licenses} {t('lbl_allocated')}
+                          <span className="text-purple-400 font-extrabold">{getCompanyLicensesCount(c)}</span> / {c.max_licenses} {t('lbl_allocated')}
                         </div>
                       </div>
                     </td>
