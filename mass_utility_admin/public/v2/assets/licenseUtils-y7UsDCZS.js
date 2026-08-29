@@ -1,2 +1,0 @@
-// @Arch[licenseUtilsy7UsDCZS]
-var c=(r,e,n)=>new Promise((o,i)=>{var u=t=>{try{s(n.next(t))}catch(a){i(a)}},p=t=>{try{s(n.throw(t))}catch(a){i(a)}},s=t=>t.done?o(t.value):Promise.resolve(t.value).then(u,p);s((n=n.apply(r,e)).next())});const m=r=>{if(!r)return"";const e=r.trim();return e.toUpperCase().startsWith("MASS-")?"MASS-••••••••••••••••••••••••••••":e.length>5?e.substring(0,5)+"••••••••••••••••••••••••":"MASS-••••••••••••••••••••••••••••"},f=r=>c(void 0,null,function*(){try{return yield navigator.clipboard.writeText(r),!0}catch(e){return!1}});export{f as c,m};
