@@ -1,4 +1,4 @@
-name: Orchestra Quality Gates CI
+name: Continuous Integration
 
 on:
   push:
@@ -7,31 +7,64 @@ on:
     branches: [ main, dev, main-test ]
 
 jobs:
-  validate:
+  backend-php:
+    name: PHP Syntax & Backend Quality
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: pdo, sqlite3, json, curl, mbstring
 
-    - name: Setup Node.js (Conditionally used for JS Stack validators)
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Lint PHP Syntax
+        run: |
+          echo "Scanning all PHP files for syntax errors..."
+          find mass_utility mass_utility_admin mass_utility_dashboard -name "*.php" -exec php -l {} +
 
-    - name: Install Conductor Dependencies
-      run: |
-        python -m pip install --upgrade pip
+  frontend-admin:
+    name: Admin Frontend (TypeScript & Vite Build)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Run Orchestra Workspace Doctor
-      run: |
-        python .orchestra/.conductor/tools/cli_doctor.py
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: mass_utility_admin/frontend/package-lock.json
 
-    - name: Run Orchestra Pre-flight Suite Check
-      run: |
-        python .orchestra/.conductor/tools/cli_test_suite.py --dry-run
+      - name: Install Dependencies
+        working-directory: mass_utility_admin/frontend
+        run: npm ci
+
+      - name: Compile TypeScript & Build Production Bundle
+        working-directory: mass_utility_admin/frontend
+        run: npm run build
+
+  frontend-dashboard:
+    name: Dashboard Frontend (TypeScript & Vite Build)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: mass_utility_dashboard/frontend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: mass_utility_dashboard/frontend
+        run: npm ci
+
+      - name: Compile TypeScript & Build Production Bundle
+        working-directory: mass_utility_dashboard/frontend
+        run: npm run build
