@@ -2,6 +2,8 @@
 /*
 
 # Whitelist allowed directories
+!/.github/
+!/.github/**
 !/mass_utility/
 !/mass_utility_dashboard/
 !/mass_utility_admin/
